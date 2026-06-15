@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職場の人間関係タイプ診断（プロトタイプ）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
+    --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
+    --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
+    --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
+    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--body); color:var(--ink); background:var(--bg);
+    line-height:1.7; letter-spacing:.01em;
+    min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+    padding:clamp(16px,4vw,48px) 16px;
+  }
+  .app{width:100%; max-width:640px}
+  .proto-tag{
+    display:inline-block; font-size:11px; letter-spacing:.18em; font-weight:700;
+    color:var(--faint); border:1px solid var(--line); border-radius:99px;
+    padding:4px 12px; margin-bottom:20px; background:var(--surface);
+  }
+  .screen{display:none; animation:fade .5s ease both}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none} *{transition:none!important}}
+
+  /* INTRO */
+  .eyebrow{font-size:12px; letter-spacing:.22em; font-weight:700; color:var(--teal); text-transform:none; margin-bottom:18px}
+  .hero{
+    font-family:var(--display); font-weight:700; line-height:1.35;
+    font-size:clamp(30px,7vw,44px); letter-spacing:.02em; margin-bottom:22px;
+  }
+  .lead{font-size:16px; color:var(--muted); margin-bottom:14px; max-width:34em}
+  .meta{font-size:13px; color:var(--faint); margin-bottom:34px}
+  .meta b{color:var(--ink); font-weight:500}
+  .btn{
+    font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
+    color:#fff; background:var(--chrome); border:none; border-radius:99px;
+    padding:15px 34px; transition:background .2s, transform .1s; letter-spacing:.04em;
+  }
+  .btn:hover{background:var(--chrome-hover)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:3px solid #B9C2CC; outline-offset:2px}
+  .btn-wide{width:100%}
+
+  /* QUIZ */
+  .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
+  .qcount{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; letter-spacing:.05em}
+  .bar{flex:1; height:4px; background:var(--line); border-radius:99px; overflow:hidden}
+  .bar > i{display:block; height:100%; width:0; background:var(--chrome); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
+  .qtext{
+    font-family:var(--display); font-weight:500; font-size:clamp(20px,4.6vw,26px);
+    line-height:1.55; letter-spacing:.02em; margin-bottom:28px;
+  }
+  .choices{display:flex; flex-direction:column; gap:14px}
+  .choice{
+    text-align:left; font-family:var(--body); font-size:16px; color:var(--ink); cursor:pointer;
+    background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius);
+    padding:20px 22px; line-height:1.6; transition:border-color .15s, background .15s, transform .1s;
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .choice:hover{border-color:#C9C8C1; background:#FCFCFA}
+  .choice:active{transform:translateY(1px)}
+  .choice:focus-visible{outline:3px solid #B9C2CC; outline-offset:2px}
+  .choice .mk{
+    flex:none; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line);
+    font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted);
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .qback{margin-top:26px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:14px; padding:6px 0}
+  .qback:hover{color:var(--muted)}
+  .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
+
+  /* RESULT */
+  .result-accent{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
+  .card{
+    background:var(--surface); border-radius:22px; box-shadow:var(--shadow);
+    overflow:hidden; border:1px solid var(--line);
+  }
+  .card-head{ padding:34px 30px 28px; background:var(--accent-soft); border-bottom:1px solid var(--line) }
+  .chip{
+    display:inline-block; font-family:var(--display); font-weight:700; font-size:12px; letter-spacing:.28em;
+    color:var(--accent-ink); border:1px solid var(--accent); border-radius:99px; padding:4px 14px; margin-bottom:16px;
+  }
+  .tname{font-family:var(--display); font-weight:700; font-size:clamp(28px,6.4vw,38px); color:var(--accent-ink); letter-spacing:.03em; margin-bottom:10px}
+  .tcatch{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,21px); color:var(--ink); letter-spacing:.02em}
+  .card-body{padding:28px 30px 32px}
+  .sectlabel{font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px}
+  .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
+  .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
+  .axis-name{font-size:12px; color:var(--muted); font-weight:500}
+  .axis-track-wrap{position:relative}
+  .axis-ends{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px}
+  .axis-ends .on{color:var(--ink); font-weight:700}
+  .axis-track{position:relative; height:5px; background:var(--line); border-radius:99px}
+  .axis-dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1)}
+  ul.aru{list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px}
+  ul.aru li{position:relative; padding-left:22px; font-size:15.5px; color:var(--ink)}
+  ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
+  .row-block{margin-bottom:26px}
+  .row-block p{font-size:15px; color:var(--ink)}
+  .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
+  .hitotsu{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px}
+  .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
+  .hitotsu p{font-size:15px; color:var(--ink)}
+
+  /* BRIDGE */
+  .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
+  .bridge-cta{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,20px); line-height:1.5; color:var(--ink); margin-bottom:20px}
+  .field{margin-bottom:14px}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
+  .field textarea, .field input{
+    width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
+    border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
+  }
+  .field textarea:focus, .field input:focus{outline:none; border-color:var(--accent)}
+  .field textarea{min-height:84px}
+  .btn-accent{color:#fff; background:var(--accent)}
+  .btn-accent:hover{filter:brightness(.94)}
+  .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
+  .afterbar{display:flex; gap:12px; flex-wrap:wrap; margin-top:26px}
+  .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
+  .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
+  .btn-sm{font-size:14px; padding:12px 22px}
+  .copied{color:var(--teal); font-weight:700}
+  #copyManual{margin-top:14px}
+  .copy-manual-note{font-size:12.5px; color:var(--muted); margin-bottom:7px}
+  .copy-manual-box{width:100%; font-family:var(--body); font-size:14px; color:var(--ink); background:var(--surface); border:1.5px solid var(--accent,#0F6E56); border-radius:12px; padding:12px 14px; line-height:1.6; resize:none}
+  .copy-manual-box:focus{outline:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <span class="proto-tag">PROTOTYPE ・ 検証用モック</span>
+
+  <!-- INTRO -->
+  <section class="screen active" id="intro">
+    <div class="eyebrow">職場の人間関係タイプ診断</div>
+    <h1 class="hero">あなたは、<br>どう関わる人か。</h1>
+    <p class="lead">本音の出し方、対立への構え、立ち位置。<br>9つの質問で、職場でのあなたの関わり方を8タイプで映し出します。</p>
+    <p class="meta"><b>9問</b> ・ 約2分 ・ 登録不要</p>
+    <button class="btn" id="startBtn">はじめる</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="quiz">
+    <div class="qtop">
+      <span class="qcount" id="qcount">1 / 9</span>
+      <div class="bar"><i id="barfill"></i></div>
+    </div>
+    <p class="qtext" id="qtext"></p>
+    <div class="choices" id="choices"></div>
+    <button class="qback" id="backBtn" hidden>← ひとつ戻る</button>
+    <p class="qhint">どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。</p>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="result">
+    <div class="card result-accent" id="card">
+      <div class="card-head">
+        <span class="chip" id="r-code"></span>
+        <h2 class="tname" id="r-name"></h2>
+        <p class="tcatch" id="r-catch"></p>
+      </div>
+      <div class="card-body">
+        <p class="sectlabel">あなたの位置</p>
+        <div class="axes" id="r-axes"></div>
+
+        <p class="sectlabel">あるある</p>
+        <ul class="aru" id="r-aru"></ul>
+
+        <div class="row-block">
+          <p class="sectlabel">強み</p>
+          <p id="r-tsuyomi"></p>
+        </div>
+        <div class="row-block">
+          <p class="sectlabel">相性</p>
+          <p id="r-aishou"></p>
+        </div>
+
+        <div class="hitotsu">
+          <div class="h-label">ひとつだけ。</div>
+          <p id="r-hitotsu"></p>
+        </div>
+
+        <!-- BRIDGE -->
+        <div class="bridge">
+          <p class="bridge-cta" id="r-cta"></p>
+          <div class="field">
+            <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
+            <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
+          </div>
+          <div class="field">
+            <label for="mail">読み解きの結果を受け取るメールアドレス</label>
+            <input id="mail" type="email" placeholder="you@example.com">
+          </div>
+          <button class="btn btn-wide btn-accent" id="deepBtn">この関係を読み解いてもらう</button>
+          <p class="proto-note" id="protoNote"></p>
+        </div>
+
+        <div class="afterbar">
+          <button class="btn btn-sm btn-ghost" id="shareBtn">結果をコピー</button>
+          <button class="btn btn-sm btn-ghost" id="restartBtn">もう一度診断する</button>
+        </div>
+        <div id="copyManual" hidden>
+          <p class="copy-manual-note">下のテキストを選択してコピーしてください：</p>
+          <textarea id="copyText" class="copy-manual-box" readonly rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {axis:'h', text:'会議で違和感を覚えたとき、あなたは——', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
+  {axis:'c', text:'意見が真っ向から対立したとき、あなたは——', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
+  {axis:'w', text:'誰も決めない・動かない場面で、あなたは——', a:{t:'「じゃあ自分が」と前に出て引っ張る',p:'L'}, b:{t:'引っ張る人を支える・補佐に回る',p:'S'}},
+  {axis:'h', text:'モヤモヤや不満があるとき、周りは——', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
+  {axis:'c', text:'場の空気が重く、ピリついてきたとき、あなたは——', a:{t:'問題そのものに切り込む',p:'B'}, b:{t:'冗談や話題転換で、まず空気をゆるめる',p:'K'}},
+  {axis:'w', text:'あなたが心地よいのは——', a:{t:'主導権を握って進める立場',p:'L'}, b:{t:'誰かを立てて、その人を活かす立場',p:'S'}},
+  {axis:'h', text:'自分が手一杯で苦しいとき、あなたは——', a:{t:'「ちょっと厳しいです」と早めに声を上げる',p:'O'}, b:{t:'まず自分で抱えて、なんとかしようとする',p:'G'}},
+  {axis:'c', text:'相手が明らかに筋を外しているとき、あなたは——', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
+  {axis:'w', text:'新しいプロジェクトで、つい取りに行くのは——', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
+];
+
+const TYPES = {
+ OBL:{name:'突撃隊長',pole:'open',catch:'気づけばいつも、先頭。',
+  aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
+  tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
+  aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
+  hitotsu:'あなたの最大の魅力と弱点は、同じ場所にあります——強すぎる直球が、周りを沈黙させる。情熱が人を動かし、同時に遠ざける。いざ振り返ると、そこにあるのは孤独。なぜ“先に動かずにいられない”のか、その根っこは1回では見えません。',
+  cta:'あなたの「いま引っかかっている関係」で、この構造を読み解く。'},
+ OBS:{name:'正論ハンマー',pole:'open',catch:'おかしいことは、おかしい。',
+  aru:['「それ論理通ってないですよね」と言ってしまう','ルールや規則を守っていないと、モヤモヤが顔に出る','後で「言い方きつかったかな」と一人反省'],
+  tsuyomi:'場の品質管理者。曖昧さや欺瞞を許さず議論を正す。',
+  aishou:'縁の下の職人(GBS)と固い信頼。でも、根回しの仕掛け人(GKL)の曖昧さには、あなたが先にイラついてしまう。',
+  hitotsu:'あなたの正しさは信頼を生む。でも同じ鋭さが、正しい瞬間に相手の逃げ場を奪っている。「批判ばかり」と誤解されるのは、正しさと伝え方が分かれていないから。その分け方は、性格でなく技術です。',
+  cta:'あなたの「いま引っかかっている関係」で、この一線を見つける。'},
+ OKL:{name:'お祭り隊長',pole:'open',catch:'とにかく、盛り上げる。',
+  aru:['場が重くなると、冗談で空気を変えにいく','対立しそうになると、つい話題をそらす','実は、嫌われるのがけっこう怖い'],
+  tsuyomi:'場のエネルギー源。誰とでも打ち解け、チームの空気を作る。',
+  aishou:'自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。',
+  hitotsu:'あなたの明るさは本物の才能。でもその「まあまあ」で、本当は解くべき問題から目を背けていないか。明るさが、その裏にある本音にフタをする。場は明るいのに——フタを外しても、明るさは消えません。むしろ強くなる。',
+  cta:'あなたの「いま引っかかっている関係」で、先送りの一個を開ける。'},
+ OKS:{name:'自由人コメンテーター',pole:'open',catch:'言うだけ、言っておく。',
+  aru:['感想やアイデアは言うが「で、誰がやる?」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
+  tsuyomi:'自由な発想と歯に衣着せぬ視点。空気に流されない独立性。',
+  aishou:'お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は?」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。',
+  hitotsu:'あなたの視点は鋭い。でも当事者意識が薄いまま引くと、信頼を失っていく。言葉はうまいのに、影響力だけが、いつまでも手に入らない。引き受けることは、自由を手放すことではありません。',
+  cta:'あなたの「いま引っかかっている関係」で、半歩だけ踏み込む点を探す。'},
+ GBL:{name:'沈黙の大黒柱',pole:'guard',catch:'多くは語らない。でも逃げない。',
+  aru:['困っても、自分で抱えて相談しない','揉めると静かに前に出て、収める','弱音を吐くのが、苦手'],
+  tsuyomi:'危機に強い安定感。背中で示すリーダーシップ。',
+  aishou:'縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。',
+  hitotsu:'あなたは頼れる柱。でも抱え込みすぎる強さが、いつの間にか「助けを求められない壁」になっている。沈黙が、信頼の橋を架け損ねる。弱さを一言開示することは、弱くなることではありません。',
+  cta:'あなたの「いま引っかかっている関係」で、抱えているものを下ろす。'},
+ GBS:{name:'縁の下の職人',pole:'guard',catch:'黙って、やり切る。',
+  aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
+  tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
+  aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
+  hitotsu:'あなたの我慢は、地味だけど本物の力。でもNOが言えずに溜め込むと、ある日プツンと切れる。その我慢は、自分も周りも気づけない“負債”になっている。小さなNOは、信頼を壊しません。',
+  cta:'あなたの「いま引っかかっている関係」で、最初の小さなNOを見つける。'},
+ GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
+  aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
+  tsuyomi:'敵を作らず物事を前に進める政治力。穏やかな影響力。',
+  aishou:'がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。',
+  hitotsu:'あなたの根回しは、場を荒らさず動かす技術。でも直接言わずに動かす癖が「察してほしい」となり、誤解と不信の火種になる。透明性の欠如が、信頼を遠回りさせる。要所で本音を出しても、あなたの強みは消えません。',
+  cta:'あなたの「いま引っかかっている関係」で、直接言うべき要所を見極める。'},
+ GKS:{name:'がんばり屋の調整役',pole:'guard',catch:'気づけば、みんなのお母さん。',
+  aru:['頼まれごとを、断れない','自分の意見より、場の空気を優先する','家に帰ると、どっと疲れる'],
+  tsuyomi:'誰もが安心できる空気を作る、対立の緩衝材。',
+  aishou:'根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。',
+  hitotsu:'あなたの気配りは、チームの安心そのもの。でも合わせすぎて、自分の本音がどこかへ行っている。その優しさが、あなた自身をすり減らしている。自分を優先することは、わがままではありません。',
+  cta:'あなたの「いま引っかかっている関係」で、最初の「私はこう思う」を取り戻す。'},
+};
+
+const AX = {
+  h:{left:'オープン',right:'ガード',poles:['O','G']},
+  c:{left:'ぶつかる',right:'かわす',poles:['B','K']},
+  w:{left:'引っ張る',right:'支える',poles:['L','S']},
+};
+
+let idx=0;
+const answers=new Array(QUESTIONS.length).fill(null);
+const $=id=>document.getElementById(id);
+
+function show(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(screen).classList.add('active');
+  window.scrollTo({top:0,behavior:'auto'});
+}
+function renderQ(){
+  const q=QUESTIONS[idx];
+  $('qcount').textContent=(idx+1)+' / '+QUESTIONS.length;
+  $('barfill').style.width=((idx)/QUESTIONS.length*100)+'%';
+  $('qtext').textContent=q.text;
+  const c=$('choices'); c.innerHTML='';
+  [['A',q.a],['B',q.b]].forEach(([letter,opt])=>{
+    const b=document.createElement('button');
+    b.className='choice'; b.type='button';
+    b.innerHTML='<span class="mk">'+letter+'</span><span>'+opt.t+'</span>';
+    b.onclick=()=>pick(opt.p);
+    c.appendChild(b);
+  });
+  $('backBtn').hidden = idx===0;
+}
+function pick(pole){
+  answers[idx]=pole;
+  if(idx<QUESTIONS.length-1){ idx++; renderQ(); }
+  else{ $('barfill').style.width='100%'; finish(); }
+}
+$('backBtn').onclick=()=>{ if(idx>0){ idx--; renderQ(); } };
+
+function tally(axis){
+  const [L,R]=AX[axis].poles; let l=0,r=0;
+  QUESTIONS.forEach((q,i)=>{ if(q.axis!==axis)return; if(answers[i]===L)l++; else if(answers[i]===R)r++; });
+  return {L:l,R:r,total:l+r};
+}
+function finish(){
+  const h=tally('h'), c=tally('c'), w=tally('w');
+  const code=(h.L>=2?'O':'G')+(c.L>=2?'B':'K')+(w.L>=2?'L':'S');
+  renderResult(code,{h,c,w});
+}
+function renderResult(code,counts){
+  const t=TYPES[code]; const card=$('card');
+  card.classList.remove('result-accent');
+  if(t.pole==='guard'){ card.style.setProperty('--accent','var(--teal)'); card.style.setProperty('--accent-soft','var(--teal-soft)'); card.style.setProperty('--accent-ink','var(--teal-ink)'); }
+  else{ card.style.setProperty('--accent','var(--coral)'); card.style.setProperty('--accent-soft','var(--coral-soft)'); card.style.setProperty('--accent-ink','var(--coral-ink)'); }
+  $('r-code').textContent=code;
+  $('r-name').textContent=t.name;
+  $('r-catch').textContent=t.catch;
+  // axes
+  const axBox=$('r-axes'); axBox.innerHTML='';
+  [['h',counts.h],['c',counts.c],['w',counts.w]].forEach(([axis,ct])=>{
+    const meta=AX[axis];
+    const fracRight=ct.R/ct.total; // 0 = fully left
+    const leftOn = ct.L>ct.R, rightOn = ct.R>ct.L;
+    const row=document.createElement('div'); row.className='axis-row';
+    row.innerHTML =
+      '<div class="axis-name">'+({h:'本音',c:'衝突',w:'重心'})[axis]+'</div>'+
+      '<div class="axis-track-wrap">'+
+        '<div class="axis-ends"><span class="'+(leftOn?'on':'')+'">'+meta.left+'</span><span class="'+(rightOn?'on':'')+'">'+meta.right+'</span></div>'+
+        '<div class="axis-track"><span class="axis-dot" style="left:0%"></span></div>'+
+      '</div>';
+    axBox.appendChild(row);
+    // animate dot after paint
+    const dot=row.querySelector('.axis-dot');
+    requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
+  });
+  // aruaru
+  const ul=$('r-aru'); ul.innerHTML='';
+  t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
+  $('r-tsuyomi').textContent=t.tsuyomi;
+  $('r-aishou').textContent=t.aishou;
+  $('r-hitotsu').textContent=t.hitotsu;
+  $('r-cta').textContent=t.cta;
+  $('protoNote').textContent='';
+  window._lastResult={code,name:t.name,catch:t.catch};
+  show('result');
+}
+
+// bridge (mocked)
+$('deepBtn').onclick=()=>{
+  $('protoNote').textContent='※ プロトタイプのため、ここから先（個別読み・予約）は未実装です。';
+};
+$('restartBtn').onclick=()=>{ idx=0; answers.fill(null); $('copyManual').hidden=true; renderQ(); show('quiz'); };
+
+function legacyCopy(text){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0, text.length);
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+async function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){
+    try{ await navigator.clipboard.writeText(text); return true; }
+    catch(e){ return legacyCopy(text); }
+  }
+  return legacyCopy(text);
+}
+$('shareBtn').onclick=async ()=>{
+  const r=window._lastResult; if(!r)return;
+  const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#職場の人間関係タイプ診断';
+  const b=$('shareBtn');
+  let ok=false;
+  try{ ok=await copyText(text); }catch(e){ ok=false; }
+  if(ok){
+    $('copyManual').hidden=true;
+    b.textContent='コピーしました'; b.classList.add('copied');
+    setTimeout(()=>{ b.textContent='結果をコピー'; b.classList.remove('copied'); },1800);
+  } else {
+    // クリップボードが使えない環境では手動コピー欄を表示
+    const box=$('copyText'); box.value=text;
+    $('copyManual').hidden=false;
+    box.focus(); box.select();
+  }
+};
+
+$('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
+renderQ();
+</script>
+</body>
+</html>
