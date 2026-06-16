@@ -118,15 +118,19 @@
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
-  .bridge-cta{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,20px); line-height:1.5; color:var(--ink); margin-bottom:20px}
-  .field{margin-bottom:14px}
-  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
-  .field textarea, .field input{
-    width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
-    border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
+  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
+  .vq{margin-bottom:20px}
+  .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
+  .vq-opts{display:flex; flex-direction:column; gap:8px}
+  .vq-opt{
+    display:flex; align-items:center; gap:11px; cursor:pointer;
+    font-size:14.5px; color:var(--ink); background:var(--surface);
+    border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
+    transition:border-color .15s, background .15s;
   }
-  .field textarea:focus, .field input:focus{outline:none; border-color:var(--accent)}
-  .field textarea{min-height:84px}
+  .vq-opt:hover{border-color:#C9C8C1; background:#FCFCFA}
+  .vq-opt input{accent-color:var(--accent); width:16px; height:16px; flex:none; margin:0}
+  .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
@@ -195,18 +199,40 @@
           <p id="r-hitotsu"></p>
         </div>
 
-        <!-- BRIDGE -->
+        <!-- VALIDATION（検証用フィードバック） -->
         <div class="bridge">
-          <p class="bridge-cta" id="r-cta"></p>
-          <div class="field">
-            <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
-            <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
+          <p class="vq-intro">最後に、この診断をよくするための3つの質問にご協力ください（10秒）。</p>
+
+          <div class="vq">
+            <p class="vq-q">1. 結果は、いまのあなたにどれくらい当てはまっていましたか？</p>
+            <div class="vq-opts" role="radiogroup">
+              <label class="vq-opt"><input type="radio" name="fit" value="とても当てはまる"><span>とても当てはまる</span></label>
+              <label class="vq-opt"><input type="radio" name="fit" value="まあ当てはまる"><span>まあ当てはまる</span></label>
+              <label class="vq-opt"><input type="radio" name="fit" value="あまり当てはまらない"><span>あまり当てはまらない</span></label>
+              <label class="vq-opt"><input type="radio" name="fit" value="まったく当てはまらない"><span>まったく当てはまらない</span></label>
+            </div>
           </div>
-          <div class="field">
-            <label for="mail">読み解きの結果を受け取るメールアドレス</label>
-            <input id="mail" type="email" placeholder="you@example.com">
+
+          <div class="vq">
+            <p class="vq-q">2. 結果を読んで、「自分でも気づいていなかったこと」を言い当てられた感じはありましたか？</p>
+            <div class="vq-opts" role="radiogroup">
+              <label class="vq-opt"><input type="radio" name="insight" value="強くあった"><span>強くあった</span></label>
+              <label class="vq-opt"><input type="radio" name="insight" value="少しあった"><span>少しあった</span></label>
+              <label class="vq-opt"><input type="radio" name="insight" value="特になかった"><span>特になかった</span></label>
+            </div>
           </div>
-          <button class="btn btn-wide btn-accent" id="deepBtn">この関係を読み解いてもらう</button>
+
+          <div class="vq">
+            <p class="vq-q">3. この診断を、同僚や友人にすすめたいと思いますか？</p>
+            <div class="vq-opts" role="radiogroup">
+              <label class="vq-opt"><input type="radio" name="recommend" value="ぜひすすめたい"><span>ぜひすすめたい</span></label>
+              <label class="vq-opt"><input type="radio" name="recommend" value="ややすすめたい"><span>ややすすめたい</span></label>
+              <label class="vq-opt"><input type="radio" name="recommend" value="どちらとも言えない"><span>どちらとも言えない</span></label>
+              <label class="vq-opt"><input type="radio" name="recommend" value="すすめない"><span>すすめない</span></label>
+            </div>
+          </div>
+
+          <button class="btn btn-wide btn-accent" id="submitBtn">回答を送信する</button>
           <p class="proto-note" id="protoNote"></p>
         </div>
 
@@ -224,6 +250,10 @@
 </div>
 
 <script>
+// ▼ 回答収集の送信先（Google Apps Script Web AppのURL）。デプロイ後にここへ貼る。
+//   空のままだと送信せず、回答は記録されません（体験のみ）。apps-script/README.md 参照。
+const SHEET_ENDPOINT = '';
+
 const QUESTIONS = [
   {axis:'h', text:'会議で違和感を覚えたとき、あなたは——', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
   {axis:'c', text:'意見が真っ向から対立したとき、あなたは——', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
@@ -366,17 +396,50 @@ function renderResult(code,counts){
   $('r-tsuyomi').textContent=t.tsuyomi;
   $('r-aishou').textContent=t.aishou;
   $('r-hitotsu').textContent=t.hitotsu;
-  $('r-cta').textContent=t.cta;
   $('protoNote').textContent='';
+  $('submitBtn').disabled=false;
+  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch};
   show('result');
 }
 
-// bridge (mocked)
-$('deepBtn').onclick=()=>{
-  $('protoNote').textContent='※ プロトタイプのため、ここから先（個別読み・予約）は未実装です。';
+// 検証用フィードバック（3問）＋診断結果をGoogleスプレッドシートへ送信
+$('submitBtn').onclick=async ()=>{
+  const r=window._lastResult; if(!r) return;
+  const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
+  const fit=val('fit'), insight=val('insight'), recommend=val('recommend');
+  if(!fit || !insight || !recommend){
+    $('protoNote').textContent='3つの質問すべてにお答えください。';
+    return;
+  }
+  const payload={
+    answers: answers.slice(),
+    axes: {h:r.code[0], c:r.code[1], w:r.code[2]},
+    code: r.code,
+    name: r.name,
+    fit, insight, recommend,
+  };
+  $('submitBtn').disabled=true;
+  if(SHEET_ENDPOINT){
+    try{
+      // CORSプリフライト回避のためContent-Typeは既定(text/plain)のまま、no-corsで送信
+      await fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      $('protoNote').textContent='ありがとうございました。ご協力に感謝します。';
+    }catch(e){
+      $('protoNote').textContent='送信に失敗しました。通信環境を確認して、もう一度お試しください。';
+      $('submitBtn').disabled=false;
+    }
+  }else{
+    $('protoNote').textContent='※ 送信先URL未設定（プロトタイプ）。回答はまだ記録されていません。';
+  }
 };
-$('restartBtn').onclick=()=>{ idx=0; answers.fill(null); $('copyManual').hidden=true; renderQ(); show('quiz'); };
+$('restartBtn').onclick=()=>{
+  idx=0; answers.fill(null);
+  $('copyManual').hidden=true;
+  $('submitBtn').disabled=false; $('protoNote').textContent='';
+  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  renderQ(); show('quiz');
+};
 
 function legacyCopy(text){
   try{
