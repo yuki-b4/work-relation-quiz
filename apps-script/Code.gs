@@ -1,8 +1,9 @@
 /**
  * 職場の人間関係タイプ診断 — 回答収集用 Web App
  *
- * prototype.html の結果画面で答える「検証用フィードバック（3問）」を、
- * 診断結果とあわせて回答ログ用スプレッドシートに1行ずつ追記する。
+ * prototype.html から送られてくる回答を、回答ログ用スプレッドシートに1行ずつ追記する。
+ *  - feedback モード（8名・検証）：検証用フィードバック3問
+ *  - lead モード（紹介者）：深掘り診断の申込（メール＋自由記述）。ref に紹介元。
  * デプロイ手順は同じフォルダの README.md を参照。
  */
 
@@ -10,13 +11,14 @@
 var SHEET_ID = '1J9sfu2F3uJtpriORSkz7v-5uNQHD6mR4j3UZ22H1Q7M';
 
 var HEADERS = [
-  'タイムスタンプ',
+  'タイムスタンプ', 'モード', '紹介元',
   'Q1_本音', 'Q2_衝突', 'Q3_重心',
   'Q4_本音', 'Q5_衝突', 'Q6_重心',
   'Q7_本音', 'Q8_衝突', 'Q9_重心',
   '判定_本音', '判定_衝突', '判定_重心',
   'タイプコード', 'タイプ名',
-  '当てはまり', '言い当てられた感', 'すすめたい'
+  '当てはまり', '言い当てられた感', 'すすめたい',
+  'メールアドレス', '自由記述'
 ];
 
 function doPost(e) {
@@ -28,12 +30,13 @@ function doPost(e) {
     var a = data.answers || [];
     var axes = data.axes || {};
     var row = [
-      new Date(),
+      new Date(), data.mode || '', data.ref || '',
       a[0] || '', a[1] || '', a[2] || '', a[3] || '', a[4] || '',
       a[5] || '', a[6] || '', a[7] || '', a[8] || '',
       axes.h || '', axes.c || '', axes.w || '',
       data.code || '', data.name || '',
-      data.fit || '', data.insight || '', data.recommend || ''
+      data.fit || '', data.insight || '', data.recommend || '',
+      data.email || '', data.relationship || ''
     ];
     sheet.appendRow(row);
 
