@@ -26,11 +26,6 @@
     padding:clamp(16px,4vw,48px) 16px;
   }
   .app{width:100%; max-width:640px}
-  .proto-tag{
-    display:inline-block; font-size:11px; letter-spacing:.18em; font-weight:700;
-    color:var(--faint); border:1px solid var(--line); border-radius:99px;
-    padding:4px 12px; margin-bottom:20px; background:var(--surface);
-  }
   .screen{display:none; animation:fade .5s ease both}
   .screen.active{display:block}
   @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
@@ -155,8 +150,6 @@
 </head>
 <body>
 <div class="app">
-  <span class="proto-tag">PROTOTYPE ・ 検証用モック</span>
-
   <!-- INTRO -->
   <section class="screen active" id="intro">
     <div class="eyebrow">職場の人間関係タイプ診断</div>
