@@ -4,7 +4,9 @@
 
 職場の人間関係タイプ診断アプリ。9問の質問から、職場での関わり方を8タイプで診断する。
 
-- `prototype.html` — 検証用のプロトタイプ（スタンドアロンのHTML/CSS/JS）
+- `prototype.html` — 検証用のプロトタイプ（スタンドアロンのHTML/CSS/JS）。`?ref=`/`?mode=lead` で紹介者向け（深掘り診断の申込）に切替
+- `index.html` / `.nojekyll` — GitHub Pages 公開用。`index.html` はクエリ（`?ref=` 等）を引き継いで `prototype.html` へリダイレクト
+- `apps-script/` — 診断結果・検証フィードバック・紹介者リード（メール/自由記述）をGoogleスプレッドシート（回答ログ）に記録する Google Apps Script Web App とセットアップ手順
 
 ## データソース
 

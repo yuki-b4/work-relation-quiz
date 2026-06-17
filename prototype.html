@@ -118,7 +118,19 @@
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
-  .bridge-cta{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,20px); line-height:1.5; color:var(--ink); margin-bottom:20px}
+  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
+  .vq{margin-bottom:20px}
+  .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
+  .vq-opts{display:flex; flex-direction:column; gap:8px}
+  .vq-opt{
+    display:flex; align-items:center; gap:11px; cursor:pointer;
+    font-size:14.5px; color:var(--ink); background:var(--surface);
+    border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
+    transition:border-color .15s, background .15s;
+  }
+  .vq-opt:hover{border-color:#C9C8C1; background:#FCFCFA}
+  .vq-opt input{accent-color:var(--accent); width:16px; height:16px; flex:none; margin:0}
+  .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .field{margin-bottom:14px}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
   .field textarea, .field input{
@@ -195,18 +207,58 @@
           <p id="r-hitotsu"></p>
         </div>
 
-        <!-- BRIDGE -->
+        <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
         <div class="bridge">
-          <p class="bridge-cta" id="r-cta"></p>
-          <div class="field">
-            <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
-            <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
+          <!-- FEEDBACK：8名（過去客）向け 検証フィードバック -->
+          <div id="feedbackBlock">
+            <p class="vq-intro">最後に、この診断をよくするための3つの質問にご協力ください（10秒）。</p>
+
+            <div class="vq">
+              <p class="vq-q">1. 結果は、いまのあなたにどれくらい当てはまっていましたか？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="fit" value="とても当てはまる"><span>とても当てはまる</span></label>
+                <label class="vq-opt"><input type="radio" name="fit" value="まあ当てはまる"><span>まあ当てはまる</span></label>
+                <label class="vq-opt"><input type="radio" name="fit" value="あまり当てはまらない"><span>あまり当てはまらない</span></label>
+                <label class="vq-opt"><input type="radio" name="fit" value="まったく当てはまらない"><span>まったく当てはまらない</span></label>
+              </div>
+            </div>
+
+            <div class="vq">
+              <p class="vq-q">2. 結果を読んで、「自分でも気づいていなかったこと」を言い当てられた感じはありましたか？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="insight" value="強くあった"><span>強くあった</span></label>
+                <label class="vq-opt"><input type="radio" name="insight" value="少しあった"><span>少しあった</span></label>
+                <label class="vq-opt"><input type="radio" name="insight" value="特になかった"><span>特になかった</span></label>
+              </div>
+            </div>
+
+            <div class="vq">
+              <p class="vq-q">3. この診断を、同僚や友人にすすめたいと思いますか？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="recommend" value="ぜひすすめたい"><span>ぜひすすめたい</span></label>
+                <label class="vq-opt"><input type="radio" name="recommend" value="ややすすめたい"><span>ややすすめたい</span></label>
+                <label class="vq-opt"><input type="radio" name="recommend" value="どちらとも言えない"><span>どちらとも言えない</span></label>
+                <label class="vq-opt"><input type="radio" name="recommend" value="すすめない"><span>すすめない</span></label>
+              </div>
+            </div>
+
+            <button class="btn btn-wide btn-accent" id="submitFeedback">回答を送信する</button>
           </div>
-          <div class="field">
-            <label for="mail">読み解きの結果を受け取るメールアドレス</label>
-            <input id="mail" type="email" placeholder="you@example.com">
+
+          <!-- LEAD：紹介者向け 深掘り診断の申込（メール取得・読み解きは手動でお届け） -->
+          <div id="leadBlock" hidden>
+            <p class="vq-intro">あなたの「関わり方」を、いま引っかかっている相手との関係で深掘りします。</p>
+            <div class="field">
+              <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
+              <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
+            </div>
+            <div class="field">
+              <label for="mail">深掘りの読み解きをお届けするメールアドレス</label>
+              <input id="mail" type="email" placeholder="you@example.com">
+            </div>
+            <button class="btn btn-wide btn-accent" id="submitLead">深掘りの読み解きをメールで受け取る</button>
           </div>
-          <button class="btn btn-wide btn-accent" id="deepBtn">この関係を読み解いてもらう</button>
+
           <p class="proto-note" id="protoNote"></p>
         </div>
 
@@ -224,6 +276,16 @@
 </div>
 
 <script>
+// ▼ 回答収集の送信先（Google Apps Script Web AppのURL）。デプロイ後にここへ貼る。
+//   空のままだと送信せず、回答は記録されません（体験のみ）。apps-script/README.md 参照。
+const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
+
+// ▼ モード判定：?ref=<紹介者> 付き（または ?mode=lead）で紹介者向け（深掘り申込）、
+//   それ以外は8名（過去客）向けの検証フィードバック。ref は紹介元としてログに残す。
+const _params = new URLSearchParams(location.search);
+const REF = _params.get('ref') || '';
+const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
+
 const QUESTIONS = [
   {axis:'h', text:'会議で違和感を覚えたとき、あなたは——', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
   {axis:'c', text:'意見が真っ向から対立したとき、あなたは——', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
@@ -366,17 +428,68 @@ function renderResult(code,counts){
   $('r-tsuyomi').textContent=t.tsuyomi;
   $('r-aishou').textContent=t.aishou;
   $('r-hitotsu').textContent=t.hitotsu;
-  $('r-cta').textContent=t.cta;
   $('protoNote').textContent='';
+  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
+  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch};
   show('result');
 }
 
-// bridge (mocked)
-$('deepBtn').onclick=()=>{
-  $('protoNote').textContent='※ プロトタイプのため、ここから先（個別読み・予約）は未実装です。';
+// 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
+function basePayload(r){
+  return {
+    mode: MODE, ref: REF,
+    answers: answers.slice(),
+    axes: {h:r.code[0], c:r.code[1], w:r.code[2]},
+    code: r.code, name: r.name,
+  };
+}
+async function send(payload, btn, okMsg){
+  btn.disabled=true;
+  if(SHEET_ENDPOINT){
+    try{
+      await fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      $('protoNote').textContent=okMsg;
+    }catch(e){
+      $('protoNote').textContent='送信に失敗しました。通信環境を確認して、もう一度お試しください。';
+      btn.disabled=false;
+    }
+  }else{
+    $('protoNote').textContent='※ 送信先URL未設定（プロトタイプ）。回答はまだ記録されていません。';
+  }
+}
+
+// FEEDBACK（8名・検証）：検証用フィードバック3問を送信
+$('submitFeedback').onclick=()=>{
+  const r=window._lastResult; if(!r) return;
+  const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
+  const fit=val('fit'), insight=val('insight'), recommend=val('recommend');
+  if(!fit || !insight || !recommend){
+    $('protoNote').textContent='3つの質問すべてにお答えください。';
+    return;
+  }
+  send(Object.assign(basePayload(r),{fit,insight,recommend}), $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
-$('restartBtn').onclick=()=>{ idx=0; answers.fill(null); $('copyManual').hidden=true; renderQ(); show('quiz'); };
+
+// LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）を送信
+$('submitLead').onclick=()=>{
+  const r=window._lastResult; if(!r) return;
+  const email=$('mail').value.trim();
+  const relationship=$('rel').value.trim();
+  if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
+  if(!relationship){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
+  send(Object.assign(basePayload(r),{email,relationship}), $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
+};
+
+$('restartBtn').onclick=()=>{
+  idx=0; answers.fill(null);
+  $('copyManual').hidden=true;
+  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
+  $('protoNote').textContent='';
+  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  $('rel').value=''; $('mail').value='';
+  renderQ(); show('quiz');
+};
 
 function legacyCopy(text){
   try{
@@ -415,6 +528,8 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
+// モード切替：紹介者向けは検証フィードバックを隠し、深掘り申込ブロックを表示
+if(MODE==='lead'){ $('feedbackBlock').hidden=true; $('leadBlock').hidden=false; }
 $('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
 renderQ();
 </script>
