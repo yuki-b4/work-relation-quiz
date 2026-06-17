@@ -173,8 +173,8 @@
   <!-- INTRO -->
   <section class="screen active" id="intro">
     <div class="eyebrow">職場の人間関係タイプ診断</div>
-    <h1 class="hero">あなたの“関わり方”を可視化する自己分析テスト。</h1>
-    <p class="lead">言いたいことは、言う？飲み込む？ ぶつかる？かわす？<br>職場でのあなたの“関わり方”を、8つのタイプで映し出します。</p>
+    <h1 class="hero">あなたの関わり方を可視化する自己分析テスト。</h1>
+    <p class="lead">言いたいことは、言う？飲み込む？ ぶつかる？かわす？<br>職場でのあなたの関わり方を、8つのタイプで映し出します。</p>
     <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
     <button class="btn" id="startBtn">診断を始める</button>
   </section>
@@ -188,7 +188,7 @@
     <p class="qtext" id="qtext"></p>
     <div class="choices" id="choices"></div>
     <button class="qback" id="backBtn" hidden>← ひとつ戻る</button>
-    <p class="qhint" id="qhint">どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。</p>
+    <p class="qhint" id="qhint">どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。</p>
   </section>
 
   <!-- RESULT -->
@@ -328,7 +328,7 @@ const TYPES = {
   aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
   tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
   aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
-  hitotsu:'あなたの最大の魅力と弱点は、同じ場所にあります——強すぎる直球が、周りを沈黙させる。会議で勢いよく話を進めた後、ふと「誰も本音を言っていない」と気づく瞬間はありませんか。情熱が人を動かし、同時に遠ざける。その孤独の根っこ＝なぜ“先に動かずにいられない”のかは、1回では見えません。',
+  hitotsu:'あなたの最大の魅力と弱点は、同じ場所にあります——強すぎる直球が、周りを沈黙させる。会議で勢いよく話を進めた後、ふと「誰も本音を言っていない」と気づく瞬間はありませんか。情熱が人を動かし、同時に遠ざける。その孤独の根っこ＝なぜ先に動かずにいられないのかは、1回では見えません。',
   cta:'あなたの「いま引っかかっている関係」で、この構造を読み解く。'},
  OBS:{name:'正論ハンマー',pole:'open',catch:'おかしいことは、おかしい。',
   aru:['「それ論理通ってないですよね」と言ってしまう','ルールや規則を守っていないと、モヤモヤが顔に出る','後で「言い方きつかったかな」と一人反省'],
@@ -358,7 +358,7 @@ const TYPES = {
   aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
   tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
   aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
-  hitotsu:'あなたの我慢は、地味だけど本物の力。でも頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にくる——その手前に、心当たりはありませんか。溜め込んだ我慢は、自分も周りも気づけない“負債”になる。小さなNOは、信頼を壊しません。',
+  hitotsu:'あなたの我慢は、地味だけど本物の力。でも頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にくる——その手前に、心当たりはありませんか。溜め込んだ我慢は、自分も周りも気づけない負債になる。小さなNOは、信頼を壊しません。',
   cta:'あなたの「いま引っかかっている関係」で、最初の小さなNOを見つける。'},
  GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
   aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
@@ -383,7 +383,7 @@ const AX = {
 // 第2層：5軸スコア（レーダー）。各軸3問のリッカート（4件法）で測る。
 const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
 const RADAR_META = {
-  safety:  {name:'本音の出しやすさ',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。', act:'次の1on1で、自分の迷いや弱みを“先に”ひとつ開示してみる。'},
+  safety:  {name:'本音の出しやすさ',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。', act:'次の1on1で、自分の迷いや弱みを先にひとつ開示してみる。'},
   trust:   {name:'任せる力',             short:'任せる',  high:'人を信じて任せられる。相手の力を引き出せる。',           trap:'抱え込んで、自分も相手も伸び切らない。',         act:'いま抱えている仕事をひとつ、思い切って誰かに手渡す。'},
   bound:   {name:'相手との線引き',       short:'線引き',  high:'NOと線引きができる。自分をすり減らさない。',             trap:'NOが言えず、気づけば抱えすぎている。',           act:'次に頼まれたら即答せず、「いつまでに/どこまで」をひとつ添えて返す。'},
   conflict:{name:'対立に対して構える力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。',         act:'先送りにしている一件を、相手に「すり合わせたい」と切り出す。'},
@@ -440,7 +440,7 @@ function renderQ(){
       b.onclick=()=>pick(opt.p);
       c.appendChild(b);
     });
-    $('qhint').textContent='どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。';
+    $('qhint').textContent='どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。';
   }else{
     LIKERT.forEach(opt=>{
       const b=document.createElement('button');
@@ -527,8 +527,8 @@ function renderRelations(scores){
   let hi=RADAR_AXES[0], lo=RADAR_AXES[0];
   RADAR_AXES.forEach(a=>{ if(scores[a]>scores[hi]) hi=a; if(scores[a]<scores[lo]) lo=a; });
   const M=RADAR_META;
-  $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み（出っ張り）</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
-  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴（凹み）</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p><p class="act"><b>明日の一手</b>：'+M[lo].act+'</p>';
+  $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
+  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p><p class="act"><b>明日の一手</b>：'+M[lo].act+'</p>';
   $('r-loop').textContent=LOOP_LINE;
   renderRadar(scores);
 }
