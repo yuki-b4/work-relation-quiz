@@ -121,14 +121,13 @@
   .pv-peak .cap, .pv-peak .cap-axis, .pv-peak .act b{color:var(--teal-ink)}
   .pv-valley{background:var(--coral-soft)}
   .pv-valley .cap, .pv-valley .cap-axis, .pv-valley .act b{color:var(--coral-ink)}
-  .radar-fold{margin:2px 0 12px}
+  .radar-fold{margin:2px 0 28px}
   .radar-fold summary{cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; user-select:none}
   .radar-wrap{display:flex; flex-direction:column; align-items:center; margin-top:10px}
   .radar{width:100%; max-width:300px; height:auto}
   .radar-legend{display:grid; grid-template-columns:1fr; gap:2px; width:100%; max-width:320px; margin-top:8px}
   .radar-leg{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); border-bottom:1px solid var(--line); padding:3px 0}
   .radar-leg b{color:var(--accent-ink); font-weight:700}
-  .loop{font-size:13.5px; line-height:1.65; color:var(--muted); margin-bottom:30px}
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
@@ -174,7 +173,7 @@
   <section class="screen active" id="intro">
     <div class="eyebrow">職場の人間関係タイプ診断</div>
     <h1 class="hero">あなたの関わり方を可視化する自己分析テスト。</h1>
-    <p class="lead">言いたいことは、言う？飲み込む？ ぶつかる？かわす？<br>職場でのあなたの関わり方を、8つのタイプで映し出します。</p>
+    <p class="lead">職場でのあなたの関わり方を、8つのタイプで映し出します。</p>
     <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
     <button class="btn" id="startBtn">診断を始める</button>
   </section>
@@ -200,7 +199,7 @@
         <p class="tcatch" id="r-catch"></p>
       </div>
       <div class="card-body">
-        <p class="sectlabel">あなたの位置</p>
+        <p class="sectlabel">あなたの人間関係タイプ</p>
         <div class="axes" id="r-axes"></div>
 
         <p class="sectlabel">あなたの強みと落とし穴</p>
@@ -209,11 +208,10 @@
         <details class="radar-fold">
           <summary>5つの力のバランスを見る</summary>
           <div class="radar-wrap">
-            <svg id="r-radar" class="radar" viewBox="0 0 260 210" aria-hidden="true"></svg>
+            <svg id="r-radar" class="radar" viewBox="0 0 300 220" aria-hidden="true"></svg>
             <div class="radar-legend" id="r-radar-legend"></div>
           </div>
         </details>
-        <p class="loop" id="r-loop"></p>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -389,7 +387,6 @@ const RADAR_META = {
   conflict:{name:'対立に向き合う力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。',         act:'先送りにしている一件を、相手に「すり合わせたい」と切り出す。'},
   connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。',       act:'今日ひとり、具体的に「ここが良かった」と言葉で伝える。'},
 };
-const LOOP_LINE='強みも落とし穴も、相手とパターンで出方が変わる——その根っこは、1回では解けません。';
 const RADAR_Q = [
   {axis:'safety',  text:'この職場では、反対意見でも安心して口にできる'},
   {axis:'trust',   text:'重要な仕事を、安心して人に任せられる'},
@@ -529,14 +526,13 @@ function renderRelations(scores){
   const M=RADAR_META;
   $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
   $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p><p class="act"><b>明日の一手</b>：'+M[lo].act+'</p>';
-  $('r-loop').textContent=LOOP_LINE;
   renderRadar(scores);
 }
 
 // 5軸レーダーを描画（色はタイプのアクセントを継承。SVGの値は var() を効かせるため style 属性で指定）
 function renderRadar(scores){
   const svg=$('r-radar'); if(!svg) return;
-  const cx=130, cy=98, R=66, n=RADAR_AXES.length;
+  const cx=150, cy=100, R=64, n=RADAR_AXES.length;
   const ang=i=>(-90 + i*360/n)*Math.PI/180;
   const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
   let s='';
@@ -547,7 +543,7 @@ function renderRadar(scores){
   const dp=RADAR_AXES.map((a,i)=>pt(i,R*Math.max(0.05,scores[a])).map(v=>v.toFixed(1)).join(',')).join(' ');
   s+='<polygon points="'+dp+'" style="fill:var(--accent);fill-opacity:.18;stroke:var(--accent);stroke-width:2"/>';
   RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R*Math.max(0.05,scores[a])); s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" style="fill:var(--accent)"/>'; });
-  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R+17); s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" style="fill:var(--muted);font-size:9px">'+RADAR_META[a].short+'</text>'; });
+  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R+12); let anc='middle'; if(p[0]>cx+2) anc='start'; else if(p[0]<cx-2) anc='end'; s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="'+anc+'" dominant-baseline="middle" style="fill:var(--muted);font-size:9px">'+RADAR_META[a].name+'</text>'; });
   svg.innerHTML=s;
   const leg=$('r-radar-legend'); leg.innerHTML='';
   RADAR_AXES.forEach(a=>{ const d=document.createElement('div'); d.className='radar-leg'; d.innerHTML='<span>'+RADAR_META[a].name+'</span><b>'+Math.round(scores[a]*100)+'</b>'; leg.appendChild(d); });
