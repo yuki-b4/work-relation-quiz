@@ -111,6 +111,16 @@
   .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
   .hitotsu p{font-size:15px; color:var(--ink)}
 
+  /* RADAR (5軸) */
+  .radar-wrap{display:flex; flex-direction:column; align-items:center; margin-bottom:14px}
+  .radar{width:100%; max-width:300px; height:auto}
+  .radar-legend{display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; width:100%; margin-top:6px}
+  .radar-leg{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); border-bottom:1px solid var(--line); padding:3px 0}
+  .radar-leg b{color:var(--accent-ink); font-weight:700}
+  .radar-dip{font-size:14px; line-height:1.6; color:var(--ink); background:var(--accent-soft); border-radius:var(--radius); padding:13px 16px; margin-bottom:30px}
+  .radar-dip b{color:var(--accent-ink); font-weight:700}
+  .choice-lik{justify-content:center; text-align:center; font-weight:500}
+
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
   .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
@@ -154,21 +164,21 @@
   <section class="screen active" id="intro">
     <div class="eyebrow">職場の人間関係タイプ診断</div>
     <h1 class="hero">あなたは、<br>どう関わる人か。</h1>
-    <p class="lead">本音の出し方、対立への構え、立ち位置。<br>9つの質問で、職場でのあなたの関わり方を8タイプで映し出します。</p>
-    <p class="meta"><b>9問</b> ・ 約2分 ・ 登録不要</p>
+    <p class="lead">本音の出し方、対立への構え、立ち位置。<br>24の質問で、職場でのあなたの関わり方を8タイプ＋関係性の5つの力で映し出します。</p>
+    <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
     <button class="btn" id="startBtn">はじめる</button>
   </section>
 
   <!-- QUIZ -->
   <section class="screen" id="quiz">
     <div class="qtop">
-      <span class="qcount" id="qcount">1 / 9</span>
+      <span class="qcount" id="qcount">1 / 24</span>
       <div class="bar"><i id="barfill"></i></div>
     </div>
     <p class="qtext" id="qtext"></p>
     <div class="choices" id="choices"></div>
     <button class="qback" id="backBtn" hidden>← ひとつ戻る</button>
-    <p class="qhint">どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。</p>
+    <p class="qhint" id="qhint">どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。</p>
   </section>
 
   <!-- RESULT -->
@@ -182,6 +192,13 @@
       <div class="card-body">
         <p class="sectlabel">あなたの位置</p>
         <div class="axes" id="r-axes"></div>
+
+        <p class="sectlabel">関係性の5つの力</p>
+        <div class="radar-wrap">
+          <svg id="r-radar" class="radar" viewBox="0 0 260 210" aria-hidden="true"></svg>
+          <div class="radar-legend" id="r-radar-legend"></div>
+        </div>
+        <p class="radar-dip" id="r-radar-dip"></p>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -348,8 +365,44 @@ const AX = {
   w:{left:'引っ張る',right:'支える',poles:['L','S']},
 };
 
+// 第2層：5軸スコア（レーダー）。各軸3問のリッカート（4件法）で測る。
+const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
+const RADAR_META = {
+  safety:  {name:'心理的安全性',  dip:'本音を言える場がまだ薄いのかも。まずは対話の入口づくりから。'},
+  trust:   {name:'信頼・委任',    dip:'抱え込みがちかも。任せる前の「期待値のすり合わせ」がカギ。'},
+  bound:   {name:'境界線',        dip:'NOや期待値の調整が苦手なサイン。小さな「断り」の練習から。'},
+  conflict:{name:'対立対処',      dip:'対立を避けがちかも。揉めても建設的に向き合う作法が効く。'},
+  connect: {name:'承認・つながり',dip:'認め合いが不足しているサイン。承認を言葉にすることから。'},
+};
+const RADAR_Q = [
+  {axis:'safety',  text:'この職場では、反対意見でも安心して口にできる'},
+  {axis:'trust',   text:'重要な仕事を、安心して人に任せられる'},
+  {axis:'bound',   text:'無理な依頼には「できません」と言える'},
+  {axis:'conflict',text:'意見がぶつかっても、関係を壊さずに話し合える'},
+  {axis:'connect', text:'自分の貢献は、きちんと認められていると感じる'},
+  {axis:'safety',  text:'失敗やミスを、責められる心配なく打ち明けられる'},
+  {axis:'trust',   text:'任された仕事は、細かく口を出されずに任せてもらえる'},
+  {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えられる'},
+  {axis:'conflict',text:'必要なときは、対立から逃げずに向き合える'},
+  {axis:'connect', text:'お互いの良いところを、言葉にして伝え合っている'},
+  {axis:'safety',  text:'「わからない」「助けてほしい」と言いやすい'},
+  {axis:'trust',   text:'メンバー同士、お互いの力量を信頼し合えている'},
+  {axis:'bound',   text:'相手の期待と自分の事情を、すり合わせられている'},
+  {axis:'conflict',text:'揉めたあとも、わだかまりを残さず立て直せる'},
+  {axis:'connect', text:'この職場に、心を許せるつながりがある'},
+];
+const LIKERT = [
+  {t:'とてもそう思う',  v:4},
+  {t:'ややそう思う',    v:3},
+  {t:'あまり思わない',  v:2},
+  {t:'まったく思わない',v:1},
+];
+// 出題順：タイプ判定（9問・二択）→ 5軸レーダー（15問・リッカート）
+const ITEMS = QUESTIONS.map(q=>Object.assign({kind:'bin'},q))
+  .concat(RADAR_Q.map(q=>({kind:'lik',axis:q.axis,text:q.text})));
+
 let idx=0;
-const answers=new Array(QUESTIONS.length).fill(null);
+const answers=new Array(ITEMS.length).fill(null);
 const $=id=>document.getElementById(id);
 
 function show(screen){
@@ -358,23 +411,35 @@ function show(screen){
   window.scrollTo({top:0,behavior:'auto'});
 }
 function renderQ(){
-  const q=QUESTIONS[idx];
-  $('qcount').textContent=(idx+1)+' / '+QUESTIONS.length;
-  $('barfill').style.width=((idx)/QUESTIONS.length*100)+'%';
+  const q=ITEMS[idx];
+  $('qcount').textContent=(idx+1)+' / '+ITEMS.length;
+  $('barfill').style.width=((idx)/ITEMS.length*100)+'%';
   $('qtext').textContent=q.text;
   const c=$('choices'); c.innerHTML='';
-  [['A',q.a],['B',q.b]].forEach(([letter,opt])=>{
-    const b=document.createElement('button');
-    b.className='choice'; b.type='button';
-    b.innerHTML='<span class="mk">'+letter+'</span><span>'+opt.t+'</span>';
-    b.onclick=()=>pick(opt.p);
-    c.appendChild(b);
-  });
+  if(q.kind==='bin'){
+    [['A',q.a],['B',q.b]].forEach(([letter,opt])=>{
+      const b=document.createElement('button');
+      b.className='choice'; b.type='button';
+      b.innerHTML='<span class="mk">'+letter+'</span><span>'+opt.t+'</span>';
+      b.onclick=()=>pick(opt.p);
+      c.appendChild(b);
+    });
+    $('qhint').textContent='どちらが“より自分に近いか”で直感的に。迷ったら第一印象で大丈夫です。';
+  }else{
+    LIKERT.forEach(opt=>{
+      const b=document.createElement('button');
+      b.className='choice choice-lik'; b.type='button';
+      b.innerHTML='<span>'+opt.t+'</span>';
+      b.onclick=()=>pick(opt.v);
+      c.appendChild(b);
+    });
+    $('qhint').textContent='いまの職場を思い浮かべて、どれくらい当てはまるか直感で。';
+  }
   $('backBtn').hidden = idx===0;
 }
-function pick(pole){
-  answers[idx]=pole;
-  if(idx<QUESTIONS.length-1){ idx++; renderQ(); }
+function pick(val){
+  answers[idx]=val;
+  if(idx<ITEMS.length-1){ idx++; renderQ(); }
   else{ $('barfill').style.width='100%'; finish(); }
 }
 $('backBtn').onclick=()=>{ if(idx>0){ idx--; renderQ(); } };
@@ -384,12 +449,23 @@ function tally(axis){
   QUESTIONS.forEach((q,i)=>{ if(q.axis!==axis)return; if(answers[i]===L)l++; else if(answers[i]===R)r++; });
   return {L:l,R:r,total:l+r};
 }
+function radarScores(){
+  const sum={}, cnt={};
+  RADAR_AXES.forEach(a=>{ sum[a]=0; cnt[a]=0; });
+  RADAR_Q.forEach((q,i)=>{
+    const v=answers[QUESTIONS.length+i];
+    if(typeof v==='number'){ sum[q.axis]+=v; cnt[q.axis]++; }
+  });
+  const out={};
+  RADAR_AXES.forEach(a=>{ out[a]= cnt[a] ? (sum[a]/cnt[a]-1)/3 : 0; }); // 0..1
+  return out;
+}
 function finish(){
   const h=tally('h'), c=tally('c'), w=tally('w');
   const code=(h.L>=2?'O':'G')+(c.L>=2?'B':'K')+(w.L>=2?'L':'S');
-  renderResult(code,{h,c,w});
+  renderResult(code,{h,c,w}, radarScores());
 }
-function renderResult(code,counts){
+function renderResult(code,counts,radar){
   const t=TYPES[code]; const card=$('card');
   card.classList.remove('result-accent');
   if(t.pole==='guard'){ card.style.setProperty('--accent','var(--teal)'); card.style.setProperty('--accent-soft','var(--teal-soft)'); card.style.setProperty('--accent-ink','var(--teal-ink)'); }
@@ -415,6 +491,7 @@ function renderResult(code,counts){
     const dot=row.querySelector('.axis-dot');
     requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
   });
+  renderRadar(radar);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
@@ -424,9 +501,31 @@ function renderResult(code,counts){
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
-  window._lastResult={code,name:t.name,catch:t.catch,id:newId()};
+  window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
+}
+
+// 5軸レーダーを描画（色はタイプのアクセントを継承。SVGの値は var() を効かせるため style 属性で指定）
+function renderRadar(scores){
+  const svg=$('r-radar'); if(!svg) return;
+  const cx=130, cy=98, R=66, n=RADAR_AXES.length;
+  const ang=i=>(-90 + i*360/n)*Math.PI/180;
+  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
+  let s='';
+  [0.25,0.5,0.75,1].forEach(g=>{
+    s+='<polygon points="'+RADAR_AXES.map((_,i)=>pt(i,R*g).map(v=>v.toFixed(1)).join(',')).join(' ')+'" style="fill:none;stroke:var(--line);stroke-width:1"/>';
+  });
+  RADAR_AXES.forEach((_,i)=>{ const p=pt(i,R); s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" style="stroke:var(--line);stroke-width:1"/>'; });
+  const dp=RADAR_AXES.map((a,i)=>pt(i,R*Math.max(0.05,scores[a])).map(v=>v.toFixed(1)).join(',')).join(' ');
+  s+='<polygon points="'+dp+'" style="fill:var(--accent);fill-opacity:.18;stroke:var(--accent);stroke-width:2"/>';
+  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R*Math.max(0.05,scores[a])); s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" style="fill:var(--accent)"/>'; });
+  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R+17); s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" style="fill:var(--muted);font-size:8.5px">'+RADAR_META[a].name+'</text>'; });
+  svg.innerHTML=s;
+  const leg=$('r-radar-legend'); leg.innerHTML='';
+  RADAR_AXES.forEach(a=>{ const d=document.createElement('div'); d.className='radar-leg'; d.innerHTML='<span>'+RADAR_META[a].name+'</span><b>'+Math.round(scores[a]*100)+'</b>'; leg.appendChild(d); });
+  let low=RADAR_AXES[0]; RADAR_AXES.forEach(a=>{ if(scores[a]<scores[low]) low=a; });
+  $('r-radar-dip').innerHTML='いまの一番の凹みは <b>'+RADAR_META[low].name+'</b>。'+RADAR_META[low].dip;
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
@@ -442,9 +541,10 @@ function recordDiagnosis(r){
   if(!SHEET_ENDPOINT) return;
   post({
     action:'create', id:r.id, mode:MODE, ref:REF,
-    answers:answers.slice(),
+    answers:answers.slice(0, QUESTIONS.length),
     axes:{h:r.code[0], c:r.code[1], w:r.code[2]},
     code:r.code, name:r.name,
+    radar:r.radar,
   }).catch(()=>{});
 }
 // フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
