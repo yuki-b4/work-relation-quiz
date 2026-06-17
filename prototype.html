@@ -431,24 +431,36 @@ function renderResult(code,counts){
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
-  window._lastResult={code,name:t.name,catch:t.catch};
+  window._lastResult={code,name:t.name,catch:t.catch,id:newId()};
+  recordDiagnosis(window._lastResult);
   show('result');
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
-function basePayload(r){
-  return {
-    mode: MODE, ref: REF,
-    answers: answers.slice(),
-    axes: {h:r.code[0], c:r.code[1], w:r.code[2]},
-    code: r.code, name: r.name,
-  };
+function newId(){
+  return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2,10);
 }
-async function send(payload, btn, okMsg){
+function post(payload){
+  return fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+}
+// フェーズ1：診断が完了した時点で、回答IDつきの行を先に追加（アンケート未回答でも取りこぼさない）
+function recordDiagnosis(r){
+  if(!SHEET_ENDPOINT) return;
+  post({
+    action:'create', id:r.id, mode:MODE, ref:REF,
+    answers:answers.slice(),
+    axes:{h:r.code[0], c:r.code[1], w:r.code[2]},
+    code:r.code, name:r.name,
+  }).catch(()=>{});
+}
+// フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
+async function sendSurvey(fields, btn, okMsg){
+  const r=window._lastResult; if(!r) return;
   btn.disabled=true;
   if(SHEET_ENDPOINT){
     try{
-      await fetch(SHEET_ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      await post(Object.assign({action:'update', id:r.id}, fields));
       $('protoNote').textContent=okMsg;
     }catch(e){
       $('protoNote').textContent='送信に失敗しました。通信環境を確認して、もう一度お試しください。';
@@ -459,26 +471,24 @@ async function send(payload, btn, okMsg){
   }
 }
 
-// FEEDBACK（8名・検証）：検証用フィードバック3問を送信
+// FEEDBACK（8名・検証）：検証用フィードバック3問
 $('submitFeedback').onclick=()=>{
-  const r=window._lastResult; if(!r) return;
   const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
   const fit=val('fit'), insight=val('insight'), recommend=val('recommend');
   if(!fit || !insight || !recommend){
     $('protoNote').textContent='3つの質問すべてにお答えください。';
     return;
   }
-  send(Object.assign(basePayload(r),{fit,insight,recommend}), $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
+  sendSurvey({fit,insight,recommend}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
-// LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）を送信
+// LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
 $('submitLead').onclick=()=>{
-  const r=window._lastResult; if(!r) return;
   const email=$('mail').value.trim();
   const relationship=$('rel').value.trim();
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
   if(!relationship){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
-  send(Object.assign(basePayload(r),{email,relationship}), $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
+  sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
 };
 
 $('restartBtn').onclick=()=>{
