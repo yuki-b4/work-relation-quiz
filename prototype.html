@@ -234,7 +234,7 @@
         <div class="bridge">
           <!-- FEEDBACK：8名（過去客）向け 検証フィードバック -->
           <div id="feedbackBlock">
-            <p class="vq-intro">最後に、この診断をよくするための3つの質問にご協力ください（10秒）。</p>
+            <p class="vq-intro">最後に、この診断の精度を確かめる4つの質問にご協力ください（約20秒）。</p>
 
             <div class="vq">
               <p class="vq-q">1. 結果は、いまのあなたにどれくらい当てはまっていましたか？</p>
@@ -256,12 +256,22 @@
             </div>
 
             <div class="vq">
-              <p class="vq-q">3. この診断を、同僚や友人にすすめたいと思いますか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="recommend" value="ぜひすすめたい"><span>ぜひすすめたい</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="ややすすめたい"><span>ややすすめたい</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="どちらとも言えない"><span>どちらとも言えない</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="すすめない"><span>すすめない</span></label>
+              <p class="vq-q">3. とくに「当てはまる」と感じた項目は？（複数選択可）</p>
+              <div class="vq-opts" role="group" aria-label="当てはまった項目">
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="あるある"><span>あるある</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="強み"><span>強み</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="ワンポイント"><span>ワンポイント</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="5つの力"><span>5つの力（レーダー）</span></label>
+              </div>
+            </div>
+
+            <div class="vq">
+              <p class="vq-q">4. 逆に「当てはまらない」と感じた項目は？（複数選択可）</p>
+              <div class="vq-opts" role="group" aria-label="当てはまらなかった項目">
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="あるある"><span>あるある</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="強み"><span>強み</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="ワンポイント"><span>ワンポイント</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="5つの力"><span>5つの力（レーダー）</span></label>
               </div>
             </div>
 
@@ -515,7 +525,7 @@ function renderResult(code,counts,radar){
   $('r-cta').textContent=t.cta;
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
-  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
@@ -590,12 +600,14 @@ async function sendSurvey(fields, btn, okMsg){
 // FEEDBACK（8名・検証）：検証用フィードバック3問
 $('submitFeedback').onclick=()=>{
   const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
-  const fit=val('fit'), insight=val('insight'), recommend=val('recommend');
-  if(!fit || !insight || !recommend){
-    $('protoNote').textContent='3つの質問すべてにお答えください。';
+  const vals=name=>Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(el=>el.value).join('、');
+  const fit=val('fit'), insight=val('insight');
+  const fitElements=vals('fitElements'), missElements=vals('missElements');
+  if(!fit || !insight){
+    $('protoNote').textContent='最初の2問（Q1・Q2）にお答えください。';
     return;
   }
-  sendSurvey({fit,insight,recommend}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
+  sendSurvey({fit,insight,fitElements,missElements}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
 // LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
@@ -612,7 +624,7 @@ $('restartBtn').onclick=()=>{
   $('copyManual').hidden=true;
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   $('protoNote').textContent='';
-  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('rel').value=''; $('mail').value='';
   renderQ(); show('quiz');
 };
