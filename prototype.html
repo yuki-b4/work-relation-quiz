@@ -116,11 +116,10 @@
   .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px}
   .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:6px}
   .pv p{font-size:14.5px; line-height:1.65; color:var(--ink)}
-  .pv .act{margin-top:8px}
   .pv-peak{background:var(--teal-soft)}
-  .pv-peak .cap, .pv-peak .cap-axis, .pv-peak .act b{color:var(--teal-ink)}
+  .pv-peak .cap, .pv-peak .cap-axis{color:var(--teal-ink)}
   .pv-valley{background:var(--coral-soft)}
-  .pv-valley .cap, .pv-valley .cap-axis, .pv-valley .act b{color:var(--coral-ink)}
+  .pv-valley .cap, .pv-valley .cap-axis{color:var(--coral-ink)}
   .radar-fold{margin:2px 0 28px}
   .radar-fold summary{cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; user-select:none}
   .radar-wrap{display:flex; flex-direction:column; align-items:center; margin-top:10px}
@@ -381,11 +380,11 @@ const AX = {
 // 第2層：5軸スコア（レーダー）。各軸3問のリッカート（4件法）で測る。
 const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
 const RADAR_META = {
-  safety:  {name:'本音を出す力',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。', act:'次の1on1で、自分の迷いや弱みを先にひとつ開示してみる。'},
-  trust:   {name:'任せる力',             short:'任せる',  high:'人を信じて任せられる。相手の力を引き出せる。',           trap:'抱え込んで、自分も相手も伸び切らない。',         act:'いま抱えている仕事をひとつ、思い切って誰かに手渡す。'},
-  bound:   {name:'線を引く力',       short:'線引き',  high:'NOと線引きができる。自分をすり減らさない。',             trap:'NOが言えず、気づけば抱えすぎている。',           act:'次に頼まれたら即答せず、「いつまでに/どこまで」をひとつ添えて返す。'},
-  conflict:{name:'対立に向き合う力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。',         act:'先送りにしている一件を、相手に「すり合わせたい」と切り出す。'},
-  connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。',       act:'今日ひとり、具体的に「ここが良かった」と言葉で伝える。'},
+  safety:  {name:'本音を出す力',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。'},
+  trust:   {name:'任せる力',             short:'任せる',  high:'人を信じて任せられる。相手の力を引き出せる。',           trap:'抱え込んで、自分も相手も伸び切らない。'},
+  bound:   {name:'線を引く力',       short:'線引き',  high:'NOと線引きができる。自分をすり減らさない。',             trap:'NOが言えず、気づけば抱えすぎている。'},
+  conflict:{name:'対立に向き合う力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。'},
+  connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。'},
 };
 const RADAR_Q = [
   {axis:'safety',  text:'この職場では、反対意見でも安心して口にできる'},
@@ -519,13 +518,13 @@ function renderResult(code,counts,radar){
   show('result');
 }
 
-// 案B：結果のヘソ＝一番の強み（出っ張り）＋落とし穴（凹み）＋明日の一手＋開いたループ
+// 案B：結果のヘソ＝一番の強み（出っ張り）＋落とし穴（凹み）＋開いたループ
 function renderRelations(scores){
   let hi=RADAR_AXES[0], lo=RADAR_AXES[0];
   RADAR_AXES.forEach(a=>{ if(scores[a]>scores[hi]) hi=a; if(scores[a]<scores[lo]) lo=a; });
   const M=RADAR_META;
   $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
-  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p><p class="act"><b>明日の一手</b>：'+M[lo].act+'</p>';
+  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p>';
   renderRadar(scores);
 }
 
