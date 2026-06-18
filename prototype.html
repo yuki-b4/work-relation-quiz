@@ -389,21 +389,21 @@ const RADAR_META = {
   connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。'},
 };
 const RADAR_Q = [
-  {axis:'safety',  text:'この職場では、反対意見でも安心して口にできる'},
-  {axis:'trust',   text:'重要な仕事を、安心して人に任せられる'},
-  {axis:'bound',   text:'無理な依頼には「できません」と言える'},
-  {axis:'conflict',text:'意見がぶつかっても、関係を壊さずに話し合える'},
-  {axis:'connect', text:'自分の貢献は、きちんと認められていると感じる'},
-  {axis:'safety',  text:'失敗やミスを、責められる心配なく打ち明けられる'},
-  {axis:'trust',   text:'任された仕事は、細かく口を出されずに任せてもらえる'},
-  {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えられる'},
-  {axis:'conflict',text:'必要なときは、対立から逃げずに向き合える'},
-  {axis:'connect', text:'お互いの良いところを、言葉にして伝え合っている'},
-  {axis:'safety',  text:'「わからない」「助けてほしい」と言いやすい'},
-  {axis:'trust',   text:'メンバー同士、お互いの力量を信頼し合えている'},
-  {axis:'bound',   text:'相手の期待と自分の事情を、すり合わせられている'},
-  {axis:'conflict',text:'揉めたあとも、わだかまりを残さず立て直せる'},
-  {axis:'connect', text:'この職場に、心を許せるつながりがある'},
+  {axis:'safety',  text:'相手や立場が変わっても、反対意見ははっきり口にするほうだ'},
+  {axis:'trust',   text:'重要な仕事でも、思い切って人に任せるほうだ'},
+  {axis:'bound',   text:'無理な依頼には「できません」と言うほうだ'},
+  {axis:'conflict',text:'意見がぶつかっても、関係を壊さず話し合うほうだ'},
+  {axis:'connect', text:'相手の良いところは、自分から言葉にして伝えるほうだ'},
+  {axis:'safety',  text:'自分の失敗やミスは、隠さず打ち明けるほうだ'},
+  {axis:'trust',   text:'人に任せたら、細かく口を出さずに見守るほうだ'},
+  {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えるほうだ'},
+  {axis:'conflict',text:'必要なときは、対立から逃げずに向き合うほうだ'},
+  {axis:'connect', text:'感謝や「ありがとう」を、ためらわず口にするほうだ'},
+  {axis:'safety',  text:'「わからない」「助けてほしい」と、自分から言うほうだ'},
+  {axis:'trust',   text:'相手の力量を信じて、安心して頼るほうだ'},
+  {axis:'bound',   text:'相手の期待と自分の事情を、自分からすり合わせるほうだ'},
+  {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
+  {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
 ];
 const LIKERT = [
   {t:'とてもそう思う',  v:4},
@@ -447,7 +447,7 @@ function renderQ(){
       b.onclick=()=>pick(opt.v);
       c.appendChild(b);
     });
-    $('qhint').textContent='いまの職場を思い浮かべて、どれくらい当てはまるか直感で。';
+    $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
 }
