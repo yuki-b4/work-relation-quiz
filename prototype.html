@@ -124,10 +124,13 @@
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
   .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
-  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:8px; color:var(--accent-ink)}
-  .pv p{font-size:14.5px; line-height:1.65; color:var(--ink)}
-  .pv p + p{margin-top:8px}
-  .pv .side{color:var(--muted)}
+  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink)}
+  .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
+  .focus-tag{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap}
+  .focus-tag-gift{background:var(--accent)}
+  .focus-tag-side{background:#565A60}
+  .focus-item p{font-size:14.5px; line-height:1.7; color:var(--ink)}
+  .focus-grow{font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px}
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
@@ -563,8 +566,9 @@ function renderRelations(scores){
   $('r-focus').innerHTML =
     '<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
     '<div class="cap-axis">「'+pole+'」寄り</div>'+
-    '<p>'+gift+'。<span class="side">（つい出る面：'+side+'）</span></p>'+
-    '<p>意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
+    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
