@@ -177,9 +177,17 @@
   .compat-row{padding:13px 0; border-top:1px solid var(--line)}
   .compat-row:first-child{border-top:none}
   .ct-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
-  .ct-name{font-family:var(--display); font-weight:700; font-size:15.5px; color:var(--ink); letter-spacing:.02em}
+  .ct-name{font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
+  .compat-row.pole-open .ct-name{background:var(--coral-soft); color:var(--coral-ink)}
+  .compat-row.pole-guard .ct-name{background:var(--teal-soft); color:var(--teal-ink)}
   .ct-code{font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700}
-  .ct-tag{font-size:11px; font-weight:700; letter-spacing:.02em; border-radius:7px; padding:3px 9px; background:var(--accent-soft); color:var(--accent-ink); white-space:nowrap}
+  .ct-tag{font-size:11px; font-weight:700; letter-spacing:.02em; border-radius:7px; padding:3px 9px; background:var(--chrome); color:#fff; white-space:nowrap}
+  .ct-best{font-size:10px; letter-spacing:.06em; font-weight:700; color:#fff; border-radius:99px; padding:2px 9px; white-space:nowrap}
+  .compat-row.pole-open .ct-best{background:var(--coral)}
+  .compat-row.pole-guard .ct-best{background:var(--teal)}
+  .compat-row.is-best{border-radius:10px}
+  .compat-row.is-best.pole-open{box-shadow:inset 3px 0 0 var(--coral); padding-left:12px}
+  .compat-row.is-best.pole-guard{box-shadow:inset 3px 0 0 var(--teal); padding-left:12px}
   .ct-self{margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700}
   .ct-text{font-size:14px; line-height:1.65; color:var(--ink)}
   .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
@@ -619,15 +627,34 @@ function compatLine(self, other){
 }
 function renderCompat(selfCode){
   const box=$('r-compat'); if(!box) return; box.innerHTML='';
+  // 最もポジティブな相性（ベストマッチ）を1つ選ぶ
+  let best=null, bestScore=-Infinity;
+  Object.keys(TYPES).forEach(code=>{
+    if(code===selfCode) return;
+    const sc=compatScore(selfCode, code);
+    if(sc>bestScore){ bestScore=sc; best=code; }
+  });
   Object.keys(TYPES).forEach(code=>{
     const t=TYPES[code], c=compatLine(selfCode, code);
+    const pole = (t.pole==='guard') ? 'pole-guard' : 'pole-open';
+    const isBest = (code===best);
     const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
+    const bestBadge = isBest ? '<span class="ct-best">ベストマッチ</span>' : '';
     const selfBadge = (code===selfCode) ? '<span class="ct-self">あなた</span>' : '';
-    const row=document.createElement('div'); row.className='compat-row';
-    row.innerHTML='<div class="ct-head"><span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+tags+selfBadge+'</div>'+
+    const row=document.createElement('div'); row.className='compat-row '+pole+(isBest?' is-best':'');
+    row.innerHTML='<div class="ct-head"><span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+'</div>'+
       '<div class="ct-text">'+c.text+'</div>';
     box.appendChild(row);
   });
+}
+// 相性のポジティブ度（ベストマッチ選定用）。重心の補完を最重視し、本音・衝突の調和を加点。
+function compatScore(self, other){
+  if(self===other) return -Infinity;
+  let s=0;
+  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
+  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
+  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
+  return s;
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
