@@ -231,46 +231,63 @@
 
         <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
         <div class="bridge">
-          <!-- FEEDBACK：8名（過去客）向け 検証フィードバック -->
+          <!-- FEEDBACK：8名（過去客）向け 検証アンケート（指標v2：精度でなくエンゲージメント／拡散を測る） -->
           <div id="feedbackBlock">
-            <p class="vq-intro">最後に、この診断をよくするための4つの質問にご協力ください（10秒）。</p>
+            <p class="vq-intro">最後に、この診断をよくするための5つの質問にご協力ください。</p>
 
             <div class="vq">
-              <p class="vq-q">1. 結果は、いまのあなたにどれくらい当てはまっていましたか？</p>
+              <p class="vq-q">1. 結果を読んで、『これは私だ』とどれくらい感じましたか？</p>
               <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="fit" value="とても当てはまる"><span>とても当てはまる</span></label>
-                <label class="vq-opt"><input type="radio" name="fit" value="まあ当てはまる"><span>まあ当てはまる</span></label>
-                <label class="vq-opt"><input type="radio" name="fit" value="あまり当てはまらない"><span>あまり当てはまらない</span></label>
-                <label class="vq-opt"><input type="radio" name="fit" value="まったく当てはまらない"><span>まったく当てはまらない</span></label>
+                <label class="vq-opt"><input type="radio" name="me" value="強く感じた"><span>強く感じた</span></label>
+                <label class="vq-opt"><input type="radio" name="me" value="まあ感じた"><span>まあ感じた</span></label>
+                <label class="vq-opt"><input type="radio" name="me" value="あまり感じない"><span>あまり感じない</span></label>
+                <label class="vq-opt"><input type="radio" name="me" value="まったく感じない"><span>まったく感じない</span></label>
               </div>
             </div>
 
             <div class="vq">
-              <p class="vq-q">2. 結果を読んで、「自分でも気づいていなかったこと」を言い当てられた感じはありましたか？</p>
+              <p class="vq-q">2. 読んでいて『これはあの人だ』と思い浮かんだ人はいましたか？</p>
               <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="insight" value="強くあった"><span>強くあった</span></label>
-                <label class="vq-opt"><input type="radio" name="insight" value="少しあった"><span>少しあった</span></label>
-                <label class="vq-opt"><input type="radio" name="insight" value="特になかった"><span>特になかった</span></label>
+                <label class="vq-opt"><input type="radio" name="others" value="いる"><span>いる</span></label>
+                <label class="vq-opt"><input type="radio" name="others" value="なんとなくいる"><span>なんとなくいる</span></label>
+                <label class="vq-opt"><input type="radio" name="others" value="いない"><span>いない</span></label>
+              </div>
+              <div class="field">
+                <label for="othersWho">（任意）どんな関係の人ですか？</label>
+                <input id="othersWho" type="text" placeholder="例：上司、後輩、同僚">
               </div>
             </div>
 
             <div class="vq">
-              <p class="vq-q">3. とくに「当てはまる」と感じた項目は？（複数選択可）</p>
-              <div class="vq-opts" role="group" aria-label="当てはまった項目">
-                <label class="vq-opt"><input type="checkbox" name="fitElements" value="あるある"><span>あるある</span></label>
-                <label class="vq-opt"><input type="checkbox" name="fitElements" value="強み"><span>強み</span></label>
-                <label class="vq-opt"><input type="checkbox" name="fitElements" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="checkbox" name="fitElements" value="5つの軸"><span>5つの軸</span></label>
+              <p class="vq-q">3. この結果を、誰かに見せたい・話したいと思いましたか？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="share" value="強く思う"><span>強く思う</span></label>
+                <label class="vq-opt"><input type="radio" name="share" value="まあ思う"><span>まあ思う</span></label>
+                <label class="vq-opt"><input type="radio" name="share" value="思わない"><span>思わない</span></label>
+              </div>
+              <div class="field">
+                <label for="shareWho">（任意）誰に見せたい・話したいですか？</label>
+                <input id="shareWho" type="text" placeholder="例：同僚、パートナー、友人">
               </div>
             </div>
 
             <div class="vq">
-              <p class="vq-q">4. 逆に「当てはまらない」と感じた項目は？（複数選択可）</p>
-              <div class="vq-opts" role="group" aria-label="当てはまらなかった項目">
-                <label class="vq-opt"><input type="checkbox" name="missElements" value="あるある"><span>あるある</span></label>
-                <label class="vq-opt"><input type="checkbox" name="missElements" value="強み"><span>強み</span></label>
-                <label class="vq-opt"><input type="checkbox" name="missElements" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="checkbox" name="missElements" value="5つの軸"><span>5つの軸</span></label>
+              <p class="vq-q">4. 今、人間関係で引っかかっていることを、さらに深掘りしたいですか？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="dig" value="ぜひ"><span>ぜひ</span></label>
+                <label class="vq-opt"><input type="radio" name="dig" value="興味はある"><span>興味はある</span></label>
+                <label class="vq-opt"><input type="radio" name="dig" value="今はいい"><span>今はいい</span></label>
+              </div>
+            </div>
+
+            <div class="vq">
+              <p class="vq-q">5. いちばん『当たってない』と感じた部分は？</p>
+              <div class="vq-opts" role="radiogroup">
+                <label class="vq-opt"><input type="radio" name="miss" value="あるある"><span>あるある</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="強み"><span>強み</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="ワンポイント"><span>ワンポイント</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="5つの軸"><span>5つの軸</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="特になし"><span>特になし</span></label>
               </div>
             </div>
 
@@ -314,7 +331,7 @@
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
 
 // ▼ モード判定：?ref=<紹介者> 付き（または ?mode=lead）で紹介者向け（深掘り申込）、
-//   それ以外は8名（過去客）向けの検証フィードバック。ref は紹介元としてログに残す。
+//   それ以外は8名（過去客）向けの検証アンケート。ref は紹介元としてログに残す。
 const _params = new URLSearchParams(location.search);
 const REF = _params.get('ref') || '';
 const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
@@ -610,17 +627,16 @@ async function sendSurvey(fields, btn, okMsg){
   }
 }
 
-// FEEDBACK（8名・検証）：検証用フィードバック3問
+// FEEDBACK（8名・検証）：検証アンケート（指標v2）5問
 $('submitFeedback').onclick=()=>{
   const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
-  const vals=name=>Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(el=>el.value).join('、');
-  const fit=val('fit'), insight=val('insight');
-  const fitElements=vals('fitElements'), missElements=vals('missElements');
-  if(!fit || !insight){
-    $('protoNote').textContent='最初の2問（Q1・Q2）にお答えください。';
+  const me=val('me'), others=val('others'), share=val('share'), dig=val('dig'), miss=val('miss');
+  const othersWho=$('othersWho').value.trim(), shareWho=$('shareWho').value.trim();
+  if(!me || !others || !share || !dig){
+    $('protoNote').textContent='Q1〜Q4にお答えください（Q5と自由記述は任意です）。';
     return;
   }
-  sendSurvey({fit,insight,fitElements,missElements}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
+  sendSurvey({me,others,othersWho,share,shareWho,dig,miss}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
 // LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
@@ -638,6 +654,7 @@ $('restartBtn').onclick=()=>{
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
+  $('othersWho').value=''; $('shareWho').value='';
   $('rel').value=''; $('mail').value='';
   renderQ(); show('quiz');
 };
@@ -679,7 +696,7 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
-// モード切替：紹介者向けは検証フィードバックを隠し、深掘り申込ブロックを表示
+// モード切替：紹介者向けは検証アンケートを隠し、深掘り申込ブロックを表示
 if(MODE==='lead'){ $('feedbackBlock').hidden=true; $('leadBlock').hidden=false; }
 $('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
 renderQ();

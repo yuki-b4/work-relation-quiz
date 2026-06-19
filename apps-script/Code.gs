@@ -4,15 +4,16 @@
  * 2フェーズで記録する：
  *  - action:'create' … 診断完了時に、回答IDつきの行を先に追加（アンケート未回答でも取りこぼさない）
  *  - action:'update' … アンケート回答時に、回答IDをキーに同じ行のアンケート列だけを埋める
- * モード：feedback（8名・検証3問）／lead（紹介者・メール＋自由記述）
+ * モード：feedback（8名・検証アンケート5問）／lead（紹介者・メール＋自由記述）
  * デプロイ手順は同じフォルダの README.md を参照。
  */
 
 // 回答を書き込むスプレッドシートID（「職場の人間関係タイプ診断_回答ログ」）
 var SHEET_ID = '1J9sfu2F3uJtpriORSkz7v-5uNQHD6mR4j3UZ22H1Q7M';
 
-// 記録先シート（タブ）名。存在しなければ自動作成する
-var SHEET_NAME = '20260619~';
+// 記録先シート（タブ）名。存在しなければ自動作成する。
+// 指標v2＝精度でなくエンゲージメント／拡散を測る新アンケート用（旧 20260619~ とは別管理）
+var SHEET_NAME = '指標v2';
 
 var HEADERS = [
   'タイムスタンプ', 'モード', '紹介元',
@@ -21,7 +22,7 @@ var HEADERS = [
   'Q7_本音', 'Q8_衝突', 'Q9_重心',
   '判定_本音', '判定_衝突', '判定_重心',
   'タイプコード', 'タイプ名',
-  '当てはまり', '言い当てられた感', '当てはまった要素', '当てはまらなかった要素',
+  'これは私だ', '他者当てはめ', '他者当てはめ_誰', '見せたい・話したい', '見せたい_誰', '深掘りしたい', '滑った部分',
   'メールアドレス', '自由記述', '回答ID'
 ];
 
@@ -60,8 +61,9 @@ function handleCreate(sheet, data) {
     'Q7_本音': a[6] || '', 'Q8_衝突': a[7] || '', 'Q9_重心': a[8] || '',
     '判定_本音': axes.h || '', '判定_衝突': axes.c || '', '判定_重心': axes.w || '',
     'タイプコード': data.code || '', 'タイプ名': data.name || '',
-    '当てはまり': data.fit || '', '言い当てられた感': data.insight || '',
-    '当てはまった要素': data.fitElements || '', '当てはまらなかった要素': data.missElements || '',
+    'これは私だ': data.me || '', '他者当てはめ': data.others || '', '他者当てはめ_誰': data.othersWho || '',
+    '見せたい・話したい': data.share || '', '見せたい_誰': data.shareWho || '',
+    '深掘りしたい': data.dig || '', '滑った部分': data.miss || '',
     'メールアドレス': data.email || '', '自由記述': data.relationship || '',
     '回答ID': data.id || ''
   };
@@ -77,8 +79,9 @@ function handleUpdate(sheet, data) {
     return;
   }
   var updates = {
-    '当てはまり': data.fit, '言い当てられた感': data.insight,
-    '当てはまった要素': data.fitElements, '当てはまらなかった要素': data.missElements,
+    'これは私だ': data.me, '他者当てはめ': data.others, '他者当てはめ_誰': data.othersWho,
+    '見せたい・話したい': data.share, '見せたい_誰': data.shareWho,
+    '深掘りしたい': data.dig, '滑った部分': data.miss,
     'メールアドレス': data.email, '自由記述': data.relationship
   };
   Object.keys(updates).forEach(function (name) {
