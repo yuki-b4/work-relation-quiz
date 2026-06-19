@@ -169,6 +169,22 @@
   .copy-manual-note{font-size:12.5px; color:var(--muted); margin-bottom:7px}
   .copy-manual-box{width:100%; font-family:var(--body); font-size:14px; color:var(--ink); background:var(--surface); border:1.5px solid var(--accent,#0F6E56); border-radius:12px; padding:12px 14px; line-height:1.6; resize:none}
   .copy-manual-box:focus{outline:none}
+
+  /* 相性一覧（自分×全8タイプ） */
+  .compat{margin-bottom:26px}
+  .compat-hint{font-size:13px; color:var(--muted); margin:-2px 0 14px}
+  .compat-list{display:flex; flex-direction:column}
+  .compat-row{padding:13px 0; border-top:1px solid var(--line)}
+  .compat-row:first-child{border-top:none}
+  .ct-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
+  .ct-name{font-family:var(--display); font-weight:700; font-size:15.5px; color:var(--ink); letter-spacing:.02em}
+  .ct-code{font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700}
+  .ct-tag{font-size:11px; font-weight:700; letter-spacing:.02em; border-radius:7px; padding:3px 9px; background:var(--accent-soft); color:var(--accent-ink); white-space:nowrap}
+  .ct-self{margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700}
+  .ct-text{font-size:14px; line-height:1.65; color:var(--ink)}
+  .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
+  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
+  .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -227,6 +243,17 @@
         <div class="hitotsu">
           <div class="h-label">あなたが良い人間関係を築くためのワンポイント</div>
           <p id="r-hitotsu"></p>
+        </div>
+
+        <div class="compat">
+          <p class="sectlabel">あの人との相性（8タイプ別）</p>
+          <p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
+          <div class="compat-list" id="r-compat"></div>
+          <div class="compat-cta">
+            <div class="cc-label">特定の相手を、もっと深く</div>
+            <p class="cc-text">気になる相手がいたら、その人との関係を一つだけ具体的に教えてください。お二人の力学を読み解いて、個別にお返しします。</p>
+            <button class="btn btn-wide btn-accent" id="compatDeepBtn">この相手との関係を深掘りする</button>
+          </div>
         </div>
 
         <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
@@ -542,6 +569,7 @@ function renderResult(code,counts,radar){
     requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
   });
   renderRelations(radar);
+  renderCompat(code);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
@@ -555,6 +583,51 @@ function renderResult(code,counts,radar){
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
+}
+
+// 相性：3軸の組合せから「自分視点の力学」を生成（Model B＝重心ベース＋摩擦の半句）
+// コード = [本音 O/G][衝突 B/K][重心 L/S]
+function compatLine(self, other){
+  if(self===other){
+    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
+  }
+  const GRAV={
+    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
+    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
+    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
+    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
+  };
+  const HONNE={
+    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
+    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
+    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
+  };
+  const CONF={
+    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
+    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
+    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
+  };
+  const g=GRAV[self[2]+other[2]];
+  let tags=[g.tag], text=g.full;
+  if(!g.friction){
+    const hon=HONNE[self[0]+other[0]];
+    const con=CONF[self[1]+other[1]];
+    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
+    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
+  }
+  return {tags:tags, text:text};
+}
+function renderCompat(selfCode){
+  const box=$('r-compat'); if(!box) return; box.innerHTML='';
+  Object.keys(TYPES).forEach(code=>{
+    const t=TYPES[code], c=compatLine(selfCode, code);
+    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
+    const selfBadge = (code===selfCode) ? '<span class="ct-self">あなた</span>' : '';
+    const row=document.createElement('div'); row.className='compat-row';
+    row.innerHTML='<div class="ct-head"><span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+tags+selfBadge+'</div>'+
+      '<div class="ct-text">'+c.text+'</div>';
+    box.appendChild(row);
+  });
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -648,6 +721,11 @@ $('submitLead').onclick=()=>{
   sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
 };
 
+// 相性CTA：深掘り（既存の深掘り申込フォームを開く＝追加情報で個別分析）
+$('compatDeepBtn').onclick=()=>{
+  $('leadBlock').hidden=false;
+  $('leadBlock').scrollIntoView({behavior:'smooth', block:'start'});
+};
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
   $('copyManual').hidden=true;
