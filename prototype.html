@@ -49,6 +49,16 @@
   .btn:active{transform:translateY(1px)}
   .btn:focus-visible{outline:3px solid #B9C2CC; outline-offset:2px}
   .btn-wide{width:100%}
+  .btn:disabled{cursor:default; opacity:.6}
+  .btn.is-loading{position:relative; color:transparent !important; pointer-events:none; opacity:1}
+  .btn.is-loading::after{
+    content:""; position:absolute; top:50%; left:50%; width:18px; height:18px; margin:-9px 0 0 -9px;
+    border:2.5px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%;
+    animation:btnspin .7s linear infinite;
+  }
+  @keyframes btnspin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){ .btn.is-loading::after{animation:btnpulse 1.1s ease-in-out infinite} }
+  @keyframes btnpulse{0%,100%{opacity:.35} 50%{opacity:1}}
 
   /* QUIZ */
   .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
@@ -111,28 +121,22 @@
   .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
   .hitotsu p{font-size:15px; color:var(--ink)}
 
-  /* 強み(出っ張り)／落とし穴(凹み)＋レーダー（案B） */
-  .pv{border-radius:var(--radius); padding:16px 18px; margin-bottom:12px}
-  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px}
-  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:6px}
-  .pv p{font-size:14.5px; line-height:1.65; color:var(--ink)}
-  .pv .act{margin-top:8px}
-  .pv-peak{background:var(--teal-soft)}
-  .pv-peak .cap, .pv-peak .cap-axis, .pv-peak .act b{color:var(--teal-ink)}
-  .pv-valley{background:var(--coral-soft)}
-  .pv-valley .cap, .pv-valley .cap-axis, .pv-valley .act b{color:var(--coral-ink)}
-  .radar-fold{margin:2px 0 28px}
-  .radar-fold summary{cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; user-select:none}
-  .radar-wrap{display:flex; flex-direction:column; align-items:center; margin-top:10px}
-  .radar{width:100%; max-width:300px; height:auto}
-  .radar-legend{display:grid; grid-template-columns:1fr; gap:2px; width:100%; max-width:320px; margin-top:8px}
-  .radar-leg{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); border-bottom:1px solid var(--line); padding:3px 0}
-  .radar-leg b{color:var(--accent-ink); font-weight:700}
+  /* 5つの軸：ノビシロの読み解きボックス */
+  .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
+  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
+  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink)}
+  .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
+  .focus-tag{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap}
+  .focus-tag-gift{background:var(--accent)}
+  .focus-tag-side{background:#565A60}
+  .focus-item p{font-size:14.5px; line-height:1.7; color:var(--ink)}
+  .focus-grow{font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px}
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
   .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
+  .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
   .vq{margin-bottom:20px}
   .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
   .vq-opts{display:flex; flex-direction:column; gap:8px}
@@ -202,16 +206,11 @@
         <p class="sectlabel">あなたの人間関係タイプ</p>
         <div class="axes" id="r-axes"></div>
 
-        <p class="sectlabel">あなたの強みと落とし穴</p>
-        <div class="pv pv-peak" id="r-peak"></div>
-        <div class="pv pv-valley" id="r-valley"></div>
-        <details class="radar-fold">
-          <summary>5つの力のバランスを見る</summary>
-          <div class="radar-wrap">
-            <svg id="r-radar" class="radar" viewBox="0 0 300 220" aria-hidden="true"></svg>
-            <div class="radar-legend" id="r-radar-legend"></div>
-          </div>
-        </details>
+        <p class="sectlabel">人間関係における5つの軸</p>
+        <div class="axes" id="r-spectrums"></div>
+
+        <p class="sectlabel">特徴的な軸と、その活かし方</p>
+        <div class="pv" id="r-focus"></div>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -226,7 +225,7 @@
         </div>
 
         <div class="hitotsu">
-          <div class="h-label">ひとつだけ。</div>
+          <div class="h-label">あなたが良い人間関係を築くためのワンポイント</div>
           <p id="r-hitotsu"></p>
         </div>
 
@@ -234,7 +233,7 @@
         <div class="bridge">
           <!-- FEEDBACK：8名（過去客）向け 検証フィードバック -->
           <div id="feedbackBlock">
-            <p class="vq-intro">最後に、この診断をよくするための3つの質問にご協力ください（10秒）。</p>
+            <p class="vq-intro">最後に、この診断をよくするための4つの質問にご協力ください（10秒）。</p>
 
             <div class="vq">
               <p class="vq-q">1. 結果は、いまのあなたにどれくらい当てはまっていましたか？</p>
@@ -256,12 +255,22 @@
             </div>
 
             <div class="vq">
-              <p class="vq-q">3. この診断を、同僚や友人にすすめたいと思いますか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="recommend" value="ぜひすすめたい"><span>ぜひすすめたい</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="ややすすめたい"><span>ややすすめたい</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="どちらとも言えない"><span>どちらとも言えない</span></label>
-                <label class="vq-opt"><input type="radio" name="recommend" value="すすめない"><span>すすめない</span></label>
+              <p class="vq-q">3. とくに「当てはまる」と感じた項目は？（複数選択可）</p>
+              <div class="vq-opts" role="group" aria-label="当てはまった項目">
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="あるある"><span>あるある</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="強み"><span>強み</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="ワンポイント"><span>ワンポイント</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="5つの軸"><span>5つの軸</span></label>
+              </div>
+            </div>
+
+            <div class="vq">
+              <p class="vq-q">4. 逆に「当てはまらない」と感じた項目は？（複数選択可）</p>
+              <div class="vq-opts" role="group" aria-label="当てはまらなかった項目">
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="あるある"><span>あるある</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="強み"><span>強み</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="ワンポイント"><span>ワンポイント</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="5つの軸"><span>5つの軸</span></label>
               </div>
             </div>
 
@@ -270,6 +279,7 @@
 
           <!-- LEAD：紹介者向け 深掘り診断の申込（メール取得・読み解きは手動でお届け） -->
           <div id="leadBlock" hidden>
+            <p class="lead-cta" id="r-cta"></p>
             <p class="vq-intro">あなたの「関わり方」を、いま引っかかっている相手との関係で深掘りします。</p>
             <div class="field">
               <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
@@ -310,15 +320,15 @@ const REF = _params.get('ref') || '';
 const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
 
 const QUESTIONS = [
-  {axis:'h', text:'会議で違和感を覚えたとき、あなたは——', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
-  {axis:'c', text:'意見が真っ向から対立したとき、あなたは——', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
-  {axis:'w', text:'誰も決めない・動かない場面で、あなたは——', a:{t:'「じゃあ自分が」と前に出て引っ張る',p:'L'}, b:{t:'引っ張る人を支える・補佐に回る',p:'S'}},
-  {axis:'h', text:'モヤモヤや不満があるとき、周りは——', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
-  {axis:'c', text:'場の空気が重く、ピリついてきたとき、あなたは——', a:{t:'問題そのものに切り込む',p:'B'}, b:{t:'冗談や話題転換で、まず空気をゆるめる',p:'K'}},
-  {axis:'w', text:'あなたが心地よいのは——', a:{t:'主導権を握って進める立場',p:'L'}, b:{t:'誰かを立てて、その人を活かす立場',p:'S'}},
-  {axis:'h', text:'自分が手一杯で苦しいとき、あなたは——', a:{t:'「ちょっと厳しいです」と早めに声を上げる',p:'O'}, b:{t:'まず自分で抱えて、なんとかしようとする',p:'G'}},
-  {axis:'c', text:'相手が明らかに筋を外しているとき、あなたは——', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
-  {axis:'w', text:'新しいプロジェクトで、つい取りに行くのは——', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
+  {axis:'h', text:'会議で違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
+  {axis:'c', text:'意見が真っ向から対立したとき、あなたは？', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
+  {axis:'w', text:'誰も決めない・動かない場面で、あなたは？', a:{t:'「じゃあ自分が」と前に出て引っ張る',p:'L'}, b:{t:'引っ張る人を支える・補佐に回る',p:'S'}},
+  {axis:'h', text:'モヤモヤや不満があるとき、周りは？', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
+  {axis:'c', text:'場の空気が重く、ピリついてきたとき、あなたは？', a:{t:'問題そのものに切り込む',p:'B'}, b:{t:'冗談や話題転換で、まず空気をゆるめる',p:'K'}},
+  {axis:'w', text:'あなたが心地よいのは？', a:{t:'主導権を握って進める立場',p:'L'}, b:{t:'誰かを立てて、その人を活かす立場',p:'S'}},
+  {axis:'h', text:'自分が手一杯で苦しいとき、あなたは？', a:{t:'「ちょっと厳しいです」と早めに声を上げる',p:'O'}, b:{t:'まず自分で抱えて、なんとかしようとする',p:'G'}},
+  {axis:'c', text:'相手が明らかに筋を外しているとき、あなたは？', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
+  {axis:'w', text:'新しいプロジェクトで、つい取りに行くのは？', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
 ];
 
 const TYPES = {
@@ -326,49 +336,49 @@ const TYPES = {
   aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
   tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
   aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
-  hitotsu:'あなたの最大の魅力と弱点は、同じ場所にあります——強すぎる直球が、周りを沈黙させる。会議で勢いよく話を進めた後、ふと「誰も本音を言っていない」と気づく瞬間はありませんか。情熱が人を動かし、同時に遠ざける。その孤独の根っこ＝なぜ先に動かずにいられないのかは、1回では見えません。',
+  hitotsu:'あなたの持ち味は、停滞した空気をこじ開ける突破力です。みんなが二の足を踏む場面でも、最初の一歩を踏み出して周りを巻き込んでいけますが、その一方で、勢いのまま話を進めてしまい、気づけば誰も本音を言っていない、なんてことになりがちです。強すぎる直球は、ときに相手を萎縮させ能動的な発言を妨げてしまうので、「進める前に、ひと呼吸おくこと」を意識してみましょう。自分で踏み込んで突破したいと思った瞬間に、あえて「みんなはどう思う？」と先に問いを投げかけてみてください。あなたが半歩引くと、周りの一歩が出てきます。その時、あなた一人でやるよりずっと大きな力が手に入ります。',
   cta:'あなたの「いま引っかかっている関係」で、この構造を読み解く。'},
  OBS:{name:'正論ハンマー',pole:'open',catch:'おかしいことは、おかしい。',
   aru:['「それ論理通ってないですよね」と言ってしまう','ルールや規則を守っていないと、モヤモヤが顔に出る','後で「言い方きつかったかな」と一人反省'],
   tsuyomi:'場の品質管理者。曖昧さや欺瞞を許さず議論を正す。',
   aishou:'縁の下の職人(GBS)と固い信頼。でも、根回しの仕掛け人(GKL)の曖昧さには、あなたが先にイラついてしまう。',
-  hitotsu:'あなたの正しさは信頼を生む。でも同じ鋭さが、正しい瞬間に相手の逃げ場を奪っている。正論を言い切った直後、相手が黙り込んで場の温度が下がる——あの感覚に覚えはありませんか。「批判ばかり」と誤解されるのは、正しさと伝え方が分かれていないから。その分け方は、性格でなく技術です。',
+  hitotsu:'あなたの持ち味は、曖昧さや欺瞞を見逃さない、筋を通す力です。議論のほころびにいち早く気づき、場を整えていけますが、その一方で、正論を言い切った瞬間に相手が黙り込み、場の温度が下がってしまう、なんてことになりがちです。鋭い正しさは、ときに相手の逃げ場を奪い、「批判ばかりの人」と受け取られてしまうので、「正しさと伝え方は別物だ」と意識してみましょう。指摘したくなった瞬間に、あえて「ここは良いと思う」と一つ認めてから本題に入ってみてください。同じ中身でも、相手の受け取り方は驚くほど変わります。その積み重ねが、あなたの正しさを信頼へと変えていきます。',
   cta:'あなたの「いま引っかかっている関係」で、この一線を見つける。'},
  OKL:{name:'お祭り隊長',pole:'open',catch:'とにかく、盛り上げる。',
   aru:['場が重くなると、冗談で空気を変えにいく','対立しそうになると、つい話題をそらす','実は、嫌われるのがけっこう怖い'],
   tsuyomi:'場のエネルギー源。誰とでも打ち解け、チームの空気を作る。',
   aishou:'自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。',
-  hitotsu:'あなたの明るさは本物の才能。でも、重い話になりそうな瞬間につい冗談で流して、家に帰ってから「本当は言うべきだった」と思い出すことはありませんか。その「まあまあ」が、解くべき問題にフタをする。——フタを外しても、あなたの明るさは消えません。むしろ強くなる。',
+  hitotsu:'あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、チームの空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。',
   cta:'あなたの「いま引っかかっている関係」で、先送りの一個を開ける。'},
  OKS:{name:'自由人コメンテーター',pole:'open',catch:'言うだけ、言っておく。',
-  aru:['感想やアイデアは言うが「で、誰がやる?」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
+  aru:['感想やアイデアは言うが「で、誰がやる？」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
   tsuyomi:'自由な発想と歯に衣着せぬ視点。空気に流されない独立性。',
-  aishou:'お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は?」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。',
-  hitotsu:'あなたの視点は鋭い。でも「で、誰がやる?」の沈黙で、自分だけスッと一歩引いていませんか。良い意見を言うほど当事者になり損ね、信頼を取りこぼす。言葉はうまいのに、影響力だけがいつまでも手に入らない。引き受けることは、自由を手放すことではありません。',
+  aishou:'お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は？」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。',
+  hitotsu:'あなたの持ち味は、空気に流されない自由な視点です。歯に衣着せず、ほかの人が見落とす角度から本質を突いていけますが、その一方で、「で、誰がやる？」という空気になった瞬間、自分だけそっと一歩引いてしまう、なんてことになりがちです。良い意見を言うほど当事者になり損ね、せっかくの鋭さが信頼につながらないので、「言ったことは、半歩だけ引き受ける」と意識してみましょう。意見を述べた直後に、あえて「この部分なら自分がやります」と小さく手を挙げてみてください。引き受けても自由は失われません。むしろ、あなたの言葉に確かな影響力が宿っていきます。',
   cta:'あなたの「いま引っかかっている関係」で、半歩だけ踏み込む点を探す。'},
  GBL:{name:'沈黙の大黒柱',pole:'guard',catch:'多くは語らない。でも逃げない。',
   aru:['困っても、自分で抱えて相談しない','揉めると静かに前に出て、収める','弱音を吐くのが、苦手'],
   tsuyomi:'危機に強い安定感。背中で示すリーダーシップ。',
   aishou:'縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。',
-  hitotsu:'あなたは頼れる柱。でも本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込んでいませんか。その強さが、いつの間にか「助けを求められない壁」になる。沈黙は、信頼の橋を架け損ねる。弱さを一言開示することは、弱くなることではありません。',
+  hitotsu:'あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中でチームを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。',
   cta:'あなたの「いま引っかかっている関係」で、抱えているものを下ろす。'},
  GBS:{name:'縁の下の職人',pole:'guard',catch:'黙って、やり切る。',
   aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
   tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
   aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
-  hitotsu:'あなたの我慢は、地味だけど本物の力。でも頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にくる——その手前に、心当たりはありませんか。溜め込んだ我慢は、自分も周りも気づけない負債になる。小さなNOは、信頼を壊しません。',
+  hitotsu:'あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、質の高い仕事で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。',
   cta:'あなたの「いま引っかかっている関係」で、最初の小さなNOを見つける。'},
  GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
   aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
   tsuyomi:'敵を作らず物事を前に進める政治力。穏やかな影響力。',
   aishou:'がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。',
-  hitotsu:'あなたの根回しは、場を荒らさず動かす技術。でも、事前に話をつけておいたことが表に出て「裏で手を回した」と受け取られた——あの居心地の悪さはありませんか。「察してほしい」が、誤解と不信の火種になる。要所で本音を直接出しても、あなたの強みは消えません。',
+  hitotsu:'あなたの持ち味は、敵を作らず物事を前に進める調整力です。事前に布石を打ち、角を立てずに場を動かしていけますが、その一方で、根回ししておいたことが表に出て「裏で手を回した」と受け取られてしまう、なんてことになりがちです。「察してほしい」が強すぎると、ときに誤解や不信の火種になってしまうので、「要所だけは、本音を表で出す」と意識してみましょう。ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。',
   cta:'あなたの「いま引っかかっている関係」で、直接言うべき要所を見極める。'},
  GKS:{name:'がんばり屋の調整役',pole:'guard',catch:'気づけば、みんなのお母さん。',
   aru:['頼まれごとを、断れない','自分の意見より、場の空気を優先する','家に帰ると、どっと疲れる'],
   tsuyomi:'誰もが安心できる空気を作る、対立の緩衝材。',
   aishou:'根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。',
-  hitotsu:'あなたの気配りは、チームの安心そのもの。でも、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る——そんな夜はありませんか。合わせすぎて、自分の本音がどこかへ行っている。その優しさが、あなた自身をすり減らす。自分を優先することは、わがままではありません。',
+  hitotsu:'あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。',
   cta:'あなたの「いま引っかかっている関係」で、最初の「私はこう思う」を取り戻す。'},
 };
 
@@ -378,31 +388,41 @@ const AX = {
   w:{left:'引っ張る',right:'支える',poles:['L','S']},
 };
 
-// 第2層：5軸スコア（レーダー）。各軸3問のリッカート（4件法）で測る。
+// 第2層：人間関係における5つの軸（両極スペクトル）。各軸3問のリッカート（4件法）で立ち位置を測る。
 const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
 const RADAR_META = {
-  safety:  {name:'本音を出す力',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。', act:'次の1on1で、自分の迷いや弱みを先にひとつ開示してみる。'},
-  trust:   {name:'任せる力',             short:'任せる',  high:'人を信じて任せられる。相手の力を引き出せる。',           trap:'抱え込んで、自分も相手も伸び切らない。',         act:'いま抱えている仕事をひとつ、思い切って誰かに手渡す。'},
-  bound:   {name:'線を引く力',       short:'線引き',  high:'NOと線引きができる。自分をすり減らさない。',             trap:'NOが言えず、気づけば抱えすぎている。',           act:'次に頼まれたら即答せず、「いつまでに/どこまで」をひとつ添えて返す。'},
-  conflict:{name:'対立に向き合う力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。',         act:'先送りにしている一件を、相手に「すり合わせたい」と切り出す。'},
-  connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。',       act:'今日ひとり、具体的に「ここが良かった」と言葉で伝える。'},
+  safety:  {name:'本音',   left:'胸にとどめる',   right:'率直に話す',
+            rightGift:'誰も言いたがらないことをためらわず発言できる', rightSide:'直球すぎて相手を身構えさせる',
+            leftGift:'軽々しく言わず、慎重に見極める',                 leftSide:'ためこんで周りに伝わらない'},
+  trust:   {name:'任せ方', left:'自分で担う',     right:'人にゆだねる',
+            rightGift:'相手を信じて任せ、力を引き出す',               rightSide:'任せたら放置してしまう',
+            leftGift:'引き受けてやり切る',                           leftSide:'抱え込んで手が回らない'},
+  bound:   {name:'境界',   left:'引き受ける',     right:'線を引く',
+            rightGift:'NOを言い、自分の領域を守れる',                 rightSide:'相手に距離を感じさせてしまう',
+            leftGift:'頼みを受け止める面倒見の良さ',                 leftSide:'抱えすぎて自分をすり減らす'},
+  conflict:{name:'摩擦',   left:'和を保つ',       right:'切り込む',
+            rightGift:'ぶつかってでも本質に迫る',                     rightSide:'波風を立てがち',
+            leftGift:'衝突を避け、場を穏やかに保つ',                 leftSide:'問題が先送りになる'},
+  connect: {name:'間合い', left:'適度な距離',     right:'積極的に近づく',
+            rightGift:'良さを言葉にし、関係を温める',                 rightSide:'距離感を間違えて距離を置かれる',
+            leftGift:'踏み込みすぎず、さっぱり接する',               leftSide:'事務的で温度が伝わりにくい'},
 };
 const RADAR_Q = [
-  {axis:'safety',  text:'この職場では、反対意見でも安心して口にできる'},
-  {axis:'trust',   text:'重要な仕事を、安心して人に任せられる'},
-  {axis:'bound',   text:'無理な依頼には「できません」と言える'},
-  {axis:'conflict',text:'意見がぶつかっても、関係を壊さずに話し合える'},
-  {axis:'connect', text:'自分の貢献は、きちんと認められていると感じる'},
-  {axis:'safety',  text:'失敗やミスを、責められる心配なく打ち明けられる'},
-  {axis:'trust',   text:'任された仕事は、細かく口を出されずに任せてもらえる'},
-  {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えられる'},
-  {axis:'conflict',text:'必要なときは、対立から逃げずに向き合える'},
-  {axis:'connect', text:'お互いの良いところを、言葉にして伝え合っている'},
-  {axis:'safety',  text:'「わからない」「助けてほしい」と言いやすい'},
-  {axis:'trust',   text:'メンバー同士、お互いの力量を信頼し合えている'},
-  {axis:'bound',   text:'相手の期待と自分の事情を、すり合わせられている'},
-  {axis:'conflict',text:'揉めたあとも、わだかまりを残さず立て直せる'},
-  {axis:'connect', text:'この職場に、心を許せるつながりがある'},
+  {axis:'safety',  text:'相手や立場が変わっても、反対意見ははっきり口にするほうだ'},
+  {axis:'trust',   text:'重要な仕事でも、思い切って人に任せるほうだ'},
+  {axis:'bound',   text:'無理な依頼には「できません」と言うほうだ'},
+  {axis:'conflict',text:'意見がぶつかっても、関係を壊さず話し合うほうだ'},
+  {axis:'connect', text:'相手の良いところは、自分から言葉にして伝えるほうだ'},
+  {axis:'safety',  text:'自分の失敗やミスは、隠さず打ち明けるほうだ'},
+  {axis:'trust',   text:'人に任せたら、細かく口を出さずに見守るほうだ'},
+  {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えるほうだ'},
+  {axis:'conflict',text:'必要なときは、対立から逃げずに向き合うほうだ'},
+  {axis:'connect', text:'感謝や「ありがとう」を、ためらわず口にするほうだ'},
+  {axis:'safety',  text:'「わからない」「助けてほしい」と、自分から言うほうだ'},
+  {axis:'trust',   text:'相手の力量を信じて、安心して頼るほうだ'},
+  {axis:'bound',   text:'相手の期待と自分の事情を、自分からすり合わせるほうだ'},
+  {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
+  {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
 ];
 const LIKERT = [
   {t:'とてもそう思う',  v:4},
@@ -410,7 +430,7 @@ const LIKERT = [
   {t:'あまり思わない',  v:2},
   {t:'まったく思わない',v:1},
 ];
-// 出題順：タイプ判定（9問・二択）→ 5軸レーダー（15問・リッカート）
+// 出題順：タイプ判定（9問・二択）→ 5つの軸（15問・リッカート）
 const ITEMS = QUESTIONS.map(q=>Object.assign({kind:'bin'},q))
   .concat(RADAR_Q.map(q=>({kind:'lik',axis:q.axis,text:q.text})));
 
@@ -446,7 +466,7 @@ function renderQ(){
       b.onclick=()=>pick(opt.v);
       c.appendChild(b);
     });
-    $('qhint').textContent='いまの職場を思い浮かべて、どれくらい当てはまるか直感で。';
+    $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
 }
@@ -511,42 +531,44 @@ function renderResult(code,counts,radar){
   $('r-tsuyomi').textContent=t.tsuyomi;
   $('r-aishou').textContent=t.aishou;
   $('r-hitotsu').textContent=t.hitotsu;
+  $('r-cta').textContent=t.cta;
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
-  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
 }
 
-// 案B：結果のヘソ＝一番の強み（出っ張り）＋落とし穴（凹み）＋明日の一手＋開いたループ
+// 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
 function renderRelations(scores){
-  let hi=RADAR_AXES[0], lo=RADAR_AXES[0];
-  RADAR_AXES.forEach(a=>{ if(scores[a]>scores[hi]) hi=a; if(scores[a]<scores[lo]) lo=a; });
   const M=RADAR_META;
-  $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
-  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p><p class="act"><b>明日の一手</b>：'+M[lo].act+'</p>';
-  renderRadar(scores);
-}
-
-// 5軸レーダーを描画（色はタイプのアクセントを継承。SVGの値は var() を効かせるため style 属性で指定）
-function renderRadar(scores){
-  const svg=$('r-radar'); if(!svg) return;
-  const cx=150, cy=100, R=64, n=RADAR_AXES.length;
-  const ang=i=>(-90 + i*360/n)*Math.PI/180;
-  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
-  let s='';
-  [0.25,0.5,0.75,1].forEach(g=>{
-    s+='<polygon points="'+RADAR_AXES.map((_,i)=>pt(i,R*g).map(v=>v.toFixed(1)).join(',')).join(' ')+'" style="fill:none;stroke:var(--line);stroke-width:1"/>';
+  const box=$('r-spectrums'); box.innerHTML='';
+  RADAR_AXES.forEach(a=>{
+    const s=scores[a]; // 0..1（0=左極 / 1=右極）
+    const rightOn=s>0.5, leftOn=s<0.5;
+    const row=document.createElement('div'); row.className='axis-row';
+    row.innerHTML =
+      '<div class="axis-name">'+M[a].name+'</div>'+
+      '<div class="axis-track-wrap">'+
+        '<div class="axis-ends"><span class="'+(leftOn?'on':'')+'">'+M[a].left+'</span><span class="'+(rightOn?'on':'')+'">'+M[a].right+'</span></div>'+
+        '<div class="axis-track"><span class="axis-dot" style="left:0%"></span></div>'+
+      '</div>';
+    box.appendChild(row);
+    const dot=row.querySelector('.axis-dot');
+    requestAnimationFrame(()=>{ dot.style.left=(8+s*84)+'%'; });
   });
-  RADAR_AXES.forEach((_,i)=>{ const p=pt(i,R); s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" style="stroke:var(--line);stroke-width:1"/>'; });
-  const dp=RADAR_AXES.map((a,i)=>pt(i,R*Math.max(0.05,scores[a])).map(v=>v.toFixed(1)).join(',')).join(' ');
-  s+='<polygon points="'+dp+'" style="fill:var(--accent);fill-opacity:.18;stroke:var(--accent);stroke-width:2"/>';
-  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R*Math.max(0.05,scores[a])); s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" style="fill:var(--accent)"/>'; });
-  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R+12); let anc='middle'; if(p[0]>cx+2) anc='start'; else if(p[0]<cx-2) anc='end'; s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="'+anc+'" dominant-baseline="middle" style="fill:var(--muted);font-size:9px">'+RADAR_META[a].name+'</text>'; });
-  svg.innerHTML=s;
-  const leg=$('r-radar-legend'); leg.innerHTML='';
-  RADAR_AXES.forEach(a=>{ const d=document.createElement('div'); d.className='radar-leg'; d.innerHTML='<span>'+RADAR_META[a].name+'</span><b>'+Math.round(scores[a]*100)+'</b>'; leg.appendChild(d); });
+  // 中央(0.5)から最も離れた＝いちばん出ている1軸を読み解く
+  let f=RADAR_AXES[0];
+  RADAR_AXES.forEach(a=>{ if(Math.abs(scores[a]-0.5)>Math.abs(scores[f]-0.5)) f=a; });
+  const m=M[f], right=scores[f]>=0.5;
+  const pole=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
+  $('r-focus').innerHTML =
+    '<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
+    '<div class="cap-axis">「'+pole+'」寄り</div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
@@ -573,12 +595,15 @@ async function sendSurvey(fields, btn, okMsg){
   const r=window._lastResult; if(!r) return;
   btn.disabled=true;
   if(SHEET_ENDPOINT){
+    btn.classList.add('is-loading');
     try{
       await post(Object.assign({action:'update', id:r.id}, fields));
       $('protoNote').textContent=okMsg;
     }catch(e){
       $('protoNote').textContent='送信に失敗しました。通信環境を確認して、もう一度お試しください。';
       btn.disabled=false;
+    }finally{
+      btn.classList.remove('is-loading');
     }
   }else{
     $('protoNote').textContent='※ 送信先URL未設定（プロトタイプ）。回答はまだ記録されていません。';
@@ -588,12 +613,14 @@ async function sendSurvey(fields, btn, okMsg){
 // FEEDBACK（8名・検証）：検証用フィードバック3問
 $('submitFeedback').onclick=()=>{
   const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
-  const fit=val('fit'), insight=val('insight'), recommend=val('recommend');
-  if(!fit || !insight || !recommend){
-    $('protoNote').textContent='3つの質問すべてにお答えください。';
+  const vals=name=>Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(el=>el.value).join('、');
+  const fit=val('fit'), insight=val('insight');
+  const fitElements=vals('fitElements'), missElements=vals('missElements');
+  if(!fit || !insight){
+    $('protoNote').textContent='最初の2問（Q1・Q2）にお答えください。';
     return;
   }
-  sendSurvey({fit,insight,recommend}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
+  sendSurvey({fit,insight,fitElements,missElements}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
 // LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
@@ -610,7 +637,7 @@ $('restartBtn').onclick=()=>{
   $('copyManual').hidden=true;
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   $('protoNote').textContent='';
-  document.querySelectorAll('.vq-opts input[type=radio]').forEach(el=>{ el.checked=false; });
+  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('rel').value=''; $('mail').value='';
   renderQ(); show('quiz');
 };
