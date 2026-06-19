@@ -121,22 +121,13 @@
   .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
   .hitotsu p{font-size:15px; color:var(--ink)}
 
-  /* 強み(出っ張り)／落とし穴(凹み)＋レーダー（案B） */
-  .pv{border-radius:var(--radius); padding:16px 18px; margin-bottom:12px}
-  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px}
-  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:6px}
+  /* 5つの軸：ノビシロの読み解きボックス */
+  .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
+  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
+  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:8px; color:var(--accent-ink)}
   .pv p{font-size:14.5px; line-height:1.65; color:var(--ink)}
-  .pv-peak{background:var(--teal-soft)}
-  .pv-peak .cap, .pv-peak .cap-axis{color:var(--teal-ink)}
-  .pv-valley{background:var(--coral-soft)}
-  .pv-valley .cap, .pv-valley .cap-axis{color:var(--coral-ink)}
-  .radar-fold{margin:2px 0 28px}
-  .radar-fold summary{cursor:pointer; font-size:13px; color:var(--muted); padding:6px 0; user-select:none}
-  .radar-wrap{display:flex; flex-direction:column; align-items:center; margin-top:10px}
-  .radar{width:100%; max-width:300px; height:auto}
-  .radar-legend{display:grid; grid-template-columns:1fr; gap:2px; width:100%; max-width:320px; margin-top:8px}
-  .radar-leg{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); border-bottom:1px solid var(--line); padding:3px 0}
-  .radar-leg b{color:var(--accent-ink); font-weight:700}
+  .pv p + p{margin-top:8px}
+  .pv .side{color:var(--muted)}
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
@@ -212,16 +203,11 @@
         <p class="sectlabel">あなたの人間関係タイプ</p>
         <div class="axes" id="r-axes"></div>
 
-        <p class="sectlabel">あなたの強みと落とし穴</p>
-        <div class="pv pv-peak" id="r-peak"></div>
-        <div class="pv pv-valley" id="r-valley"></div>
-        <details class="radar-fold">
-          <summary>5つの力のバランスを見る</summary>
-          <div class="radar-wrap">
-            <svg id="r-radar" class="radar" viewBox="0 0 300 220" aria-hidden="true"></svg>
-            <div class="radar-legend" id="r-radar-legend"></div>
-          </div>
-        </details>
+        <p class="sectlabel">人間関係における5つの軸</p>
+        <div class="axes" id="r-spectrums"></div>
+
+        <p class="sectlabel">現状理解と関わり方のノビシロ</p>
+        <div class="pv" id="r-focus"></div>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -271,7 +257,7 @@
                 <label class="vq-opt"><input type="checkbox" name="fitElements" value="あるある"><span>あるある</span></label>
                 <label class="vq-opt"><input type="checkbox" name="fitElements" value="強み"><span>強み</span></label>
                 <label class="vq-opt"><input type="checkbox" name="fitElements" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="checkbox" name="fitElements" value="5つの力"><span>5つの力（レーダー）</span></label>
+                <label class="vq-opt"><input type="checkbox" name="fitElements" value="5つの軸"><span>5つの軸</span></label>
               </div>
             </div>
 
@@ -281,7 +267,7 @@
                 <label class="vq-opt"><input type="checkbox" name="missElements" value="あるある"><span>あるある</span></label>
                 <label class="vq-opt"><input type="checkbox" name="missElements" value="強み"><span>強み</span></label>
                 <label class="vq-opt"><input type="checkbox" name="missElements" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="checkbox" name="missElements" value="5つの力"><span>5つの力（レーダー）</span></label>
+                <label class="vq-opt"><input type="checkbox" name="missElements" value="5つの軸"><span>5つの軸</span></label>
               </div>
             </div>
 
@@ -399,14 +385,24 @@ const AX = {
   w:{left:'引っ張る',right:'支える',poles:['L','S']},
 };
 
-// 第2層：5軸スコア（レーダー）。各軸3問のリッカート（4件法）で測る。
+// 第2層：人間関係における5つの軸（両極スペクトル）。各軸3問のリッカート（4件法）で立ち位置を測る。
 const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
 const RADAR_META = {
-  safety:  {name:'本音を出す力',     short:'本音',    high:'本音を引き出す安心感。あなたがいると、人は率直になれる。', trap:'本音を言いにくい関係で、もやもやを溜めやすい。'},
-  trust:   {name:'任せる力',             short:'任せる',  high:'人を信じて任せられる。相手の力を引き出せる。',           trap:'抱え込んで、自分も相手も伸び切らない。'},
-  bound:   {name:'線を引く力',       short:'線引き',  high:'NOと線引きができる。自分をすり減らさない。',             trap:'NOが言えず、気づけば抱えすぎている。'},
-  conflict:{name:'対立に向き合う力', short:'対立',    high:'ぶつかっても戻れる。健全な衝突を恐れない。',             trap:'対立を避けて、問題が先送りになりがち。'},
-  connect: {name:'認め合う力',       short:'認め合い',high:'人の良さを言葉にできる。つながりを温められる。',         trap:'認め合いが薄く、関係が事務的になりがち。'},
+  safety:  {name:'本音',   left:'胸にとどめる',   right:'率直に話す',
+            rightGift:'誰も言いたがらないことをためらわず発言できる', rightSide:'直球すぎて相手を身構えさせる',
+            leftGift:'軽々しく言わず、慎重に見極める',                 leftSide:'ためこんで周りに伝わらない'},
+  trust:   {name:'任せ方', left:'自分で担う',     right:'人にゆだねる',
+            rightGift:'相手を信じて任せ、力を引き出す',               rightSide:'任せたら放置してしまう',
+            leftGift:'引き受けてやり切る',                           leftSide:'抱え込んで手が回らない'},
+  bound:   {name:'境界',   left:'引き受ける',     right:'線を引く',
+            rightGift:'NOを言い、自分の領域を守れる',                 rightSide:'相手に距離を感じさせてしまう',
+            leftGift:'頼みを受け止める面倒見の良さ',                 leftSide:'抱えすぎて自分をすり減らす'},
+  conflict:{name:'対立',   left:'和を保つ',       right:'切り込む',
+            rightGift:'ぶつかってでも本質に迫る',                     rightSide:'波風を立てがち',
+            leftGift:'衝突を避け、場を穏やかに保つ',                 leftSide:'問題が先送りになる'},
+  connect: {name:'関係',   left:'適度な距離',     right:'積極的に近づく',
+            rightGift:'良さを言葉にし、関係を温める',                 rightSide:'距離感を間違えて距離を置かれる',
+            leftGift:'踏み込みすぎず、さっぱり接する',               leftSide:'事務的で温度が伝わりにくい'},
 };
 const RADAR_Q = [
   {axis:'safety',  text:'相手や立場が変わっても、反対意見ははっきり口にするほうだ'},
@@ -431,7 +427,7 @@ const LIKERT = [
   {t:'あまり思わない',  v:2},
   {t:'まったく思わない',v:1},
 ];
-// 出題順：タイプ判定（9問・二択）→ 5軸レーダー（15問・リッカート）
+// 出題順：タイプ判定（9問・二択）→ 5つの軸（15問・リッカート）
 const ITEMS = QUESTIONS.map(q=>Object.assign({kind:'bin'},q))
   .concat(RADAR_Q.map(q=>({kind:'lik',axis:q.axis,text:q.text})));
 
@@ -541,34 +537,34 @@ function renderResult(code,counts,radar){
   show('result');
 }
 
-// 案B：結果のヘソ＝一番の強み（出っ張り）＋落とし穴（凹み）＋開いたループ
+// 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
 function renderRelations(scores){
-  let hi=RADAR_AXES[0], lo=RADAR_AXES[0];
-  RADAR_AXES.forEach(a=>{ if(scores[a]>scores[hi]) hi=a; if(scores[a]<scores[lo]) lo=a; });
   const M=RADAR_META;
-  $('r-peak').innerHTML='<div class="cap">◎ あなたの一番の強み</div><div class="cap-axis">'+M[hi].name+'</div><p>'+M[hi].high+'</p>';
-  $('r-valley').innerHTML='<div class="cap">▲ いちばんの落とし穴</div><div class="cap-axis">'+M[lo].name+'</div><p>'+M[lo].trap+'</p>';
-  renderRadar(scores);
-}
-
-// 5軸レーダーを描画（色はタイプのアクセントを継承。SVGの値は var() を効かせるため style 属性で指定）
-function renderRadar(scores){
-  const svg=$('r-radar'); if(!svg) return;
-  const cx=150, cy=100, R=64, n=RADAR_AXES.length;
-  const ang=i=>(-90 + i*360/n)*Math.PI/180;
-  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
-  let s='';
-  [0.25,0.5,0.75,1].forEach(g=>{
-    s+='<polygon points="'+RADAR_AXES.map((_,i)=>pt(i,R*g).map(v=>v.toFixed(1)).join(',')).join(' ')+'" style="fill:none;stroke:var(--line);stroke-width:1"/>';
+  const box=$('r-spectrums'); box.innerHTML='';
+  RADAR_AXES.forEach(a=>{
+    const s=scores[a]; // 0..1（0=左極 / 1=右極）
+    const rightOn=s>0.5, leftOn=s<0.5;
+    const row=document.createElement('div'); row.className='axis-row';
+    row.innerHTML =
+      '<div class="axis-name">'+M[a].name+'</div>'+
+      '<div class="axis-track-wrap">'+
+        '<div class="axis-ends"><span class="'+(leftOn?'on':'')+'">'+M[a].left+'</span><span class="'+(rightOn?'on':'')+'">'+M[a].right+'</span></div>'+
+        '<div class="axis-track"><span class="axis-dot" style="left:0%"></span></div>'+
+      '</div>';
+    box.appendChild(row);
+    const dot=row.querySelector('.axis-dot');
+    requestAnimationFrame(()=>{ dot.style.left=(8+s*84)+'%'; });
   });
-  RADAR_AXES.forEach((_,i)=>{ const p=pt(i,R); s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" style="stroke:var(--line);stroke-width:1"/>'; });
-  const dp=RADAR_AXES.map((a,i)=>pt(i,R*Math.max(0.05,scores[a])).map(v=>v.toFixed(1)).join(',')).join(' ');
-  s+='<polygon points="'+dp+'" style="fill:var(--accent);fill-opacity:.18;stroke:var(--accent);stroke-width:2"/>';
-  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R*Math.max(0.05,scores[a])); s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" style="fill:var(--accent)"/>'; });
-  RADAR_AXES.forEach((a,i)=>{ const p=pt(i,R+12); let anc='middle'; if(p[0]>cx+2) anc='start'; else if(p[0]<cx-2) anc='end'; s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="'+anc+'" dominant-baseline="middle" style="fill:var(--muted);font-size:9px">'+RADAR_META[a].name+'</text>'; });
-  svg.innerHTML=s;
-  const leg=$('r-radar-legend'); leg.innerHTML='';
-  RADAR_AXES.forEach(a=>{ const d=document.createElement('div'); d.className='radar-leg'; d.innerHTML='<span>'+RADAR_META[a].name+'</span><b>'+Math.round(scores[a]*100)+'</b>'; leg.appendChild(d); });
+  // 中央(0.5)から最も離れた＝いちばん出ている1軸を読み解く
+  let f=RADAR_AXES[0];
+  RADAR_AXES.forEach(a=>{ if(Math.abs(scores[a]-0.5)>Math.abs(scores[f]-0.5)) f=a; });
+  const m=M[f], right=scores[f]>=0.5;
+  const pole=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
+  $('r-focus').innerHTML =
+    '<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
+    '<div class="cap-axis">「'+pole+'」寄り</div>'+
+    '<p>'+gift+'。<span class="side">（つい出る面：'+side+'）</span></p>'+
+    '<p>意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
