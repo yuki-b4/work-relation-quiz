@@ -151,11 +151,11 @@
   .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .field{margin-bottom:14px}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
-  .field textarea, .field input{
+  .field textarea, .field input, .field select{
     width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
   }
-  .field textarea:focus, .field input:focus{outline:none; border-color:var(--accent)}
+  .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
@@ -255,10 +255,24 @@
           <div class="compat-list" id="r-compat"></div>
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ ここから下は、紹介で来た方に表示される「深掘りの申込」画面です。試して、使えそうか感想をいただけると助かります。</p>
-            <div class="cc-label">その一人との関係、仕事の質を左右していませんか</div>
-            <p class="cc-text">上の一覧でピンと来た相手がいたら、その関係をひとつ。あなたのタイプ×相手の力学から、何が噛み合っていないか、明日どう動けば変わるかを個別に読み解いてお返しします。売り込みではなく、まず読み解きそのものをお届けします。</p>
+            <div class="cc-label">たった1人との人間関係の悩みが、仕事を大変にしていませんか？</div>
+            <p class="cc-text">あなたのタイプをもとに、その相手と明日からどう考え、どう動けば関係が変わるのかを読み解いてお伝えします。売り込みではなく、まず読み解きそのものをお届けします。</p>
             <div class="field">
-              <label for="rel">いま一番こじれている関係を、ひとつ具体的に</label>
+              <label for="partnerType">相手はどのタイプだと思いますか？（任意。分かると読み解きの精度が上がります）</label>
+              <select id="partnerType">
+                <option value="">わからない / 選ばない</option>
+                <option value="突撃隊長">突撃隊長</option>
+                <option value="正論ハンマー">正論ハンマー</option>
+                <option value="お祭り隊長">お祭り隊長</option>
+                <option value="自由人コメンテーター">自由人コメンテーター</option>
+                <option value="沈黙の大黒柱">沈黙の大黒柱</option>
+                <option value="縁の下の職人">縁の下の職人</option>
+                <option value="根回しの仕掛け人">根回しの仕掛け人</option>
+                <option value="がんばり屋の調整役">がんばり屋の調整役</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rel">その相手との関係で、具体的に困っていることを一つ教えてください</label>
               <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
             </div>
             <div class="field">
@@ -736,9 +750,11 @@ $('submitFeedback').onclick=()=>{
 // LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
 $('submitLead').onclick=()=>{
   const email=$('mail').value.trim();
-  const relationship=$('rel').value.trim();
+  const rel=$('rel').value.trim();
+  const partner=$('partnerType').value;
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  if(!relationship){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
+  if(!rel){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
+  const relationship = (partner ? '【相手の想定タイプ：'+partner+'】 ' : '') + rel;
   sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
 };
 
@@ -750,7 +766,7 @@ $('restartBtn').onclick=()=>{
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  $('rel').value=''; $('mail').value='';
+  $('rel').value=''; $('mail').value=''; $('partnerType').value='';
   renderQ(); show('quiz');
 };
 
