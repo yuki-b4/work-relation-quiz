@@ -193,6 +193,7 @@
   .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
   .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
   .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
+  .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
 </style>
 </head>
 <body>
@@ -253,6 +254,7 @@
           <p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
           <div class="compat-list" id="r-compat"></div>
           <div class="compat-cta" id="deepBlock">
+            <p class="cc-preview" id="deepPreviewNote" hidden>▼ ここから下は、紹介で来た方に表示される「深掘りの申込」画面です。試して、使えそうか感想をいただけると助かります。</p>
             <div class="cc-label">その一人との関係、仕事の質を左右していませんか</div>
             <p class="cc-text">上の一覧でピンと来た相手がいたら、その関係をひとつ。あなたのタイプ×相手の力学から、何が噛み合っていないか、明日どう動けば変わるかを個別に読み解いてお返しします。売り込みではなく、まず読み解きそのものをお届けします。</p>
             <div class="field">
@@ -789,8 +791,9 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
-// モード切替：紹介者向け（lead）は検証アンケートを隠す（深掘り申込フォームは相性欄に常時表示）
+// モード切替：lead は検証アンケートを隠す／feedback（8名）は深掘りフォームを「紹介先プレビュー」と明示
 if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
+else { $('deepPreviewNote').hidden=false; }
 $('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
 renderQ();
 </script>
