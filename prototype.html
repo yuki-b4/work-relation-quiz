@@ -252,10 +252,18 @@
           <p class="sectlabel">あの人との相性（8タイプ別）</p>
           <p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
           <div class="compat-list" id="r-compat"></div>
-          <div class="compat-cta">
-            <div class="cc-label">特定の相手を、もっと深く</div>
-            <p class="cc-text">気になる相手がいたら、その人との関係を一つだけ具体的に教えてください。お二人の力学を読み解いて、個別にお返しします。</p>
-            <button class="btn btn-wide btn-accent" id="compatDeepBtn">この相手との関係を深掘りする</button>
+          <div class="compat-cta" id="deepBlock">
+            <div class="cc-label">その一人との関係、仕事の質を左右していませんか</div>
+            <p class="cc-text">上の一覧でピンと来た相手がいたら、その関係をひとつ。あなたのタイプ×相手の力学から、何が噛み合っていないか、明日どう動けば変わるかを個別に読み解いてお返しします。売り込みではなく、まず読み解きそのものをお届けします。</p>
+            <div class="field">
+              <label for="rel">いま一番こじれている関係を、ひとつ具体的に</label>
+              <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
+            </div>
+            <div class="field">
+              <label for="mail">読み解きをお届けするメールアドレス</label>
+              <input id="mail" type="email" placeholder="you@example.com">
+            </div>
+            <button class="btn btn-wide btn-accent" id="submitLead">この関係の読み解きを受け取る</button>
           </div>
         </div>
 
@@ -327,21 +335,6 @@
             </div>
 
             <button class="btn btn-wide btn-accent" id="submitFeedback">回答を送信する</button>
-          </div>
-
-          <!-- LEAD：紹介者向け 深掘り診断の申込（メール取得・読み解きは手動でお届け） -->
-          <div id="leadBlock" hidden>
-            <p class="lead-cta" id="r-cta"></p>
-            <p class="vq-intro">あなたの「関わり方」を、いま引っかかっている相手との関係で深掘りします。</p>
-            <div class="field">
-              <label for="rel">いま職場で一番引っかかっている人間関係を、ひとつ具体的に</label>
-              <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
-            </div>
-            <div class="field">
-              <label for="mail">深掘りの読み解きをお届けするメールアドレス</label>
-              <input id="mail" type="email" placeholder="you@example.com">
-            </div>
-            <button class="btn btn-wide btn-accent" id="submitLead">深掘りの読み解きをメールで受け取る</button>
           </div>
 
           <p class="proto-note" id="protoNote"></p>
@@ -584,7 +577,6 @@ function renderResult(code,counts,radar){
   $('r-tsuyomi').textContent=t.tsuyomi;
   $('r-aishou').textContent=t.aishou;
   $('r-hitotsu').textContent=t.hitotsu;
-  $('r-cta').textContent=t.cta;
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
@@ -748,11 +740,7 @@ $('submitLead').onclick=()=>{
   sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
 };
 
-// 相性CTA：深掘り（既存の深掘り申込フォームを開く＝追加情報で個別分析）
-$('compatDeepBtn').onclick=()=>{
-  $('leadBlock').hidden=false;
-  $('leadBlock').scrollIntoView({behavior:'smooth', block:'start'});
-};
+// 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
   $('copyManual').hidden=true;
@@ -801,8 +789,8 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
-// モード切替：紹介者向けは検証アンケートを隠し、深掘り申込ブロックを表示
-if(MODE==='lead'){ $('feedbackBlock').hidden=true; $('leadBlock').hidden=false; }
+// モード切替：紹介者向け（lead）は検証アンケートを隠す（深掘り申込フォームは相性欄に常時表示）
+if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
 $('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
 renderQ();
 </script>
