@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>全8タイプ 結果一覧（デブリーフ参照用）</title>
+<title>職場の人間関係タイプ 全8タイプ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -14,12 +14,13 @@
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
     --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
+    --radius:16px;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact}
   body{font-family:var(--body); color:var(--ink); background:var(--bg); line-height:1.7; letter-spacing:.01em}
-  .wrap{max-width:980px; margin:0 auto; padding:24px 18px 60px}
+  .wrap{max-width:680px; margin:0 auto; padding:22px 16px 60px}
 
-  /* TOOLBAR */
   .toolbar{position:sticky; top:0; z-index:9; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     background:var(--bg); padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:18px}
   .toolbar button{font-family:var(--body); font-size:14px; font-weight:700; cursor:pointer; color:#fff;
@@ -27,55 +28,79 @@
   .toolbar .note{font-size:12.5px; color:var(--muted)}
 
   h1{font-family:var(--display); font-weight:700; font-size:clamp(22px,4.6vw,30px); letter-spacing:.02em; margin-bottom:8px}
-  .sub{font-size:14px; color:var(--muted); margin-bottom:18px; max-width:60em}
+  .sub{font-size:13.5px; color:var(--muted); margin-bottom:16px; max-width:60em}
 
-  /* INDEX */
   .index{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-bottom:26px}
   .ix{display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink);
     border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface); font-size:13.5px}
   .ix .c{font-family:var(--display); font-weight:700; font-size:10.5px; letter-spacing:.14em; color:#fff; border-radius:6px; padding:2px 7px}
   .ix.open .c{background:var(--coral)} .ix.guard .c{background:var(--teal)}
-  .ix b{font-weight:700}
 
-  /* CARD */
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:18px; overflow:hidden;
-    box-shadow:0 1px 2px rgba(20,20,20,.04),0 10px 26px rgba(20,20,20,.05); margin-bottom:22px; break-inside:avoid; page-break-inside:avoid}
-  .card.open{--ac:var(--coral); --ac-soft:var(--coral-soft); --ac-ink:var(--coral-ink)}
-  .card.guard{--ac:var(--teal); --ac-soft:var(--teal-soft); --ac-ink:var(--teal-ink)}
-  .head{padding:22px 24px 18px; background:var(--ac-soft); border-bottom:1px solid var(--line)}
-  .chip{display:inline-block; font-family:var(--display); font-weight:700; font-size:13px; letter-spacing:.22em;
-    color:#fff; background:var(--ac); border-radius:99px; padding:4px 12px 4px 16px; margin-bottom:10px}
-  .name{font-family:var(--display); font-weight:700; font-size:clamp(22px,4.4vw,28px); color:var(--ac-ink); letter-spacing:.02em}
-  .catch{font-family:var(--display); font-weight:500; font-size:16px; color:var(--ink); margin-top:4px}
-  .axtags{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px}
-  .axtags span{font-size:11.5px; font-weight:700; color:var(--ac-ink); background:var(--surface); border:1px solid var(--ac); border-radius:7px; padding:3px 9px}
+  /* ▼ 以下は prototype.html の結果カードと同じスタイル */
+  .card{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink);
+    background:var(--surface); border-radius:22px; box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--line);
+    margin-bottom:24px; break-inside:avoid; page-break-inside:avoid }
+  .card.pole-open{ --accent:var(--coral); --accent-soft:var(--coral-soft); --accent-ink:var(--coral-ink) }
+  .card.pole-guard{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
+  .card-head{ padding:34px 30px 28px; background:var(--accent-soft); border-bottom:1px solid var(--line) }
+  .chip{ display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
+    color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px }
+  .tname{ font-family:var(--display); font-weight:700; font-size:clamp(28px,6.4vw,38px); color:var(--accent-ink); letter-spacing:.03em; margin-bottom:10px }
+  .tcatch{ font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,21px); color:var(--ink); letter-spacing:.02em }
+  .card-body{ padding:28px 30px 32px }
+  .sectlabel{ font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px }
+  .axes{ display:flex; flex-direction:column; gap:16px; margin-bottom:30px }
+  .axis-row{ display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center }
+  .axis-name{ font-size:12px; color:var(--muted); font-weight:500 }
+  .axis-track-wrap{ position:relative }
+  .axis-ends{ display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px }
+  .axis-ends .on{ color:var(--ink); font-weight:700 }
+  .axis-track{ position:relative; height:5px; background:var(--line); border-radius:99px }
+  .axis-dot{ position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%) }
+  ul.aru{ list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px }
+  ul.aru li{ position:relative; padding-left:22px; font-size:15.5px; color:var(--ink) }
+  ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
+  .row-block{ margin-bottom:26px }
+  .row-block p{ font-size:15px; color:var(--ink) }
+  .hitotsu{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px }
+  .hitotsu .h-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em }
+  .hitotsu p{ font-size:15px; color:var(--ink) }
+  .pv{ border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft) }
+  .pv .cap{ font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink) }
+  .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink) }
+  .focus-item{ display:flex; gap:10px; align-items:flex-start; margin-top:11px }
+  .focus-tag{ flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap }
+  .focus-tag-gift{ background:var(--accent) }
+  .focus-tag-side{ background:#565A60 }
+  .focus-item p{ font-size:14.5px; line-height:1.7; color:var(--ink) }
+  .focus-grow{ font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px }
+  .compat{ margin-bottom:26px }
+  .compat-hint{ font-size:13px; color:var(--muted); margin:-2px 0 14px }
+  .compat-list{ display:flex; flex-direction:column }
+  .compat-row{ padding:13px 0; border-top:1px solid var(--line) }
+  .compat-row:first-child{ border-top:none }
+  .ct-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px }
+  .ct-name{ font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px }
+  .compat-row.pole-open .ct-name{ background:var(--coral-soft); color:var(--coral-ink) }
+  .compat-row.pole-guard .ct-name{ background:var(--teal-soft); color:var(--teal-ink) }
+  .ct-code{ font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700 }
+  .ct-tag{ font-size:11px; font-weight:700; letter-spacing:.02em; border-radius:7px; padding:3px 9px; background:var(--chrome); color:#fff; white-space:nowrap }
+  .ct-best{ font-size:10px; letter-spacing:.06em; font-weight:700; color:#fff; border-radius:99px; padding:2px 9px; white-space:nowrap }
+  .compat-row.pole-open .ct-best{ background:var(--coral) }
+  .compat-row.pole-guard .ct-best{ background:var(--teal) }
+  .compat-row.is-best{ border-radius:10px }
+  .compat-row.is-best.pole-open{ box-shadow:inset 3px 0 0 var(--coral); padding-left:12px }
+  .compat-row.is-best.pole-guard{ box-shadow:inset 3px 0 0 var(--teal); padding-left:12px }
+  .ct-self{ margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700 }
+  .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
 
-  .body{padding:20px 24px 24px}
-  .sect{font-size:10.5px; letter-spacing:.18em; font-weight:700; color:var(--faint); margin:0 0 8px}
-  .block{margin-bottom:18px}
-  ul.aru{list-style:none; display:flex; flex-direction:column; gap:6px}
-  ul.aru li{position:relative; padding-left:18px; font-size:14px}
-  ul.aru li::before{content:""; position:absolute; left:3px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--ac)}
-  .block p{font-size:14px; color:var(--ink)}
-  .onepoint{background:var(--ac-soft); border-radius:12px; padding:16px 18px}
-  .onepoint .sect{color:var(--ac-ink)}
-
-  /* CRIB（デブリーフ用） */
-  .crib{margin-top:18px; border:1px dashed var(--ac); border-radius:12px; padding:16px 18px; background:#FCFCFA}
-  .crib .label{font-family:var(--display); font-weight:700; font-size:13px; letter-spacing:.08em; color:var(--ac-ink); margin-bottom:12px}
-  .crib dl{display:grid; grid-template-columns:84px 1fr; gap:7px 12px; font-size:13.5px}
-  .crib dt{font-weight:700; color:var(--muted)}
-  .crib dd{color:var(--ink)}
-  .crib dd.hot{color:var(--ac-ink); font-weight:700}
-
-  @media (max-width:560px){ .crib dl{grid-template-columns:70px 1fr} }
   @media print{
-    body{background:#fff}
-    .wrap{max-width:none; padding:0}
-    .no-print{display:none !important}
-    .index{margin-bottom:14px}
-    .card{box-shadow:none; border:1px solid #ccc; margin-bottom:12px}
-    @page{size:A4; margin:12mm}
+    body{ background:#fff }
+    .wrap{ max-width:none; padding:0 }
+    .no-print{ display:none !important }
+    .index{ margin-bottom:12px }
+    .card{ box-shadow:none; margin-bottom:12px }
+    @page{ size:A4; margin:12mm }
   }
 </style>
 </head>
@@ -84,231 +109,210 @@
 
   <div class="toolbar no-print">
     <button onclick="window.print()">印刷 / PDFで保存</button>
-    <span class="note">各タイプはページ内で改ページされません（PDF化に最適）。スマホ・PCのブラウザでそのまま閲覧も可。</span>
+    <span class="note">各タイプはページ内で改ページされません（PDF化に最適）。</span>
   </div>
 
-  <h1>全8タイプ 結果一覧</h1>
-  <p class="sub">デブリーフ中に、相手の出たタイプをすぐ参照するための一覧。各カードは「受診者が読む結果（あるある／強み／相性／ワンポイント）」＋「デブリーフ用クリブ（本質・罠・一手・根・なりたい方向・5軸の癖）」。④の見立ては<b>「罠」と「根」</b>を、締めは<b>「なりたい方向」</b>を使うと運びやすい。</p>
+  <h1>職場の人間関係タイプ 全8タイプ</h1>
+  <p class="sub">8つのタイプそれぞれの診断結果を一覧で。<br>※「人間関係における5つの軸」と「特徴的な軸」は回答により一人ひとり異なります。本ページは各タイプの代表例です。</p>
 
   <div class="index no-print">
-    <a class="ix open"  href="#OBL"><span class="c">OBL</span><b>突撃隊長</b></a>
-    <a class="ix open"  href="#OBS"><span class="c">OBS</span><b>正論ハンマー</b></a>
-    <a class="ix open"  href="#OKL"><span class="c">OKL</span><b>お祭り隊長</b></a>
-    <a class="ix open"  href="#OKS"><span class="c">OKS</span><b>自由人コメンテーター</b></a>
-    <a class="ix guard" href="#GBL"><span class="c">GBL</span><b>沈黙の大黒柱</b></a>
-    <a class="ix guard" href="#GBS"><span class="c">GBS</span><b>縁の下の職人</b></a>
-    <a class="ix guard" href="#GKL"><span class="c">GKL</span><b>根回しの仕掛け人</b></a>
-    <a class="ix guard" href="#GKS"><span class="c">GKS</span><b>がんばり屋の調整役</b></a>
+    <a class="ix open"  href="#OBL"><span class="c">OBL</span><span>突撃隊長</span></a>
+    <a class="ix open"  href="#OBS"><span class="c">OBS</span><span>正論ハンマー</span></a>
+    <a class="ix open"  href="#OKL"><span class="c">OKL</span><span>お祭り隊長</span></a>
+    <a class="ix open"  href="#OKS"><span class="c">OKS</span><span>自由人コメンテーター</span></a>
+    <a class="ix guard" href="#GBL"><span class="c">GBL</span><span>沈黙の大黒柱</span></a>
+    <a class="ix guard" href="#GBS"><span class="c">GBS</span><span>縁の下の職人</span></a>
+    <a class="ix guard" href="#GKL"><span class="c">GKL</span><span>根回しの仕掛け人</span></a>
+    <a class="ix guard" href="#GKS"><span class="c">GKS</span><span>がんばり屋の調整役</span></a>
   </div>
 
-  <!-- OBL -->
-  <section class="card open" id="OBL">
-    <div class="head">
-      <span class="chip">OBL</span>
-      <div class="name">突撃隊長</div>
-      <div class="catch">気づけばいつも、先頭。</div>
-      <div class="axtags"><span>オープン</span><span>ぶつかる</span><span>引っ張る</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>会議で沈黙が3秒続くと、つい自分が口火を切る</li><li>「とりあえずやってみよう」が口癖</li><li>論破してから「言いすぎた」と気づく</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。</p></div>
-      <div class="block"><p class="sect">相性</p><p>縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、停滞した空気をこじ開ける突破力です。みんなが二の足を踏む場面でも、最初の一歩を踏み出して周りを巻き込んでいけますが、その一方で、勢いのまま話を進めてしまい、気づけば誰も本音を言っていない、なんてことになりがちです。強すぎる直球は、ときに相手を萎縮させ能動的な発言を妨げてしまうので、「進める前に、ひと呼吸おくこと」を意識してみましょう。自分で踏み込んで突破したいと思った瞬間に、あえて「みんなはどう思う？」と先に問いを投げかけてみてください。あなたが半歩引くと、周りの一歩が出てきます。その時、あなた一人でやるよりずっと大きな力が手に入ります。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>思ったら即動き、停滞をこじ開ける情熱家。実は「止まると不安」で先に動く。</dd>
-        <dt>罠</dt><dd class="hot">強すぎる直球が周りを沈黙させる。振り返ると孤独。情熱が人を動かし、同時に遠ざける。</dd>
-        <dt>一手</dt><dd>口火を切る前に3秒待つ／「自分の意見だけど」と添える／先に「どう思う?」と聞く。</dd>
-        <dt>誤解され</dt><dd>不安が動力なのに「自信家・怖い人」。成果を願うのに「独走・自分勝手」。</dd>
-        <dt>5軸の癖</dt><dd>対立対処=高、承認・つながり=凹む、信頼・委任=低（抱える）。</dd>
-        <dt>根</dt><dd class="hot">不安を動力に、先に動いて場を引っ張る「型」。</dd>
-        <dt>なりたい方向</dt><dd>半歩引いて、周りの一歩を引き出す。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- OBS -->
-  <section class="card open" id="OBS">
-    <div class="head">
-      <span class="chip">OBS</span>
-      <div class="name">正論ハンマー</div>
-      <div class="catch">おかしいことは、おかしい。</div>
-      <div class="axtags"><span>オープン</span><span>ぶつかる</span><span>支える</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>「それ論理通ってないですよね」と言ってしまう</li><li>ルールや規則を守っていないと、モヤモヤが顔に出る</li><li>後で「言い方きつかったかな」と一人反省</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>場の品質管理者。曖昧さや欺瞞を許さず議論を正す。</p></div>
-      <div class="block"><p class="sect">相性</p><p>縁の下の職人(GBS)と固い信頼。でも、根回しの仕掛け人(GKL)の曖昧さには、あなたが先にイラついてしまう。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、曖昧さや欺瞞を見逃さない、筋を通す力です。議論のほころびにいち早く気づき、場を整えていけますが、その一方で、正論を言い切った瞬間に相手が黙り込み、場の温度が下がってしまう、なんてことになりがちです。鋭い正しさは、ときに相手の逃げ場を奪い、「批判ばかりの人」と受け取られてしまうので、「正しさと伝え方は別物だ」と意識してみましょう。指摘したくなった瞬間に、あえて「ここは良いと思う」と一つ認めてから本題に入ってみてください。同じ中身でも、相手の受け取り方は驚くほど変わります。その積み重ねが、あなたの正しさを信頼へと変えていきます。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>曖昧さや欺瞞を見逃せない、筋を通す人。正しさが信頼を生む。</dd>
-        <dt>罠</dt><dd class="hot">正しさで人を追い詰めた瞬間、関係にヒビ。正論は相手の逃げ場を奪う。</dd>
-        <dt>一手</dt><dd>主張の前に相手の意図を一度受け取る／指摘を提案の形に変える／勝ち負けを手放す。</dd>
-        <dt>誤解され</dt><dd>良くしたいだけなのに「批判ばかり」「めんどくさい人」。</dd>
-        <dt>5軸の癖</dt><dd>対立対処=高、心理的安全性=中、承認・つながり=低め。</dd>
-        <dt>根</dt><dd class="hot">正しさで関係を測る「型」。</dd>
-        <dt>なりたい方向</dt><dd>正しさを、信頼に変える伝え方。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- OKL -->
-  <section class="card open" id="OKL">
-    <div class="head">
-      <span class="chip">OKL</span>
-      <div class="name">お祭り隊長</div>
-      <div class="catch">とにかく、盛り上げる。</div>
-      <div class="axtags"><span>オープン</span><span>かわす</span><span>引っ張る</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>場が重くなると、冗談で空気を変えにいく</li><li>対立しそうになると、つい話題をそらす</li><li>実は、嫌われるのがけっこう怖い</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>場のエネルギー源。誰とでも打ち解け、チームの空気を作る。</p></div>
-      <div class="block"><p class="sect">相性</p><p>自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、チームの空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>明るく場を回す天才。ただしシリアスな対立は笑いに変えて避ける。</dd>
-        <dt>罠</dt><dd class="hot">「まあまあ」で本当は解くべき問題から目を背ける。明るさが本音にフタをする。</dd>
-        <dt>一手</dt><dd>笑いに逃げる前に一度「間」を持つ／「実はちゃんと話したい」と切り出す／NOの練習。</dd>
-        <dt>誤解され</dt><dd>実は繊細で気を遣うのに「ノリだけ」「軽い人」。</dd>
-        <dt>5軸の癖</dt><dd>心理的安全性=高、対立対処=低、承認・つながり=高。</dd>
-        <dt>根</dt><dd class="hot">明るさで本音にフタをする「型」。</dd>
-        <dt>なりたい方向</dt><dd>笑いに逃げず、本音も置ける場づくり。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- OKS -->
-  <section class="card open" id="OKS">
-    <div class="head">
-      <span class="chip">OKS</span>
-      <div class="name">自由人コメンテーター</div>
-      <div class="catch">言うだけ、言っておく。</div>
-      <div class="axtags"><span>オープン</span><span>かわす</span><span>支える</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>感想やアイデアは言うが「で、誰がやる？」で静かになる</li><li>面倒な役回りは、自然に避けている</li><li>「自分は自分」と線引きして、周りと群れない</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>自由な発想と歯に衣着せぬ視点。空気に流されない独立性。</p></div>
-      <div class="block"><p class="sect">相性</p><p>お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は？」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、空気に流されない自由な視点です。歯に衣着せず、ほかの人が見落とす角度から本質を突いていけますが、その一方で、「で、誰がやる？」という空気になった瞬間、自分だけそっと一歩引いてしまう、なんてことになりがちです。良い意見を言うほど当事者になり損ね、せっかくの鋭さが信頼につながらないので、「言ったことは、半歩だけ引き受ける」と意識してみましょう。意見を述べた直後に、あえて「この部分なら自分がやります」と小さく手を挙げてみてください。引き受けても自由は失われません。むしろ、あなたの言葉に確かな影響力が宿っていきます。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>意見は鋭く発想も豊か。でも矢面・責任は避けてふわっと距離を取る。</dd>
-        <dt>罠</dt><dd class="hot">当事者意識の薄さで信頼を失う。言葉はうまいが影響力が手に入らない。</dd>
-        <dt>一手</dt><dd>意見に「自分が引き受けること」を添える／小さく当事者になる／逃げ癖を自覚する。</dd>
-        <dt>誤解され</dt><dd>本当は鋭く見ているのに「評論家」「他人事」。</dd>
-        <dt>5軸の癖</dt><dd>境界線=高、信頼・委任=低、対立対処=低め。</dd>
-        <dt>根</dt><dd class="hot">距離を取って身を守る「型」。</dd>
-        <dt>なりたい方向</dt><dd>言葉に当事者性を乗せて、影響力に変える。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- GBL -->
-  <section class="card guard" id="GBL">
-    <div class="head">
-      <span class="chip">GBL</span>
-      <div class="name">沈黙の大黒柱</div>
-      <div class="catch">多くは語らない。でも逃げない。</div>
-      <div class="axtags"><span>ガード</span><span>ぶつかる</span><span>引っ張る</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>困っても、自分で抱えて相談しない</li><li>揉めると静かに前に出て、収める</li><li>弱音を吐くのが、苦手</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>危機に強い安定感。背中で示すリーダーシップ。</p></div>
-      <div class="block"><p class="sect">相性</p><p>縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中でチームを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>多くを語らず、いざという時に引き受ける柱。本音は見せない。</dd>
-        <dt>罠</dt><dd class="hot">抱え込みすぎて助けを求められない。何を考えているか分からず恐れられる。</dd>
-        <dt>一手</dt><dd>弱さや迷いを一言開示する／「助けて」を言う練習／背中でなく言葉で伝える。</dd>
-        <dt>誤解され</dt><dd>実は面倒見が良いのに「怖い」「何考えてるか分からない」。</dd>
-        <dt>5軸の癖</dt><dd>信頼・委任=低（抱える）、心理的安全性=低め、対立対処=高。</dd>
-        <dt>根</dt><dd class="hot">弱さを見せず背中で示す「型」。</dd>
-        <dt>なりたい方向</dt><dd>言葉で開いて、安心して頼られる存在に。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- GBS -->
-  <section class="card guard" id="GBS">
-    <div class="head">
-      <span class="chip">GBS</span>
-      <div class="name">縁の下の職人</div>
-      <div class="catch">黙って、やり切る。</div>
-      <div class="axtags"><span>ガード</span><span>ぶつかる</span><span>支える</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>頼まれると断れず、タスクが溜まる</li><li>不満は言わず、黙って処理する</li><li>限界まで我慢して、突然プツンとくる</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。</p></div>
-      <div class="block"><p class="sect">相性</p><p>沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、質の高い仕事で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>口数は少ないが責任を静かに完遂。頼まれると断れず抱えすぎる。</dd>
-        <dt>罠</dt><dd class="hot">NOが言えず溜め込み、ある日プツンと切れる。我慢が時限爆弾化する。</dd>
-        <dt>一手</dt><dd>小さなNOから練習／抱える前に「今いっぱいです」と言う／助けを求める。</dd>
-        <dt>誤解され</dt><dd>限界なのに、いつまでも「大丈夫な人」「便利な人」扱い。</dd>
-        <dt>5軸の癖</dt><dd>境界線=低、信頼・委任=低（抱える）、心理的安全性=中。</dd>
-        <dt>根</dt><dd class="hot">我慢を1人で抱える「型」。</dd>
-        <dt>なりたい方向</dt><dd>小さなNOで、自分の容量を守る。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- GKL -->
-  <section class="card guard" id="GKL">
-    <div class="head">
-      <span class="chip">GKL</span>
-      <div class="name">根回しの仕掛け人</div>
-      <div class="catch">気づいたら、私の流れ。</div>
-      <div class="axtags"><span>ガード</span><span>かわす</span><span>引っ張る</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>会議の前に、個別に話をつけておく</li><li>「察してほしい」が、強め</li><li>本音は、最後まで見せない</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>敵を作らず物事を前に進める政治力。穏やかな影響力。</p></div>
-      <div class="block"><p class="sect">相性</p><p>がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、敵を作らず物事を前に進める調整力です。事前に布石を打ち、角を立てずに場を動かしていけますが、その一方で、根回ししておいたことが表に出て「裏で手を回した」と受け取られてしまう、なんてことになりがちです。「察してほしい」が強すぎると、ときに誤解や不信の火種になってしまうので、「要所だけは、本音を表で出す」と意識してみましょう。ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>正面では言わず、裏で手を回して流れを作る穏やかな策士。敵を作らない。</dd>
-        <dt>罠</dt><dd class="hot">本音が見えず誤解と不信の火種に。透明性の欠如で評価を落とす。</dd>
-        <dt>一手</dt><dd>要所だけでも本音を直接言う／根回しを「透明な相談」に変える／察してほしいを手放す。</dd>
-        <dt>誤解され</dt><dd>平和に進めたいだけなのに、バレると「裏がある」「腹黒い」。</dd>
-        <dt>5軸の癖</dt><dd>対立対処=低、心理的安全性=低め、境界線=中。</dd>
-        <dt>根</dt><dd class="hot">直接言わずに動かす「型」。</dd>
-        <dt>なりたい方向</dt><dd>透明な相談で、信頼ごと動かす。</dd>
-      </dl></div>
-    </div>
-  </section>
-
-  <!-- GKS -->
-  <section class="card guard" id="GKS">
-    <div class="head">
-      <span class="chip">GKS</span>
-      <div class="name">がんばり屋の調整役</div>
-      <div class="catch">気づけば、みんなのお母さん。</div>
-      <div class="axtags"><span>ガード</span><span>かわす</span><span>支える</span></div>
-    </div>
-    <div class="body">
-      <div class="block"><p class="sect">あるある</p>
-        <ul class="aru"><li>頼まれごとを、断れない</li><li>自分の意見より、場の空気を優先する</li><li>家に帰ると、どっと疲れる</li></ul></div>
-      <div class="block"><p class="sect">強み</p><p>誰もが安心できる空気を作る、対立の緩衝材。</p></div>
-      <div class="block"><p class="sect">相性</p><p>根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。</p></div>
-      <div class="onepoint"><p class="sect">ワンポイント（受診者が読む本文）</p><p>あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。</p></div>
-      <div class="crib"><div class="label">デブリーフ用クリブ</div><dl>
-        <dt>本質</dt><dd>波風を立てず場を丸く収める気配りの達人。いつも自分は後回し。</dd>
-        <dt>罠</dt><dd class="hot">合わせすぎて自分の本音が迷子。優しさが自分をすり減らす。</dd>
-        <dt>一手</dt><dd>小さな主張から始める／断る練習／自分の機嫌を最優先にする日を作る。</dd>
-        <dt>誤解され</dt><dd>自分を抑えているのに「いい人」で消費され、本音は気づかれない。</dd>
-        <dt>5軸の癖</dt><dd>境界線=最も低い、承認・つながり=高、対立対処=低。</dd>
-        <dt>根</dt><dd class="hot">自分を後回しにして合わせる「型」。</dd>
-        <dt>なりたい方向</dt><dd>自分の機嫌を後回しにしない関わり方。</dd>
-      </dl></div>
-    </div>
-  </section>
-
+  <div id="gallery"></div>
 </div>
+
+<script>
+// ▼ データとロジックは prototype.html から転記（結果カードの表示項目・レイアウトを一致させるため）
+const TYPES = {
+ OBL:{name:'突撃隊長',pole:'open',catch:'気づけばいつも、先頭。',
+  aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
+  tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
+  aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
+  hitotsu:'あなたの持ち味は、停滞した空気をこじ開ける突破力です。みんなが二の足を踏む場面でも、最初の一歩を踏み出して周りを巻き込んでいけますが、その一方で、勢いのまま話を進めてしまい、気づけば誰も本音を言っていない、なんてことになりがちです。強すぎる直球は、ときに相手を萎縮させ能動的な発言を妨げてしまうので、「進める前に、ひと呼吸おくこと」を意識してみましょう。自分で踏み込んで突破したいと思った瞬間に、あえて「みんなはどう思う？」と先に問いを投げかけてみてください。あなたが半歩引くと、周りの一歩が出てきます。その時、あなた一人でやるよりずっと大きな力が手に入ります。'},
+ OBS:{name:'正論ハンマー',pole:'open',catch:'おかしいことは、おかしい。',
+  aru:['「それ論理通ってないですよね」と言ってしまう','ルールや規則を守っていないと、モヤモヤが顔に出る','後で「言い方きつかったかな」と一人反省'],
+  tsuyomi:'場の品質管理者。曖昧さや欺瞞を許さず議論を正す。',
+  aishou:'縁の下の職人(GBS)と固い信頼。でも、根回しの仕掛け人(GKL)の曖昧さには、あなたが先にイラついてしまう。',
+  hitotsu:'あなたの持ち味は、曖昧さや欺瞞を見逃さない、筋を通す力です。議論のほころびにいち早く気づき、場を整えていけますが、その一方で、正論を言い切った瞬間に相手が黙り込み、場の温度が下がってしまう、なんてことになりがちです。鋭い正しさは、ときに相手の逃げ場を奪い、「批判ばかりの人」と受け取られてしまうので、「正しさと伝え方は別物だ」と意識してみましょう。指摘したくなった瞬間に、あえて「ここは良いと思う」と一つ認めてから本題に入ってみてください。同じ中身でも、相手の受け取り方は驚くほど変わります。その積み重ねが、あなたの正しさを信頼へと変えていきます。'},
+ OKL:{name:'お祭り隊長',pole:'open',catch:'とにかく、盛り上げる。',
+  aru:['場が重くなると、冗談で空気を変えにいく','対立しそうになると、つい話題をそらす','実は、嫌われるのがけっこう怖い'],
+  tsuyomi:'場のエネルギー源。誰とでも打ち解け、チームの空気を作る。',
+  aishou:'自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。',
+  hitotsu:'あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、チームの空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。'},
+ OKS:{name:'自由人コメンテーター',pole:'open',catch:'言うだけ、言っておく。',
+  aru:['感想やアイデアは言うが「で、誰がやる？」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
+  tsuyomi:'自由な発想と歯に衣着せぬ視点。空気に流されない独立性。',
+  aishou:'お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は？」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。',
+  hitotsu:'あなたの持ち味は、空気に流されない自由な視点です。歯に衣着せず、ほかの人が見落とす角度から本質を突いていけますが、その一方で、「で、誰がやる？」という空気になった瞬間、自分だけそっと一歩引いてしまう、なんてことになりがちです。良い意見を言うほど当事者になり損ね、せっかくの鋭さが信頼につながらないので、「言ったことは、半歩だけ引き受ける」と意識してみましょう。意見を述べた直後に、あえて「この部分なら自分がやります」と小さく手を挙げてみてください。引き受けても自由は失われません。むしろ、あなたの言葉に確かな影響力が宿っていきます。'},
+ GBL:{name:'沈黙の大黒柱',pole:'guard',catch:'多くは語らない。でも逃げない。',
+  aru:['困っても、自分で抱えて相談しない','揉めると静かに前に出て、収める','弱音を吐くのが、苦手'],
+  tsuyomi:'危機に強い安定感。背中で示すリーダーシップ。',
+  aishou:'縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。',
+  hitotsu:'あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中でチームを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。'},
+ GBS:{name:'縁の下の職人',pole:'guard',catch:'黙って、やり切る。',
+  aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
+  tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
+  aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
+  hitotsu:'あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、質の高い仕事で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。'},
+ GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
+  aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
+  tsuyomi:'敵を作らず物事を前に進める政治力。穏やかな影響力。',
+  aishou:'がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。',
+  hitotsu:'あなたの持ち味は、敵を作らず物事を前に進める調整力です。事前に布石を打ち、角を立てずに場を動かしていけますが、その一方で、根回ししておいたことが表に出て「裏で手を回した」と受け取られてしまう、なんてことになりがちです。「察してほしい」が強すぎると、ときに誤解や不信の火種になってしまうので、「要所だけは、本音を表で出す」と意識してみましょう。ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。'},
+ GKS:{name:'がんばり屋の調整役',pole:'guard',catch:'気づけば、みんなのお母さん。',
+  aru:['頼まれごとを、断れない','自分の意見より、場の空気を優先する','家に帰ると、どっと疲れる'],
+  tsuyomi:'誰もが安心できる空気を作る、対立の緩衝材。',
+  aishou:'根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。',
+  hitotsu:'あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。'},
+};
+const AX = {
+  h:{left:'オープン',right:'ガード'},
+  c:{left:'ぶつかる',right:'かわす'},
+  w:{left:'引っ張る',right:'支える'},
+};
+const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
+const RADAR_META = {
+  safety:  {name:'本音',   left:'胸にとどめる',   right:'率直に話す',
+            rightGift:'誰も言いたがらないことをためらわず発言できる', rightSide:'直球すぎて相手を身構えさせる',
+            leftGift:'軽々しく言わず、慎重に見極める',                 leftSide:'ためこんで周りに伝わらない'},
+  trust:   {name:'任せ方', left:'自分で担う',     right:'人にゆだねる',
+            rightGift:'相手を信じて任せ、力を引き出す',               rightSide:'任せたら放置してしまう',
+            leftGift:'引き受けてやり切る',                           leftSide:'抱え込んで手が回らない'},
+  bound:   {name:'境界',   left:'引き受ける',     right:'線を引く',
+            rightGift:'NOを言い、自分の領域を守れる',                 rightSide:'相手に距離を感じさせてしまう',
+            leftGift:'頼みを受け止める面倒見の良さ',                 leftSide:'抱えすぎて自分をすり減らす'},
+  conflict:{name:'摩擦',   left:'和を保つ',       right:'切り込む',
+            rightGift:'ぶつかってでも本質に迫る',                     rightSide:'波風を立てがち',
+            leftGift:'衝突を避け、場を穏やかに保つ',                 leftSide:'問題が先送りになる'},
+  connect: {name:'間合い', left:'適度な距離',     right:'積極的に近づく',
+            rightGift:'良さを言葉にし、関係を温める',                 rightSide:'距離感を間違えて距離を置かれる',
+            leftGift:'踏み込みすぎず、さっぱり接する',               leftSide:'事務的で温度が伝わりにくい'},
+};
+// 各タイプの「5つの軸」代表例（4件法 1〜4 の値。回答により本来は一人ひとり変わる）
+const SAMPLE = {
+ OBL:{safety:3,trust:2,bound:3,conflict:4,connect:2},
+ OBS:{safety:3,trust:3,bound:3,conflict:4,connect:2},
+ OKL:{safety:3,trust:3,bound:2,conflict:1,connect:3},
+ OKS:{safety:3,trust:2,bound:4,conflict:2,connect:2},
+ GBL:{safety:2,trust:1,bound:3,conflict:3,connect:2},
+ GBS:{safety:3,trust:2,bound:1,conflict:3,connect:2},
+ GKL:{safety:2,trust:3,bound:3,conflict:1,connect:3},
+ GKS:{safety:3,trust:3,bound:1,conflict:2,connect:4},
+};
+function radarOf(code){ const o={}; RADAR_AXES.forEach(a=>{ o[a]=(SAMPLE[code][a]-1)/3; }); return o; }
+
+// 相性（prototype.html と同一ロジック）
+function compatLine(self, other){
+  if(self===other){
+    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
+  }
+  const GRAV={
+    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
+    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
+    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
+    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
+  };
+  const HONNE={
+    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
+    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
+    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
+  };
+  const CONF={
+    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
+    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
+    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
+  };
+  const g=GRAV[self[2]+other[2]];
+  let tags=[g.tag], text=g.full;
+  if(!g.friction){
+    const hon=HONNE[self[0]+other[0]];
+    const con=CONF[self[1]+other[1]];
+    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
+    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
+  }
+  return {tags:tags, text:text};
+}
+function compatScore(self, other){
+  if(self===other) return -Infinity;
+  let s=0;
+  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
+  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
+  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
+  return s;
+}
+
+function axisRowHTML(name,left,right,leftOn,rightOn,dotLeft){
+  return '<div class="axis-row"><div class="axis-name">'+name+'</div>'+
+    '<div class="axis-track-wrap"><div class="axis-ends">'+
+      '<span class="'+(leftOn?'on':'')+'">'+left+'</span><span class="'+(rightOn?'on':'')+'">'+right+'</span>'+
+    '</div><div class="axis-track"><span class="axis-dot" style="left:'+dotLeft+'%"></span></div></div></div>';
+}
+function compatHTML(selfCode){
+  let best=null, bestScore=-Infinity;
+  Object.keys(TYPES).forEach(code=>{ if(code===selfCode) return; const sc=compatScore(selfCode,code); if(sc>bestScore){ bestScore=sc; best=code; } });
+  return Object.keys(TYPES).map(code=>{
+    const t=TYPES[code], c=compatLine(selfCode,code);
+    const pole=(t.pole==='guard')?'pole-guard':'pole-open';
+    const isBest=(code===best);
+    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
+    const bestBadge=isBest?'<span class="ct-best">ベストマッチ</span>':'';
+    const selfBadge=(code===selfCode)?'<span class="ct-self">あなた</span>':'';
+    return '<div class="compat-row '+pole+(isBest?' is-best':'')+'"><div class="ct-head">'+
+      '<span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+
+      '</div><div class="ct-text">'+c.text+'</div></div>';
+  }).join('');
+}
+function buildCard(code){
+  const t=TYPES[code];
+  const pole=(t.pole==='guard')?'pole-guard':'pole-open';
+  // 3軸（本音・衝突・重心）：タイプが示す極にドットを置く
+  const ax3=[
+    ['本音', AX.h.left, AX.h.right, code[0]==='O'],
+    ['衝突', AX.c.left, AX.c.right, code[1]==='B'],
+    ['重心', AX.w.left, AX.w.right, code[2]==='L'],
+  ].map(function(r){ const leftOn=r[3]; return axisRowHTML(r[0],r[1],r[2],leftOn,!leftOn,leftOn?8:92); }).join('');
+  // 5軸（代表例）
+  const radar=radarOf(code);
+  const ax5=RADAR_AXES.map(function(a){ const s=radar[a], m=RADAR_META[a]; return axisRowHTML(m.name,m.left,m.right,s<0.5,s>0.5,8+s*84); }).join('');
+  // 特徴的な軸（中央から最も離れた軸）
+  let f=RADAR_AXES[0];
+  RADAR_AXES.forEach(function(a){ if(Math.abs(radar[a]-0.5)>Math.abs(radar[f]-0.5)) f=a; });
+  const m=RADAR_META[f], right=radar[f]>=0.5;
+  const poleLabel=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
+  const pv='<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
+    '<div class="cap-axis">「'+poleLabel+'」寄り</div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
+  const aru=t.aru.map(function(a){ return '<li>'+a+'</li>'; }).join('');
+  const el=document.createElement('section');
+  el.className='card '+pole; el.id=code;
+  el.innerHTML=
+    '<div class="card-head"><span class="chip">'+code+'</span><h2 class="tname">'+t.name+'</h2><p class="tcatch">'+t.catch+'</p></div>'+
+    '<div class="card-body">'+
+      '<p class="sectlabel">あなたの人間関係タイプ</p><div class="axes">'+ax3+'</div>'+
+      '<p class="sectlabel">人間関係における5つの軸</p><div class="axes">'+ax5+'</div>'+
+      '<p class="sectlabel">特徴的な軸と、その活かし方</p><div class="pv">'+pv+'</div>'+
+      '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
+      '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
+      '<div class="row-block"><p class="sectlabel">相性</p><p>'+t.aishou+'</p></div>'+
+      '<div class="compat"><p class="sectlabel">あの人との相性（8タイプ別）</p>'+
+        '<p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>'+
+        '<div class="compat-list">'+compatHTML(code)+'</div></div>'+
+      '<div class="hitotsu"><div class="h-label">あなたが良い人間関係を築くためのワンポイント</div><p>'+t.hitotsu+'</p></div>'+
+    '</div>';
+  return el;
+}
+const gallery=document.getElementById('gallery');
+Object.keys(TYPES).forEach(function(code){ gallery.appendChild(buildCard(code)); });
+</script>
 </body>
 </html>
