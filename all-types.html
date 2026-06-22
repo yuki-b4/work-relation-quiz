@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職場の人間関係タイプ 全8タイプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
+    --line:#E4E3DD; --chrome:#2B333D;
+    --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
+    --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
+    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
+    --radius:16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  body{font-family:var(--body); color:var(--ink); background:var(--bg); line-height:1.7; letter-spacing:.01em}
+  .wrap{max-width:680px; margin:0 auto; padding:22px 16px 60px}
+
+  .toolbar{position:sticky; top:0; z-index:9; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--bg); padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:18px}
+  .toolbar button{font-family:var(--body); font-size:14px; font-weight:700; cursor:pointer; color:#fff;
+    background:var(--chrome); border:none; border-radius:99px; padding:10px 20px}
+  .toolbar .note{font-size:12.5px; color:var(--muted)}
+
+  h1{font-family:var(--display); font-weight:700; font-size:clamp(22px,4.6vw,30px); letter-spacing:.02em; margin-bottom:8px}
+  .sub{font-size:13.5px; color:var(--muted); margin-bottom:16px; max-width:60em}
+
+  .index{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-bottom:26px}
+  .ix{display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface); font-size:13.5px}
+  .ix .c{font-family:var(--display); font-weight:700; font-size:10.5px; letter-spacing:.14em; color:#fff; border-radius:6px; padding:2px 7px}
+  .ix.open .c{background:var(--coral)} .ix.guard .c{background:var(--teal)}
+
+  /* ▼ 以下は prototype.html の結果カードと同じスタイル */
+  .card{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink);
+    background:var(--surface); border-radius:22px; box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--line);
+    margin-bottom:24px; break-inside:avoid; page-break-inside:avoid }
+  .card.pole-open{ --accent:var(--coral); --accent-soft:var(--coral-soft); --accent-ink:var(--coral-ink) }
+  .card.pole-guard{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
+  .card-head{ padding:34px 30px 28px; background:var(--accent-soft); border-bottom:1px solid var(--line) }
+  .chip{ display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
+    color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px }
+  .tname{ font-family:var(--display); font-weight:700; font-size:clamp(28px,6.4vw,38px); color:var(--accent-ink); letter-spacing:.03em; margin-bottom:10px }
+  .tcatch{ font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,21px); color:var(--ink); letter-spacing:.02em }
+  .card-body{ padding:28px 30px 32px }
+  .sectlabel{ font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px }
+  .axes{ display:flex; flex-direction:column; gap:16px; margin-bottom:30px }
+  .axis-row{ display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center }
+  .axis-name{ font-size:12px; color:var(--muted); font-weight:500 }
+  .axis-track-wrap{ position:relative }
+  .axis-ends{ display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px }
+  .axis-ends .on{ color:var(--ink); font-weight:700 }
+  .axis-track{ position:relative; height:5px; background:var(--line); border-radius:99px }
+  .axis-dot{ position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%) }
+  ul.aru{ list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px }
+  ul.aru li{ position:relative; padding-left:22px; font-size:15.5px; color:var(--ink) }
+  ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
+  .row-block{ margin-bottom:26px }
+  .row-block p{ font-size:15px; color:var(--ink) }
+  .hitotsu{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px }
+  .hitotsu .h-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em }
+  .hitotsu p{ font-size:15px; color:var(--ink) }
+  .pv{ border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft) }
+  .pv .cap{ font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink) }
+  .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink) }
+  .focus-item{ display:flex; gap:10px; align-items:flex-start; margin-top:11px }
+  .focus-tag{ flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap }
+  .focus-tag-gift{ background:var(--accent) }
+  .focus-tag-side{ background:#565A60 }
+  .focus-item p{ font-size:14.5px; line-height:1.7; color:var(--ink) }
+  .focus-grow{ font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px }
+  .compat{ margin-bottom:26px }
+  .compat-hint{ font-size:13px; color:var(--muted); margin:-2px 0 14px }
+  .compat-list{ display:flex; flex-direction:column }
+  .compat-row{ padding:13px 0; border-top:1px solid var(--line) }
+  .compat-row:first-child{ border-top:none }
+  .ct-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px }
+  .ct-name{ font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px }
+  .compat-row.pole-open .ct-name{ background:var(--coral-soft); color:var(--coral-ink) }
+  .compat-row.pole-guard .ct-name{ background:var(--teal-soft); color:var(--teal-ink) }
+  .ct-code{ font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700 }
+  .ct-tag{ font-size:11px; font-weight:700; letter-spacing:.02em; border-radius:7px; padding:3px 9px; background:var(--chrome); color:#fff; white-space:nowrap }
+  .ct-best{ font-size:10px; letter-spacing:.06em; font-weight:700; color:#fff; border-radius:99px; padding:2px 9px; white-space:nowrap }
+  .compat-row.pole-open .ct-best{ background:var(--coral) }
+  .compat-row.pole-guard .ct-best{ background:var(--teal) }
+  .compat-row.is-best{ border-radius:10px }
+  .compat-row.is-best.pole-open{ box-shadow:inset 3px 0 0 var(--coral); padding-left:12px }
+  .compat-row.is-best.pole-guard{ box-shadow:inset 3px 0 0 var(--teal); padding-left:12px }
+  .ct-self{ margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700 }
+  .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
+
+  @media print{
+    body{ background:#fff }
+    .wrap{ max-width:none; padding:0 }
+    .no-print{ display:none !important }
+    .index{ margin-bottom:12px }
+    .card{ box-shadow:none; margin-bottom:12px }
+    @page{ size:A4; margin:12mm }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="toolbar no-print">
+    <button onclick="window.print()">印刷 / PDFで保存</button>
+    <span class="note">各タイプはページ内で改ページされません（PDF化に最適）。</span>
+  </div>
+
+  <h1>職場の人間関係タイプ 全8タイプ</h1>
+  <p class="sub">8つのタイプそれぞれの診断結果を一覧で。<br>※「人間関係における5つの軸」と「特徴的な軸」は回答により一人ひとり異なります。本ページは各タイプの代表例です。</p>
+
+  <div class="index no-print">
+    <a class="ix open"  href="#OBL"><span class="c">OBL</span><span>突撃隊長</span></a>
+    <a class="ix open"  href="#OBS"><span class="c">OBS</span><span>正論ハンマー</span></a>
+    <a class="ix open"  href="#OKL"><span class="c">OKL</span><span>お祭り隊長</span></a>
+    <a class="ix open"  href="#OKS"><span class="c">OKS</span><span>自由人コメンテーター</span></a>
+    <a class="ix guard" href="#GBL"><span class="c">GBL</span><span>沈黙の大黒柱</span></a>
+    <a class="ix guard" href="#GBS"><span class="c">GBS</span><span>縁の下の職人</span></a>
+    <a class="ix guard" href="#GKL"><span class="c">GKL</span><span>根回しの仕掛け人</span></a>
+    <a class="ix guard" href="#GKS"><span class="c">GKS</span><span>がんばり屋の調整役</span></a>
+  </div>
+
+  <div id="gallery"></div>
+</div>
+
+<script>
+// ▼ データとロジックは prototype.html から転記（結果カードの表示項目・レイアウトを一致させるため）
+const TYPES = {
+ OBL:{name:'突撃隊長',pole:'open',catch:'気づけばいつも、先頭。',
+  aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
+  tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
+  aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
+  hitotsu:'あなたの持ち味は、停滞した空気をこじ開ける突破力です。みんなが二の足を踏む場面でも、最初の一歩を踏み出して周りを巻き込んでいけますが、その一方で、勢いのまま話を進めてしまい、気づけば誰も本音を言っていない、なんてことになりがちです。強すぎる直球は、ときに相手を萎縮させ能動的な発言を妨げてしまうので、「進める前に、ひと呼吸おくこと」を意識してみましょう。自分で踏み込んで突破したいと思った瞬間に、あえて「みんなはどう思う？」と先に問いを投げかけてみてください。あなたが半歩引くと、周りの一歩が出てきます。その時、あなた一人でやるよりずっと大きな力が手に入ります。'},
+ OBS:{name:'正論ハンマー',pole:'open',catch:'おかしいことは、おかしい。',
+  aru:['「それ論理通ってないですよね」と言ってしまう','ルールや規則を守っていないと、モヤモヤが顔に出る','後で「言い方きつかったかな」と一人反省'],
+  tsuyomi:'場の品質管理者。曖昧さや欺瞞を許さず議論を正す。',
+  aishou:'縁の下の職人(GBS)と固い信頼。でも、根回しの仕掛け人(GKL)の曖昧さには、あなたが先にイラついてしまう。',
+  hitotsu:'あなたの持ち味は、曖昧さや欺瞞を見逃さない、筋を通す力です。議論のほころびにいち早く気づき、場を整えていけますが、その一方で、正論を言い切った瞬間に相手が黙り込み、場の温度が下がってしまう、なんてことになりがちです。鋭い正しさは、ときに相手の逃げ場を奪い、「批判ばかりの人」と受け取られてしまうので、「正しさと伝え方は別物だ」と意識してみましょう。指摘したくなった瞬間に、あえて「ここは良いと思う」と一つ認めてから本題に入ってみてください。同じ中身でも、相手の受け取り方は驚くほど変わります。その積み重ねが、あなたの正しさを信頼へと変えていきます。'},
+ OKL:{name:'お祭り隊長',pole:'open',catch:'とにかく、盛り上げる。',
+  aru:['場が重くなると、冗談で空気を変えにいく','対立しそうになると、つい話題をそらす','実は、嫌われるのがけっこう怖い'],
+  tsuyomi:'場のエネルギー源。誰とでも打ち解け、チームの空気を作る。',
+  aishou:'自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。',
+  hitotsu:'あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、チームの空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。'},
+ OKS:{name:'自由人コメンテーター',pole:'open',catch:'言うだけ、言っておく。',
+  aru:['感想やアイデアは言うが「で、誰がやる？」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
+  tsuyomi:'自由な発想と歯に衣着せぬ視点。空気に流されない独立性。',
+  aishou:'お祭り隊長(OKL)と相思相愛。沈黙の大黒柱(GBL)に「で、君は？」と問われると固まる。縁の下の職人(GBS)とは、そりが合わない。',
+  hitotsu:'あなたの持ち味は、空気に流されない自由な視点です。歯に衣着せず、ほかの人が見落とす角度から本質を突いていけますが、その一方で、「で、誰がやる？」という空気になった瞬間、自分だけそっと一歩引いてしまう、なんてことになりがちです。良い意見を言うほど当事者になり損ね、せっかくの鋭さが信頼につながらないので、「言ったことは、半歩だけ引き受ける」と意識してみましょう。意見を述べた直後に、あえて「この部分なら自分がやります」と小さく手を挙げてみてください。引き受けても自由は失われません。むしろ、あなたの言葉に確かな影響力が宿っていきます。'},
+ GBL:{name:'沈黙の大黒柱',pole:'guard',catch:'多くは語らない。でも逃げない。',
+  aru:['困っても、自分で抱えて相談しない','揉めると静かに前に出て、収める','弱音を吐くのが、苦手'],
+  tsuyomi:'危機に強い安定感。背中で示すリーダーシップ。',
+  aishou:'縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。',
+  hitotsu:'あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中でチームを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。'},
+ GBS:{name:'縁の下の職人',pole:'guard',catch:'黙って、やり切る。',
+  aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
+  tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
+  aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
+  hitotsu:'あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、質の高い仕事で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。'},
+ GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
+  aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
+  tsuyomi:'敵を作らず物事を前に進める政治力。穏やかな影響力。',
+  aishou:'がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。',
+  hitotsu:'あなたの持ち味は、敵を作らず物事を前に進める調整力です。事前に布石を打ち、角を立てずに場を動かしていけますが、その一方で、根回ししておいたことが表に出て「裏で手を回した」と受け取られてしまう、なんてことになりがちです。「察してほしい」が強すぎると、ときに誤解や不信の火種になってしまうので、「要所だけは、本音を表で出す」と意識してみましょう。ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。'},
+ GKS:{name:'がんばり屋の調整役',pole:'guard',catch:'気づけば、みんなのお母さん。',
+  aru:['頼まれごとを、断れない','自分の意見より、場の空気を優先する','家に帰ると、どっと疲れる'],
+  tsuyomi:'誰もが安心できる空気を作る、対立の緩衝材。',
+  aishou:'根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。',
+  hitotsu:'あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。'},
+};
+const AX = {
+  h:{left:'オープン',right:'ガード'},
+  c:{left:'ぶつかる',right:'かわす'},
+  w:{left:'引っ張る',right:'支える'},
+};
+const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
+const RADAR_META = {
+  safety:  {name:'本音',   left:'胸にとどめる',   right:'率直に話す',
+            rightGift:'誰も言いたがらないことをためらわず発言できる', rightSide:'直球すぎて相手を身構えさせる',
+            leftGift:'軽々しく言わず、慎重に見極める',                 leftSide:'ためこんで周りに伝わらない'},
+  trust:   {name:'任せ方', left:'自分で担う',     right:'人にゆだねる',
+            rightGift:'相手を信じて任せ、力を引き出す',               rightSide:'任せたら放置してしまう',
+            leftGift:'引き受けてやり切る',                           leftSide:'抱え込んで手が回らない'},
+  bound:   {name:'境界',   left:'引き受ける',     right:'線を引く',
+            rightGift:'NOを言い、自分の領域を守れる',                 rightSide:'相手に距離を感じさせてしまう',
+            leftGift:'頼みを受け止める面倒見の良さ',                 leftSide:'抱えすぎて自分をすり減らす'},
+  conflict:{name:'摩擦',   left:'和を保つ',       right:'切り込む',
+            rightGift:'ぶつかってでも本質に迫る',                     rightSide:'波風を立てがち',
+            leftGift:'衝突を避け、場を穏やかに保つ',                 leftSide:'問題が先送りになる'},
+  connect: {name:'間合い', left:'適度な距離',     right:'積極的に近づく',
+            rightGift:'良さを言葉にし、関係を温める',                 rightSide:'距離感を間違えて距離を置かれる',
+            leftGift:'踏み込みすぎず、さっぱり接する',               leftSide:'事務的で温度が伝わりにくい'},
+};
+// 各タイプの「5つの軸」代表例（4件法 1〜4 の値。回答により本来は一人ひとり変わる）
+const SAMPLE = {
+ OBL:{safety:3,trust:2,bound:3,conflict:4,connect:2},
+ OBS:{safety:3,trust:3,bound:3,conflict:4,connect:2},
+ OKL:{safety:3,trust:3,bound:2,conflict:1,connect:3},
+ OKS:{safety:3,trust:2,bound:4,conflict:2,connect:2},
+ GBL:{safety:2,trust:1,bound:3,conflict:3,connect:2},
+ GBS:{safety:3,trust:2,bound:1,conflict:3,connect:2},
+ GKL:{safety:2,trust:3,bound:3,conflict:1,connect:3},
+ GKS:{safety:3,trust:3,bound:1,conflict:2,connect:4},
+};
+function radarOf(code){ const o={}; RADAR_AXES.forEach(a=>{ o[a]=(SAMPLE[code][a]-1)/3; }); return o; }
+
+// 相性（prototype.html と同一ロジック）
+function compatLine(self, other){
+  if(self===other){
+    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
+  }
+  const GRAV={
+    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
+    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
+    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
+    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
+  };
+  const HONNE={
+    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
+    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
+    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
+  };
+  const CONF={
+    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
+    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
+    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
+  };
+  const g=GRAV[self[2]+other[2]];
+  let tags=[g.tag], text=g.full;
+  if(!g.friction){
+    const hon=HONNE[self[0]+other[0]];
+    const con=CONF[self[1]+other[1]];
+    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
+    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
+  }
+  return {tags:tags, text:text};
+}
+function compatScore(self, other){
+  if(self===other) return -Infinity;
+  let s=0;
+  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
+  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
+  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
+  return s;
+}
+
+function axisRowHTML(name,left,right,leftOn,rightOn,dotLeft){
+  return '<div class="axis-row"><div class="axis-name">'+name+'</div>'+
+    '<div class="axis-track-wrap"><div class="axis-ends">'+
+      '<span class="'+(leftOn?'on':'')+'">'+left+'</span><span class="'+(rightOn?'on':'')+'">'+right+'</span>'+
+    '</div><div class="axis-track"><span class="axis-dot" style="left:'+dotLeft+'%"></span></div></div></div>';
+}
+function compatHTML(selfCode){
+  let best=null, bestScore=-Infinity;
+  Object.keys(TYPES).forEach(code=>{ if(code===selfCode) return; const sc=compatScore(selfCode,code); if(sc>bestScore){ bestScore=sc; best=code; } });
+  return Object.keys(TYPES).map(code=>{
+    const t=TYPES[code], c=compatLine(selfCode,code);
+    const pole=(t.pole==='guard')?'pole-guard':'pole-open';
+    const isBest=(code===best);
+    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
+    const bestBadge=isBest?'<span class="ct-best">ベストマッチ</span>':'';
+    const selfBadge=(code===selfCode)?'<span class="ct-self">あなた</span>':'';
+    return '<div class="compat-row '+pole+(isBest?' is-best':'')+'"><div class="ct-head">'+
+      '<span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+
+      '</div><div class="ct-text">'+c.text+'</div></div>';
+  }).join('');
+}
+function buildCard(code){
+  const t=TYPES[code];
+  const pole=(t.pole==='guard')?'pole-guard':'pole-open';
+  // 3軸（本音・衝突・重心）：タイプが示す極にドットを置く
+  const ax3=[
+    ['本音', AX.h.left, AX.h.right, code[0]==='O'],
+    ['衝突', AX.c.left, AX.c.right, code[1]==='B'],
+    ['重心', AX.w.left, AX.w.right, code[2]==='L'],
+  ].map(function(r){ const leftOn=r[3]; return axisRowHTML(r[0],r[1],r[2],leftOn,!leftOn,leftOn?8:92); }).join('');
+  // 5軸（代表例）
+  const radar=radarOf(code);
+  const ax5=RADAR_AXES.map(function(a){ const s=radar[a], m=RADAR_META[a]; return axisRowHTML(m.name,m.left,m.right,s<0.5,s>0.5,8+s*84); }).join('');
+  // 特徴的な軸（中央から最も離れた軸）
+  let f=RADAR_AXES[0];
+  RADAR_AXES.forEach(function(a){ if(Math.abs(radar[a]-0.5)>Math.abs(radar[f]-0.5)) f=a; });
+  const m=RADAR_META[f], right=radar[f]>=0.5;
+  const poleLabel=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
+  const pv='<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
+    '<div class="cap-axis">「'+poleLabel+'」寄り</div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
+  const aru=t.aru.map(function(a){ return '<li>'+a+'</li>'; }).join('');
+  const el=document.createElement('section');
+  el.className='card '+pole; el.id=code;
+  el.innerHTML=
+    '<div class="card-head"><span class="chip">'+code+'</span><h2 class="tname">'+t.name+'</h2><p class="tcatch">'+t.catch+'</p></div>'+
+    '<div class="card-body">'+
+      '<p class="sectlabel">あなたの人間関係タイプ</p><div class="axes">'+ax3+'</div>'+
+      '<p class="sectlabel">人間関係における5つの軸</p><div class="axes">'+ax5+'</div>'+
+      '<p class="sectlabel">特徴的な軸と、その活かし方</p><div class="pv">'+pv+'</div>'+
+      '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
+      '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
+      '<div class="row-block"><p class="sectlabel">相性</p><p>'+t.aishou+'</p></div>'+
+      '<div class="compat"><p class="sectlabel">あの人との相性（8タイプ別）</p>'+
+        '<p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>'+
+        '<div class="compat-list">'+compatHTML(code)+'</div></div>'+
+      '<div class="hitotsu"><div class="h-label">あなたが良い人間関係を築くためのワンポイント</div><p>'+t.hitotsu+'</p></div>'+
+    '</div>';
+  return el;
+}
+const gallery=document.getElementById('gallery');
+Object.keys(TYPES).forEach(function(code){ gallery.appendChild(buildCard(code)); });
+</script>
+</body>
+</html>

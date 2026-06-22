@@ -22,8 +22,13 @@ var HEADERS = [
   'Q7_本音', 'Q8_衝突', 'Q9_重心',
   '判定_本音', '判定_衝突', '判定_重心',
   'タイプコード', 'タイプ名',
+  // 5軸スコア（0〜1。0=左の極／1=右の極／0.5=中央）。タイプ名の右に配置。フロントの radar から記録。
+  '5軸_本音', '5軸_任せ方', '5軸_境界', '5軸_摩擦', '5軸_間合い',
   'これは私だ', '他者当てはめ', '他者当てはめ_誰', '見せたい・話したい', '見せたい_誰', '深掘りしたい', '滑った部分',
-  'メールアドレス', '自由記述', '回答ID'
+  'メールアドレス', '自由記述', '回答ID',
+  // 「紹介者名」「備考」はスプレッドシート側で手入力する既存列。位置を保持して壊さないため明示する。
+  // 「立場」は24問回答後に取得する任意項目（アドバイス精度向上のための情報）。末尾に追加。
+  '紹介者名', '備考', '立場'
 ];
 
 function doPost(e) {
@@ -52,6 +57,7 @@ function doPost(e) {
 function handleCreate(sheet, data) {
   var a = data.answers || [];
   var axes = data.axes || {};
+  var radar = data.radar || {};
   var values = {
     'タイムスタンプ': new Date(),
     'モード': data.mode || '',
@@ -61,11 +67,15 @@ function handleCreate(sheet, data) {
     'Q7_本音': a[6] || '', 'Q8_衝突': a[7] || '', 'Q9_重心': a[8] || '',
     '判定_本音': axes.h || '', '判定_衝突': axes.c || '', '判定_重心': axes.w || '',
     'タイプコード': data.code || '', 'タイプ名': data.name || '',
+    '5軸_本音': rscore(radar.safety), '5軸_任せ方': rscore(radar.trust), '5軸_境界': rscore(radar.bound),
+    '5軸_摩擦': rscore(radar.conflict), '5軸_間合い': rscore(radar.connect),
     'これは私だ': data.me || '', '他者当てはめ': data.others || '', '他者当てはめ_誰': data.othersWho || '',
     '見せたい・話したい': data.share || '', '見せたい_誰': data.shareWho || '',
     '深掘りしたい': data.dig || '', '滑った部分': data.miss || '',
     'メールアドレス': data.email || '', '自由記述': data.relationship || '',
-    '回答ID': data.id || ''
+    '回答ID': data.id || '',
+    // 紹介者名・備考は手入力列のため新規行では空のまま。立場はフロントから受け取って記録。
+    '立場': data.position || ''
   };
   sheet.appendRow(HEADERS.map(function (h) { return values.hasOwnProperty(h) ? values[h] : ''; }));
 }
@@ -105,8 +115,37 @@ function findRowById(sheet, id) {
   return -1;
 }
 
-// 1行目を正しいヘッダーに揃える（列が足りなければ追加し、無い／古い場合は上書き）
+// 既存シートにも、タイプ名の右へ5軸スコア列を物理挿入して桁ずれを防ぐ（doPostのロック内で1回だけ・冪等）。
+// 既存データは挿入位置より右へ正しくシフトする。
+function ensureRadarColumns(sheet) {
+  var lastCol = sheet.getLastColumn();
+  if (lastCol < 1) return;
+  var row1 = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (row1.indexOf('5軸_本音') !== -1) return; // 挿入済み
+  var typeNameCol = row1.indexOf('タイプ名') + 1;
+  if (typeNameCol === 0) return; // タイプ名が無い（新規/空シート）はここでは触らず、ensureHeaderが全体を整える
+  var radarHeaders = ['5軸_本音', '5軸_任せ方', '5軸_境界', '5軸_摩擦', '5軸_間合い'];
+  sheet.insertColumnsAfter(typeNameCol, radarHeaders.length);
+  sheet.getRange(1, typeNameCol + 1, 1, radarHeaders.length).setValues([radarHeaders]);
+}
+
+// 0〜1のスコアを小数2桁に丸める。数値でなければ空文字。
+function rscore(v) {
+  return (typeof v === 'number') ? Math.round(v * 100) / 100 : '';
+}
+
+// 手動実行用：デプロイ後にこの関数を1回実行すると、送信を待たずにすぐ5軸列が挿入・整備される。
+function setupRadarColumns() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) return 'シートが見つかりません: ' + SHEET_NAME;
+  ensureHeader(sheet);
+  return '5軸列の整備が完了しました';
+}
+
+// 1行目を正しいヘッダーに揃える（列が足りなければ追加し、無い／古い場合は上書き）。先に5軸列の整備も行う。
 function ensureHeader(sheet) {
+  ensureRadarColumns(sheet);
   var width = HEADERS.length;
   if (sheet.getMaxColumns() < width) {
     sheet.insertColumnsAfter(sheet.getMaxColumns(), width - sheet.getMaxColumns());

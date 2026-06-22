@@ -219,6 +219,30 @@
     <p class="qhint" id="qhint">どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。</p>
   </section>
 
+  <!-- POSITION（24問の回答後・結果表示の前に取得する任意項目。タイプ結果は変えず、アドバイス精度のための情報） -->
+  <section class="screen" id="position">
+    <h2 class="hero" style="font-size:clamp(22px,5vw,30px)">回答お疲れ様でした。</h2>
+    <p class="lead">いまのあなたの立場がわかると、結果に添えるアドバイスを、より状況に合った内容でお届けできます。</p>
+    <p class="meta">回答は任意です。回答しない場合は、下の「スキップ」からそのまま結果に進めます。</p>
+    <div class="field">
+      <label for="positionSel">いまのあなたの立場に近いのは？</label>
+      <select id="positionSel">
+        <option value="">選択してください</option>
+        <option value="経営者">経営者（社長・役員など）</option>
+        <option value="管理職">管理職（部下・チームをもつ立場）</option>
+        <option value="メンバー">メンバー（一般の社員・スタッフ）</option>
+        <option value="業務委託・フリーランス">業務委託・フリーランス</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    <div class="field" id="positionOtherWrap" hidden>
+      <label for="positionOther">その他（自由記述・任意）</label>
+      <input id="positionOther" type="text" placeholder="例：求職中、学生、休職中 など">
+    </div>
+    <button class="btn btn-wide" id="positionNext">この内容で結果を見る</button>
+    <button class="qback" id="positionSkip" style="display:block; width:100%; text-align:center; margin-top:18px">スキップして結果を見る →</button>
+  </section>
+
   <!-- RESULT -->
   <section class="screen" id="result">
     <div class="card result-accent" id="card">
@@ -496,6 +520,7 @@ const ITEMS = QUESTIONS.map(q=>Object.assign({kind:'bin'},q))
   .concat(RADAR_Q.map(q=>({kind:'lik',axis:q.axis,text:q.text})));
 
 let idx=0;
+let _pending=null;
 const answers=new Array(ITEMS.length).fill(null);
 const $=id=>document.getElementById(id);
 
@@ -557,8 +582,23 @@ function radarScores(){
 function finish(){
   const h=tally('h'), c=tally('c'), w=tally('w');
   const code=(h.L>=2?'O':'G')+(c.L>=2?'B':'K')+(w.L>=2?'L':'S');
-  renderResult(code,{h,c,w}, radarScores());
+  _pending={code, counts:{h,c,w}, radar:radarScores()};
+  show('position');
 }
+// 立場（任意）：24問の回答後・結果表示の前に取得。タイプ結果は変えず、アドバイス精度を高めるための情報。
+$('positionSel').onchange=()=>{ $('positionOtherWrap').hidden = ($('positionSel').value!=='その他'); };
+function currentPosition(){
+  const sel=$('positionSel').value;
+  if(sel==='その他'){ const o=$('positionOther').value.trim(); return o ? ('その他：'+o) : 'その他'; }
+  return sel;
+}
+function showResultFromPending(pos){
+  if(!_pending) return;
+  window._position = pos;
+  renderResult(_pending.code, _pending.counts, _pending.radar);
+}
+$('positionNext').onclick=()=>showResultFromPending(currentPosition());
+$('positionSkip').onclick=()=>showResultFromPending('');
 function renderResult(code,counts,radar){
   const t=TYPES[code]; const card=$('card');
   card.classList.remove('result-accent');
@@ -713,6 +753,7 @@ function recordDiagnosis(r){
     axes:{h:r.code[0], c:r.code[1], w:r.code[2]},
     code:r.code, name:r.name,
     radar:r.radar,
+    position: window._position || '',
   }).catch(()=>{});
 }
 // フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
@@ -767,6 +808,8 @@ $('restartBtn').onclick=()=>{
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
   $('rel').value=''; $('mail').value=''; $('partnerType').value='';
+  $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
+  window._position=''; _pending=null;
   renderQ(); show('quiz');
 };
 
