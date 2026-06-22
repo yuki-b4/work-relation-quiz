@@ -305,7 +305,7 @@
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
             <div class="cc-label">たった1人との人間関係の悩みが、仕事を大変にしていませんか？</div>
-            <p class="cc-text">あなたのタイプをもとに、その相手との関係をどう考え、どう動けば良いのかを読み解いてお伝えします。読み解きの結果については、2〜3日以内に下記に入力いただくメールアドレスに送付いたします。</p>
+            <p class="cc-text">いま、診断を受けた方に、その関係を一緒にほどく<b>読み解きセッションを1回プレゼント</b>しています。まずはメールアドレスを登録して、あなたのタイプに沿った<b>3日間の読み解きガイド</b>を受け取ってください。</p>
             <div class="field">
               <label for="partnerType">相手はどのタイプだと思いますか？（任意。分かると読み解きの精度が上がります）</label>
               <select id="partnerType">
@@ -321,14 +321,14 @@
               </select>
             </div>
             <div class="field">
-              <label for="rel">その相手との関係で、具体的に困っていることを一つ教えてください</label>
+              <label for="rel">いま引っかかっている関係で、具体的に困っていることがあれば教えてください（任意。書いていただくと、ガイドがあなたの状況に沿います）</label>
               <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
             </div>
             <div class="field">
-              <label for="mail">読み解きをお届けするメールアドレス</label>
+              <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
-            <button class="btn btn-wide btn-accent" id="submitLead">この関係の読み解きを受け取る</button>
+            <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
           </div>
         </div>
 
@@ -821,9 +821,8 @@ $('submitLead').onclick=()=>{
   const rel=$('rel').value.trim();
   const partner=$('partnerType').value;
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  if(!rel){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
   const relationship = (partner ? '【相手の想定タイプ：'+partner+'】 ' : '') + rel;
-  sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
+  sendSurvey({email,relationship}, $('submitLead'), '登録ありがとうございます。3日間の読み解きガイドをメールでお届けします。');
 };
 
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
