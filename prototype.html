@@ -194,6 +194,10 @@
   .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
   .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
   .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
+  /* 想定職場の固定：冒頭の説明ボックスと、回答中に出すアンカー */
+  .frame-why{font-size:13.5px; line-height:1.7; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
+  .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
+  .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
 </style>
 </head>
 <body>
@@ -207,12 +211,32 @@
     <button class="btn" id="startBtn">診断を始める</button>
   </section>
 
+  <!-- FRAME（診断冒頭：想定する職場をひとつに固定する。複数経験者の回答ブレを防ぐ） -->
+  <section class="screen" id="frame">
+    <div class="eyebrow">はじめに</div>
+    <h2 class="hero" style="font-size:clamp(22px,5vw,30px)">思い浮かべる職場を、ひとつ決めてください。</h2>
+    <p class="frame-why">複数の職場を経験している方ほど、知らないうちに「一番本気で関わった職場」を思い浮かべて答える傾向があります。途中で別の職場が頭をよぎると結果がブレるので、最後まで同じ職場の自分を思い浮かべて答えてください。</p>
+    <div class="field">
+      <label for="frameSel">どの職場を思い浮かべますか？</label>
+      <select id="frameSel">
+        <option value="">選択してください</option>
+        <option value="いま在籍している職場">いま在籍している職場</option>
+        <option value="一番本気で関わった職場">一番本気で関わった職場</option>
+        <option value="直近で離れた職場">直近で離れた職場</option>
+        <option value="その他の場（アルバイト・副業・学校など）">その他の場（アルバイト・副業・学校など）</option>
+      </select>
+    </div>
+    <button class="btn btn-wide" id="frameStart">この職場で診断を始める</button>
+    <p class="frame-note" id="frameNote"></p>
+  </section>
+
   <!-- QUIZ -->
   <section class="screen" id="quiz">
     <div class="qtop">
       <span class="qcount" id="qcount">1 / 24</span>
       <div class="bar"><i id="barfill"></i></div>
     </div>
+    <p class="qframe" id="qframe"></p>
     <p class="qtext" id="qtext"></p>
     <div class="choices" id="choices"></div>
     <button class="qback" id="backBtn" hidden>← ひとつ戻る</button>
@@ -278,9 +302,10 @@
           <p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
           <div class="compat-list" id="r-compat"></div>
           <div class="compat-cta" id="deepBlock">
-            <p class="cc-preview" id="deepPreviewNote" hidden>▼ ここから下は、紹介で来た方に表示される「深掘りの申込」画面です。試して、使えそうか感想をいただけると助かります。</p>
+            <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
+            <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
             <div class="cc-label">たった1人との人間関係の悩みが、仕事を大変にしていませんか？</div>
-            <p class="cc-text">あなたのタイプをもとに、その相手との関係をどう考え、どう動けば良いのかを読み解いてお伝えします。読み解きの結果については、2〜3日以内に下記に入力いただくメールアドレスに送付いたします。</p>
+            <p class="cc-text">いま、診断を受けた方に、その関係を一緒にほどく<b>読み解きセッションを1回プレゼント</b>しています。まずはメールアドレスを登録して、あなたのタイプに沿った<b>3日間の読み解きガイド</b>を受け取ってください。</p>
             <div class="field">
               <label for="partnerType">相手はどのタイプだと思いますか？（任意。分かると読み解きの精度が上がります）</label>
               <select id="partnerType">
@@ -296,14 +321,14 @@
               </select>
             </div>
             <div class="field">
-              <label for="rel">その相手との関係で、具体的に困っていることを一つ教えてください</label>
+              <label for="rel">いま引っかかっている関係で、具体的に困っていることがあれば教えてください（任意。書いていただくと、ガイドがあなたの状況に沿います）</label>
               <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
             </div>
             <div class="field">
-              <label for="mail">読み解きをお届けするメールアドレス</label>
+              <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
-            <button class="btn btn-wide btn-accent" id="submitLead">この関係の読み解きを受け取る</button>
+            <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
           </div>
         </div>
 
@@ -408,11 +433,11 @@ const QUESTIONS = [
   {axis:'h', text:'会議で違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
   {axis:'c', text:'意見が真っ向から対立したとき、あなたは？', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
   {axis:'w', text:'誰も決めない・動かない場面で、あなたは？', a:{t:'「じゃあ自分が」と前に出て引っ張る',p:'L'}, b:{t:'引っ張る人を支える・補佐に回る',p:'S'}},
-  {axis:'h', text:'モヤモヤや不満があるとき、周りは？', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
-  {axis:'c', text:'場の空気が重く、ピリついてきたとき、あなたは？', a:{t:'問題そのものに切り込む',p:'B'}, b:{t:'冗談や話題転換で、まず空気をゆるめる',p:'K'}},
-  {axis:'w', text:'あなたが心地よいのは？', a:{t:'主導権を握って進める立場',p:'L'}, b:{t:'誰かを立てて、その人を活かす立場',p:'S'}},
+  {axis:'h', text:'あなた自身がモヤモヤや不満を抱えているとき、周りは？', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
+  {axis:'c', text:'解決すべき問題があって、場の空気が張りつめているとき、あなたは？', a:{t:'問題そのものに切り込む',p:'B'}, b:{t:'冗談や話題転換で、まず空気をゆるめる',p:'K'}},
+  {axis:'w', text:'あなたが心地よいのは？', a:{t:'自分が主導権を握って進める立場',p:'L'}, b:{t:'前に立つ人を立て、後ろから支える立場',p:'S'}},
   {axis:'h', text:'自分が手一杯で苦しいとき、あなたは？', a:{t:'「ちょっと厳しいです」と早めに声を上げる',p:'O'}, b:{t:'まず自分で抱えて、なんとかしようとする',p:'G'}},
-  {axis:'c', text:'相手が明らかに筋を外しているとき、あなたは？', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
+  {axis:'c', text:'相手が明らかに間違ったことを言っている・しているとき、あなたは？', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
   {axis:'w', text:'新しいプロジェクトで、つい取りに行くのは？', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
 ];
 
@@ -495,16 +520,16 @@ const RADAR_META = {
 const RADAR_Q = [
   {axis:'safety',  text:'相手や立場が変わっても、反対意見ははっきり口にするほうだ'},
   {axis:'trust',   text:'重要な仕事でも、思い切って人に任せるほうだ'},
-  {axis:'bound',   text:'無理な依頼には「できません」と言うほうだ'},
-  {axis:'conflict',text:'意見がぶつかっても、関係を壊さず話し合うほうだ'},
+  {axis:'bound',   text:'引き受けると手一杯になる依頼は「できません」と断るほうだ'},
+  {axis:'conflict',text:'意見がぶつかっても、逃げずに、関係を保ちながら話し合うほうだ'},
   {axis:'connect', text:'相手の良いところは、自分から言葉にして伝えるほうだ'},
   {axis:'safety',  text:'自分の失敗やミスは、隠さず打ち明けるほうだ'},
   {axis:'trust',   text:'人に任せたら、細かく口を出さずに見守るほうだ'},
   {axis:'bound',   text:'手一杯なときは「いま厳しい」と早めに伝えるほうだ'},
   {axis:'conflict',text:'必要なときは、対立から逃げずに向き合うほうだ'},
   {axis:'connect', text:'感謝や「ありがとう」を、ためらわず口にするほうだ'},
-  {axis:'safety',  text:'「わからない」「助けてほしい」と、自分から言うほうだ'},
-  {axis:'trust',   text:'相手の力量を信じて、安心して頼るほうだ'},
+  {axis:'safety',  text:'困ったときは「助けてほしい」と、自分から言うほうだ'},
+  {axis:'trust',   text:'仕事を任せるとき、相手の力量を信じて、安心してゆだねるほうだ'},
   {axis:'bound',   text:'相手の期待と自分の事情を、自分からすり合わせるほうだ'},
   {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
   {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
@@ -521,6 +546,7 @@ const ITEMS = QUESTIONS.map(q=>Object.assign({kind:'bin'},q))
 
 let idx=0;
 let _pending=null;
+let workplaceFrame='';
 const answers=new Array(ITEMS.length).fill(null);
 const $=id=>document.getElementById(id);
 
@@ -754,6 +780,7 @@ function recordDiagnosis(r){
     code:r.code, name:r.name,
     radar:r.radar,
     position: window._position || '',
+    workplaceFrame: workplaceFrame || '', // 想定職場（ログ保存には Code.gs に列追加＋再デプロイが必要）
   }).catch(()=>{});
 }
 // フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
@@ -794,9 +821,8 @@ $('submitLead').onclick=()=>{
   const rel=$('rel').value.trim();
   const partner=$('partnerType').value;
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  if(!rel){ $('protoNote').textContent='深掘りのために、引っかかっている関係をひとつご記入ください。'; return; }
   const relationship = (partner ? '【相手の想定タイプ：'+partner+'】 ' : '') + rel;
-  sendSurvey({email,relationship}, $('submitLead'), '送信しました。深掘りの読み解きを後日メールでお届けします。');
+  sendSurvey({email,relationship}, $('submitLead'), '登録ありがとうございます。3日間の読み解きガイドをメールでお届けします。');
 };
 
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
@@ -810,7 +836,8 @@ $('restartBtn').onclick=()=>{
   $('rel').value=''; $('mail').value=''; $('partnerType').value='';
   $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
   window._position=''; _pending=null;
-  renderQ(); show('quiz');
+  workplaceFrame=''; $('frameSel').value=''; $('frameNote').textContent=''; $('qframe').textContent='';
+  show('frame');
 };
 
 function legacyCopy(text){
@@ -853,7 +880,15 @@ $('shareBtn').onclick=async ()=>{
 // モード切替：lead は検証アンケートを隠す／feedback（8名）は深掘りフォームを「紹介先プレビュー」と明示
 if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
 else { $('deepPreviewNote').hidden=false; }
-$('startBtn').onclick=()=>{ renderQ(); show('quiz'); };
+$('startBtn').onclick=()=>{ show('frame'); };
+$('frameStart').onclick=()=>{
+  const sel=$('frameSel').value;
+  if(!sel){ $('frameNote').textContent='思い浮かべる職場をひとつ選んでください。'; return; }
+  workplaceFrame=sel;
+  $('qframe').textContent='想定中の職場：'+sel;
+  idx=0; answers.fill(null);
+  renderQ(); show('quiz');
+};
 renderQ();
 </script>
 </body>
