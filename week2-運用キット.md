@@ -5,7 +5,7 @@
 
 - コピー文はそのまま送れる形。`{ }` の箇所だけ差し替える。
 - 本文に長音ダッシュは使わない（プロジェクトの表記ルール）。
-- 関連：全体像は `ROADMAP.md`、記録の仕組みは `apps-script/README.md`。
+- 関連：全体像は[ロードマップ（Googleスプレッドシート）](https://docs.google.com/spreadsheets/d/1eb-P739JJs7qi1c9Uzy_WpZhy0gsCag382YzohFOBEY/edit)、記録の仕組みは `apps-script/README.md`。
 
 ---
 

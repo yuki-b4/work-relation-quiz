@@ -26,6 +26,12 @@
 
 - https://docs.google.com/spreadsheets/d/1ve8KILi6TJ1uc4w7L3wmLQyJXLZAWr4EyYRAcD9zlas/edit
 
+### ロードマップ（今後の開発・Funnel 1 90日ロードマップの参照先）
+
+今後の開発および Funnel 1 の90日ロードマップ・12ヶ月計画は、以下のGoogleスプレッドシートを唯一の参照先とする（旧 `ROADMAP.md` は廃止）。
+
+- https://docs.google.com/spreadsheets/d/1eb-P739JJs7qi1c9Uzy_WpZhy0gsCag382YzohFOBEY/edit
+
 ### ルール：スプレッドシート参照時のシート指定
 
 - ユーザーがこのスプレッドシートを参照する際は、**必ずシート指定（複数可）があるはず**である。
