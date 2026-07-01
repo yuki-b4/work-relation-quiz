@@ -13,6 +13,7 @@
 - `index.html` / `.nojekyll` — GitHub Pages 公開用。`index.html` はクエリ（`?ref=` 等）を引き継いで `prototype.html` へリダイレクト
 - `apps-script/` — 診断結果・検証フィードバック・紹介者リード（メール/自由記述）をGoogleスプレッドシート（回答ログ）に記録する Google Apps Script Web App とセットアップ手順
 - `guide-3day-spec.md` — メール登録者に手動で送る「3日間の読み解きガイド」を生成するための仕様。受診者タイプを指示すると、この仕様と `all-types.html` の素材から Day1〜3 を生成する（現状は手動運用、将来は本実装）。
+- `文脈出し分け仕様.md` — 個人／法人で出し分ける入口・立場・CTAのコピー素材。結果カードの核は共通のまま。LP制作フェーズ（M2〜M3）で `?ctx=` 実装時に参照。
 
 ## 表記ルール
 
