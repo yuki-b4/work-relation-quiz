@@ -62,9 +62,20 @@
   ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
   .row-block{ margin-bottom:26px }
   .row-block p{ font-size:15px; color:var(--ink) }
-  .hitotsu{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px }
-  .hitotsu .h-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em }
-  .hitotsu p{ font-size:15px; color:var(--ink) }
+  /* トリセツ（取扱説明書）：このタイプとの付き合い方 */
+  .toriset{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px }
+  .toriset .ts-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px }
+  .toriset .ts-lead{ font-size:13px; color:var(--muted); margin-bottom:14px }
+  .ts-item{ padding:12px 0; border-top:1px solid rgba(0,0,0,.06) }
+  .ts-item:first-child{ border-top:none; padding-top:2px }
+  .ts-item .ts-l{ display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px }
+  .ts-item .ts-t{ font-size:14.5px; line-height:1.7; color:var(--ink) }
+  /* 深層（本質）：なぜそう振る舞うのか */
+  .honshitsu{ border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px; background:var(--surface) }
+  .honshitsu .hs-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.03em; margin-bottom:3px }
+  .honshitsu .hs-sub{ font-size:12.5px; color:var(--faint); margin-bottom:15px }
+  .honshitsu .hs-core{ font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px }
+  .honshitsu .hs-cost{ font-size:14.5px; line-height:1.8; color:var(--muted) }
   .pv{ border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft) }
   .pv .cap{ font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink) }
   .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink) }
@@ -173,6 +184,68 @@ const TYPES = {
   aishou:'根回しの仕掛け人(GKL)と穏やか。でも、突撃隊長(OBL)の圧には、飲まれやすい。',
   hitotsu:'あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。'},
 };
+// トリセツ（取扱説明書）：8タイプ別。prototype.html と同一。このタイプとの付き合い方。
+const TORISET = {
+ OBL:[
+  {l:'こう接すると、うまくいく', t:'スピード感を否定せず、まず一緒に走ってみて。方向がずれたら、走りながら直せば大丈夫。'},
+  {l:'こんな時は、気づいてほしい', t:'勢いよく進めている時ほど、実は不安。「大丈夫？」の一言で、すっと力が抜けます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱さや迷いを、否定せずに受け止めてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'強く見えても、止まるのが怖いだけ。自信家でも自分勝手でもありません。'}],
+ OBS:[
+  {l:'こう接すると、うまくいく', t:'意見を頭ごなしに否定せず、まず筋を聞いて。納得できれば、すっと引きます。'},
+  {l:'こんな時は、気づいてほしい', t:'正論を言った後は、たいてい「きつかったかな」と反省中。追い打ちをかけないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'正しさより先に、気持ちを分かろうとしてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'批判したいのではなく、良くしたいだけ。根っこはいつも味方です。'}],
+ OKL:[
+  {l:'こう接すると、うまくいく', t:'明るさに乗ってあげて。ノリを楽しんでくれる人には、全力で場を作ります。'},
+  {l:'こんな時は、気づいてほしい', t:'やたら明るい時は、重い話にフタをしているサイン。そっと本音を聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'笑わせなくても、そのままでいていいと感じられた時。'},
+  {l:'誤解しないでほしいのは', t:'軽そうに見えて、実はすごく気を遣っています。嫌われるのが、けっこう怖い。'}],
+ OKS:[
+  {l:'こう接すると、うまくいく', t:'自由と距離感を尊重して。縛らない相手には、鋭い視点をどんどん出します。'},
+  {l:'こんな時は、気づいてほしい', t:'一歩引いている時は、当事者になるのが少し怖い時。責めずに背中を押して。'},
+  {l:'心を開くのは、こんな瞬間', t:'意見を否定せず、面白がってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'他人事に見えて、本当はよく見ています。冷めているわけではありません。'}],
+ GBL:[
+  {l:'こう接すると、うまくいく', t:'多くを語らなくても、信じて任せて。いざという時は、必ず引き受けます。'},
+  {l:'こんな時は、気づいてほしい', t:'「大丈夫」と言う時ほど、抱えていることが多い。気づいてもらえると救われます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱音を、弱さとして扱われなかった時。'},
+  {l:'誤解しないでほしいのは', t:'怖いのではなく、伝えるのが下手なだけ。本当は面倒見がいいんです。'}],
+ GBS:[
+  {l:'こう接すると、うまくいく', t:'見えない働きに気づいて、言葉にして。それだけで、また頑張れます。'},
+  {l:'こんな時は、気づいてほしい', t:'何も言わない時ほど、限界が近いかも。「無理してない？」と聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'「ありがとう」を、ちゃんと受け取ってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'便利な人ではありません。断らないのは、あなたを困らせたくないからです。'}],
+ GKL:[
+  {l:'こう接すると、うまくいく', t:'正面から問い詰めず、まず安心させて。安全だと分かれば、本音を出します。'},
+  {l:'こんな時は、気づいてほしい', t:'はっきり言わない時は、波風を立てたくない時。急かさないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'探り合いでなく、まっすぐ信頼を示してもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'裏があるのではなく、みんなが穏やかでいられる道を探しているだけ。'}],
+ GKS:[
+  {l:'こう接すると、うまくいく', t:'「あなたはどうしたい？」と聞いてあげて。自分を後回しにしがちだから。'},
+  {l:'こんな時は、気づいてほしい', t:'笑顔で「大丈夫」と言う時ほど、我慢しているかも。気にかけて。'},
+  {l:'心を開くのは、こんな瞬間', t:'気を遣わなくていい、と心から思えた時。'},
+  {l:'誤解しないでほしいのは', t:'ただの「いい人」ではありません。あなたとの居心地を守るために、無理をしています。'}],
+};
+// 深層（本質）：8タイプ別。prototype.html と同一。なぜそう振る舞うのか（図星＋消耗の構造）。
+const HONSHITSU = {
+ OBL:{core:'あなたが先頭を走るのは、自信があるからではありません。ほんとうは「止まると不安だから、先に動く」。動き続けることで、心の落ち着きを保っているのです。',
+      cost:'だからこそ、強すぎる直球が周りを沈黙させ、ふと振り返ると一人だった、ということが起きます。情熱は人を動かし、同時に遠ざけてしまう。'},
+ OBS:{core:'あなたが間違いを見逃せないのは、意地悪だからではありません。ほんとうは「正しさで、場や人を守りたい」。筋を通すことが、あなたなりの誠実さなのです。',
+      cost:'でも、正しさで相手を追い詰めた瞬間、関係にヒビが入る。あなたの正論は、時に相手の逃げ場を奪ってしまいます。'},
+ OKL:{core:'あなたが場を明るくするのは、ただ楽しいからではありません。ほんとうは「重くなるのが、こわい」。笑いに変えることで、対立から場を守っているのです。',
+      cost:'でも「まあまあ」で流すたび、ほんとうは解くべき問題にフタをしている。明るさの裏で、あなた自身の本音も置き去りになりがちです。'},
+ OKS:{core:'あなたが一歩引くのは、冷めているからではありません。ほんとうは「縛られたくない、でも当事者になるのは少しこわい」。自由さは、あなたの身の守り方でもあるのです。',
+      cost:'でも、良い意見を言うほど当事者になり損ね、せっかくの鋭さが影響力に変わらない。言葉は届くのに、信頼が積み上がりにくい。'},
+ GBL:{core:'あなたが多くを語らないのは、冷たいからではありません。ほんとうは「弱さを見せるのが、こわい」。背中で支えることが、あなたの責任の取り方なのです。',
+      cost:'でも「大丈夫」と抱え込むほど、周りはあなたの内側が読めず、頼れる人なのに近寄りがたくなる。強さが、孤立を呼んでしまいます。'},
+ GBS:{core:'あなたが断れないのは、優柔不断だからではありません。ほんとうは「相手を困らせたくない」。黙ってやり切ることが、あなたの思いやりの形なのです。',
+      cost:'でも、NOを飲み込むほど我慢は静かに溜まり、ある日プツンと切れる。その限界は、自分でも周りでも気づけない時限爆弾になりがちです。'},
+ GKL:{core:'あなたが根回しをするのは、腹黒いからではありません。ほんとうは「誰も傷つけずに、前に進めたい」。波風を立てない道を探すのが、あなたの優しさなのです。',
+      cost:'でも、本音を最後まで見せないほど「裏がある」と誤解され、あなたの穏やかさが、かえって不信の火種になってしまうことがあります。'},
+ GKS:{core:'あなたが自分を後回しにするのは、遠慮からではありません。ほんとうは「みんなが心地よくいられる場を、守りたい」。合わせることが、あなたの愛情表現なのです。',
+      cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
+};
 const AX = {
   h:{left:'オープン',right:'ガード'},
   c:{left:'ぶつかる',right:'かわす'},
@@ -209,66 +282,11 @@ const SAMPLE = {
 };
 function radarOf(code){ const o={}; RADAR_AXES.forEach(a=>{ o[a]=(SAMPLE[code][a]-1)/3; }); return o; }
 
-// 相性（prototype.html と同一ロジック）
-function compatLine(self, other){
-  if(self===other){
-    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
-  }
-  const GRAV={
-    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
-    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
-    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
-    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
-  };
-  const HONNE={
-    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
-    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
-    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
-  };
-  const CONF={
-    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
-    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
-    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
-  };
-  const g=GRAV[self[2]+other[2]];
-  let tags=[g.tag], text=g.full;
-  if(!g.friction){
-    const hon=HONNE[self[0]+other[0]];
-    const con=CONF[self[1]+other[1]];
-    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
-    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
-  }
-  return {tags:tags, text:text};
-}
-function compatScore(self, other){
-  if(self===other) return -Infinity;
-  let s=0;
-  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
-  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
-  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
-  return s;
-}
-
 function axisRowHTML(name,left,right,leftOn,rightOn,dotLeft){
   return '<div class="axis-row"><div class="axis-name">'+name+'</div>'+
     '<div class="axis-track-wrap"><div class="axis-ends">'+
       '<span class="'+(leftOn?'on':'')+'">'+left+'</span><span class="'+(rightOn?'on':'')+'">'+right+'</span>'+
     '</div><div class="axis-track"><span class="axis-dot" style="left:'+dotLeft+'%"></span></div></div></div>';
-}
-function compatHTML(selfCode){
-  let best=null, bestScore=-Infinity;
-  Object.keys(TYPES).forEach(code=>{ if(code===selfCode) return; const sc=compatScore(selfCode,code); if(sc>bestScore){ bestScore=sc; best=code; } });
-  return Object.keys(TYPES).map(code=>{
-    const t=TYPES[code], c=compatLine(selfCode,code);
-    const pole=(t.pole==='guard')?'pole-guard':'pole-open';
-    const isBest=(code===best);
-    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
-    const bestBadge=isBest?'<span class="ct-best">ベストマッチ</span>':'';
-    const selfBadge=(code===selfCode)?'<span class="ct-self">あなた</span>':'';
-    return '<div class="compat-row '+pole+(isBest?' is-best':'')+'"><div class="ct-head">'+
-      '<span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+
-      '</div><div class="ct-text">'+c.text+'</div></div>';
-  }).join('');
 }
 function buildCard(code){
   const t=TYPES[code];
@@ -293,6 +311,15 @@ function buildCard(code){
     '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
     '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
   const aru=t.aru.map(function(a){ return '<li>'+a+'</li>'; }).join('');
+  // トリセツ（このタイプとの付き合い方）
+  const tsItems=(TORISET[code]||[]).map(function(it){ return '<div class="ts-item"><span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span></div>'; }).join('');
+  const toriset='<div class="toriset"><div class="ts-label">このタイプのトリセツ（付き合い方）</div>'+
+    '<p class="ts-lead">このタイプの人と、うまくやっていくコツ。</p>'+tsItems+'</div>';
+  // 深層（なぜそう振る舞うのか）
+  const hs=HONSHITSU[code];
+  const honshitsu=hs?('<div class="honshitsu"><div class="hs-label">深層</div>'+
+    '<p class="hs-sub">このタイプが、そう振る舞う「ほんとうの理由」。</p>'+
+    '<p class="hs-core">'+hs.core+'</p><p class="hs-cost">'+hs.cost+'</p></div>'):'';
   const el=document.createElement('section');
   el.className='card '+pole; el.id=code;
   el.innerHTML=
@@ -303,11 +330,8 @@ function buildCard(code){
       '<p class="sectlabel">特徴的な軸と、その活かし方</p><div class="pv">'+pv+'</div>'+
       '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
       '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
-      '<div class="row-block"><p class="sectlabel">相性</p><p>'+t.aishou+'</p></div>'+
-      '<div class="compat"><p class="sectlabel">あの人との相性（8タイプ別）</p>'+
-        '<p class="compat-hint">気になるあの人は、どのタイプ？ 思い浮かべながら見てください。</p>'+
-        '<div class="compat-list">'+compatHTML(code)+'</div></div>'+
-      '<div class="hitotsu"><div class="h-label">あなたが良い人間関係を築くためのワンポイント</div><p>'+t.hitotsu+'</p></div>'+
+      toriset+
+      honshitsu+
     '</div>';
   return el;
 }
