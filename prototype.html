@@ -121,6 +121,17 @@
   .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
   .hitotsu p{font-size:15px; color:var(--ink)}
 
+  /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
+  .toriset{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px}
+  .toriset .ts-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px}
+  .toriset .ts-lead{font-size:13px; color:var(--muted); margin-bottom:14px}
+  .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
+  .ts-item:first-child{border-top:none; padding-top:2px}
+  .ts-item .ts-l{display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px}
+  .ts-item .ts-t{font-size:14.5px; line-height:1.7; color:var(--ink)}
+  .ts-share{margin-top:16px}
+  .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
+
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
   .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
@@ -281,6 +292,14 @@
         <div class="row-block">
           <p class="sectlabel">強み</p>
           <p id="r-tsuyomi"></p>
+        </div>
+
+        <div class="toriset">
+          <div class="ts-label">あなたのトリセツ（取扱説明書）</div>
+          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
+          <div id="r-toriset"></div>
+          <button class="btn btn-sm btn-accent ts-share" id="torisetCopy">トリセツをコピーして送る</button>
+          <p class="ts-note" id="torisetNote"></p>
         </div>
 
         <div class="compat">
@@ -481,6 +500,51 @@ const TYPES = {
   cta:'あなたの「いま引っかかっている関係」で、最初の「私はこう思う」を取り戻す。'},
 };
 
+// トリセツ（取扱説明書）：8タイプ別。大切な人に渡す・送れる形の「私との付き合い方」。
+// 相性（良し悪しの判定）の代替として、理解と関わり方に振り切る。優劣はつけない。
+const TORISET = {
+ OBL:[
+  {l:'こう接すると、うまくいく', t:'スピード感を否定せず、まず一緒に走ってみて。方向がずれたら、走りながら直せば大丈夫。'},
+  {l:'こんな時は、気づいてほしい', t:'勢いよく進めている時ほど、実は不安。「大丈夫？」の一言で、すっと力が抜けます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱さや迷いを、否定せずに受け止めてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'強く見えても、止まるのが怖いだけ。自信家でも自分勝手でもありません。'}],
+ OBS:[
+  {l:'こう接すると、うまくいく', t:'意見を頭ごなしに否定せず、まず筋を聞いて。納得できれば、すっと引きます。'},
+  {l:'こんな時は、気づいてほしい', t:'正論を言った後は、たいてい「きつかったかな」と反省中。追い打ちをかけないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'正しさより先に、気持ちを分かろうとしてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'批判したいのではなく、良くしたいだけ。根っこはいつも味方です。'}],
+ OKL:[
+  {l:'こう接すると、うまくいく', t:'明るさに乗ってあげて。ノリを楽しんでくれる人には、全力で場を作ります。'},
+  {l:'こんな時は、気づいてほしい', t:'やたら明るい時は、重い話にフタをしているサイン。そっと本音を聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'笑わせなくても、そのままでいていいと感じられた時。'},
+  {l:'誤解しないでほしいのは', t:'軽そうに見えて、実はすごく気を遣っています。嫌われるのが、けっこう怖い。'}],
+ OKS:[
+  {l:'こう接すると、うまくいく', t:'自由と距離感を尊重して。縛らない相手には、鋭い視点をどんどん出します。'},
+  {l:'こんな時は、気づいてほしい', t:'一歩引いている時は、当事者になるのが少し怖い時。責めずに背中を押して。'},
+  {l:'心を開くのは、こんな瞬間', t:'意見を否定せず、面白がってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'他人事に見えて、本当はよく見ています。冷めているわけではありません。'}],
+ GBL:[
+  {l:'こう接すると、うまくいく', t:'多くを語らなくても、信じて任せて。いざという時は、必ず引き受けます。'},
+  {l:'こんな時は、気づいてほしい', t:'「大丈夫」と言う時ほど、抱えていることが多い。気づいてもらえると救われます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱音を、弱さとして扱われなかった時。'},
+  {l:'誤解しないでほしいのは', t:'怖いのではなく、伝えるのが下手なだけ。本当は面倒見がいいんです。'}],
+ GBS:[
+  {l:'こう接すると、うまくいく', t:'見えない働きに気づいて、言葉にして。それだけで、また頑張れます。'},
+  {l:'こんな時は、気づいてほしい', t:'何も言わない時ほど、限界が近いかも。「無理してない？」と聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'「ありがとう」を、ちゃんと受け取ってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'便利な人ではありません。断らないのは、あなたを困らせたくないからです。'}],
+ GKL:[
+  {l:'こう接すると、うまくいく', t:'正面から問い詰めず、まず安心させて。安全だと分かれば、本音を出します。'},
+  {l:'こんな時は、気づいてほしい', t:'はっきり言わない時は、波風を立てたくない時。急かさないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'探り合いでなく、まっすぐ信頼を示してもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'裏があるのではなく、みんなが穏やかでいられる道を探しているだけ。'}],
+ GKS:[
+  {l:'こう接すると、うまくいく', t:'「あなたはどうしたい？」と聞いてあげて。自分を後回しにしがちだから。'},
+  {l:'こんな時は、気づいてほしい', t:'笑顔で「大丈夫」と言う時ほど、我慢しているかも。気にかけて。'},
+  {l:'心を開くのは、こんな瞬間', t:'気を遣わなくていい、と心から思えた時。'},
+  {l:'誤解しないでほしいのは', t:'ただの「いい人」ではありません。あなたとの居心地を守るために、無理をしています。'}],
+};
+
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
   c:{left:'ぶつかる',right:'かわす',poles:['B','K']},
@@ -645,13 +709,31 @@ function renderResult(code,counts,radar){
   const ul=$('r-aru'); ul.innerHTML='';
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
   $('r-tsuyomi').textContent=t.tsuyomi;
+  renderToriset(code);
   $('r-hitotsu').textContent=t.hitotsu;
   $('protoNote').textContent='';
+  $('torisetNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
+}
+
+// トリセツ：タイプ別の「私との付き合い方」を描画
+function renderToriset(code){
+  const box=$('r-toriset'); if(!box) return; box.innerHTML='';
+  (TORISET[code]||[]).forEach(it=>{
+    const d=document.createElement('div'); d.className='ts-item';
+    d.innerHTML='<span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span>';
+    box.appendChild(d);
+  });
+}
+// トリセツを送れるテキストに（LINE等に貼って大切な人へ）
+function torisetText(){
+  const r=window._lastResult; if(!r) return '';
+  const items=(TORISET[r.code]||[]).map(it=>'・'+it.l+'：'+it.t).join('\n');
+  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\n#人間関係タイプ診断';
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -782,6 +864,21 @@ async function copyText(text){
   }
   return legacyCopy(text);
 }
+$('torisetCopy').onclick=async ()=>{
+  const text=torisetText(); if(!text) return;
+  const b=$('torisetCopy');
+  let ok=false;
+  try{ ok=await copyText(text); }catch(e){ ok=false; }
+  if(ok){
+    $('torisetNote').textContent='コピーしました。大切な人に送ってみてください。';
+    b.textContent='コピーしました'; b.classList.add('copied');
+    setTimeout(()=>{ b.textContent='トリセツをコピーして送る'; b.classList.remove('copied'); },2200);
+  } else {
+    const box=$('copyText'); box.value=text;
+    $('copyManual').hidden=false; box.focus(); box.select();
+    $('torisetNote').textContent='下のテキスト欄からコピーして送ってください。';
+  }
+};
 $('shareBtn').onclick=async ()=>{
   const r=window._lastResult; if(!r)return;
   const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#人間関係タイプ診断';
