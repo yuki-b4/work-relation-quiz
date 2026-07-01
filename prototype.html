@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>職場の人間関係タイプ診断（プロトタイプ）</title>
+<title>人間関係タイプ診断（プロトタイプ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -117,9 +117,24 @@
   .row-block{margin-bottom:26px}
   .row-block p{font-size:15px; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
-  .hitotsu{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px}
-  .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
-  .hitotsu p{font-size:15px; color:var(--ink)}
+  /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
+  .toriset{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px}
+  .toriset .ts-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px}
+  .toriset .ts-lead{font-size:13px; color:var(--muted); margin-bottom:14px}
+  .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
+  .ts-item:first-child{border-top:none; padding-top:2px}
+  .ts-item .ts-l{display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px}
+  .ts-item .ts-t{font-size:14.5px; line-height:1.7; color:var(--ink)}
+  .ts-share{margin-top:16px}
+  .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
+
+  /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
+  .honshitsu{border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px; background:var(--surface)}
+  .honshitsu .hs-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.03em; margin-bottom:3px}
+  .honshitsu .hs-sub{font-size:12.5px; color:var(--faint); margin-bottom:15px}
+  .honshitsu .hs-core{font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px}
+  .honshitsu .hs-cost{font-size:14.5px; line-height:1.8; color:var(--muted); margin-bottom:16px}
+  .honshitsu .hs-loop{font-size:14.5px; line-height:1.75; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
@@ -194,7 +209,7 @@
   .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
   .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
   .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
-  /* 想定職場の固定：冒頭の説明ボックスと、回答中に出すアンカー */
+  /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
   .frame-why{font-size:13.5px; line-height:1.7; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
   .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
   .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
@@ -204,29 +219,19 @@
 <div class="app">
   <!-- INTRO -->
   <section class="screen active" id="intro">
-    <div class="eyebrow">職場の人間関係タイプ診断</div>
-    <h1 class="hero">人間関係がうまくいくパターンを可視化する自己分析テスト。</h1>
-    <p class="lead">職場でのあなたの関わり方を、8つのタイプで映し出します。</p>
+    <div class="eyebrow">人間関係タイプ診断</div>
+    <h1 class="hero">自然体のあなたを知ることが、居心地のいい関係づくりの第一歩。</h1>
+    <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。自分を知り、身近なあの人を知るほど、関わりはラクになっていきます。</p>
     <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
     <button class="btn" id="startBtn">診断を始める</button>
   </section>
 
-  <!-- FRAME（診断冒頭：想定する職場をひとつに固定する。複数経験者の回答ブレを防ぐ） -->
+  <!-- FRAME（診断冒頭：特定の場面ではなく "自然体の自分" で答えるよう促し、回答のブレを防ぐ） -->
   <section class="screen" id="frame">
     <div class="eyebrow">はじめに</div>
-    <h2 class="hero" style="font-size:clamp(22px,5vw,30px)">思い浮かべる職場を、ひとつ決めてください。</h2>
-    <p class="frame-why">複数の職場を経験している方ほど、知らないうちに「一番本気で関わった職場」を思い浮かべて答える傾向があります。途中で別の職場が頭をよぎると結果がブレるので、最後まで同じ職場の自分を思い浮かべて答えてください。</p>
-    <div class="field">
-      <label for="frameSel">どの職場を思い浮かべますか？</label>
-      <select id="frameSel">
-        <option value="">選択してください</option>
-        <option value="いま在籍している職場">いま在籍している職場</option>
-        <option value="一番本気で関わった職場">一番本気で関わった職場</option>
-        <option value="直近で離れた職場">直近で離れた職場</option>
-        <option value="その他の場（アルバイト・副業・学校など）">その他の場（アルバイト・副業・学校など）</option>
-      </select>
-    </div>
-    <button class="btn btn-wide" id="frameStart">この職場で診断を始める</button>
+    <h2 class="hero" style="font-size:clamp(22px,5vw,30px)">特定の場面ではなく、「普段のあなた」で答えてください。</h2>
+    <p class="frame-why">人は、相手や場面によって振る舞いを変えます。この診断で映すのは、職場やプライベートといった特定の場面の顔ではなく、力を抜いたときの「自然体のあなた」です。特定の誰かや状況を思い浮かべず、いつもの自分ならどう感じるか、で答えてください。</p>
+    <button class="btn btn-wide" id="frameStart">自然体の自分で診断を始める</button>
     <p class="frame-note" id="frameNote"></p>
   </section>
 
@@ -292,19 +297,28 @@
           <p class="sectlabel">強み</p>
           <p id="r-tsuyomi"></p>
         </div>
-        <div class="row-block">
-          <p class="sectlabel">相性</p>
-          <p id="r-aishou"></p>
+
+        <div class="toriset">
+          <div class="ts-label">あなたのトリセツ（取扱説明書）</div>
+          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
+          <div id="r-toriset"></div>
+          <button class="btn btn-sm btn-accent ts-share" id="torisetCopy">トリセツをコピーして送る</button>
+          <p class="ts-note" id="torisetNote"></p>
+        </div>
+
+        <div class="honshitsu">
+          <div class="hs-label">あなたの深層</div>
+          <p class="hs-sub">タイプの奥にある、あなたがそう振る舞う「ほんとうの理由」。</p>
+          <p class="hs-core" id="r-hs-core"></p>
+          <p class="hs-cost" id="r-hs-cost"></p>
+          <p class="hs-loop" id="r-hs-loop"></p>
         </div>
 
         <div class="compat">
-          <p class="sectlabel">あの人との相性（8タイプ別）</p>
-          <p class="compat-hint">職場のあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
-          <div class="compat-list" id="r-compat"></div>
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
-            <div class="cc-label">たった1人との人間関係の悩みが、仕事を大変にしていませんか？</div>
+            <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
             <p class="cc-text">いま、診断を受けた方に、その関係を一緒にほどく<b>読み解きセッションを1回プレゼント</b>しています。まずはメールアドレスを登録して、あなたのタイプに沿った<b>3日間の読み解きガイド</b>を受け取ってください。</p>
             <div class="field">
               <label for="partnerType">相手はどのタイプだと思いますか？（任意。分かると読み解きの精度が上がります）</label>
@@ -332,9 +346,10 @@
           </div>
         </div>
 
-        <div class="hitotsu">
-          <div class="h-label">あなたが良い人間関係を築くためのワンポイント</div>
-          <p id="r-hitotsu"></p>
+        <div class="row-block" style="margin-top:28px">
+          <p class="sectlabel">ほかのタイプを知る</p>
+          <p style="margin-bottom:14px">8つのタイプには、それぞれ違った関わり方のクセがあります。身近なあの人を思い浮かべながら、全タイプを眺めてみてください。</p>
+          <a class="btn btn-sm btn-ghost" href="all-types.html" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none">全8タイプを見る →</a>
         </div>
 
         <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
@@ -430,7 +445,7 @@ const REF = _params.get('ref') || '';
 const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
 
 const QUESTIONS = [
-  {axis:'h', text:'会議で違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといいですか」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
+  {axis:'h', text:'誰かと話していて違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといい？」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
   {axis:'c', text:'意見が真っ向から対立したとき、あなたは？', a:{t:'納得いくまで議論する。逃げない',p:'B'}, b:{t:'一度引いて、角が立たない落としどころを探す',p:'K'}},
   {axis:'w', text:'誰も決めない・動かない場面で、あなたは？', a:{t:'「じゃあ自分が」と前に出て引っ張る',p:'L'}, b:{t:'引っ張る人を支える・補佐に回る',p:'S'}},
   {axis:'h', text:'あなた自身がモヤモヤや不満を抱えているとき、周りは？', a:{t:'わりとすぐ気づく（顔や言葉に出ている）',p:'O'}, b:{t:'言わないと気づかれない（表には出さない）',p:'G'}},
@@ -438,12 +453,12 @@ const QUESTIONS = [
   {axis:'w', text:'あなたが心地よいのは？', a:{t:'自分が主導権を握って進める立場',p:'L'}, b:{t:'前に立つ人を立て、後ろから支える立場',p:'S'}},
   {axis:'h', text:'自分が手一杯で苦しいとき、あなたは？', a:{t:'「ちょっと厳しいです」と早めに声を上げる',p:'O'}, b:{t:'まず自分で抱えて、なんとかしようとする',p:'G'}},
   {axis:'c', text:'相手が明らかに間違ったことを言っている・しているとき、あなたは？', a:{t:'はっきり指摘する',p:'B'}, b:{t:'直接は言わず、別の形で伝えるか流す',p:'K'}},
-  {axis:'w', text:'新しいプロジェクトで、つい取りに行くのは？', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
+  {axis:'w', text:'みんなで何かに取り組むとき、つい取りに行くのは？', a:{t:'旗を振る・引っ張るポジション',p:'L'}, b:{t:'縁の下・サポートのポジション',p:'S'}},
 ];
 
 const TYPES = {
  OBL:{name:'突撃隊長',pole:'open',catch:'気づけばいつも、先頭。',
-  aru:['会議で沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
+  aru:['沈黙が3秒続くと、つい自分が口火を切る','「とりあえずやってみよう」が口癖','論破してから「言いすぎた」と気づく'],
   tsuyomi:'停滞をこじ開ける突破力。最初の一歩を踏める。熱量で巻き込む。対立や責任から逃げない。',
   aishou:'縁の下の職人(GBS)・沈黙の大黒柱(GBL)が背後を固めると最強。でも、がんばり屋の調整役(GKS)は、あなたの圧で本音を言えなくなっているかも。',
   hitotsu:'あなたの持ち味は、停滞した空気をこじ開ける突破力です。みんなが二の足を踏む場面でも、最初の一歩を踏み出して周りを巻き込んでいけますが、その一方で、勢いのまま話を進めてしまい、気づけば誰も本音を言っていない、なんてことになりがちです。強すぎる直球は、ときに相手を萎縮させ能動的な発言を妨げてしまうので、「進める前に、ひと呼吸おくこと」を意識してみましょう。自分で踏み込んで突破したいと思った瞬間に、あえて「みんなはどう思う？」と先に問いを投げかけてみてください。あなたが半歩引くと、周りの一歩が出てきます。その時、あなた一人でやるよりずっと大きな力が手に入ります。',
@@ -456,9 +471,9 @@ const TYPES = {
   cta:'あなたの「いま引っかかっている関係」で、この一線を見つける。'},
  OKL:{name:'お祭り隊長',pole:'open',catch:'とにかく、盛り上げる。',
   aru:['場が重くなると、冗談で空気を変えにいく','対立しそうになると、つい話題をそらす','実は、嫌われるのがけっこう怖い'],
-  tsuyomi:'場のエネルギー源。誰とでも打ち解け、チームの空気を作る。',
+  tsuyomi:'場のエネルギー源。誰とでも打ち解け、場の空気を作る。',
   aishou:'自由人コメンテーター(OKS)と最高に楽しい。でも、正論ハンマー(OBS)に詰められると、急に弱い。',
-  hitotsu:'あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、チームの空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。',
+  hitotsu:'あなたの持ち味は、その場をぱっと明るくするエネルギーです。誰とでも打ち解け、場の空気そのものを作っていけますが、その一方で、重い話になりそうな瞬間につい冗談で流してしまい、家に帰ってから「本当は言うべきだった」と思い出す、なんてことになりがちです。場をしのぐ明るさは、ときに解くべき問題にフタをしてしまうので、「茶化す前に、本音を一つだけ置く」と意識してみましょう。空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。',
   cta:'あなたの「いま引っかかっている関係」で、先送りの一個を開ける。'},
  OKS:{name:'自由人コメンテーター',pole:'open',catch:'言うだけ、言っておく。',
   aru:['感想やアイデアは言うが「で、誰がやる？」で静かになる','面倒な役回りは、自然に避けている','「自分は自分」と線引きして、周りと群れない'],
@@ -470,16 +485,16 @@ const TYPES = {
   aru:['困っても、自分で抱えて相談しない','揉めると静かに前に出て、収める','弱音を吐くのが、苦手'],
   tsuyomi:'危機に強い安定感。背中で示すリーダーシップ。',
   aishou:'縁の下の職人(GBS)と無言の信頼。でも、自由人コメンテーター(OKS)の軽さは理解できず、すれ違う。',
-  hitotsu:'あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中でチームを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。',
+  hitotsu:'あなたの持ち味は、危機にこそ揺るがない安定感です。多くを語らずとも背中で周りを支え、いざという場面で前に出て収めていけますが、その一方で、本当は手一杯なのに「大丈夫」と言ってしまい、誰にも相談できないまま抱え込む、なんてことになりがちです。その頼もしさは、ときに「助けを求められない壁」になってしまうので、「弱さを、先に一言だけ見せる」と意識してみましょう。抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。',
   cta:'あなたの「いま引っかかっている関係」で、抱えているものを下ろす。'},
  GBS:{name:'縁の下の職人',pole:'guard',catch:'黙って、やり切る。',
-  aru:['頼まれると断れず、タスクが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
-  tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と質の高い仕事。',
+  aru:['頼まれると断れず、頼まれごとが溜まる','不満は言わず、黙って処理する','限界まで我慢して、突然プツンとくる'],
+  tsuyomi:'黙ってやり切る信頼性。地味だが不可欠な土台を支える。陰の責任感と、任されたことをやり切る力。',
   aishou:'沈黙の大黒柱(GBL)と最強タッグ。でも、突撃隊長(OBL)には振り回されがち。',
-  hitotsu:'あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、質の高い仕事で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。',
+  hitotsu:'あなたの持ち味は、黙ってやり切る信頼性です。目立たなくても欠かせない土台を支え、任されたことをやり切る姿で周りに安心を届けていけますが、その一方で、頼まれごとを断れずに引き受け続け、ある日ふっと「もう無理だ」と一気にきてしまう、なんてことになりがちです。溜め込んだ我慢は、自分も周りも気づかないうちに負債になっていくので、「小さなNOを、一つ口にする」と意識してみましょう。また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。',
   cta:'あなたの「いま引っかかっている関係」で、最初の小さなNOを見つける。'},
  GKL:{name:'根回しの仕掛け人',pole:'guard',catch:'気づいたら、私の流れ。',
-  aru:['会議の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
+  aru:['大事な話の前に、個別に話をつけておく','「察してほしい」が、強め','本音は、最後まで見せない'],
   tsuyomi:'敵を作らず物事を前に進める政治力。穏やかな影響力。',
   aishou:'がんばり屋の調整役(GKS)と平和に共存。でも、正論ハンマー(OBS)に本音を突かれると、居心地が悪い。',
   hitotsu:'あなたの持ち味は、敵を作らず物事を前に進める調整力です。事前に布石を打ち、角を立てずに場を動かしていけますが、その一方で、根回ししておいたことが表に出て「裏で手を回した」と受け取られてしまう、なんてことになりがちです。「察してほしい」が強すぎると、ときに誤解や不信の火種になってしまうので、「要所だけは、本音を表で出す」と意識してみましょう。ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。',
@@ -491,6 +506,73 @@ const TYPES = {
   hitotsu:'あなたの持ち味は、誰もが安心できる空気を作る気配りです。対立の緩衝材となって、ぶつかりそうな場の角をやわらげていけますが、その一方で、みんなの機嫌に気を配って場を丸く収め、家に帰った瞬間にどっと疲れが出る、なんてことになりがちです。合わせすぎるうちに、自分の本音がどこかへ行ってしまうので、「小さな『私はこう思う』を、一日に一つ」と意識してみましょう。賛成でも反対でも、あえて自分の気持ちを短く言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。',
   cta:'あなたの「いま引っかかっている関係」で、最初の「私はこう思う」を取り戻す。'},
 };
+
+// トリセツ（取扱説明書）：8タイプ別。大切な人に渡す・送れる形の「私との付き合い方」。
+// 相性（良し悪しの判定）の代替として、理解と関わり方に振り切る。優劣はつけない。
+const TORISET = {
+ OBL:[
+  {l:'こう接すると、うまくいく', t:'スピード感を否定せず、まず一緒に走ってみて。方向がずれたら、走りながら直せば大丈夫。'},
+  {l:'こんな時は、気づいてほしい', t:'勢いよく進めている時ほど、実は不安。「大丈夫？」の一言で、すっと力が抜けます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱さや迷いを、否定せずに受け止めてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'強く見えても、止まるのが怖いだけ。自信家でも自分勝手でもありません。'}],
+ OBS:[
+  {l:'こう接すると、うまくいく', t:'意見を頭ごなしに否定せず、まず筋を聞いて。納得できれば、すっと引きます。'},
+  {l:'こんな時は、気づいてほしい', t:'正論を言った後は、たいてい「きつかったかな」と反省中。追い打ちをかけないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'正しさより先に、気持ちを分かろうとしてもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'批判したいのではなく、良くしたいだけ。根っこはいつも味方です。'}],
+ OKL:[
+  {l:'こう接すると、うまくいく', t:'明るさに乗ってあげて。ノリを楽しんでくれる人には、全力で場を作ります。'},
+  {l:'こんな時は、気づいてほしい', t:'やたら明るい時は、重い話にフタをしているサイン。そっと本音を聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'笑わせなくても、そのままでいていいと感じられた時。'},
+  {l:'誤解しないでほしいのは', t:'軽そうに見えて、実はすごく気を遣っています。嫌われるのが、けっこう怖い。'}],
+ OKS:[
+  {l:'こう接すると、うまくいく', t:'自由と距離感を尊重して。縛らない相手には、鋭い視点をどんどん出します。'},
+  {l:'こんな時は、気づいてほしい', t:'一歩引いている時は、当事者になるのが少し怖い時。責めずに背中を押して。'},
+  {l:'心を開くのは、こんな瞬間', t:'意見を否定せず、面白がってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'他人事に見えて、本当はよく見ています。冷めているわけではありません。'}],
+ GBL:[
+  {l:'こう接すると、うまくいく', t:'多くを語らなくても、信じて任せて。いざという時は、必ず引き受けます。'},
+  {l:'こんな時は、気づいてほしい', t:'「大丈夫」と言う時ほど、抱えていることが多い。気づいてもらえると救われます。'},
+  {l:'心を開くのは、こんな瞬間', t:'弱音を、弱さとして扱われなかった時。'},
+  {l:'誤解しないでほしいのは', t:'怖いのではなく、伝えるのが下手なだけ。本当は面倒見がいいんです。'}],
+ GBS:[
+  {l:'こう接すると、うまくいく', t:'見えない働きに気づいて、言葉にして。それだけで、また頑張れます。'},
+  {l:'こんな時は、気づいてほしい', t:'何も言わない時ほど、限界が近いかも。「無理してない？」と聞いて。'},
+  {l:'心を開くのは、こんな瞬間', t:'「ありがとう」を、ちゃんと受け取ってもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'便利な人ではありません。断らないのは、あなたを困らせたくないからです。'}],
+ GKL:[
+  {l:'こう接すると、うまくいく', t:'正面から問い詰めず、まず安心させて。安全だと分かれば、本音を出します。'},
+  {l:'こんな時は、気づいてほしい', t:'はっきり言わない時は、波風を立てたくない時。急かさないで。'},
+  {l:'心を開くのは、こんな瞬間', t:'探り合いでなく、まっすぐ信頼を示してもらえた時。'},
+  {l:'誤解しないでほしいのは', t:'裏があるのではなく、みんなが穏やかでいられる道を探しているだけ。'}],
+ GKS:[
+  {l:'こう接すると、うまくいく', t:'「あなたはどうしたい？」と聞いてあげて。自分を後回しにしがちだから。'},
+  {l:'こんな時は、気づいてほしい', t:'笑顔で「大丈夫」と言う時ほど、我慢しているかも。気にかけて。'},
+  {l:'心を開くのは、こんな瞬間', t:'気を遣わなくていい、と心から思えた時。'},
+  {l:'誤解しないでほしいのは', t:'ただの「いい人」ではありません。あなたとの居心地を守るために、無理をしています。'}],
+};
+
+// 深層（本質）：8タイプ別。あるある/強みより一段深い「なぜそう振る舞うのか」の読み解き。
+// core＝図星（根っこ）／cost＝その根っこが生む消耗の構造。末尾に共通の開いたループを添える。
+const HONSHITSU = {
+ OBL:{core:'あなたが先頭を走るのは、自信があるからではありません。ほんとうは「止まると不安だから、先に動く」。動き続けることで、心の落ち着きを保っているのです。',
+      cost:'だからこそ、強すぎる直球が周りを沈黙させ、ふと振り返ると一人だった、ということが起きます。情熱は人を動かし、同時に遠ざけてしまう。'},
+ OBS:{core:'あなたが間違いを見逃せないのは、意地悪だからではありません。ほんとうは「正しさで、場や人を守りたい」。筋を通すことが、あなたなりの誠実さなのです。',
+      cost:'でも、正しさで相手を追い詰めた瞬間、関係にヒビが入る。あなたの正論は、時に相手の逃げ場を奪ってしまいます。'},
+ OKL:{core:'あなたが場を明るくするのは、ただ楽しいからではありません。ほんとうは「重くなるのが、こわい」。笑いに変えることで、対立から場を守っているのです。',
+      cost:'でも「まあまあ」で流すたび、ほんとうは解くべき問題にフタをしている。明るさの裏で、あなた自身の本音も置き去りになりがちです。'},
+ OKS:{core:'あなたが一歩引くのは、冷めているからではありません。ほんとうは「縛られたくない、でも当事者になるのは少しこわい」。自由さは、あなたの身の守り方でもあるのです。',
+      cost:'でも、良い意見を言うほど当事者になり損ね、せっかくの鋭さが影響力に変わらない。言葉は届くのに、信頼が積み上がりにくい。'},
+ GBL:{core:'あなたが多くを語らないのは、冷たいからではありません。ほんとうは「弱さを見せるのが、こわい」。背中で支えることが、あなたの責任の取り方なのです。',
+      cost:'でも「大丈夫」と抱え込むほど、周りはあなたの内側が読めず、頼れる人なのに近寄りがたくなる。強さが、孤立を呼んでしまいます。'},
+ GBS:{core:'あなたが断れないのは、優柔不断だからではありません。ほんとうは「相手を困らせたくない」。黙ってやり切ることが、あなたの思いやりの形なのです。',
+      cost:'でも、NOを飲み込むほど我慢は静かに溜まり、ある日プツンと切れる。その限界は、自分でも周りでも気づけない時限爆弾になりがちです。'},
+ GKL:{core:'あなたが根回しをするのは、腹黒いからではありません。ほんとうは「誰も傷つけずに、前に進めたい」。波風を立てない道を探すのが、あなたの優しさなのです。',
+      cost:'でも、本音を最後まで見せないほど「裏がある」と誤解され、あなたの穏やかさが、かえって不信の火種になってしまうことがあります。'},
+ GKS:{core:'あなたが自分を後回しにするのは、遠慮からではありません。ほんとうは「みんなが心地よくいられる場を、守りたい」。合わせることが、あなたの愛情表現なのです。',
+      cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
+};
+const HONSHITSU_LOOP='この根っこは、相手や場面によって、良い形にも、苦しい形にも変わります。あなたの「いま引っかかっている関係」では、どちらに転んでいるでしょうか。そこからが、読み解きの本番です。';
 
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
@@ -519,7 +601,7 @@ const RADAR_META = {
 };
 const RADAR_Q = [
   {axis:'safety',  text:'相手や立場が変わっても、反対意見ははっきり口にするほうだ'},
-  {axis:'trust',   text:'重要な仕事でも、思い切って人に任せるほうだ'},
+  {axis:'trust',   text:'大事なことでも、思い切って人に任せるほうだ'},
   {axis:'bound',   text:'引き受けると手一杯になる依頼は「できません」と断るほうだ'},
   {axis:'conflict',text:'意見がぶつかっても、逃げずに、関係を保ちながら話し合うほうだ'},
   {axis:'connect', text:'相手の良いところは、自分から言葉にして伝えるほうだ'},
@@ -529,7 +611,7 @@ const RADAR_Q = [
   {axis:'conflict',text:'必要なときは、対立から逃げずに向き合うほうだ'},
   {axis:'connect', text:'感謝や「ありがとう」を、ためらわず口にするほうだ'},
   {axis:'safety',  text:'困ったときは「助けてほしい」と、自分から言うほうだ'},
-  {axis:'trust',   text:'仕事を任せるとき、相手の力量を信じて、安心してゆだねるほうだ'},
+  {axis:'trust',   text:'何かを任せるとき、相手の力量を信じて、安心してゆだねるほうだ'},
   {axis:'bound',   text:'相手の期待と自分の事情を、自分からすり合わせるほうだ'},
   {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
   {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
@@ -652,14 +734,14 @@ function renderResult(code,counts,radar){
     requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
   });
   renderRelations(radar);
-  renderCompat(code);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
   $('r-tsuyomi').textContent=t.tsuyomi;
-  $('r-aishou').textContent=t.aishou;
-  $('r-hitotsu').textContent=t.hitotsu;
+  renderToriset(code);
+  renderHonshitsu(code);
   $('protoNote').textContent='';
+  $('torisetNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
@@ -667,68 +749,27 @@ function renderResult(code,counts,radar){
   show('result');
 }
 
-// 相性：3軸の組合せから「自分視点の力学」を生成（Model B＝重心ベース＋摩擦の半句）
-// コード = [本音 O/G][衝突 B/K][重心 L/S]
-function compatLine(self, other){
-  if(self===other){
-    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
-  }
-  const GRAV={
-    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
-    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
-    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
-    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
-  };
-  const HONNE={
-    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
-    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
-    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
-  };
-  const CONF={
-    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
-    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
-    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
-  };
-  const g=GRAV[self[2]+other[2]];
-  let tags=[g.tag], text=g.full;
-  if(!g.friction){
-    const hon=HONNE[self[0]+other[0]];
-    const con=CONF[self[1]+other[1]];
-    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
-    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
-  }
-  return {tags:tags, text:text};
-}
-function renderCompat(selfCode){
-  const box=$('r-compat'); if(!box) return; box.innerHTML='';
-  // 最もポジティブな相性（ベストマッチ）を1つ選ぶ
-  let best=null, bestScore=-Infinity;
-  Object.keys(TYPES).forEach(code=>{
-    if(code===selfCode) return;
-    const sc=compatScore(selfCode, code);
-    if(sc>bestScore){ bestScore=sc; best=code; }
-  });
-  Object.keys(TYPES).forEach(code=>{
-    const t=TYPES[code], c=compatLine(selfCode, code);
-    const pole = (t.pole==='guard') ? 'pole-guard' : 'pole-open';
-    const isBest = (code===best);
-    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
-    const bestBadge = isBest ? '<span class="ct-best">ベストマッチ</span>' : '';
-    const selfBadge = (code===selfCode) ? '<span class="ct-self">あなた</span>' : '';
-    const row=document.createElement('div'); row.className='compat-row '+pole+(isBest?' is-best':'');
-    row.innerHTML='<div class="ct-head"><span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+'</div>'+
-      '<div class="ct-text">'+c.text+'</div>';
-    box.appendChild(row);
+// トリセツ：タイプ別の「私との付き合い方」を描画
+function renderToriset(code){
+  const box=$('r-toriset'); if(!box) return; box.innerHTML='';
+  (TORISET[code]||[]).forEach(it=>{
+    const d=document.createElement('div'); d.className='ts-item';
+    d.innerHTML='<span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span>';
+    box.appendChild(d);
   });
 }
-// 相性のポジティブ度（ベストマッチ選定用）。重心の補完を最重視し、本音・衝突の調和を加点。
-function compatScore(self, other){
-  if(self===other) return -Infinity;
-  let s=0;
-  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
-  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
-  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
-  return s;
+// 深層（本質）：図星＋消耗の構造＋開いたループを描画
+function renderHonshitsu(code){
+  const h=HONSHITSU[code]; if(!h) return;
+  $('r-hs-core').textContent=h.core;
+  $('r-hs-cost').textContent=h.cost;
+  $('r-hs-loop').textContent=HONSHITSU_LOOP;
+}
+// トリセツを送れるテキストに（LINE等に貼って大切な人へ）
+function torisetText(){
+  const r=window._lastResult; if(!r) return '';
+  const items=(TORISET[r.code]||[]).map(it=>'・'+it.l+'：'+it.t).join('\n');
+  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\n#人間関係タイプ診断';
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -780,7 +821,7 @@ function recordDiagnosis(r){
     code:r.code, name:r.name,
     radar:r.radar,
     position: window._position || '',
-    workplaceFrame: workplaceFrame || '', // 想定職場（ログ保存には Code.gs に列追加＋再デプロイが必要）
+    workplaceFrame: workplaceFrame || '', // 回答アンカー（自然体。ログ保存には Code.gs に列追加＋再デプロイが必要）
   }).catch(()=>{});
 }
 // フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
@@ -836,7 +877,7 @@ $('restartBtn').onclick=()=>{
   $('rel').value=''; $('mail').value=''; $('partnerType').value='';
   $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
   window._position=''; _pending=null;
-  workplaceFrame=''; $('frameSel').value=''; $('frameNote').textContent=''; $('qframe').textContent='';
+  workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
   show('frame');
 };
 
@@ -859,9 +900,24 @@ async function copyText(text){
   }
   return legacyCopy(text);
 }
+$('torisetCopy').onclick=async ()=>{
+  const text=torisetText(); if(!text) return;
+  const b=$('torisetCopy');
+  let ok=false;
+  try{ ok=await copyText(text); }catch(e){ ok=false; }
+  if(ok){
+    $('torisetNote').textContent='コピーしました。大切な人に送ってみてください。';
+    b.textContent='コピーしました'; b.classList.add('copied');
+    setTimeout(()=>{ b.textContent='トリセツをコピーして送る'; b.classList.remove('copied'); },2200);
+  } else {
+    const box=$('copyText'); box.value=text;
+    $('copyManual').hidden=false; box.focus(); box.select();
+    $('torisetNote').textContent='下のテキスト欄からコピーして送ってください。';
+  }
+};
 $('shareBtn').onclick=async ()=>{
   const r=window._lastResult; if(!r)return;
-  const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#職場の人間関係タイプ診断';
+  const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#人間関係タイプ診断';
   const b=$('shareBtn');
   let ok=false;
   try{ ok=await copyText(text); }catch(e){ ok=false; }
@@ -882,10 +938,8 @@ if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
 else { $('deepPreviewNote').hidden=false; }
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
-  const sel=$('frameSel').value;
-  if(!sel){ $('frameNote').textContent='思い浮かべる職場をひとつ選んでください。'; return; }
-  workplaceFrame=sel;
-  $('qframe').textContent='想定中の職場：'+sel;
+  workplaceFrame='自然体';
+  $('qframe').textContent='力を抜いた「普段のあなた」で答えてください';
   idx=0; answers.fill(null);
   renderQ(); show('quiz');
 };
