@@ -282,15 +282,8 @@
           <p class="sectlabel">強み</p>
           <p id="r-tsuyomi"></p>
         </div>
-        <div class="row-block">
-          <p class="sectlabel">相性</p>
-          <p id="r-aishou"></p>
-        </div>
 
         <div class="compat">
-          <p class="sectlabel">あの人との相性（8タイプ別）</p>
-          <p class="compat-hint">気になるあの人は、どのタイプ？ 思い浮かべながら見てください。</p>
-          <div class="compat-list" id="r-compat"></div>
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
@@ -325,6 +318,12 @@
         <div class="hitotsu">
           <div class="h-label">あなたが良い人間関係を築くためのワンポイント</div>
           <p id="r-hitotsu"></p>
+        </div>
+
+        <div class="row-block" style="margin-top:28px">
+          <p class="sectlabel">ほかのタイプを知る</p>
+          <p style="margin-bottom:14px">8つのタイプには、それぞれ違った関わり方のクセがあります。身近なあの人を思い浮かべながら、全タイプを眺めてみてください。</p>
+          <a class="btn btn-sm btn-ghost" href="all-types.html" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none">全8タイプを見る →</a>
         </div>
 
         <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
@@ -642,12 +641,10 @@ function renderResult(code,counts,radar){
     requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
   });
   renderRelations(radar);
-  renderCompat(code);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
   $('r-tsuyomi').textContent=t.tsuyomi;
-  $('r-aishou').textContent=t.aishou;
   $('r-hitotsu').textContent=t.hitotsu;
   $('protoNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
@@ -655,70 +652,6 @@ function renderResult(code,counts,radar){
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
   show('result');
-}
-
-// 相性：3軸の組合せから「自分視点の力学」を生成（Model B＝重心ベース＋摩擦の半句）
-// コード = [本音 O/G][衝突 B/K][重心 L/S]
-function compatLine(self, other){
-  if(self===other){
-    return {tags:['似た者同士'], text:'気は楽だが、強みも弱みも同じ。二人そろって同じ落とし穴にハマりやすい。'};
-  }
-  const GRAV={
-    LL:{tag:'主導権がぶつかる', full:'二人とも前に出たいので、役割を決めないと引っ張り合いになる。決めれば噛み合う。', friction:true},
-    SS:{tag:'停滞しやすい', full:'二人とも一歩引くので、物事が前に進みにくい。どちらかが旗を振ると動き出す。', friction:true},
-    LS:{tag:'役割が噛み合う', full:'あなたが引っ張り、相手が支える。自然に噛み合う組み合わせ。', short:'あなたが引っ張り、相手が支える形で噛み合う。', friction:false},
-    SL:{tag:'役割が噛み合う', full:'相手が前に立ち、あなたが支える。噛み合うが、自分の意見も一言そえたい。', short:'相手が前に立ち、あなたが支える形で噛み合う。', friction:false}
-  };
-  const HONNE={
-    OG:{score:4, tag:'すれ違い注意', clause:'ただ、あなたの率直さが相手を身構えさせることもある。'},
-    GO:{score:4, tag:'圧を感じやすい', clause:'ただ相手は率直で、あなたは抱え込みがち。圧を感じたら、小さく本音を返すと対等になる。'},
-    GG:{score:1, tag:'本音が見えない', clause:'ただ二人とも本音を見せないので、互いの腹の内が読めないまま進みやすい。'}
-  };
-  const CONF={
-    BK:{score:3, tag:'直球が刺さる', clause:'ただ、あなたが切り込むと相手はかわしがち。問いかける形にすると乗ってくる。'},
-    KB:{score:3, tag:'飲まれやすい', clause:'ただ相手の勢いに押されて、言いたいことを飲み込まないように。'},
-    KK:{score:2, tag:'問題が放置', clause:'ただ二人とも波風を立てないので、解くべき課題が先送りになりやすい。'}
-  };
-  const g=GRAV[self[2]+other[2]];
-  let tags=[g.tag], text=g.full;
-  if(!g.friction){
-    const hon=HONNE[self[0]+other[0]];
-    const con=CONF[self[1]+other[1]];
-    let pick = (hon&&con) ? (hon.score>=con.score?hon:con) : (hon||con);
-    if(pick){ text=g.short+pick.clause; tags.push(pick.tag); }
-  }
-  return {tags:tags, text:text};
-}
-function renderCompat(selfCode){
-  const box=$('r-compat'); if(!box) return; box.innerHTML='';
-  // 最もポジティブな相性（ベストマッチ）を1つ選ぶ
-  let best=null, bestScore=-Infinity;
-  Object.keys(TYPES).forEach(code=>{
-    if(code===selfCode) return;
-    const sc=compatScore(selfCode, code);
-    if(sc>bestScore){ bestScore=sc; best=code; }
-  });
-  Object.keys(TYPES).forEach(code=>{
-    const t=TYPES[code], c=compatLine(selfCode, code);
-    const pole = (t.pole==='guard') ? 'pole-guard' : 'pole-open';
-    const isBest = (code===best);
-    const tags=c.tags.map(tg=>'<span class="ct-tag">'+tg+'</span>').join('');
-    const bestBadge = isBest ? '<span class="ct-best">ベストマッチ</span>' : '';
-    const selfBadge = (code===selfCode) ? '<span class="ct-self">あなた</span>' : '';
-    const row=document.createElement('div'); row.className='compat-row '+pole+(isBest?' is-best':'');
-    row.innerHTML='<div class="ct-head"><span class="ct-name">'+t.name+'</span><span class="ct-code">'+code+'</span>'+bestBadge+tags+selfBadge+'</div>'+
-      '<div class="ct-text">'+c.text+'</div>';
-    box.appendChild(row);
-  });
-}
-// 相性のポジティブ度（ベストマッチ選定用）。重心の補完を最重視し、本音・衝突の調和を加点。
-function compatScore(self, other){
-  if(self===other) return -Infinity;
-  let s=0;
-  const g=self[2]+other[2]; s += (g==='LS'||g==='SL') ? 3 : -1;
-  const h=self[0]+other[0]; s += (h==='OO') ? 1 : (h==='GG' ? -0.5 : -1.5);
-  const c=self[1]+other[1]; s += (c==='BB') ? 0.5 : (c==='KK' ? -0.3 : -1);
-  return s;
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
