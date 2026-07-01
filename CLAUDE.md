@@ -22,13 +22,7 @@
 
 ## データソース
 
-このプロジェクトは以下のGoogleスプレッドシートをソースとして作成されている。
-
-- https://docs.google.com/spreadsheets/d/1ve8KILi6TJ1uc4w7L3wmLQyJXLZAWr4EyYRAcD9zlas/edit
-
-### ロードマップ（今後の開発・Funnel 1 90日ロードマップの参照先）
-
-今後の開発および Funnel 1 の90日ロードマップ・12ヶ月計画は、以下のGoogleスプレッドシートを唯一の参照先とする（旧 `ROADMAP.md` は廃止）。
+このプロジェクトのソース、および今後の開発・Funnel 1 の90日ロードマップ・12ヶ月計画は、以下のGoogleスプレッドシートを唯一の参照先とする（旧 `ROADMAP.md`・旧スプレッドシートは廃止）。
 
 - https://docs.google.com/spreadsheets/d/1eb-P739JJs7qi1c9Uzy_WpZhy0gsCag382YzohFOBEY/edit
 
