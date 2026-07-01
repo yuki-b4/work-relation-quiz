@@ -117,10 +117,6 @@
   .row-block{margin-bottom:26px}
   .row-block p{font-size:15px; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
-  .hitotsu{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:8px}
-  .hitotsu .h-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:10px; letter-spacing:.03em}
-  .hitotsu p{font-size:15px; color:var(--ink)}
-
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
   .toriset{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px}
   .toriset .ts-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px}
@@ -131,6 +127,14 @@
   .ts-item .ts-t{font-size:14.5px; line-height:1.7; color:var(--ink)}
   .ts-share{margin-top:16px}
   .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
+
+  /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
+  .honshitsu{border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px; background:var(--surface)}
+  .honshitsu .hs-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.03em; margin-bottom:3px}
+  .honshitsu .hs-sub{font-size:12.5px; color:var(--faint); margin-bottom:15px}
+  .honshitsu .hs-core{font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px}
+  .honshitsu .hs-cost{font-size:14.5px; line-height:1.8; color:var(--muted); margin-bottom:16px}
+  .honshitsu .hs-loop{font-size:14.5px; line-height:1.75; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
@@ -302,6 +306,14 @@
           <p class="ts-note" id="torisetNote"></p>
         </div>
 
+        <div class="honshitsu">
+          <div class="hs-label">あなたの深層</div>
+          <p class="hs-sub">タイプの奥にある、あなたがそう振る舞う「ほんとうの理由」。</p>
+          <p class="hs-core" id="r-hs-core"></p>
+          <p class="hs-cost" id="r-hs-cost"></p>
+          <p class="hs-loop" id="r-hs-loop"></p>
+        </div>
+
         <div class="compat">
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
@@ -332,11 +344,6 @@
             </div>
             <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
           </div>
-        </div>
-
-        <div class="hitotsu">
-          <div class="h-label">あなたが良い人間関係を築くためのワンポイント</div>
-          <p id="r-hitotsu"></p>
         </div>
 
         <div class="row-block" style="margin-top:28px">
@@ -545,6 +552,28 @@ const TORISET = {
   {l:'誤解しないでほしいのは', t:'ただの「いい人」ではありません。あなたとの居心地を守るために、無理をしています。'}],
 };
 
+// 深層（本質）：8タイプ別。あるある/強みより一段深い「なぜそう振る舞うのか」の読み解き。
+// core＝図星（根っこ）／cost＝その根っこが生む消耗の構造。末尾に共通の開いたループを添える。
+const HONSHITSU = {
+ OBL:{core:'あなたが先頭を走るのは、自信があるからではありません。ほんとうは「止まると不安だから、先に動く」。動き続けることで、心の落ち着きを保っているのです。',
+      cost:'だからこそ、強すぎる直球が周りを沈黙させ、ふと振り返ると一人だった、ということが起きます。情熱は人を動かし、同時に遠ざけてしまう。'},
+ OBS:{core:'あなたが間違いを見逃せないのは、意地悪だからではありません。ほんとうは「正しさで、場や人を守りたい」。筋を通すことが、あなたなりの誠実さなのです。',
+      cost:'でも、正しさで相手を追い詰めた瞬間、関係にヒビが入る。あなたの正論は、時に相手の逃げ場を奪ってしまいます。'},
+ OKL:{core:'あなたが場を明るくするのは、ただ楽しいからではありません。ほんとうは「重くなるのが、こわい」。笑いに変えることで、対立から場を守っているのです。',
+      cost:'でも「まあまあ」で流すたび、ほんとうは解くべき問題にフタをしている。明るさの裏で、あなた自身の本音も置き去りになりがちです。'},
+ OKS:{core:'あなたが一歩引くのは、冷めているからではありません。ほんとうは「縛られたくない、でも当事者になるのは少しこわい」。自由さは、あなたの身の守り方でもあるのです。',
+      cost:'でも、良い意見を言うほど当事者になり損ね、せっかくの鋭さが影響力に変わらない。言葉は届くのに、信頼が積み上がりにくい。'},
+ GBL:{core:'あなたが多くを語らないのは、冷たいからではありません。ほんとうは「弱さを見せるのが、こわい」。背中で支えることが、あなたの責任の取り方なのです。',
+      cost:'でも「大丈夫」と抱え込むほど、周りはあなたの内側が読めず、頼れる人なのに近寄りがたくなる。強さが、孤立を呼んでしまいます。'},
+ GBS:{core:'あなたが断れないのは、優柔不断だからではありません。ほんとうは「相手を困らせたくない」。黙ってやり切ることが、あなたの思いやりの形なのです。',
+      cost:'でも、NOを飲み込むほど我慢は静かに溜まり、ある日プツンと切れる。その限界は、自分でも周りでも気づけない時限爆弾になりがちです。'},
+ GKL:{core:'あなたが根回しをするのは、腹黒いからではありません。ほんとうは「誰も傷つけずに、前に進めたい」。波風を立てない道を探すのが、あなたの優しさなのです。',
+      cost:'でも、本音を最後まで見せないほど「裏がある」と誤解され、あなたの穏やかさが、かえって不信の火種になってしまうことがあります。'},
+ GKS:{core:'あなたが自分を後回しにするのは、遠慮からではありません。ほんとうは「みんなが心地よくいられる場を、守りたい」。合わせることが、あなたの愛情表現なのです。',
+      cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
+};
+const HONSHITSU_LOOP='この根っこは、相手や場面によって、良い形にも、苦しい形にも変わります。あなたの「いま引っかかっている関係」では、どちらに転んでいるでしょうか。そこからが、読み解きの本番です。';
+
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
   c:{left:'ぶつかる',right:'かわす',poles:['B','K']},
@@ -710,7 +739,7 @@ function renderResult(code,counts,radar){
   t.aru.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); });
   $('r-tsuyomi').textContent=t.tsuyomi;
   renderToriset(code);
-  $('r-hitotsu').textContent=t.hitotsu;
+  renderHonshitsu(code);
   $('protoNote').textContent='';
   $('torisetNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
@@ -728,6 +757,13 @@ function renderToriset(code){
     d.innerHTML='<span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span>';
     box.appendChild(d);
   });
+}
+// 深層（本質）：図星＋消耗の構造＋開いたループを描画
+function renderHonshitsu(code){
+  const h=HONSHITSU[code]; if(!h) return;
+  $('r-hs-core').textContent=h.core;
+  $('r-hs-cost').textContent=h.cost;
+  $('r-hs-loop').textContent=HONSHITSU_LOOP;
 }
 // トリセツを送れるテキストに（LINE等に貼って大切な人へ）
 function torisetText(){
