@@ -28,7 +28,9 @@ var HEADERS = [
   'メールアドレス', '自由記述', '回答ID',
   // 「紹介者名」「備考」はスプレッドシート側で手入力する既存列。位置を保持して壊さないため明示する。
   // 「立場」は24問回答後に取得する任意項目（アドバイス精度向上のための情報）。末尾に追加。
-  '紹介者名', '備考', '立場'
+  '紹介者名', '備考', '立場',
+  // 3日間読み解きガイドの配信記録（Guide.gs が使用。guide-3day-spec.md §9）
+  'guide_day1_at', 'guide_day2_at', 'guide_day3_at', 'optout_at', 'ガイドトークン'
 ];
 
 function doPost(e) {
@@ -78,6 +80,12 @@ function handleCreate(sheet, data) {
     '立場': data.position || ''
   };
   sheet.appendRow(HEADERS.map(function (h) { return values.hasOwnProperty(h) ? values[h] : ''; }));
+
+  // 読み解きガイドの申込（許諾チェック済み）なら、Day1を即時送信して配信登録する（Guide.gs）
+  if (data.guide === true) {
+    try { enrollGuideLead(sheet, sheet.getLastRow()); }
+    catch (err) { console.error('ガイド登録に失敗（記録は成功）: ' + err); }
+  }
 }
 
 // アンケート回答時：回答IDで行を探し、アンケート列だけ更新
@@ -100,6 +108,12 @@ function handleUpdate(sheet, data) {
       sheet.getRange(rownum, HEADERS.indexOf(name) + 1).setValue(v);
     }
   });
+
+  // 診断済みの行にあとからメール＋許諾が届いたケース（update経由のガイド申込）
+  if (data.guide === true) {
+    try { enrollGuideLead(sheet, rownum); }
+    catch (err) { console.error('ガイド登録に失敗（記録は成功）: ' + err); }
+  }
 }
 
 // 回答IDから行番号を探す（無ければ -1）
@@ -157,8 +171,12 @@ function ensureHeader(sheet) {
   }
 }
 
-// デプロイ確認用：ブラウザでURLを開くと稼働状況が表示される
-function doGet() {
+// デプロイ確認用：ブラウザでURLを開くと稼働状況が表示される。
+// ?action=unsub&token=… はガイドの配信停止（Guide.gs）。
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'unsub') {
+    return handleGuideUnsub(e.parameter.token || '');
+  }
   return json({ ok: true, message: '職場の人間関係タイプ診断 回答収集エンドポイントは稼働中です。' });
 }
 
