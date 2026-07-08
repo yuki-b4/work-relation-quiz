@@ -172,6 +172,8 @@
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
+  .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
+  .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
@@ -321,27 +323,10 @@
             <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
             <p class="cc-text">いま、診断を受けた方に、その関係を一緒にほどく<b>読み解きセッションを1回プレゼント</b>しています。まずはメールアドレスを登録して、あなたのタイプに沿った<b>3日間の読み解きガイド</b>を受け取ってください。</p>
             <div class="field">
-              <label for="partnerType">相手はどのタイプだと思いますか？（任意。分かると読み解きの精度が上がります）</label>
-              <select id="partnerType">
-                <option value="">わからない / 選ばない</option>
-                <option value="突撃隊長">突撃隊長</option>
-                <option value="正論ハンマー">正論ハンマー</option>
-                <option value="お祭り隊長">お祭り隊長</option>
-                <option value="自由人コメンテーター">自由人コメンテーター</option>
-                <option value="沈黙の大黒柱">沈黙の大黒柱</option>
-                <option value="縁の下の職人">縁の下の職人</option>
-                <option value="根回しの仕掛け人">根回しの仕掛け人</option>
-                <option value="がんばり屋の調整役">がんばり屋の調整役</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="rel">いま引っかかっている関係で、具体的に困っていることがあれば教えてください（任意。書いていただくと、ガイドがあなたの状況に沿います）</label>
-              <textarea id="rel" placeholder="例：任せたいのに、つい自分でやってしまう後輩がいて…"></textarea>
-            </div>
-            <div class="field">
               <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
+            <label class="consent"><input type="checkbox" id="guideConsent"><span>3日間の読み解きガイド（無料）と、新しいガイドのご案内をお送りします。配信はいつでも停止できます。</span></label>
             <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
           </div>
         </div>
@@ -856,14 +841,14 @@ $('submitFeedback').onclick=()=>{
   sendSurvey({me,others,othersWho,share,shareWho,dig,miss}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
-// LEAD（紹介者）：深掘り診断の申込（メール＋自由記述）
+// LEAD（紹介者）：3日間ガイドの申込（メール＋許諾のみ。guide-3day-spec.md §9で簡素化）
+// guide:true を送ると、GAS側がガイド配信に登録してDay1を即時送信する。
 $('submitLead').onclick=()=>{
   const email=$('mail').value.trim();
-  const rel=$('rel').value.trim();
-  const partner=$('partnerType').value;
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  const relationship = (partner ? '【相手の想定タイプ：'+partner+'】 ' : '') + rel;
-  sendSurvey({email,relationship}, $('submitLead'), '登録ありがとうございます。3日間の読み解きガイドをメールでお届けします。');
+  if(!$('guideConsent').checked){ $('protoNote').textContent='ご案内の送付に同意いただける場合は、チェックを入れてください。'; return; }
+  const r=window._lastResult||{};
+  sendSurvey({email, guide:true, code:r.code, name:r.name}, $('submitLead'), '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。');
 };
 
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
@@ -874,7 +859,7 @@ $('restartBtn').onclick=()=>{
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  $('rel').value=''; $('mail').value=''; $('partnerType').value='';
+  $('mail').value=''; $('guideConsent').checked=false;
   $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
   window._position=''; _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
