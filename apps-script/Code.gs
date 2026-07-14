@@ -4,6 +4,7 @@
  * 2フェーズで記録する：
  *  - action:'create' … 診断完了時に、回答IDつきの行を先に追加（アンケート未回答でも取りこぼさない）
  *  - action:'update' … アンケート回答時に、回答IDをキーに同じ行のアンケート列だけを埋める
+ *  - action:'corpLead' … 法人LP（lp-corporate.html）の商談フォーム。「法人リード」シートに1行追加
  * モード：feedback（8名・検証アンケート5問）／lead（紹介者・メール＋自由記述）
  * デプロイ手順は同じフォルダの README.md を参照。
  */
@@ -14,6 +15,14 @@ var SHEET_ID = '1J9sfu2F3uJtpriORSkz7v-5uNQHD6mR4j3UZ22H1Q7M';
 // 記録先シート（タブ）名。存在しなければ自動作成する。
 // 指標v2＝精度でなくエンゲージメント／拡散を測る新アンケート用（旧 20260619~ とは別管理）
 var SHEET_NAME = '指標v2';
+
+// 法人LP（lp-corporate.html）の商談フォームの記録先シート。存在しなければ自動作成する。
+// 「対応状況」「メモ」はスプレッドシート側で手入力する運用列。
+var CORP_SHEET_NAME = '法人リード';
+var CORP_HEADERS = [
+  'タイムスタンプ', 'メールアドレス', '課題', '自由記述',
+  '紹介元', '流入ページ', 'リードID', '対応状況', 'メモ'
+];
 
 var HEADERS = [
   'タイムスタンプ', 'モード', '紹介元',
@@ -39,6 +48,12 @@ function doPost(e) {
     lock.waitLock(20000);
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.openById(SHEET_ID);
+
+    if (data.action === 'corpLead') {
+      handleCorpLead(ss, data);
+      return json({ ok: true });
+    }
+
     var sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
     ensureHeader(sheet);
 
@@ -86,6 +101,20 @@ function handleCreate(sheet, data) {
     try { enrollGuideLead(sheet, sheet.getLastRow()); }
     catch (err) { console.error('ガイド登録に失敗（記録は成功）: ' + err); }
   }
+}
+
+// 法人LPの商談フォーム：「法人リード」シートに1行追加（診断ログとは別管理）
+function handleCorpLead(ss, data) {
+  var sheet = ss.getSheetByName(CORP_SHEET_NAME) || ss.insertSheet(CORP_SHEET_NAME);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(CORP_HEADERS);
+    sheet.setFrozenRows(1);
+  }
+  var issues = Array.isArray(data.issues) ? data.issues.join('、') : (data.issues || '');
+  sheet.appendRow([
+    new Date(), data.email || '', issues, data.detail || '',
+    data.ref || '', data.page || '', data.id || '', '', ''
+  ]);
 }
 
 // アンケート回答時：回答IDで行を探し、アンケート列だけ更新

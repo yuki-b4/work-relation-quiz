@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職場の人間関係タイプ診断｜法人向け：自然体で尊重し合えるチームづくり</title>
+<meta name="description" content="人がすぐ辞める、ギスギスする、新人が馴染めない。その原因は性格ではなく「タイプの違い」かもしれません。9問・3分の無料診断でチームの自然体を可視化し、読み解きワークショップと自走キットで、辞めない・回るチームへ。">
+<meta property="og:title" content="職場の人間関係タイプ診断｜法人向け">
+<meta property="og:description" content="9問・3分の無料診断でチームの自然体を可視化。押し付けでなく、自律的に尊重し合えるチームへ。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
+    --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
+    --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
+    --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
+    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--ink);background:var(--bg);line-height:1.85;letter-spacing:.01em}
+  img{max-width:100%}
+  a{color:var(--teal)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  .narrow{max-width:720px;margin:0 auto}
+
+  /* ===== header ===== */
+  .siteheader{background:var(--bg);border-bottom:1px solid var(--line)}
+  .siteheader .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;padding-bottom:14px}
+  .brand{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em}
+  .brand small{display:block;font-family:var(--body);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.12em}
+
+  /* ===== buttons ===== */
+  .btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;text-align:center;
+    font-family:var(--body);font-weight:700;font-size:16px;line-height:1.4;
+    padding:16px 28px;border-radius:999px;transition:background .2s,transform .1s,box-shadow .2s}
+  .btn:active{transform:translateY(1px)}
+  .btn-accent{background:var(--coral);color:#fff;box-shadow:0 6px 18px rgba(192,73,43,.28)}
+  .btn-accent:hover{background:#A93E23}
+  .btn-dark{background:var(--chrome);color:#fff}
+  .btn-dark:hover{background:var(--chrome-hover)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+  .btn-ghost:hover{border-color:var(--faint)}
+  .btn-sm{font-size:14px;padding:10px 20px}
+  .btn-note{display:block;margin-top:8px;font-size:12px;color:var(--muted)}
+
+  /* ===== sections ===== */
+  section{padding:72px 0}
+  .band{background:var(--surface)}
+  .eyebrow{font-size:14px;letter-spacing:.14em;font-weight:700;color:var(--teal);margin-bottom:14px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5.4vw,44px);line-height:1.45;letter-spacing:.02em}
+  h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3.6vw,30px);line-height:1.5;margin-bottom:18px}
+  .sec-head{text-align:center;margin-bottom:36px}
+  .sec-head p.lead{color:var(--muted);max-width:720px;margin:0 auto}
+  .center{text-align:center}
+
+  /* ===== hero ===== */
+  .hero{padding:64px 0 72px}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center}
+  .hero .lead{margin:18px 0 24px;color:var(--muted);font-size:17px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+  .badge{background:var(--teal-soft);color:var(--teal-ink);font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+
+  /* type map */
+  .mapcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+  .mapcard .cap{font-size:13px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:12px;letter-spacing:.08em}
+  .tmap{position:relative;aspect-ratio:1/1;border-radius:12px;background:linear-gradient(to bottom,var(--coral-soft) 0 50%,var(--teal-soft) 50% 100%)}
+  .tmap::before,.tmap::after{content:"";position:absolute;background:rgba(35,36,39,.14)}
+  .tmap::before{left:50%;top:6%;bottom:6%;width:1px}
+  .tmap::after{top:50%;left:6%;right:6%;height:1px}
+  .axis{position:absolute;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;background:rgba(255,255,255,.85);padding:2px 8px;border-radius:999px}
+  .axis.top{top:6px;left:50%;transform:translateX(-50%)}
+  .axis.bottom{bottom:6px;left:50%;transform:translateX(-50%)}
+  .axis.left{left:2px;top:50%;transform:translateY(-50%)}
+  .axis.right{right:2px;top:50%;transform:translateY(-50%)}
+  .tchip{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
+    font-size:clamp(10px,1.6vw,12.5px);font-weight:700;padding:5px 10px;border-radius:999px;background:var(--surface);box-shadow:0 2px 8px rgba(20,20,20,.10)}
+  .tchip.o{color:var(--coral-ink);border:1px solid rgba(192,73,43,.35)}
+  .tchip.g{color:var(--teal-ink);border:1px solid rgba(15,110,86,.35)}
+  .mapnote{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+
+  /* ===== problem ===== */
+  .checklist{list-style:none;display:grid;gap:12px;max-width:720px;margin:0 auto}
+  .checklist li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 16px 52px;position:relative;font-weight:500}
+  .checklist li::before{content:"✓";position:absolute;left:18px;top:50%;transform:translateY(-50%);
+    width:24px;height:24px;border-radius:50%;background:var(--coral-soft);color:var(--coral);font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center}
+  .band .checklist li{background:var(--bg)}
+  .bridge-line{max-width:720px;margin:28px auto 0;text-align:center;font-family:var(--display);font-size:18px;line-height:2}
+
+  /* ===== cards ===== */
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px 24px;box-shadow:var(--shadow)}
+  .band .card{background:var(--bg);box-shadow:none}
+  .card h3{font-family:var(--display);font-size:18px;margin-bottom:10px;line-height:1.6}
+  .card p{font-size:14.5px;color:var(--muted)}
+
+  /* ===== types ===== */
+  .typegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px 0 8px}
+  .typecard{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+  .typecard .code{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--faint)}
+  .typecard .name{font-family:var(--display);font-weight:700;font-size:16.5px;margin:4px 0 6px;line-height:1.5}
+  .typecard .catch{font-size:12.5px;color:var(--muted);line-height:1.7}
+  .typecard.o{border-top:3px solid var(--coral)}
+  .typecard.g{border-top:3px solid var(--teal)}
+  .pattern-title{font-weight:700;margin:34px 0 12px;text-align:center}
+  .patterns{list-style:none;display:grid;gap:10px;max-width:640px;margin:0 auto}
+  .patterns li{padding-left:26px;position:relative;color:var(--muted);font-size:15px}
+  .patterns li::before{content:"";position:absolute;left:6px;top:.75em;width:8px;height:8px;border-radius:50%;background:var(--coral)}
+  .pointbox{max-width:720px;margin:30px auto 0;background:var(--teal-soft);border-radius:var(--radius);padding:22px 26px;color:var(--teal-ink);font-size:15px}
+
+  /* ===== steps ===== */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:step}
+  .step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)}
+  .band .step{background:var(--bg);box-shadow:none}
+  .step .no{width:36px;height:36px;border-radius:50%;background:var(--chrome);color:#fff;font-weight:700;font-size:16px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .step h3{font-family:var(--display);font-size:17.5px;line-height:1.6;margin-bottom:8px}
+  .step p{font-size:14.5px;color:var(--muted)}
+  .step .tag{position:absolute;top:22px;right:20px;font-size:11px;font-weight:700;color:var(--coral-ink);background:var(--coral-soft);padding:4px 10px;border-radius:999px}
+
+  /* ===== before/after ===== */
+  .ba{display:grid;gap:12px;max-width:840px;margin:0 auto}
+  .ba-row{display:grid;grid-template-columns:1fr 44px 1fr;align-items:stretch;gap:0}
+  .ba-cell{padding:16px 18px;font-size:14.5px;border-radius:12px}
+  .ba-before{background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+  .band .ba-before{background:var(--bg)}
+  .ba-after{background:var(--teal-soft);color:var(--teal-ink);font-weight:500}
+  .ba-arrow{display:flex;align-items:center;justify-content:center;color:var(--faint);font-weight:700}
+
+  /* ===== table ===== */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:640px}
+  th,td{padding:14px 18px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+  thead th{font-size:13px;letter-spacing:.06em;color:var(--muted);background:var(--bg)}
+  tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+  td.ours{background:var(--teal-soft);color:var(--teal-ink);font-weight:500}
+  .corebox{max-width:760px;margin:26px auto 0;text-align:center;font-family:var(--display);font-size:17px;line-height:2.1}
+
+  /* ===== reasons ===== */
+  .cards2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .rcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow)}
+  .band .rcard{background:var(--bg);box-shadow:none}
+  .rcard h3{font-family:var(--display);font-size:17.5px;margin-bottom:8px}
+  .rcard h3 span{color:var(--coral);margin-right:10px;font-size:15px}
+  .rcard p{font-size:14.5px;color:var(--muted)}
+
+  /* ===== usecase ===== */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:760px;margin:0 auto}
+  .chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 20px;font-size:14px;font-weight:500}
+  .band .chip{background:var(--bg)}
+  .target-note{max-width:680px;margin:26px auto 0;text-align:center;color:var(--muted);font-size:15px}
+
+  /* ===== faq ===== */
+  .faq{max-width:760px;margin:0 auto;display:grid;gap:12px}
+  details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 22px}
+  .band details{background:var(--bg)}
+  summary{cursor:pointer;list-style:none;font-weight:700;padding:18px 30px 18px 0;position:relative;line-height:1.6}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"＋";position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--faint);font-weight:400}
+  details[open] summary::after{content:"−"}
+  details p{padding:0 0 18px;color:var(--muted);font-size:14.5px}
+
+  /* ===== flow ===== */
+  .flow{max-width:640px;margin:0 auto;display:grid;gap:0}
+  .flow-step{display:grid;grid-template-columns:44px 1fr;gap:18px;position:relative;padding-bottom:30px}
+  .flow-step:last-child{padding-bottom:0}
+  .flow-step::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+  .flow-step:last-child::before{display:none}
+  .flow-no{width:44px;height:44px;border-radius:50%;background:var(--chrome);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1}
+  .flow-body h3{font-family:var(--display);font-size:17px;margin:8px 0 4px}
+  .flow-body p{font-size:14.5px;color:var(--muted)}
+
+  /* ===== contact form ===== */
+  #contact h2{text-align:center}
+  #contact .sub{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 34px}
+  .formcard{max-width:680px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:34px clamp(20px,5vw,40px)}
+  .field{margin-bottom:26px}
+  .field>label,.field>.flabel{display:block;font-weight:700;font-size:15px;margin-bottom:10px}
+  .req{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--coral);border-radius:6px;padding:1px 8px;margin-left:8px;vertical-align:2px}
+  .opt{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--bg);border-radius:6px;padding:1px 8px;margin-left:8px;vertical-align:2px}
+  input[type=email],textarea{width:100%;font-family:var(--body);font-size:16px;color:var(--ink);
+    background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;outline:none;transition:border-color .2s}
+  input[type=email]:focus,textarea:focus{border-color:var(--teal);background:#fff}
+  textarea{min-height:130px;resize:vertical;line-height:1.8}
+  .helper{font-size:12.5px;color:var(--muted);margin-top:8px}
+  .ckgroup{display:grid;gap:10px}
+  .ck{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:13px 16px;cursor:pointer;transition:border-color .2s,background .2s;font-size:15px}
+  .ck input{width:18px;height:18px;margin-top:4px;accent-color:var(--teal);flex:none;cursor:pointer}
+  .ck:has(input:checked){border-color:var(--teal);background:var(--teal-soft)}
+  .privacy{font-size:12.5px;color:var(--muted);margin:6px 0 22px}
+  .form-error{display:none;color:var(--coral);font-weight:700;font-size:14px;margin-bottom:16px}
+  .form-error.show{display:block}
+  .btn-wide{display:block;width:100%}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .hp{position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden}
+  .form-success{text-align:center;padding:26px 0 8px}
+  .form-success h3{font-family:var(--display);font-size:20px;margin-bottom:12px}
+  .form-success p{color:var(--muted);margin-bottom:22px}
+  .alt-cta{text-align:center;margin-top:22px;font-size:14px;color:var(--muted)}
+
+  /* ===== closing / footer ===== */
+  .closing{background:var(--chrome);color:#fff;text-align:center}
+  .closing h2{color:#fff}
+  .closing p{color:rgba(255,255,255,.75);max-width:640px;margin:0 auto 28px}
+  footer{padding:36px 0 110px;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;justify-content:space-between}
+  footer nav{display:flex;flex-wrap:wrap;gap:18px}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--ink);text-decoration:underline}
+
+  /* ===== sticky bar ===== */
+  .stickybar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:none;gap:10px;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(6px)}
+  .stickybar .btn{flex:1;font-size:14px;padding:13px 10px}
+  .stickybar.hide{display:none !important}
+
+  @media(max-width:860px){
+    section{padding:56px 0}
+    .hero{padding:40px 0 56px}
+    .hero-grid{grid-template-columns:1fr;gap:34px}
+    .cards3,.steps{grid-template-columns:1fr}
+    .cards2{grid-template-columns:1fr}
+    .typegrid{grid-template-columns:1fr 1fr}
+    .ba-row{grid-template-columns:1fr}
+    .ba-arrow{transform:rotate(90deg);padding:2px 0}
+    .stickybar{display:flex}
+  }
+</style>
+</head>
+<body>
+
+<header class="siteheader">
+  <div class="wrap">
+    <div class="brand">人間関係タイプ診断<small>FOR BUSINESS｜法人向けのご案内</small></div>
+    <a class="btn btn-sm btn-dark" href="#contact">導入のご相談</a>
+  </div>
+</header>
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">職場の人間関係タイプ診断</div>
+      <h1>自然体で尊重し合えるチームが、<br>辞めない現場をつくる。</h1>
+      <p class="lead">メンバー一人ひとりの、力を抜いたときの「自然体」を9問の無料診断で可視化。押し付けでなく、自律的に尊重し合えるチームへ。</p>
+      <div class="badges">
+        <span class="badge">全9問・約3分</span>
+        <span class="badge">診断は無料</span>
+        <span class="badge">その場で結果</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-accent js-quiz" href="prototype.html" target="_blank" rel="noopener">まず3分、ご自身で無料診断</a>
+        <a class="btn btn-ghost" href="#contact">導入のご相談（無料）</a>
+      </div>
+      <span class="btn-note">※ 診断は別タブで開きます。受けたあと、このページに戻ってご相談いただけます。</span>
+    </div>
+    <div class="mapcard" aria-hidden="true">
+      <div class="cap">チームの「タイプ地図」</div>
+      <div class="tmap">
+        <span class="axis top">本音を出す</span>
+        <span class="axis bottom">内にためる</span>
+        <span class="axis left">支える</span>
+        <span class="axis right">引っ張る</span>
+        <span class="tchip o" style="left:69%;top:22%">突撃隊長</span>
+        <span class="tchip o" style="left:73%;top:38%">お祭り隊長</span>
+        <span class="tchip o" style="left:28%;top:24%">正論ハンマー</span>
+        <span class="tchip o" style="left:30%;top:40%">自由人コメンテーター</span>
+        <span class="tchip g" style="left:71%;top:63%">沈黙の大黒柱</span>
+        <span class="tchip g" style="left:67%;top:79%">根回しの仕掛け人</span>
+        <span class="tchip g" style="left:29%;top:65%">縁の下の職人</span>
+        <span class="tchip g" style="left:31%;top:81%">がんばり屋の調整役</span>
+      </div>
+      <p class="mapnote">ワークショップでは、チーム全員でこの地図の上に立ちます。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>こんなお悩みはありませんか</h2>
+    </div>
+    <ul class="checklist">
+      <li>人がすぐ辞める。採用が追いつかない</li>
+      <li>スタッフ間がギスギスして、空気がお客様にも伝わっている</li>
+      <li>新人が既存メンバーに馴染めず、早期に辞めてしまう</li>
+      <li>任せたいのに任せられず、つい自分でやってしまう</li>
+      <li>本音が出ないまま、同じすれ違いが繰り返されている</li>
+    </ul>
+    <p class="bridge-line">ひとつでも当てはまるなら、原因は「人」そのものではなく、<br>関わり方のすれ違いにあるかもしれません。</p>
+  </div>
+</section>
+
+<!-- 3. COST -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>放置するほど、静かに膨らむコスト</h2>
+      <p class="lead">人間関係の摩擦は目に見えません。けれど、費用としては確実に積み上がっていきます。</p>
+    </div>
+    <div class="cards3">
+      <div class="card">
+        <h3>離職と、採用のやり直し</h3>
+        <p>1人辞めるたびに、採用と育成にかけた投資がまるごとやり直しになります。摩擦や「静かな我慢」による退職ほど、前触れなく起こります。</p>
+      </div>
+      <div class="card">
+        <h3>マネジメントの時間</h3>
+        <p>すれ違いの仲裁や調整に、店長・リーダーの時間が溶けていきます。本来はサービスと育成に使えたはずの時間です。</p>
+      </div>
+      <div class="card">
+        <h3>チームの空気</h3>
+        <p>本音が出ず、対立は先送りに。張りつめた空気は、そのまま接客品質とお客様の体験に表れます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. REDEFINE + 8 TYPES -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>すれ違いの正体は、<br>8タイプの「関わり方の癖」</h2>
+      <p class="lead">職場の摩擦は「相性が悪い」で片づけられがちです。実際には、本音の出し方・衝突への向き合い方・チームでの重心という3つの軸の違いが、すれ違いを生んでいるだけというケースがほとんど。この診断は、特定の場面ではなく、力を抜いたときの「自然体」の関わり方を8つのタイプで映し出します。</p>
+    </div>
+    <div class="typegrid">
+      <div class="typecard o"><span class="code">OBL</span><div class="name">突撃隊長</div><div class="catch">気づけばいつも、先頭。</div></div>
+      <div class="typecard o"><span class="code">OBS</span><div class="name">正論ハンマー</div><div class="catch">おかしいことは、おかしい。</div></div>
+      <div class="typecard o"><span class="code">OKL</span><div class="name">お祭り隊長</div><div class="catch">とにかく、盛り上げる。</div></div>
+      <div class="typecard o"><span class="code">OKS</span><div class="name">自由人コメンテーター</div><div class="catch">言うだけ、言っておく。</div></div>
+      <div class="typecard g"><span class="code">GBL</span><div class="name">沈黙の大黒柱</div><div class="catch">多くは語らない。でも逃げない。</div></div>
+      <div class="typecard g"><span class="code">GBS</span><div class="name">縁の下の職人</div><div class="catch">黙って、やり切る。</div></div>
+      <div class="typecard g"><span class="code">GKL</span><div class="name">根回しの仕掛け人</div><div class="catch">気づいたら、私の流れ。</div></div>
+      <div class="typecard g"><span class="code">GKS</span><div class="name">がんばり屋の調整役</div><div class="catch">気づけば、みんなのお母さん。</div></div>
+    </div>
+    <p class="center" style="margin-top:6px"><a class="btn btn-sm btn-ghost js-types" href="all-types.html" target="_blank" rel="noopener">全8タイプをくわしく見る →</a></p>
+
+    <p class="pattern-title">現場では、こんな形で表れます</p>
+    <ul class="patterns">
+      <li>引っ張り役が独走し、周りが本音を言えず沈黙する</li>
+      <li>正論が逃げ場を奪い、関係にヒビが入る</li>
+      <li>対立が笑いや根回しで先送りされ、課題が残り続ける</li>
+      <li>支え役がNOを言えずに抱え込み、良い人ほど静かに辞めていく</li>
+    </ul>
+    <div class="pointbox">タイプに優劣はありません。どのタイプも「強み」と「消耗ポイント」を対で持ちます。誰かの欠陥探しにならないから、吊し上げの心配なく、チーム全員に安心して配れます。</div>
+  </div>
+</section>
+
+<!-- 5. SOLUTION -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>診断、対話、自走。<br>3ステップで共通言語をチームに残す</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="tag">無料</span>
+        <div class="no">1</div>
+        <h3>無料診断（9問・約3分）</h3>
+        <p>メンバー全員が受けて、チームの「タイプ地図」を可視化します。スマホで3分、費用も負荷もほぼゼロ。まずは決裁者ご自身が体験してください。</p>
+      </div>
+      <div class="step">
+        <span class="tag">初回ファシリ付き</span>
+        <div class="no">2</div>
+        <h3>読み解きワークショップ（90分）</h3>
+        <p>初回はプロのファシリテーションつき。床の2軸マップにチーム全員で立ち、互いの「トリセツ」を交換し、明日の現場で使える一手を一人ひとつ持ち帰ります。評価や吊し上げをしない進行ルールで、安心して本音が出る場をつくります。</p>
+      </div>
+      <div class="step">
+        <span class="tag">資産化</span>
+        <div class="no">3</div>
+        <h3>自走キットで社内に定着</h3>
+        <p>2回目以降は、店長・リーダーが社内で実施できる自走キットを提供。共通言語が社内に残り続け、四半期の匿名サーベイで「働きやすさ・チームワーク」の変化も見えるようにします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. EFFECT (Before/After) -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>導入すると、何が変わるか</h2>
+    </div>
+    <div class="ba">
+      <div class="ba-row">
+        <div class="ba-cell ba-before">「合う・合わない」で人を評価し、摩擦が人格批判になる</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-cell ba-after">違いを「タイプ」として、人格と切り離して語れる共通言語ができる</div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-cell ba-before">各自が自己流で関わり、すれ違いが再生産される</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-cell ba-after">自分と相手の組み合わせから、具体的な関わり方の一手が分かる</div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-cell ba-before">押し付けか遠慮かの二択で、本音が出ない</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-cell ba-after">押し付けでなく、自律的に尊重し合う関係に近づく</div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-cell ba-before">任せ方・声かけが個人の勘だのみ</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-cell ba-after">メンバーのタイプを踏まえて、任せ方と声かけを設計できる</div>
+      </div>
+      <div class="ba-row">
+        <div class="ba-cell ba-before">研修が一過性で終わり、現場に残らない</div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-cell ba-after">共通言語とキットが社内に残り、四半期サーベイで変化を確かめられる</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. DIFF -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>性格診断でも、サーベイでも、<br>単発研修でもなく</h2>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>よくある手段</th><th>足りない点</th><th>本サービス</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>性格診断（MBTI等）</th><td>自己理解で止まり、職場の関わり方につながらない</td><td class="ours">相性から「自分×相手の一手」まで落とし込む</td></tr>
+          <tr><th>エンゲージメントサーベイ</th><td>課題は見えるが、打ち手がない</td><td class="ours">測るのは職場の状態でなく「人（自然体）」。相互理解でストレスを減らし、定着につなげる</td></tr>
+          <tr><th>単発研修</th><td>その場限りで、現場に残らない</td><td class="ours">初回ファシリ後は社内で自走。共通言語が資産になる</td></tr>
+          <tr><th>何もしない</th><td>放置コスト（離職・工数・停滞）が静かに膨らむ</td><td class="ours">無料診断から、低リスクで今日から始められる</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="corebox">核にあるのは、自然体の自分として答え、それをチームに理解してもらう仕組み。<br>素を出せないストレスが減るから、長く働ける。<br>摩擦を減らすのは状態の可視化ではなく、相互理解です。</p>
+  </div>
+</section>
+
+<!-- 8. REASONS -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>導入を決めやすい、4つの理由</h2>
+    </div>
+    <div class="cards2">
+      <div class="rcard"><h3><span>01</span>無料から始まる低リスク設計</h3><p>まず全員が無料診断を体験してから、有料はワークショップという軽い単位で。効果を見てから広げられます。</p></div>
+      <div class="rcard"><h3><span>02</span>放置コストを止める投資</h3><p>人間関係の摩擦は見えにくい高コスト。離職1人分の採用・育成のやり直し費用と比べて、判断できます。</p></div>
+      <div class="rcard"><h3><span>03</span>一度入れれば、社内に残る資産</h3><p>呼ぶたびに費用がかかる研修と違い、共通言語と自走キットがチームに残り続けます。</p></div>
+      <div class="rcard"><h3><span>04</span>従業員のwell-being施策にもなる</h3><p>診断が測るのは場面に依存しない自然体。社員は家族やパートナーとの関係にもそのまま使えます。会社が渡せる、福利厚生的な価値です。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. USECASE -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>こんなチーム・タイミングで</h2>
+    </div>
+    <div class="chips">
+      <span class="chip">新チームの立ち上げ・組織再編のあと</span>
+      <span class="chip">新任の店長・施設長の着任時</span>
+      <span class="chip">新人のオンボーディング</span>
+      <span class="chip">1on1や面談の前の補助線に</span>
+      <span class="chip">店舗研修・合宿のプログラムとして</span>
+    </div>
+    <p class="target-note">接客・飲食・美容・介護・保育・宿泊・式場など、関係の質がそのままサービス品質と定着に表れる、5〜15名のチームで特に力を発揮します。</p>
+  </div>
+</section>
+
+<!-- 10. FAQ -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>よくあるご質問</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>性格診断や占いと、何が違うのですか？</summary>
+        <p>自己理解で終わらせない点です。自分と相手のタイプの組み合わせから「関わり方の一手」まで落とし込み、チームの共通言語をつくることが目的です。当てること自体はゴールにしていません。</p>
+      </details>
+      <details>
+        <summary>たった9問で分かるのですか？</summary>
+        <p>細かく当てるためではなく、チームに共通言語をすばやく揃えるための9問です。負荷がほぼゼロだから全員が受けられて、チーム全体の地図になります。深い読み解きはワークショップとセッションで担保します。</p>
+      </details>
+      <details>
+        <summary>効果は一過性で終わりませんか？</summary>
+        <p>初回ファシリテーションのあと、社内で回せる自走キットと四半期の匿名サーベイをセットで提供します。共通言語を社内に残し、変化を数字で確かめられるようにする設計が、単発研修との違いです。</p>
+      </details>
+      <details>
+        <summary>人事評価やレッテル貼りに使われませんか？</summary>
+        <p>タイプは優劣ではなく「強みと癖」の対です。評価に使わない・共有範囲は本人主導という運用ルールをワークショップの冒頭で全員と確認し、相互理解の道具として運用します。</p>
+      </details>
+      <details>
+        <summary>診断結果のプライバシーは？</summary>
+        <p>個人の結果をどこまで共有するかは本人が決めます。チーム全体では、匿名の分布と共通言語だけを使う運用も可能です。</p>
+      </details>
+      <details>
+        <summary>費用はどのくらいですか？</summary>
+        <p>診断は人数にかかわらず無料です。ワークショップ以降の費用は、チームの規模や回数に合わせて個別にご提案します。まずは下のフォームからご相談ください。</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 11. FLOW -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>導入までの流れ</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-no">1</div>
+        <div class="flow-body"><h3>まず、ご自身で無料診断</h3><p>3分で結果が出ます。「当たる」「これで話せる」の感覚を、決裁者ご自身が最初に体験してください。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-no">2</div>
+        <div class="flow-body"><h3>フォームからご相談</h3><p>メールアドレスと、いま困っていることをお送りください。1〜2営業日以内にご連絡します。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-no">3</div>
+        <div class="flow-body"><h3>進め方のご提案</h3><p>課題をうかがい、チームに合わせたワークショップの進め方と費用をご提案します（オンライン可）。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-no">4</div>
+        <div class="flow-body"><h3>チーム全員で診断＋ワークショップ</h3><p>全員診断のあと、90分の読み解きワークショップを実施。以降は自走キットで社内運用に移行します。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. CONTACT -->
+<section class="band" id="contact">
+  <div class="wrap">
+    <h2>チームの「関わり方」が、<br>職場の居心地を左右していませんか。</h2>
+    <p class="sub">導入のご相談は無料です。いただいた内容を拝見した上で、チームに合わせた進め方をご提案します。</p>
+    <div class="formcard">
+      <form id="leadForm" novalidate>
+        <div class="hp" aria-hidden="true">
+          <label>この欄には入力しないでください<input type="text" name="company" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <div class="field">
+          <label for="email">ご連絡先メールアドレス<span class="req">必須</span></label>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="例：tanaka@example.com" required>
+        </div>
+        <div class="field">
+          <span class="flabel">いま困っていること（当てはまるものすべて）<span class="req">必須</span></span>
+          <div class="ckgroup" id="issueGroup">
+            <label class="ck"><input type="checkbox" name="issues" value="人がすぐ辞める・採用が追いつかない"><span>人がすぐ辞める・採用が追いつかない</span></label>
+            <label class="ck"><input type="checkbox" name="issues" value="スタッフ間の空気がギスギスしている"><span>スタッフ間の空気がギスギスしている</span></label>
+            <label class="ck"><input type="checkbox" name="issues" value="新人が馴染めない・早期に辞める"><span>新人が馴染めない・早期に辞める</span></label>
+            <label class="ck"><input type="checkbox" name="issues" value="任せられない・抱え込むメンバーがいる"><span>任せられない・抱え込むメンバーがいる</span></label>
+            <label class="ck"><input type="checkbox" name="issues" value="本音が出ない・問題が先送りになる"><span>本音が出ない・問題が先送りになる</span></label>
+            <label class="ck"><input type="checkbox" name="issues" value="その他"><span>その他</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="detail">差し支えない範囲で、状況を詳しく教えてください<span class="opt">任意</span></label>
+          <textarea id="detail" name="detail" placeholder="例：任せたいのに、つい自分でやってしまう部下がいて…"></textarea>
+          <p class="helper">具体的にご記入いただくほど、最初のご連絡の時点で、チームに合わせた見立てをお持ちできます。</p>
+        </div>
+        <p class="privacy">ご記入いただいた内容は、導入のご相談への対応にのみ使用します。</p>
+        <p class="form-error" id="formError"></p>
+        <button type="submit" class="btn btn-accent btn-wide" id="submitBtn">この内容で相談する</button>
+      </form>
+      <div class="form-success" id="formSuccess" hidden>
+        <h3>送信ありがとうございます。</h3>
+        <p>1〜2営業日以内に、ご記入いただいた課題を拝見した上でご連絡します。<br>よろしければ、その間にご自身の無料診断もお試しください。</p>
+        <a class="btn btn-accent js-quiz" href="prototype.html" target="_blank" rel="noopener">3分で無料診断を受ける</a>
+      </div>
+      <p class="alt-cta" id="altCta">診断がまだの方は、<a class="js-quiz" href="prototype.html" target="_blank" rel="noopener">先に3分でどうぞ</a>（別タブで開きます）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <div class="wrap">
+    <h2>まずは、あなた自身の3分から。</h2>
+    <p>チームを変える最初の一歩は、決裁者ご自身が「当たる」「これで話せる」を体感することです。診断は無料、登録も不要です。</p>
+    <a class="btn btn-accent js-quiz" href="prototype.html" target="_blank" rel="noopener">無料診断を受けてみる</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>職場の人間関係タイプ診断｜法人向けのご案内<br><span style="color:var(--faint)">この診断は、個人向け（大切な人との関係）にもご利用いただけます。</span></div>
+    <nav>
+      <a class="js-quiz" href="prototype.html" target="_blank" rel="noopener">無料診断を受ける</a>
+      <a class="js-types" href="all-types.html" target="_blank" rel="noopener">全8タイプを見る</a>
+      <a href="#contact">導入のご相談</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="stickybar" id="stickybar">
+  <a class="btn btn-ghost js-quiz" href="prototype.html" target="_blank" rel="noopener">無料診断を試す</a>
+  <a class="btn btn-accent" href="#contact">相談する</a>
+</div>
+
+<script>
+// ▼ 送信先：prototype.html と同じ Apps Script Web App。法人リードは action:'corpLead' で送る。
+//   （corpLead 対応の Code.gs 再デプロイ前でも、互換フィールドにより既存シートへ記録される）
+const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
+
+// ▼ 流入元：LP自身の ?ref= を診断リンクとリードに引き継ぐ（既定は corp-lp）
+const REF = new URLSearchParams(location.search).get('ref') || 'corp-lp';
+
+// 診断・全タイプページへのリンクを組み立てる。
+// htmlpreview.github.io 経由（プレビュー時）は相対リンクが切れるため、raw URL から絶対リンクを組み直す。
+(function(){
+  const preview = location.hostname === 'htmlpreview.github.io';
+  let rawBase = '';
+  if (preview) {
+    const m = (location.search || '').match(/https:\/\/raw\.githubusercontent\.com\/\S*\//);
+    if (m) rawBase = m[0];
+  }
+  function target(file, query){
+    if (preview && rawBase) return 'https://htmlpreview.github.io/?' + rawBase + file; // プレビューではクエリを付けない
+    return file + (query || '');
+  }
+  document.querySelectorAll('.js-quiz').forEach(a => { a.href = target('prototype.html', '?ref=' + encodeURIComponent(REF) + '&mode=feedback'); });
+  document.querySelectorAll('.js-types').forEach(a => { a.href = target('all-types.html', ''); });
+})();
+
+// ▼ モバイル固定バー：フォーム表示中は隠す
+(function(){
+  const bar = document.getElementById('stickybar');
+  const contact = document.getElementById('contact');
+  if (!('IntersectionObserver' in window)) return;
+  new IntersectionObserver(entries => {
+    entries.forEach(e => bar.classList.toggle('hide', e.isIntersecting));
+  }, { threshold: 0.15 }).observe(contact);
+})();
+
+// ▼ 商談フォーム送信
+(function(){
+  const form = document.getElementById('leadForm');
+  const btn = document.getElementById('submitBtn');
+  const err = document.getElementById('formError');
+
+  function newId(){
+    return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+  }
+  function showError(msg){ err.textContent = msg; err.classList.add('show'); }
+  function clearError(){ err.textContent = ''; err.classList.remove('show'); }
+
+  form.addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    clearError();
+
+    const email = document.getElementById('email').value.trim();
+    const issues = Array.from(document.querySelectorAll('input[name="issues"]:checked')).map(el => el.value);
+    const detail = document.getElementById('detail').value.trim();
+    const honeypot = form.querySelector('input[name="company"]').value;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('メールアドレスをご確認ください。');
+      document.getElementById('email').focus();
+      return;
+    }
+    if (issues.length === 0) {
+      showError('「いま困っていること」を1つ以上お選びください。');
+      return;
+    }
+
+    // CORSプリフライト回避のため、prototype.html と同じく既定Content-Typeのまま no-cors で送信
+    const payload = {
+      action: 'corpLead',
+      id: newId(),
+      mode: 'corp-lead',
+      ref: REF,
+      email: email,
+      issues: issues,
+      detail: detail,
+      page: location.href,
+      // 旧Code.gs（corpLead未対応）に届いた場合のフォールバック：指標v2シートの自由記述列に記録される
+      relationship: '【課題】' + issues.join('／') + (detail ? '\n' + detail : '')
+    };
+
+    btn.disabled = true;
+    btn.textContent = '送信しています…';
+    try {
+      if (!honeypot && SHEET_ENDPOINT) {
+        await fetch(SHEET_ENDPOINT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+      }
+      form.hidden = true;
+      document.getElementById('altCta').hidden = true;
+      document.getElementById('formSuccess').hidden = false;
+      document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      showError('送信に失敗しました。通信環境をご確認のうえ、もう一度お試しください。');
+      btn.disabled = false;
+      btn.textContent = 'この内容で相談する';
+    }
+  });
+})();
+</script>
+</body>
+</html>
