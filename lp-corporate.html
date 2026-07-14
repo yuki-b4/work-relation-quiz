@@ -54,6 +54,14 @@
   }
   .btn-pulse{animation:ctaPulse 2.6s ease-out infinite}
   @media(prefers-reduced-motion:reduce){.btn-pulse{animation:none}.btn-accent:hover{transform:none}}
+  /* 資料請求ボタン（白地＋コーラル枠・2段組） */
+  .btn-doc{display:inline-block;background:#fff;border:3px solid var(--coral);border-radius:18px;padding:16px 44px 18px;text-align:center;text-decoration:none;cursor:pointer;
+    box-shadow:0 8px 22px rgba(192,73,43,.20);transition:transform .15s,box-shadow .2s}
+  .btn-doc:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(192,73,43,.30)}
+  .btn-doc:active{transform:translateY(1px)}
+  .btn-doc .doc-sub{display:block;font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5}
+  .btn-doc .doc-main{display:block;font-size:23px;font-weight:700;color:var(--coral);line-height:1.4}
+  .btn-doc .doc-main::after{content:"›";margin-left:12px}
   .btn-dark{background:var(--chrome);color:#fff}
   .btn-dark:hover{background:var(--chrome-hover)}
   .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
@@ -272,6 +280,9 @@
     .fchip{font-size:11.5px;padding:6px 12px}
     .siteheader .btn{font-size:12.5px;padding:9px 14px;white-space:nowrap}
     .brand{font-size:13.5px}
+    .btn-doc{width:100%;padding:13px 18px 15px}
+    .btn-doc .doc-sub{font-size:12px}
+    .btn-doc .doc-main{font-size:19px}
     .hero-grid{grid-template-columns:1fr;gap:34px}
     .cards3,.steps{grid-template-columns:1fr}
     .cards2{grid-template-columns:1fr}
@@ -287,7 +298,7 @@
 <header class="siteheader">
   <div class="wrap">
     <div class="brand">人間関係タイプ診断<small>FOR BUSINESS｜法人向けのご案内</small></div>
-    <a class="btn btn-sm btn-accent btn-arrow" href="#contact">無料で見立てを受け取る</a>
+    <a class="btn btn-sm btn-accent btn-arrow" href="#contact">無料で資料請求する</a>
   </div>
 </header>
 
@@ -304,10 +315,10 @@
         <span class="badge">その場で結果</span>
       </div>
       <div class="hero-cta">
-        <a class="btn btn-accent btn-lg btn-arrow btn-pulse" href="#contact">チームの見立てを無料で受け取る</a>
+        <a class="btn-doc btn-pulse" href="#contact"><span class="doc-sub">サービス内容・進め方・料金がわかる</span><span class="doc-main">無料で資料請求する</span></a>
         <a class="btn btn-ghost js-quiz" href="prototype.html" target="_blank" rel="noopener">まず3分、ご自身で無料診断</a>
       </div>
-      <span class="btn-note">見立ては無料。1〜2営業日以内にご連絡します（しつこい営業はしません）。診断は別タブで開きます。</span>
+      <span class="btn-note">資料・ご相談は無料。1〜2営業日以内にお送りします（しつこい営業はしません）。診断は別タブで開きます。</span>
     </div>
     <div class="heroviz">
       <span class="heroblob" aria-hidden="true"></span>
@@ -367,9 +378,9 @@
 <section class="ctaband">
   <div class="wrap">
     <h2>「うちのチームの場合は？」に、<br>無料でお答えします。</h2>
-    <p>いま抱えている状況をフォームで送るだけ。チームに合わせた見立てと進め方を、1〜2営業日以内にお返しします。</p>
-    <a class="btn btn-accent btn-lg btn-arrow" href="#contact">チームの見立てを無料で受け取る</a>
-    <span class="cta-micro">無料。メールアドレスと、いま困っていることだけで送れます。</span>
+    <p>サービス内容と料金のご案内を、1〜2営業日以内にお送りします。いま困っていることを添えていただければ、チームに合わせた見立てもあわせてお返しします。</p>
+    <a class="btn-doc" href="#contact"><span class="doc-sub">サービス内容・進め方・料金がわかる</span><span class="doc-main">無料で資料請求する</span></a>
+    <span class="cta-micro">無料。入力は1分で終わります。</span>
   </div>
 </section>
 
@@ -514,9 +525,9 @@
 <section class="ctaband warm">
   <div class="wrap">
     <h2>この変化を、うちのチームでも。</h2>
-    <p>「まだ検討段階」でも大丈夫です。現状をお聞かせいただければ、貴店・貴施設の状況に合わせた始め方をご提案します。</p>
-    <a class="btn btn-accent btn-lg btn-arrow" href="#contact">チームの見立てを無料で受け取る</a>
-    <span class="cta-micro">無料。1〜2営業日以内にご連絡します。しつこい営業はしません。</span>
+    <p>「まだ検討段階」でも大丈夫です。まずは資料で、サービス内容と始め方をご確認ください。</p>
+    <a class="btn-doc" href="#contact"><span class="doc-sub">まずは無料で内容・料金を確認する</span><span class="doc-main">無料で資料請求する</span></a>
+    <span class="cta-micro">無料。1〜2営業日以内にお送りします。しつこい営業はしません。</span>
   </div>
 </section>
 
@@ -614,9 +625,9 @@
 <section class="ctaband">
   <div class="wrap">
     <h2>気になることは、直接お答えします。</h2>
-    <p>FAQにない疑問や、うちの場合の進め方・費用感など、フォームからお気軽にお寄せください。ご相談の内容に合わせてお答えします。</p>
-    <a class="btn btn-accent btn-lg btn-arrow" href="#contact">チームの見立てを無料で受け取る</a>
-    <span class="cta-micro">無料。売り込みではなく、まず見立てをお返しします。</span>
+    <p>FAQにない疑問や、うちの場合の進め方・費用感など、フォームからお気軽にお寄せください。資料とあわせて、ご質問への回答もお返しします。</p>
+    <a class="btn-doc" href="#contact"><span class="doc-sub">まずは無料で内容・料金を確認する</span><span class="doc-main">無料で資料請求する</span></a>
+    <span class="cta-micro">無料。売り込みはしません。</span>
   </div>
 </section>
 
@@ -633,7 +644,7 @@
       </div>
       <div class="flow-step">
         <div class="flow-no">2</div>
-        <div class="flow-body"><h3>フォームからご相談</h3><p>メールアドレスと、いま困っていることをお送りください。1〜2営業日以内にご連絡します。</p></div>
+        <div class="flow-body"><h3>フォームから資料請求</h3><p>メールアドレスと、いま困っていることをお送りください。1〜2営業日以内に、資料とチームへの見立てをお返しします。</p></div>
       </div>
       <div class="flow-step">
         <div class="flow-no">3</div>
@@ -651,7 +662,7 @@
 <section class="band" id="contact">
   <div class="wrap">
     <h2>チームの「関わり方」が、<br>職場の居心地を左右していませんか。</h2>
-    <p class="sub">ご相談・見立ては無料です。いただいた内容を拝見した上で、チームに合わせた見立てと進め方をお返しします。しつこい営業はしません。</p>
+    <p class="sub">資料のご請求・ご相談は無料です。サービス内容・進め方・料金のご案内をお送りするとともに、いただいた内容を拝見した上で、チームに合わせた見立てもお返しします。しつこい営業はしません。</p>
     <div class="formcard">
       <form id="leadForm" novalidate>
         <div class="hp" aria-hidden="true">
@@ -679,11 +690,11 @@
         </div>
         <p class="privacy">ご記入いただいた内容は、導入のご相談への対応にのみ使用します。</p>
         <p class="form-error" id="formError"></p>
-        <button type="submit" class="btn btn-accent btn-wide btn-lg" id="submitBtn">この内容で、無料の見立てを受け取る</button>
+        <button type="submit" class="btn btn-accent btn-wide btn-lg" id="submitBtn">この内容で、無料で資料請求する</button>
       </form>
       <div class="form-success" id="formSuccess" hidden>
         <h3>送信ありがとうございます。</h3>
-        <p>1〜2営業日以内に、ご記入いただいた課題を拝見した上でご連絡します。<br>よろしければ、その間にご自身の無料診断もお試しください。</p>
+        <p>1〜2営業日以内に、資料（サービス内容・進め方・料金のご案内）をお送りします。<br>ご記入いただいた課題への見立ても、あわせてお返しします。<br>よろしければ、その間にご自身の無料診断もお試しください。</p>
         <a class="btn btn-accent js-quiz" href="prototype.html" target="_blank" rel="noopener">3分で無料診断を受ける</a>
       </div>
       <p class="alt-cta" id="altCta">診断がまだの方は、<a class="js-quiz" href="prototype.html" target="_blank" rel="noopener">先に3分でどうぞ</a>（別タブで開きます）。</p>
@@ -695,12 +706,12 @@
 <section class="closing">
   <div class="wrap">
     <h2>チームの現状、ひとりで抱え込まずに。</h2>
-    <p>いま困っていることをお送りいただければ、チームに合わせた見立てと進め方を無料でお返しします。あわせて、最初の一歩としてご自身の3分診断もどうぞ。</p>
+    <p>まずは資料で、サービス内容と進め方をご確認ください。いま困っていることを添えていただければ、チームに合わせた見立てもお返しします。最初の一歩として、ご自身の3分診断もどうぞ。</p>
     <div class="cta-row">
-      <a class="btn btn-accent btn-lg btn-arrow" href="#contact">チームの見立てを無料で受け取る</a>
+      <a class="btn-doc" href="#contact"><span class="doc-sub">サービス内容・進め方・料金がわかる</span><span class="doc-main">無料で資料請求する</span></a>
       <a class="btn btn-ghost js-quiz" href="prototype.html" target="_blank" rel="noopener">3分で無料診断を受ける</a>
     </div>
-    <span class="cta-micro">無料。1〜2営業日以内にご連絡します。しつこい営業はしません。</span>
+    <span class="cta-micro">無料。1〜2営業日以内にお送りします。しつこい営業はしません。</span>
   </div>
 </section>
 
@@ -710,14 +721,14 @@
     <nav>
       <a class="js-quiz" href="prototype.html" target="_blank" rel="noopener">無料診断を受ける</a>
       <a class="js-types" href="all-types.html" target="_blank" rel="noopener">全8タイプを見る</a>
-      <a href="#contact">無料で見立てを受け取る</a>
+      <a href="#contact">無料で資料請求する</a>
     </nav>
   </div>
 </footer>
 
 <div class="stickybar" id="stickybar">
   <a class="btn btn-ghost js-quiz" href="prototype.html" target="_blank" rel="noopener">3分で無料診断</a>
-  <a class="btn btn-accent" href="#contact" style="flex:1.5">無料で見立てを受け取る</a>
+  <a class="btn btn-accent" href="#contact" style="flex:1.5">無料で資料請求する</a>
 </div>
 
 <script>
