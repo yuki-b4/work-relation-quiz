@@ -10,14 +10,14 @@
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
     --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
-    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
+    --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
     --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
     --radius:16px;
   }
@@ -62,6 +62,9 @@
   .btn-doc .doc-sub{display:block;font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5}
   .btn-doc .doc-main{display:block;font-size:23px;font-weight:700;color:var(--coral);line-height:1.4}
   .btn-doc .doc-main::after{content:"›";margin-left:12px}
+  .btn-doc.fill{background:linear-gradient(180deg,#D25A38,var(--coral))}
+  .btn-doc.fill .doc-sub,.btn-doc.fill .doc-main{color:#fff}
+  .sp-only{display:none}
   .btn-dark{background:var(--chrome);color:#fff}
   .btn-dark:hover{background:var(--chrome-hover)}
   .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
@@ -73,8 +76,8 @@
   section{padding:72px 0}
   .band{background:var(--surface)}
   .eyebrow{font-size:14px;letter-spacing:.14em;font-weight:700;color:var(--teal);margin-bottom:14px}
-  h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5.4vw,44px);line-height:1.45;letter-spacing:.02em}
-  h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3.6vw,30px);line-height:1.5;margin-bottom:18px}
+  h1{font-family:var(--display);font-weight:900;font-size:clamp(27px,5vw,42px);line-height:1.5;letter-spacing:.02em}
+  h2{font-family:var(--display);font-weight:900;font-size:clamp(21px,3.4vw,29px);line-height:1.55;margin-bottom:18px}
   .sec-head{text-align:center;margin-bottom:36px}
   .sec-head p.lead{color:var(--muted);max-width:720px;margin:0 auto}
   .center{text-align:center}
@@ -330,6 +333,10 @@
   .form-success p{color:var(--muted);margin-bottom:22px}
   .alt-cta{text-align:center;margin-top:22px;font-size:14px;color:var(--muted)}
 
+  /* ===== SP用フォームセクション ===== */
+  .spform{display:none}
+  .spform .formcard{max-width:560px;margin:0 auto}
+
   /* ===== closing / footer ===== */
   .closing{background:var(--chrome);color:#fff;text-align:center}
   .closing h2{color:#fff}
@@ -358,14 +365,14 @@
   .stagearrow{display:flex;align-items:center;color:var(--teal);font-size:13px;letter-spacing:-2px;font-weight:700}
   .stage-result{text-align:center;margin:26px 0 4px;color:var(--muted);font-weight:700}
   .stage-vee{text-align:center;color:var(--faint);font-size:18px}
-  .omakase{font-family:var(--display);font-weight:700;font-size:clamp(42px,8vw,64px);text-align:center;line-height:1.4;margin:8px 0 24px;letter-spacing:.04em}
+  .omakase{font-family:var(--display);font-weight:900;font-size:clamp(42px,8vw,64px);text-align:center;line-height:1.4;margin:8px 0 24px;letter-spacing:.04em}
   .pivotcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 26px;max-width:720px;margin:0 auto;text-align:center;font-size:16.5px;line-height:2.1}
   .pivotcard .tw{color:var(--teal)}
   .pivotcard .cw{color:var(--coral)}
 
   /* ===== つまり＋循環サイクル ===== */
   .tsumari{display:flex;gap:26px;align-items:center;justify-content:center;flex-wrap:wrap}
-  .tword{font-family:var(--display);font-weight:700;font-size:clamp(44px,7vw,64px);color:var(--coral);flex:none;line-height:1.2}
+  .tword{font-family:var(--display);font-weight:900;font-size:clamp(44px,7vw,64px);color:var(--coral);flex:none;line-height:1.2}
   .tlead{font-size:16.5px;line-height:2.2;font-weight:500}
   .tlead .tw{color:var(--teal);font-weight:700}
   .hl{background:linear-gradient(transparent 58%,#FFE9A0 58%);font-weight:700}
@@ -384,7 +391,14 @@
 
   @media(max-width:860px){
     section{padding:56px 0}
-    .hero{padding:40px 0 56px}
+    .hero{padding:40px 0 48px}
+    .sp-only{display:inline-block}
+    .pc-only{display:none}
+    .spform{display:block}
+    .hero .eyebrow,.hero h1,.hero .lead{text-align:center}
+    .hero .btn-note{text-align:center}
+    .hero-cta{flex-direction:column;gap:12px}
+    .btn-line{display:block;text-align:center}
     .btn-lg{font-size:16px;padding:17px 26px}
     .hero-cta .btn,.closing .cta-row .btn{width:100%}
     .ctaband{padding:48px 0}
@@ -442,16 +456,14 @@
       <div class="eyebrow">職場の人間関係タイプ診断</div>
       <h1>自然体で尊重し合えるチームが、<br>辞めない現場をつくる。</h1>
       <p class="lead">メンバー一人ひとりの、力を抜いたときの「自然体」を9問の無料診断で可視化。押し付けでなく、自律的に尊重し合えるチームへ。</p>
-      <div class="badges">
-        <span class="badge">全9問・約3分</span>
-        <span class="badge">診断は無料</span>
-        <span class="badge">その場で結果</span>
-      </div>
       <div class="hero-cta">
-        <a class="btn btn-ghost js-quiz" href="prototype.html" target="_blank" rel="noopener">まず3分、ご自身で無料診断</a>
+        <a class="btn-doc sp-only" href="#contact"><span class="doc-sub">まずは無料で内容・料金を確認する</span><span class="doc-main">無料で資料請求する</span></a>
+        <a class="btn-doc fill sp-only js-quiz" href="prototype.html" target="_blank" rel="noopener"><span class="doc-sub">全9問・3分でその場で結果！</span><span class="doc-main">無料で診断を試す</span></a>
+        <a class="btn btn-ghost pc-only js-quiz" href="prototype.html" target="_blank" rel="noopener">まず3分、ご自身で無料診断</a>
       </div>
-      <span class="btn-note">資料請求はフォームから1分で。資料・ご相談は無料です（しつこい営業はしません）。診断は別タブで開き、戻ってそのまま請求できます。</span>
+      <span class="btn-note">資料・ご相談は無料です（しつこい営業はしません）。診断は別タブで開きます。</span>
     </div>
+    <div id="pcFormSlot">
     <div class="formcard" id="contact">
       <p class="form-title">無料で資料請求</p>
       <p class="form-sub">サービス内容・進め方・料金のご案内と、チームへの見立てをお送りします。</p>
@@ -489,6 +501,7 @@
         <a class="btn btn-accent js-quiz" href="prototype.html" target="_blank" rel="noopener">3分で無料診断を受ける</a>
       </div>
       <p class="alt-cta" id="altCta">診断がまだの方は、<a class="js-quiz" href="prototype.html" target="_blank" rel="noopener">先に3分でどうぞ</a>（別タブで開きます）。</p>
+    </div>
     </div>
   </div>
 </section>
@@ -915,6 +928,14 @@
   </div>
 </section>
 
+<!-- SP用フォームセクション（モバイルではフォーム本体がここへ移動する） -->
+<section class="band spform">
+  <div class="wrap">
+    <h2 class="center" style="margin-bottom:24px">チームの「関わり方」が、<br>職場の居心地を左右していませんか。</h2>
+    <div id="spFormSlot"></div>
+  </div>
+</section>
+
 <!-- CLOSING -->
 <section class="closing">
   <div class="wrap">
@@ -969,6 +990,18 @@ const REF = new URLSearchParams(location.search).get('ref') || 'corp-lp';
   }
   document.querySelectorAll('.js-quiz').forEach(a => { a.href = target('prototype.html', '?ref=' + encodeURIComponent(REF) + '&mode=feedback'); });
   document.querySelectorAll('.js-types').forEach(a => { a.href = target('all-types.html', ''); });
+})();
+
+// ▼ フォームの配置：PCはファーストビュー右、SP（860px以下）は下部セクションへ移動
+(function(){
+  const formCard = document.getElementById('contact');
+  const pcSlot = document.getElementById('pcFormSlot');
+  const spSlot = document.getElementById('spFormSlot');
+  const mq = window.matchMedia('(max-width:860px)');
+  function placeForm(){ (mq.matches ? spSlot : pcSlot).appendChild(formCard); }
+  placeForm();
+  if (mq.addEventListener) mq.addEventListener('change', placeForm);
+  else if (mq.addListener) mq.addListener(placeForm);
 })();
 
 // ▼ モバイル固定バー：フォーム表示中は隠す
