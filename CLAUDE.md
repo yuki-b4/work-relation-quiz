@@ -12,6 +12,7 @@
 - `prototype.html` — 検証用のプロトタイプ（スタンドアロンのHTML/CSS/JS）。`?ref=`/`?mode=lead` で紹介者向け（深掘り診断の申込）に切替
 - `index.html` / `.nojekyll` — GitHub Pages 公開用。`index.html` はクエリ（`?ref=` 等）を引き継いで `prototype.html` へリダイレクト
 - `lp-corporate.html` — 法人向けLP（Tier1業種の決裁者向け）。無料診断への導線（別タブ・`?ref=corp-lp&mode=feedback`）と商談フォーム（メール＋課題チェック＋自由記述）を持つ。フォームは Apps Script の `action:corpLead` で「法人リード」シートに記録（要再デプロイ。詳細は `apps-script/README.md`）
+- `lp-wedding.html` / `lp-coffee.html` — 法人LPの業種特化版（結婚式場版・珈琲屋カフェ版。初期フォーカス業種）。`lp-corporate.html` を親版とし、業種の言い当てモジュール（名乗り・悩み・放置コスト・ユースケース・フォーム課題・ref既定値 `wedding-lp`／`coffee-lp`）のみ差し替え。珈琲屋版は創業者の元珈琲屋オーナーというルーツを信頼要素（founder story）として組み込む。構成・コピーを変える際は `法人LP情報設計.json` の `variants` を先に更新して同期する。親版の共通部分を変更したら特化版2枚にも同じ変更を反映する
 - `法人LP情報設計.json` — 法人LPの情報設計（構成・コピー・フォーム仕様のソース）。LPの構成やコピーを変える際はここを先に更新して同期する
 - `apps-script/` — 診断結果・検証フィードバック・紹介者リード（メール/自由記述）をGoogleスプレッドシート（回答ログ）に記録する Google Apps Script Web App とセットアップ手順
 - `guide-3day-spec.md` — メール登録者に自動配信する「3日間の読み解きガイド」の仕様（v2：自然体・関係非依存の個人文脈）。タイプ別固定文24本（8タイプ×3日）を本仕様と `all-types.html` の素材から生成し、Apps Script で自動配信する。手動送信はゼロ（個別読み解きはM4以降の有料商品のみ）。M4「関係性読み解きガイド」の前身で、読者リストがローンチリストになる。
