@@ -149,6 +149,15 @@
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
+  /* チーム力学レポート申込（法人色＝ティール固定。タイプの極色に依存させない） */
+  .team-block{background:var(--teal-soft); border-left:4px solid var(--teal); border-radius:var(--radius); padding:22px 22px; margin-top:26px}
+  .team-block .tm-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--teal-ink); letter-spacing:.03em; margin-bottom:8px}
+  .team-block .tm-lead{font-size:15px; line-height:1.7; color:var(--ink); margin-bottom:10px}
+  .team-block .tm-text{font-size:14px; line-height:1.7; color:var(--ink); margin-bottom:10px}
+  .team-block .tm-steps{font-size:12.5px; line-height:1.7; color:var(--muted); margin-bottom:16px}
+  .team-block .tm-note{font-size:13px; color:var(--teal-ink); margin-top:10px; line-height:1.6}
+  .btn-teal{color:#fff; background:var(--teal)}
+  .btn-teal:hover{filter:brightness(.94)}
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
   .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
   .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
@@ -335,6 +344,34 @@
           <p class="sectlabel">ほかのタイプを知る</p>
           <p style="margin-bottom:14px">8つのタイプには、それぞれ違った関わり方のクセがあります。身近なあの人を思い浮かべながら、全タイプを眺めてみてください。</p>
           <a class="btn btn-sm btn-ghost" href="all-types.html" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none">全8タイプを見る →</a>
+        </div>
+
+        <!-- TEAM（チーム力学レポートの申込フック。ref が team- 始まり＝チーム経由の受診では非表示） -->
+        <div class="team-block" id="teamBlock">
+          <div class="tm-label">チームで受けると</div>
+          <p class="tm-lead" id="teamLead"><b>ひとりのタイプは、入り口です。</b>チーム全員分がそろうと、組み合わせから生まれる「チームの力学」が見えてきます。</p>
+          <p class="tm-text">5〜15名のチームで全員が受けると、<b>①チームの強みと伸びしろ ②起きやすいすれ違い ③定着（辞めない）の打ち手3つ</b> をまとめた<b>「チーム力学レポート」</b>を無料でお作りしています。心理的安全性などの研究に裏づけのある読み解き付きです。</p>
+          <p class="tm-steps">お申込み後、チーム専用の診断リンクと進め方をメールでお送りします。メンバーが受け終わると、レポートをお届けします。レポートに載るのはタイプの分布と構造のみで、個人の結果はご本人のものとして扱います（人事評価にはお使いいただけません）。</p>
+          <div class="field">
+            <label for="teamMail">ご案内をお送りするメールアドレス</label>
+            <input id="teamMail" type="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="teamSize">チームの人数（ご自身を含む・おおよそで大丈夫です）</label>
+            <select id="teamSize">
+              <option value="">選択してください</option>
+              <option value="5名未満">5名未満</option>
+              <option value="5〜9名">5〜9名</option>
+              <option value="10〜15名">10〜15名</option>
+              <option value="16名以上">16名以上</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="teamName">会社・お店・チーム名（任意）</label>
+            <input id="teamName" type="text" placeholder="例：◯◯店 ホールチーム">
+          </div>
+          <button class="btn btn-wide btn-teal" id="submitTeam">チーム力学レポートを申し込む（無料）</button>
+          <p class="tm-note" id="teamNote"></p>
         </div>
 
         <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
@@ -730,6 +767,13 @@ function renderResult(code,counts,radar){
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
+  // チームブロック：立場（経営者・管理職）に合わせてリード文を出し分け。再診断に備えて毎回両態を設定
+  const isBoss=(window._position==='経営者'||window._position==='管理職');
+  $('teamLead').innerHTML = isBoss
+    ? '<b>あなたのチームは、どんな組み合わせでしょうか。</b>メンバー全員分がそろうと、チームの「力学」が地図になります。'
+    : '<b>ひとりのタイプは、入り口です。</b>チーム全員分がそろうと、組み合わせから生まれる「チームの力学」が見えてきます。';
+  $('teamNote').textContent='';
+  $('submitTeam').disabled=false; $('submitTeam').textContent='チーム力学レポートを申し込む（無料）';
   recordDiagnosis(window._lastResult);
   show('result');
 }
@@ -851,6 +895,39 @@ $('submitLead').onclick=()=>{
   sendSurvey({email, guide:true, code:r.code, name:r.name}, $('submitLead'), '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。');
 };
 
+// TEAM（チーム力学レポート申込）：法人リードとして corpLead で「法人リード」シートに記録。
+// チーム専用ref（team- 始まり）経由の受診＝メンバー側にはブロック自体を出さない（レポートはすでに進行中のため）。
+if(/^team[-_]/i.test(REF)){ $('teamBlock').hidden=true; }
+$('submitTeam').onclick=async ()=>{
+  const email=$('teamMail').value.trim();
+  const size=$('teamSize').value;
+  const tname=$('teamName').value.trim();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $('teamNote').textContent='メールアドレスをご確認ください。'; return; }
+  if(!size){ $('teamNote').textContent='チームの人数をお選びください。'; return; }
+  const r=window._lastResult||{};
+  const detail='人数:'+size+'／チーム名:'+(tname||'未記入')+'／申込者タイプ:'+(r.name||'')+'('+(r.code||'')+')／立場:'+(window._position||'未回答');
+  const btn=$('submitTeam');
+  btn.disabled=true; btn.classList.add('is-loading');
+  try{
+    if(SHEET_ENDPOINT){
+      await post({
+        action:'corpLead', id:newId(), mode:'team-report', ref:REF,
+        email:email, issues:['チーム力学レポート希望'], detail:detail,
+        page:'quiz-result',
+        // 旧Code.gs（corpLead未対応）に届いた場合のフォールバック：指標v2シートの自由記述列に記録される
+        relationship:'【チーム力学レポート希望】'+detail
+      });
+    }
+    $('teamNote').textContent='ありがとうございます。チーム専用の診断リンクと進め方を、メールでお送りします。';
+    btn.textContent='申込を受け付けました';
+  }catch(e){
+    $('teamNote').textContent='送信に失敗しました。通信環境を確認して、もう一度お試しください。';
+    btn.disabled=false;
+  }finally{
+    btn.classList.remove('is-loading');
+  }
+};
+
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
@@ -860,6 +937,8 @@ $('restartBtn').onclick=()=>{
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
   $('mail').value=''; $('guideConsent').checked=false;
+  $('teamMail').value=''; $('teamSize').value=''; $('teamName').value=''; $('teamNote').textContent='';
+  $('submitTeam').disabled=false; $('submitTeam').textContent='チーム力学レポートを申し込む（無料）';
   $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
   window._position=''; _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
