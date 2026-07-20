@@ -159,20 +159,7 @@
   .btn-teal{color:#fff; background:var(--teal)}
   .btn-teal:hover{filter:brightness(.94)}
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
-  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
   .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
-  .vq{margin-bottom:20px}
-  .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
-  .vq-opts{display:flex; flex-direction:column; gap:8px}
-  .vq-opt{
-    display:flex; align-items:center; gap:11px; cursor:pointer;
-    font-size:14.5px; color:var(--ink); background:var(--surface);
-    border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
-    transition:border-color .15s, background .15s;
-  }
-  .vq-opt:hover{border-color:#C9C8C1; background:#FCFCFA}
-  .vq-opt input{accent-color:var(--accent); width:16px; height:16px; flex:none; margin:0}
-  .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .field{margin-bottom:14px}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
   .field textarea, .field input, .field select{
@@ -219,7 +206,6 @@
   .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
   .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
   .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
-  .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
   .frame-why{font-size:13.5px; line-height:1.7; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
   .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
@@ -327,7 +313,6 @@
 
         <div class="compat">
           <div class="compat-cta" id="deepBlock">
-            <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
             <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
             <p class="cc-text">いま、診断を受けた方に、あなたのタイプに沿った<b>3日間の読み解きガイド</b>（1日1通・無料）をお届けしています。Day1「自然体でいられる環境」／Day2「あなたの『裏モード』」／Day3「あの人との関係を解く」。登録すると、<b>1通目がすぐに届きます</b>。</p>
@@ -374,71 +359,8 @@
           <p class="tm-note" id="teamNote"></p>
         </div>
 
-        <!-- BRIDGE（モードで出し分け：?ref= / ?mode=lead で紹介者向け） -->
+        <!-- 送信メッセージ表示欄（3日間ガイド申込の完了・エラーをここに出す。検証アンケートは2026-07-20に廃止） -->
         <div class="bridge">
-          <!-- FEEDBACK：8名（過去客）向け 検証アンケート（指標v2：精度でなくエンゲージメント／拡散を測る） -->
-          <div id="feedbackBlock">
-            <p class="vq-intro">最後に、この診断をよくするための5つの質問にご協力ください。</p>
-
-            <div class="vq">
-              <p class="vq-q">1. 結果を読んで、『これは私だ』とどれくらい感じましたか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="me" value="強く感じた"><span>強く感じた</span></label>
-                <label class="vq-opt"><input type="radio" name="me" value="まあ感じた"><span>まあ感じた</span></label>
-                <label class="vq-opt"><input type="radio" name="me" value="あまり感じない"><span>あまり感じない</span></label>
-                <label class="vq-opt"><input type="radio" name="me" value="まったく感じない"><span>まったく感じない</span></label>
-              </div>
-            </div>
-
-            <div class="vq">
-              <p class="vq-q">2. 読んでいて『これはあの人だ』と思い浮かんだ人はいましたか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="others" value="いる"><span>いる</span></label>
-                <label class="vq-opt"><input type="radio" name="others" value="なんとなくいる"><span>なんとなくいる</span></label>
-                <label class="vq-opt"><input type="radio" name="others" value="いない"><span>いない</span></label>
-              </div>
-              <div class="field">
-                <label for="othersWho">（任意）どんな関係の人ですか？</label>
-                <input id="othersWho" type="text" placeholder="例：上司、後輩、同僚">
-              </div>
-            </div>
-
-            <div class="vq">
-              <p class="vq-q">3. この結果を、誰かに見せたい・話したいと思いましたか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="share" value="強く思う"><span>強く思う</span></label>
-                <label class="vq-opt"><input type="radio" name="share" value="まあ思う"><span>まあ思う</span></label>
-                <label class="vq-opt"><input type="radio" name="share" value="思わない"><span>思わない</span></label>
-              </div>
-              <div class="field">
-                <label for="shareWho">（任意）誰に見せたい・話したいですか？</label>
-                <input id="shareWho" type="text" placeholder="例：同僚、パートナー、友人">
-              </div>
-            </div>
-
-            <div class="vq">
-              <p class="vq-q">4. 今、人間関係で引っかかっていることを、さらに深掘りしたいですか？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="dig" value="ぜひ"><span>ぜひ</span></label>
-                <label class="vq-opt"><input type="radio" name="dig" value="興味はある"><span>興味はある</span></label>
-                <label class="vq-opt"><input type="radio" name="dig" value="今はいい"><span>今はいい</span></label>
-              </div>
-            </div>
-
-            <div class="vq">
-              <p class="vq-q">5. いちばん『当たってない』と感じた部分は？</p>
-              <div class="vq-opts" role="radiogroup">
-                <label class="vq-opt"><input type="radio" name="miss" value="あるある"><span>あるある</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="強み"><span>強み</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="5つの軸"><span>5つの軸</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="特になし"><span>特になし</span></label>
-              </div>
-            </div>
-
-            <button class="btn btn-wide btn-accent" id="submitFeedback">回答を送信する</button>
-          </div>
-
           <p class="proto-note" id="protoNote"></p>
         </div>
 
@@ -764,8 +686,7 @@ function renderResult(code,counts,radar){
   renderHonshitsu(code);
   $('protoNote').textContent='';
   $('torisetNote').textContent='';
-  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
-  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
+  $('submitLead').disabled=false;
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   // チームブロック：立場（経営者・管理職）に合わせてリード文を出し分け。再診断に備えて毎回両態を設定
   const isBoss=(window._position==='経営者'||window._position==='管理職');
@@ -853,7 +774,7 @@ function recordDiagnosis(r){
     workplaceFrame: workplaceFrame || '', // 回答アンカー（自然体。ログ保存には Code.gs に列追加＋再デプロイが必要）
   }).catch(()=>{});
 }
-// フェーズ2：アンケート回答を、回答IDをキーに同じ行へ書き込む
+// フェーズ2：ガイド申込などの追記を、回答IDをキーに同じ行へ書き込む
 async function sendSurvey(fields, btn, okMsg){
   const r=window._lastResult; if(!r) return;
   btn.disabled=true;
@@ -873,18 +794,6 @@ async function sendSurvey(fields, btn, okMsg){
   }
 }
 
-// FEEDBACK（8名・検証）：検証アンケート（指標v2）5問
-$('submitFeedback').onclick=()=>{
-  const val=name=>{ const el=document.querySelector('input[name="'+name+'"]:checked'); return el?el.value:''; };
-  const me=val('me'), others=val('others'), share=val('share'), dig=val('dig'), miss=val('miss');
-  const othersWho=$('othersWho').value.trim(), shareWho=$('shareWho').value.trim();
-  if(!me || !others || !share || !dig){
-    $('protoNote').textContent='Q1〜Q4にお答えください（Q5と自由記述は任意です）。';
-    return;
-  }
-  sendSurvey({me,others,othersWho,share,shareWho,dig,miss}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
-};
-
 // LEAD（紹介者）：3日間ガイドの申込（メール＋許諾のみ。guide-3day-spec.md §9で簡素化）
 // guide:true を送ると、GAS側がガイド配信に登録してDay1を即時送信する。
 $('submitLead').onclick=()=>{
@@ -898,13 +807,12 @@ $('submitLead').onclick=()=>{
 // TEAM（チーム力学レポート申込）：法人リードとして corpLead で「法人リード」シートに記録。
 // 導線の一本化（珈琲屋ファネル。詳細：珈琲屋導線.md）：
 //  - 法人CTAは coffee 系 ref（珈琲屋LP・店頭QR経由のオーナー受診）でのみ表示し、
-//    その文脈では結果画面のCTAをレポート申込一択に絞る（個人向けガイドCTA・検証アンケートは出さない）。
+//    その文脈では結果画面のCTAをレポート申込一択に絞る（個人向けガイドCTAは出さない）。
 //  - team- 始まり（チーム専用リンクのメンバー受診）と、それ以外（個人・紹介・一般）には出さない。
 //    メンバー・個人には従来どおり個人ファネル（ガイド・大切な人へ）だけが残る。
 const IS_COFFEE_FUNNEL = /^coffee/i.test(REF);
 if(IS_COFFEE_FUNNEL){
   $('deepBlock').hidden = true;
-  $('feedbackBlock').hidden = true;
 }else{
   $('teamBlock').hidden = true;
 }
@@ -942,10 +850,8 @@ $('submitTeam').onclick=async ()=>{
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
   $('copyManual').hidden=true;
-  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
+  $('submitLead').disabled=false;
   $('protoNote').textContent='';
-  document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
-  $('othersWho').value=''; $('shareWho').value='';
   $('mail').value=''; $('guideConsent').checked=false;
   $('teamMail').value=''; $('teamSize').value=''; $('teamName').value=''; $('teamNote').textContent='';
   $('submitTeam').disabled=false; $('submitTeam').textContent='チーム力学レポートを申し込む（無料）';
@@ -1007,9 +913,6 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
-// モード切替：lead は検証アンケートを隠す／feedback（8名）は深掘りフォームを「紹介先プレビュー」と明示
-if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
-else { $('deepPreviewNote').hidden=false; }
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
   workplaceFrame='自然体';
