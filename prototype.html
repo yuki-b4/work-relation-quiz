@@ -346,7 +346,7 @@
           <a class="btn btn-sm btn-ghost" href="all-types.html" target="_blank" rel="noopener" style="display:inline-block; text-decoration:none">全8タイプを見る →</a>
         </div>
 
-        <!-- TEAM（チーム力学レポートの申込フック。ref が team- 始まり＝チーム経由の受診では非表示） -->
+        <!-- TEAM（チーム力学レポートの申込フック。珈琲屋ファネル（coffee系ref）経由のオーナー受診でのみ表示。詳細：珈琲屋導線.md） -->
         <div class="team-block" id="teamBlock">
           <div class="tm-label">チームで受けると</div>
           <p class="tm-lead" id="teamLead"><b>ひとりのタイプは、入り口です。</b>チーム全員分がそろうと、組み合わせから生まれる「チームの力学」が見えてきます。</p>
@@ -896,8 +896,18 @@ $('submitLead').onclick=()=>{
 };
 
 // TEAM（チーム力学レポート申込）：法人リードとして corpLead で「法人リード」シートに記録。
-// チーム専用ref（team- 始まり）経由の受診＝メンバー側にはブロック自体を出さない（レポートはすでに進行中のため）。
-if(/^team[-_]/i.test(REF)){ $('teamBlock').hidden=true; }
+// 導線の一本化（珈琲屋ファネル。詳細：珈琲屋導線.md）：
+//  - 法人CTAは coffee 系 ref（珈琲屋LP・店頭QR経由のオーナー受診）でのみ表示し、
+//    その文脈では結果画面のCTAをレポート申込一択に絞る（個人向けガイドCTA・検証アンケートは出さない）。
+//  - team- 始まり（チーム専用リンクのメンバー受診）と、それ以外（個人・紹介・一般）には出さない。
+//    メンバー・個人には従来どおり個人ファネル（ガイド・大切な人へ）だけが残る。
+const IS_COFFEE_FUNNEL = /^coffee/i.test(REF);
+if(IS_COFFEE_FUNNEL){
+  $('deepBlock').hidden = true;
+  $('feedbackBlock').hidden = true;
+}else{
+  $('teamBlock').hidden = true;
+}
 $('submitTeam').onclick=async ()=>{
   const email=$('teamMail').value.trim();
   const size=$('teamSize').value;
