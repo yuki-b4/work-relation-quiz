@@ -116,6 +116,14 @@
   .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
 
 
+  /* 3つの軸：回答に依存しないので、目盛りでなく「どちら側か」だけを示す */
+  .poles{ display:grid; gap:10px; margin-bottom:4px }
+  .pole-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+  .pole-name{ flex:none; width:44px; font-size:13px; color:var(--muted) }
+  .pole-pick{ font-size:15px; font-weight:900; color:var(--accent-ink); background:var(--accent-soft);
+    border-radius:99px; padding:5px 14px }
+  .pole-alt{ font-size:14px; color:var(--faint) }
+  .pole-alt::before{ content:"／ "; color:var(--line) }
   /* ===== 診断（prototype.html）と揃えた表現：エンブレム・放射・トリセツのバンド ===== */
   .emblem{ width:104px; height:104px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:radial-gradient(circle at 30% 25%, var(--accent-soft), #fff 78%); border:1px solid var(--line); color:var(--accent) }
@@ -284,6 +292,8 @@ const AX = {
   c:{left:'ぶつかる',right:'かわす'},
   w:{left:'引っ張る',right:'支える'},
 };
+// RADAR_AXES / RADAR_META / SAMPLE は本ページの表示では使わない（回答に依存する要素を一覧から外したため）。
+// ただし guide-3day-spec.md が「素材の正」として本ファイルのこれらを参照するので、データ定義は残す。
 const RADAR_AXES = ['safety','trust','bound','conflict','connect'];
 const RADAR_META = {
   safety:  {name:'本音',   left:'胸にとどめる',   right:'率直に話す',
@@ -313,14 +323,7 @@ const SAMPLE = {
  GKL:{safety:2,trust:3,bound:3,conflict:1,connect:3},
  GKS:{safety:3,trust:3,bound:1,conflict:2,connect:4},
 };
-function radarOf(code){ const o={}; RADAR_AXES.forEach(a=>{ o[a]=(SAMPLE[code][a]-1)/3; }); return o; }
 
-function axisRowHTML(name,left,right,leftOn,rightOn,dotLeft){
-  return '<div class="axis-row"><div class="axis-name">'+name+'</div>'+
-    '<div class="axis-track-wrap"><div class="axis-ends">'+
-      '<span class="'+(leftOn?'on':'')+'">'+left+'</span><span class="'+(rightOn?'on':'')+'">'+right+'</span>'+
-    '</div><div class="axis-track"><span class="axis-dot" style="left:'+dotLeft+'%"></span></div></div></div>';
-}
 // 8タイプのエンブレム用アイコン（lp-corporate.html の自作インラインSVGを流用。外部素材は使わない）
 const TYPE_ICON = {
   OBL: '<path d="M7 21V4h10l-3 3.5 3 3.5H7"/>',
@@ -348,26 +351,17 @@ function buildCard(code){
   const t=TYPES[code];
   const pole=(t.pole==='guard')?'pole-guard':'pole-open';
   // 3軸（本音・衝突・重心）：タイプが示す極にドットを置く
+  // 3軸はタイプコードだけで決まる（回答に依存しない）。全8タイプの一覧では
+  // 目盛り上の位置を持たないので、スライダーではなく「どちら側か」だけを示す。
   const ax3=[
     ['本音', AX.h.left, AX.h.right, code[0]==='O'],
     ['衝突', AX.c.left, AX.c.right, code[1]==='B'],
     ['重心', AX.w.left, AX.w.right, code[2]==='L'],
-  ].map(function(r){ const leftOn=r[3]; return axisRowHTML(r[0],r[1],r[2],leftOn,!leftOn,leftOn?8:92); }).join('');
-  // 5軸（代表例）
-  const radar=radarOf(code);
-  const ax5=RADAR_AXES.map(function(a){ const s=radar[a], m=RADAR_META[a]; return axisRowHTML(m.name,m.left,m.right,s<0.5,s>0.5,8+s*84); }).join('');
-  // 特徴的な軸（中央から最も離れた軸）
-  let f=RADAR_AXES[0];
-  RADAR_AXES.forEach(function(a){ if(Math.abs(radar[a]-0.5)>Math.abs(radar[f]-0.5)) f=a; });
-  const m=RADAR_META[f], right=radar[f]>=0.5;
-  const poleLabel=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
-  const pv='<div class="pv-head"><span class="pv-kicker">いちばん出ている軸</span><b>'+m.name+'</b></div>'+
-    '<div class="pv-body">'+
-      '<div class="pv-pole">「'+poleLabel+'」寄り</div>'+
-      '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
-      '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
-      '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>'+
-    '</div>';
+  ].map(function(r){
+    const on=r[3]?r[1]:r[2], off=r[3]?r[2]:r[1];
+    return '<div class="pole-row"><span class="pole-name">'+r[0]+'</span>'+
+      '<span class="pole-pick">'+on+'</span><span class="pole-alt">'+off+'</span></div>';
+  }).join('');
   const aru=t.aru.map(function(a){ return '<li>'+a+'</li>'; }).join('');
   // トリセツ（このタイプとの付き合い方）
   const tsItems=(TORISET[code]||[]).map(function(it,i){
@@ -392,9 +386,7 @@ function buildCard(code){
       '<p class="tcatch">'+t.catch+'</p><h2 class="tname">'+t.name+'</h2><span class="chip">'+code+'</span>'+
     '</div>'+
     '<div class="card-body">'+
-      '<p class="sectlabel">あなたの人間関係タイプ</p><div class="axes">'+ax3+'</div>'+
-      '<p class="sectlabel">人間関係における5つの軸</p><div class="axes">'+ax5+'</div>'+
-      '<p class="sectlabel">特徴的な軸と、その活かし方</p><div class="pv">'+pv+'</div>'+
+      '<p class="sectlabel">3つの軸</p><div class="poles">'+ax3+'</div>'+
       '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
       '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
       toriset+
