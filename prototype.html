@@ -172,6 +172,8 @@
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
+  .hear-help{margin:6px 0 0; font-size:13px}
+  .hear-help a{color:var(--accent)}
   .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
   .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
@@ -322,6 +324,26 @@
             <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
             <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
             <p class="cc-text">いま、診断を受けた方に、あなたのタイプに沿った<b>3日間の読み解きガイド</b>（1日1通・無料）をお届けしています。Day1「自然体でいられる環境」／Day2「あなたの『裏モード』」／Day3「あの人との関係を解く」。登録すると、<b>1通目がすぐに届きます</b>。</p>
+            <!-- ②紹介（seg=referral）だけに出す商談前ヒアリング。すべて任意。
+                 書いてくれた人には個別の深掘り読み解きを返し、書かない人は3日間ガイドへ分岐する。 -->
+            <div id="hearingBlock" hidden>
+              <div class="cc-label">よろしければ、いまの状況も教えてください（すべて任意）</div>
+              <p class="cc-text">書いていただいた方には、3日間のガイドに代えて、<b>あなたの状況に合わせた読み解き</b>を個別にお返しします。</p>
+              <div class="field">
+                <label for="hearNow">いま、人間関係で悩んでいること</label>
+                <textarea id="hearNow" placeholder="例：任せたいのに、つい自分でやってしまう部下がいて…"></textarea>
+              </div>
+              <div class="field">
+                <label for="hearType">気になっている相手がいる場合、その人はどのタイプに近いですか</label>
+                <select id="hearType"></select>
+                <p class="hear-help"><a href="all-types.html" target="_blank" rel="noopener">全8タイプを見て確かめる →</a></p>
+              </div>
+              <div class="field">
+                <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
+                <textarea id="hearFuture" placeholder="例：安心して任せられるようになって、現場に立つのが楽しくなっている"></textarea>
+              </div>
+            </div>
+
             <div class="field">
               <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
@@ -869,7 +891,18 @@ $('submitLead').onclick=()=>{
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
   if(!$('guideConsent').checked){ $('protoNote').textContent='ご案内の送付に同意いただける場合は、チェックを入れてください。'; return; }
   const r=window._lastResult||{};
-  sendSurvey({email, guide:true, code:r.code, name:r.name}, $('submitLead'), '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。');
+  // ②紹介のみ、商談前ヒアリング（すべて任意）を一緒に送る。
+  // 悩みが書かれていれば個別の深掘り読み解きへ、空なら従来どおり3日間ガイドへ振り分ける。
+  const hear = SEG==='referral' ? {
+    hearNow:    $('hearNow').value.trim(),
+    hearType:   $('hearType').value,
+    hearFuture: $('hearFuture').value.trim(),
+  } : {};
+  const wantsPersonal = !!hear.hearNow;
+  const okMsg = wantsPersonal
+    ? 'ありがとうございます。いただいた状況をもとに、あなたに合わせた読み解きを個別にお送りします。数日お待ちください。'
+    : '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。';
+  sendSurvey({email, guide:!wantsPersonal, personal:wantsPersonal, ...hear, code:r.code, name:r.name}, $('submitLead'), okMsg);
 };
 
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
@@ -881,6 +914,8 @@ $('restartBtn').onclick=()=>{
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
   $('mail').value=''; $('guideConsent').checked=false;
+  ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
+  $('hearType').value='';
   $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
   window._position=''; _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
@@ -943,6 +978,15 @@ $('shareBtn').onclick=async ()=>{
 // 明示する注記も同じ条件で出す。セグメントごとの出し分けは今後ここに足していく。
 $('feedbackBlock').hidden = !FEEDBACK;
 $('deepPreviewNote').hidden = !FEEDBACK;
+
+// ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意で、書いた人には個別の読み解きを返す。
+if(SEG==='referral'){
+  $('hearingBlock').hidden = false;
+  const sel=$('hearType');
+  sel.innerHTML='<option value="">選ぶ（わからない場合は空のままで大丈夫です）</option>'
+    + Object.keys(TYPES).map(c=>`<option value="${c}">${TYPES[c].name}（${TYPES[c].catch}）</option>`).join('');
+  $('submitLead').textContent='読み解きを受け取る';
+}
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
   workplaceFrame='自然体';

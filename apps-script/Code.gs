@@ -42,7 +42,10 @@ var HEADERS = [
   'guide_day1_at', 'guide_day2_at', 'guide_day3_at', 'optout_at', 'ガイドトークン',
   // 受け手の立場を表すセグメント（general／referral／leader-lp／member）。?ref= から判定してフロントが送る。
   // 既存列の位置を動かさないため末尾に追加する。
-  'セグメント'
+  'セグメント',
+  // ②紹介（seg=referral）の商談前ヒアリング（すべて任意）。悩みの本文は既存の「自由記述」列に入る。
+  // 「個別読み解き希望」がTRUEの行は、3日間ガイドでなく個別の深掘り読み解きメールを返す対象。
+  '相手の想定タイプ', '理想_解消後の毎日', '個別読み解き希望'
 ];
 
 function doPost(e) {
@@ -133,7 +136,11 @@ function handleUpdate(sheet, data) {
     'これは私だ': data.me, '他者当てはめ': data.others, '他者当てはめ_誰': data.othersWho,
     '見せたい・話したい': data.share, '見せたい_誰': data.shareWho,
     '深掘りしたい': data.dig, '滑った部分': data.miss,
-    'メールアドレス': data.email, '自由記述': data.relationship
+    'メールアドレス': data.email,
+    // ②紹介の商談前ヒアリング。悩みの本文（hearNow）は既存の「自由記述」列に集約する。
+    '自由記述': data.relationship || data.hearNow,
+    '相手の想定タイプ': data.hearType, '理想_解消後の毎日': data.hearFuture,
+    '個別読み解き希望': data.personal === true ? 'TRUE' : ''
   };
   Object.keys(updates).forEach(function (name) {
     var v = updates[name];
