@@ -6,22 +6,28 @@
 <title>人間関係タイプ診断（プロトタイプ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
     --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
-    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
-    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
-    --radius:16px;
+    --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.04),0 12px 34px rgba(20,20,20,.07);
+    --radius:20px; --card-pad-x:30px;
+    /* 回答スケール（4段階）の配色。左＝思わない側は落ち着いたブルーグレー、右＝そう思う側はコーラル。
+       ブランドのcoral/tealはタイプの極（open/guard）を表す色なので、意味が混ざらないよう別系統にする。 */
+    --sc1:#8E9BB0; --sc2:#C3CBD8; --sc3:#F0C3B2; --sc4:#D9755A;
+    /* タイプの極ごとのアクセント。結果画面のエンブレムと見出しに使う。 */
+    --accent:var(--coral); --accent-soft:var(--coral-soft); --accent-ink:var(--coral-ink);
   }
+  .pole-guard{--accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink)}
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{
     font-family:var(--body); color:var(--ink); background:var(--bg);
-    line-height:1.7; letter-spacing:.01em;
+    line-height:1.85; letter-spacing:.01em;
     min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
     padding:clamp(16px,4vw,48px) 16px;
   }
@@ -32,16 +38,20 @@
   @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none} *{transition:none!important}}
 
   /* INTRO */
-  .eyebrow{font-size:15px; letter-spacing:.14em; font-weight:700; color:var(--teal); text-transform:none; margin-bottom:14px}
+  .eyebrow{font-size:12.5px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
+  /* 日本語の折り返し。text-wrap:pretty は iOS Safari で行を過剰に短くし、
+     本文の右側に大きな余白ができてしまうため使わない。
+     balance は中央揃えの短い設問だけに限定して使う（行長を均等化する効果が確実に出る範囲）。 */
+  .qtext,.qhint{text-wrap:balance}
   .hero{
-    font-family:var(--display); font-weight:700; line-height:1.42;
-    font-size:clamp(25px,5.6vw,36px); letter-spacing:.02em; margin-bottom:18px;
+    font-family:var(--display); font-weight:900; line-height:1.4;
+    font-size:clamp(22px,5vw,30px); letter-spacing:.01em; margin-bottom:16px;
   }
-  .lead{font-size:16px; color:var(--muted); margin-bottom:14px; max-width:34em}
+  .lead{font-size:15px; color:var(--muted); margin-bottom:14px; max-width:34em}
   .meta{font-size:13px; color:var(--faint); margin-bottom:34px}
   .meta b{color:var(--ink); font-weight:500}
   .btn{
-    font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
+    font-family:var(--body); font-size:15px; font-weight:700; cursor:pointer;
     color:#fff; background:var(--chrome); border:none; border-radius:99px;
     padding:15px 34px; transition:background .2s, transform .1s; letter-spacing:.04em;
   }
@@ -62,18 +72,19 @@
 
   /* QUIZ */
   .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
-  .qcount{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; letter-spacing:.05em}
-  .bar{flex:1; height:4px; background:var(--line); border-radius:99px; overflow:hidden}
+  .qcount{font-family:var(--display); font-weight:500; font-size:12.5px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
+  .qpct{font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted); white-space:nowrap; min-width:36px}
+  .bar{flex:1; height:8px; background:var(--line); border-radius:99px; overflow:hidden}
   .bar > i{display:block; height:100%; width:0; background:var(--chrome); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
   .qtext{
-    font-family:var(--display); font-weight:500; font-size:clamp(20px,4.6vw,26px);
-    line-height:1.55; letter-spacing:.02em; margin-bottom:28px;
+    font-family:var(--display); font-weight:700; font-size:clamp(17px,4vw,21px);
+    line-height:1.6; letter-spacing:.01em; margin-bottom:30px; text-align:center;
   }
   .choices{display:flex; flex-direction:column; gap:14px}
   .choice{
-    text-align:left; font-family:var(--body); font-size:16px; color:var(--ink); cursor:pointer;
+    text-align:left; font-family:var(--body); font-size:15px; color:var(--ink); cursor:pointer;
     background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius);
-    padding:20px 22px; line-height:1.6; transition:border-color .15s, background .15s, transform .1s;
+    padding:20px 22px; line-height:1.75; transition:border-color .15s, background .15s, transform .1s;
     display:flex; gap:14px; align-items:flex-start;
   }
   .choice:hover{border-color:#C9C8C1; background:#FCFCFA}
@@ -81,10 +92,83 @@
   .choice:focus-visible{outline:3px solid #B9C2CC; outline-offset:2px}
   .choice .mk{
     flex:none; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line);
-    font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted);
+    font-family:var(--display); font-weight:700; font-size:12.5px; color:var(--muted);
     display:flex; align-items:center; justify-content:center; margin-top:1px;
   }
-  .qback{margin-top:26px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:14px; padding:6px 0}
+  .qback{margin-top:34px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:13px; padding:6px 0}
+
+  /* ===== トップ：3ステップ（何ができるかの明示） ===== */
+  .steps{list-style:none; margin:30px 0 34px; padding:0; display:grid; gap:20px; text-align:left}
+  .step{display:flex; gap:14px; align-items:flex-start}
+  .step-no{
+    flex:none; width:30px; height:30px; border-radius:50%;
+    background:var(--coral-soft); color:var(--coral-ink);
+    font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
+  }
+  .step-t{margin:2px 0 4px; font-weight:700; font-size:16px; color:var(--ink); line-height:1.5}
+  .step-d{margin:0; font-size:14px; color:var(--muted); line-height:1.95}
+
+  /* ===== 回答：円形スケール ===== */
+  .scale{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:10px}
+  .scale-dots{display:flex; align-items:center; justify-content:center; gap:clamp(12px,4.5vw,22px)}
+  .scale-legend{
+    display:flex; justify-content:space-between; width:100%; max-width:330px;
+    font-size:13px; color:var(--faint);
+  }
+  .dot{
+    border-radius:50%; cursor:pointer; padding:0; background:var(--surface);
+    transition:transform .12s, box-shadow .15s, background .15s;
+  }
+  .dot-1{width:52px; height:52px; border:2px solid var(--sc1)}
+  .dot-2{width:40px; height:40px; border:2px solid var(--sc2)}
+  .dot-3{width:40px; height:40px; border:2px solid var(--sc3)}
+  .dot-4{width:52px; height:52px; border:2px solid var(--sc4)}
+  .dot-1:hover{background:var(--sc1)} .dot-2:hover{background:var(--sc2)}
+  .dot-3:hover{background:var(--sc3)} .dot-4:hover{background:var(--sc4)}
+  .dot:hover{transform:scale(1.08)}
+  .dot:active{transform:scale(.96)}
+  .dot:focus-visible{outline:3px solid #B9C2CC; outline-offset:3px}
+  @media (max-width:380px){
+    .dot-1,.dot-4{width:44px; height:44px}
+    .dot-2,.dot-3{width:34px; height:34px}
+    .scale-end{font-size:11px; max-width:48px}
+  }
+
+  /* ===== 結果：タイプのエンブレム ===== */
+  .emblem{
+    width:104px; height:104px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 25%, var(--accent-soft), #fff 78%);
+    border:1px solid var(--line); color:var(--accent);
+  }
+  .emblem svg{width:44px; height:44px}
+  /* エンブレムから3軸のキーワードが放射する構造。スマホ幅で完結させるため、
+     ラベルは短い軸名（最大4文字）だけを使い、位置は固定で決め打ちする。 */
+  .emblem-wrap{position:relative; width:100%; max-width:330px; height:150px; margin:0 auto 6px}
+  .emblem-wrap .emblem{position:absolute; left:50%; top:23px; transform:translateX(-50%); margin:0}
+  .ray{position:absolute; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--accent-ink); white-space:nowrap}
+  .ray i{display:block; height:1px; background:var(--accent); opacity:.45; width:26px}
+  .ray b{display:block; width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.65; flex:none}
+  .ray-l{left:0; top:52px; flex-direction:row}
+  .ray-r1{right:0; top:26px; flex-direction:row-reverse}
+  .ray-r2{right:0; top:86px; flex-direction:row-reverse}
+  @media (max-width:360px){ .ray{font-size:11.5px} .ray i{width:16px} }
+
+  /* ===== トリセツ：全幅のアクセント面に番号つきカード（拡散のための「切り取れる塊」） ===== */
+  .toriset-band{
+    margin:34px calc(-1 * var(--card-pad-x)) 30px; padding:30px 22px 32px; background:var(--accent);
+    color:#fff; text-align:center;
+  }
+  .toriset-band .ts-label{font-size:12.5px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
+  .toriset-band .ts-title{font-size:22px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
+  .toriset-band .ts-lead{font-size:13px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.85; text-wrap:balance}
+  .ts-card{background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left}
+  .ts-card .ts-l{
+    display:block; font-size:13.5px; font-weight:700; color:var(--accent-ink);
+    padding:11px 16px; border-bottom:1px solid var(--line); margin:0;
+  }
+  .ts-card .ts-l .num{font-weight:900; margin-right:6px}
+  .ts-card .ts-t{display:block; font-size:14px; line-height:1.95; color:var(--ink); padding:14px 16px}
   .qback:hover{color:var(--muted)}
   .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
 
@@ -94,70 +178,109 @@
     background:var(--surface); border-radius:22px; box-shadow:var(--shadow);
     overflow:hidden; border:1px solid var(--line);
   }
-  .card-head{ padding:34px 30px 28px; background:var(--accent-soft); border-bottom:1px solid var(--line) }
+  .card-head{
+    padding:36px 26px 30px; text-align:center; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, var(--accent-soft) 0%, #fff 100%);
+  }
   .chip{
-    display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
+    display:inline-block; font-family:var(--display); font-weight:700; font-size:14px; letter-spacing:.26em;
     color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px;
   }
-  .tname{font-family:var(--display); font-weight:700; font-size:clamp(28px,6.4vw,38px); color:var(--accent-ink); letter-spacing:.03em; margin-bottom:10px}
-  .tcatch{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,21px); color:var(--ink); letter-spacing:.02em}
-  .card-body{padding:28px 30px 32px}
-  .sectlabel{font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px}
+  .tname{font-family:var(--display); font-weight:900; font-size:clamp(25px,5.8vw,32px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
+  .tcatch{font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
+  .card-body{padding:28px var(--card-pad-x) 32px}
+  /* 大見出し：関係性タイプ／関わり方傾向／深層。小見出しの一段上として、
+     文字を大きくし、下に区切り線を敷いて節の始まりを示す。 */
+  /* 大見出し：小見出しとは種類ごと変える。アクセント色の面にアイコンを載せ、
+     英字ラベルを添えて、節の始まりであることを一目で分かるようにする。 */
+  .secthead{
+    display:flex; align-items:center; gap:13px;
+    margin:52px 0 20px; padding-bottom:14px; border-bottom:2px solid var(--line);
+  }
+  .sh-icon{
+    flex:none; width:40px; height:40px; border-radius:13px;
+    background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;
+  }
+  .sh-icon svg{width:21px; height:21px}
+  .sh-text{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .sh-kicker{font-size:10px; font-weight:700; letter-spacing:.18em; color:var(--accent); line-height:1}
+  .sh-title{font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em; line-height:1.4}
+  @media (max-width:360px){ .sh-title{font-size:18px} .sh-icon{width:36px; height:36px} }
+  .card-body > .secthead:first-child{margin-top:0}
+  .sectlabel{
+    font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5;
+  }
+  .formula{display:flex; flex-direction:column; align-items:center; gap:7px;
+    margin:18px 0 4px; padding:18px 14px; background:var(--bg); border-radius:14px}
+  /* 3チップ＋演算子が1行に収まらない端末があるため、折り返さず縮めて1行に保つ */
+  .f-row{display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:6px}
+  @media (max-width:400px){ .f-chip{font-size:12px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
+  @media (max-width:340px){ .f-row{flex-direction:column; gap:3px} }
+  .f-chip{font-size:13px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
+    border-radius:99px; padding:6px 13px; white-space:nowrap; flex:none}
+  .f-op{color:var(--faint); font-size:13px; font-weight:700}
+  .f-arrow{color:var(--accent); font-size:14px; line-height:1}
+  .f-type{font-size:17px; font-weight:900; color:var(--accent-ink)}
+  .f-type small{font-size:12px; font-weight:700; color:var(--muted); margin-left:7px; letter-spacing:.1em}
+  .sect-sub{font-size:13px; color:var(--muted); margin:-8px 0 16px}
+  .link-note{
+    font-size:13.5px; line-height:1.9; color:var(--muted);
+    background:var(--bg); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
+    padding:12px 14px; margin:14px 0 4px;
+  }
+  .link-note b{color:var(--accent-ink)}
+  .sectlabel::before{content:""; width:4px; height:19px; border-radius:2px; background:var(--accent); flex:none}
+  .card-body > .sectlabel:first-child{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
   .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
-  .axis-name{font-size:12px; color:var(--muted); font-weight:500}
+  .axis-name{font-size:13px; color:var(--muted); font-weight:500}
   .axis-track-wrap{position:relative}
-  .axis-ends{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px}
+  .axis-ends{display:flex; justify-content:space-between; font-size:12.5px; color:var(--faint); margin-bottom:5px}
   .axis-ends .on{color:var(--ink); font-weight:700}
   .axis-track{position:relative; height:5px; background:var(--line); border-radius:99px}
   .axis-dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1)}
   ul.aru{list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px}
-  ul.aru li{position:relative; padding-left:22px; font-size:15.5px; color:var(--ink)}
+  ul.aru li{margin-bottom:10px; position:relative; padding-left:22px; font-size:14px; line-height:1.9; color:var(--ink)}
   ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .row-block{margin-bottom:26px}
-  .row-block p{font-size:15px; color:var(--ink)}
+  .row-block p:not(.sectlabel):not(.secthead){font-size:14px; line-height:1.9; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
-  .toriset{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px}
-  .toriset .ts-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px}
-  .toriset .ts-lead{font-size:13px; color:var(--muted); margin-bottom:14px}
   .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
   .ts-item:first-child{border-top:none; padding-top:2px}
-  .ts-item .ts-l{display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px}
-  .ts-item .ts-t{font-size:14.5px; line-height:1.7; color:var(--ink)}
-  .ts-share{margin-top:16px}
-  .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
 
   /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
-  .honshitsu{border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px; background:var(--surface)}
-  .honshitsu .hs-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.03em; margin-bottom:3px}
-  .honshitsu .hs-sub{font-size:12.5px; color:var(--faint); margin-bottom:15px}
-  .honshitsu .hs-core{font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px}
-  .honshitsu .hs-cost{font-size:14.5px; line-height:1.8; color:var(--muted); margin-bottom:16px}
-  .honshitsu .hs-loop{font-size:14.5px; line-height:1.75; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
-  .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
-  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
-  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink)}
+  .pv{border-radius:var(--radius); margin-bottom:12px; background:var(--accent-soft); overflow:hidden}
+  .pv-head{
+    display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+    padding:13px 18px; background:var(--accent); color:#fff;
+  }
+  .pv-kicker{font-size:12.5px; font-weight:700; letter-spacing:.1em; opacity:.85}
+  .pv-head b{font-size:15px; font-weight:900; letter-spacing:.02em}
+  .pv-body{padding:16px 18px 18px}
+  .pv-pole{font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--accent-ink)}
   .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
   .focus-tag{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap}
   .focus-tag-gift{background:var(--accent)}
   .focus-tag-side{background:#565A60}
-  .focus-item p{font-size:14.5px; line-height:1.7; color:var(--ink)}
-  .focus-grow{font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px}
-  .choice-lik{justify-content:center; text-align:center; font-weight:500}
+  .focus-item p{font-size:14px; line-height:1.9; color:var(--ink)}
+  .focus-grow{font-size:14px; line-height:1.9; color:var(--ink); margin-top:15px}
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
-  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
-  .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
+  /* 検証アンケートを出さないときは、上の装飾と余白ごと畳む（全8タイプとの間が空きすぎるため） */
+  .bridge.is-bare{margin-top:0; padding-top:0; border-top:none}
+  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(14px,3.2vw,17px); line-height:1.5; color:var(--ink); margin-bottom:22px}
+  .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(16px,3.8vw,19px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
   .vq{margin-bottom:20px}
-  .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
+  .vq-q{font-size:14px; font-weight:700; color:var(--ink); line-height:1.7; margin-bottom:10px}
   .vq-opts{display:flex; flex-direction:column; gap:8px}
   .vq-opt{
     display:flex; align-items:center; gap:11px; cursor:pointer;
-    font-size:14.5px; color:var(--ink); background:var(--surface);
+    font-size:14px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
     transition:border-color .15s, background .15s;
   }
@@ -167,34 +290,68 @@
   .field{margin-bottom:14px}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
   .field textarea, .field input, .field select{
-    width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
+    width:100%; font-family:var(--body); font-size:13.5px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
-  .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
-  .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
+  .optout-note{margin-top:10px; font-size:11.5px; color:var(--faint)}
+  .day-head{margin-top:18px; font-size:13px; font-weight:700; color:rgba(255,255,255,.9)}
+  .day-list{margin-top:6px; font-size:12.5px; line-height:2; color:var(--muted)}
+  .hear-help{margin:6px 0 0; font-size:13px}
+  .hear-help a{color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
-  .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
-  .afterbar{display:flex; gap:12px; flex-wrap:wrap; margin-top:26px}
+  .proto-note{font-size:13px; color:var(--faint); margin-top:12px; min-height:18px}
+  .afterbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:30px}
   .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
   .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
-  .btn-sm{font-size:14px; padding:12px 22px}
-  .copied{color:var(--teal); font-weight:700}
-  #copyManual{margin-top:14px}
-  .copy-manual-note{font-size:12.5px; color:var(--muted); margin-bottom:7px}
-  .copy-manual-box{width:100%; font-family:var(--body); font-size:14px; color:var(--ink); background:var(--surface); border:1.5px solid var(--accent,#0F6E56); border-radius:12px; padding:12px 14px; line-height:1.6; resize:none}
-  .copy-manual-box:focus{outline:none}
+  .btn-sm{font-size:13.5px; padding:12px 22px}
 
   /* 相性一覧（自分×全8タイプ） */
+  /* 深層：ページで唯一の暗い面にして「奥に沈む」感じを出す。
+     トリセツ（アクセントの色面）とは別の軸で強調するので、見せ場は競合しない。
+     右上に同心の弧を薄く重ね、層の奥行きを示す。 */
+  /* 深層とCTAをまとめた章。トリセツと同じく全幅で抜き、1本のグラデーションで
+     上（内省・寒色）から下（行動・アクセントの光）へ温度を上げる。 */
+  .deep-section{
+    position:relative; overflow:hidden;
+    margin:40px calc(-1 * var(--card-pad-x)) 30px; padding:34px 22px 34px;
+    color:#fff;
+    /* 上から下へ一方向に流す。上は明るい寒色（内省）、下へ向かうほど暗く沈み、
+       アクセント色が下から立ち上がってボタンのある行動側へつなぐ。
+       アクセントの停止位置を125%に置くことで、最下部でも色が飽和しすぎない。 */
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0) 38%, var(--accent-deep, #7A2E1A) 125%),
+      linear-gradient(180deg, #37414E 0%, #2B333D 18%, #232B34 45%, #1A2028 78%, #141A20 100%);
+  }
+  .deep-section > *{position:relative}
+  .deep-section .secthead{margin-top:0; border-bottom-color:rgba(255,255,255,.2)}
+  .deep-section .sh-title{color:#fff}
+  .deep-section .sh-kicker{color:rgba(255,255,255,.68)}
+  /* 章の中では、深層もCTAも面を持たない。区切りは細い線だけにする。 */
+  .honshitsu{position:relative; padding:0; margin:0; background:none; border:none}
+  .deep-section::before{
+    content:""; position:absolute; top:-104px; right:-78px; width:220px; height:220px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 0 0 22px rgba(255,255,255,.05), 0 0 0 46px rgba(255,255,255,.035);
+    pointer-events:none;
+  }
+  .hs-sub{font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px}
+  .hs-core{font-size:15px; line-height:1.95; color:#fff; margin-bottom:16px}
+  .hs-cost{font-size:14px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
+  .hs-loop{
+    font-size:14px; line-height:1.9; color:#fff;
+    background:rgba(255,255,255,.09); border-left:3px solid rgba(255,255,255,.34);
+    border-radius:0 12px 12px 0; padding:15px 16px;
+  }
   .compat{margin-bottom:26px}
   .compat-hint{font-size:13px; color:var(--muted); margin:-2px 0 14px}
   .compat-list{display:flex; flex-direction:column}
   .compat-row{padding:13px 0; border-top:1px solid var(--line)}
   .compat-row:first-child{border-top:none}
   .ct-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
-  .ct-name{font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
+  .ct-name{font-family:var(--display); font-weight:700; font-size:14px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
   .compat-row.pole-open .ct-name{background:var(--coral-soft); color:var(--coral-ink)}
   .compat-row.pole-guard .ct-name{background:var(--teal-soft); color:var(--teal-ink)}
   .ct-code{font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700}
@@ -206,13 +363,39 @@
   .compat-row.is-best.pole-open{box-shadow:inset 3px 0 0 var(--coral); padding-left:12px}
   .compat-row.is-best.pole-guard{box-shadow:inset 3px 0 0 var(--teal); padding-left:12px}
   .ct-self{margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700}
-  .ct-text{font-size:14px; line-height:1.65; color:var(--ink)}
-  .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
-  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
-  .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
-  .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
+  .ct-text{font-size:14px; line-height:1.9; color:var(--ink)}
+    /* 読み解きガイドのCTA：深層と同じく暗い面にするが、こちらは奥行きでなく
+     「引き込む」ための面。左上から差すアクセント色の光を、ほぼ黒へ落としていく。 */
+  .compat{margin:0}
+  .compat-cta{
+    margin-top:30px; padding-top:28px; border-top:1px solid rgba(255,255,255,.16);
+    background:none; border-radius:0;
+  }
+  .compat-cta > *{position:relative}
+  .compat-cta .cc-label{font-family:var(--display); font-weight:900; font-size:17px; color:#fff; margin-bottom:10px; letter-spacing:.02em}
+  .compat-cta .cc-text{font-size:14px; line-height:1.9; color:rgba(255,255,255,.78); margin-bottom:14px}
+  .compat-cta .cc-text b{color:#fff}
+  .compat-cta .field label{color:rgba(255,255,255,.72)}
+  .compat-cta .field textarea,
+  .compat-cta .field input,
+  .compat-cta .field select{
+    color:#fff; background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.22);
+  }
+  .compat-cta .field textarea::placeholder,
+  .compat-cta .field input::placeholder{color:rgba(255,255,255,.38)}
+  .compat-cta .field select option{color:var(--ink); background:#fff}
+  .compat-cta .field textarea:focus,
+  .compat-cta .field input:focus,
+  .compat-cta .field select:focus{border-color:rgba(255,255,255,.6)}
+  /* 暗い面ではアクセント色のボタンが沈むため、白抜きにして最も強い要素にする */
+  .compat-cta .btn-accent{background:#fff; color:#1A1715}
+  .compat-cta .day-list{color:rgba(255,255,255,.62)}
+  .compat-cta .optout-note{color:rgba(255,255,255,.42)}
+  .compat-cta .hear-help a{color:#fff; text-decoration-color:rgba(255,255,255,.5)}
+  .compat-cta .cc-preview{color:rgba(255,255,255,.7); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.25)}
+  .cc-preview{font-size:13px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
-  .frame-why{font-size:13.5px; line-height:1.7; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
+  .frame-why{font-size:14px; line-height:1.95; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
   .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
   .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
 </style>
@@ -223,9 +406,34 @@
   <section class="screen active" id="intro">
     <div class="eyebrow">人間関係タイプ診断</div>
     <h1 class="hero">自然体のあなたを知ることが、居心地のいい関係づくりの第一歩。</h1>
-    <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。自分を知り、身近なあの人を知るほど、関わりはラクになっていきます。</p>
-    <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
-    <button class="btn" id="startBtn">診断を始める</button>
+    <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。</p>
+
+    <ol class="steps">
+      <li class="step">
+        <span class="step-no">1</span>
+        <div class="step-body">
+          <p class="step-t">24問に答える（無料）</p>
+          <p class="step-d">約2分、登録は不要。力を抜いた「普段のあなた」で答えます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-no">2</span>
+        <div class="step-body">
+          <p class="step-t">自分のタイプを知る</p>
+          <p class="step-d">本音・衝突・重心の3軸の組み合わせで、8つのタイプに映し出します。</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-no">3</span>
+        <div class="step-body">
+          <p class="step-t">関わり方のヒントを受け取る</p>
+          <p class="step-d">強みと、つい出るクセ。あの人との距離の取り方まで受け取れます。</p>
+        </div>
+      </li>
+    </ol>
+
+    <button class="btn btn-wide" id="startBtn">診断を始める</button>
+    <p class="meta">24問 ・ 約2分 ・ 登録不要</p>
   </section>
 
   <!-- FRAME（診断冒頭：特定の場面ではなく "自然体の自分" で答えるよう促し、回答のブレを防ぐ） -->
@@ -240,8 +448,9 @@
   <!-- QUIZ -->
   <section class="screen" id="quiz">
     <div class="qtop">
-      <span class="qcount" id="qcount">1 / 24</span>
+      <span class="qpct" id="qpct">0%</span>
       <div class="bar"><i id="barfill"></i></div>
+      <span class="qcount" id="qcount">1 / 24</span>
     </div>
     <p class="qframe" id="qframe"></p>
     <p class="qtext" id="qtext"></p>
@@ -250,47 +459,25 @@
     <p class="qhint" id="qhint">どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。</p>
   </section>
 
-  <!-- POSITION（24問の回答後・結果表示の前に取得する任意項目。タイプ結果は変えず、アドバイス精度のための情報） -->
-  <section class="screen" id="position">
-    <h2 class="hero" style="font-size:clamp(22px,5vw,30px)">回答お疲れ様でした。</h2>
-    <p class="lead">いまのあなたの立場がわかると、結果に添えるアドバイスを、より状況に合った内容でお届けできます。</p>
-    <p class="meta">回答は任意です。回答しない場合は、下の「スキップ」からそのまま結果に進めます。</p>
-    <div class="field">
-      <label for="positionSel">いまのあなたの立場に近いのは？</label>
-      <select id="positionSel">
-        <option value="">選択してください</option>
-        <option value="経営者">経営者（社長・役員など）</option>
-        <option value="管理職">管理職（部下・チームをもつ立場）</option>
-        <option value="メンバー">メンバー（一般の社員・スタッフ）</option>
-        <option value="業務委託・フリーランス">業務委託・フリーランス</option>
-        <option value="その他">その他</option>
-      </select>
-    </div>
-    <div class="field" id="positionOtherWrap" hidden>
-      <label for="positionOther">その他（自由記述・任意）</label>
-      <input id="positionOther" type="text" placeholder="例：求職中、学生、休職中 など">
-    </div>
-    <button class="btn btn-wide" id="positionNext">この内容で結果を見る</button>
-    <button class="qback" id="positionSkip" style="display:block; width:100%; text-align:center; margin-top:18px">スキップして結果を見る →</button>
-  </section>
-
   <!-- RESULT -->
   <section class="screen" id="result">
     <div class="card result-accent" id="card">
       <div class="card-head">
-        <span class="chip" id="r-code"></span>
-        <h2 class="tname" id="r-name"></h2>
+        <div class="emblem-wrap">
+          <div class="emblem" id="r-emblem" aria-hidden="true"></div>
+          <div class="rays" id="r-rays" aria-hidden="true"></div>
+        </div>
         <p class="tcatch" id="r-catch"></p>
+        <h2 class="tname" id="r-name"></h2>
+        <span class="chip" id="r-code"></span>
       </div>
       <div class="card-body">
-        <p class="sectlabel">あなたの人間関係タイプ</p>
+        <!-- 並びは「定量 → その定量が生む定性」の対で構成する。
+             3軸（タイプを決める）→ あるある・強み・トリセツ、
+             5軸（同じタイプ内の個人差）→ 特徴的な軸、の2セット。 -->
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="10.5" r="2.4"/><path d="M3.5 19.5c.5-3.4 2.7-5.3 5.5-5.3s5 1.9 5.5 5.3"/><path d="M15.5 14.6c2.1.4 3.5 2.1 4 5"/></svg></span><span class="sh-text"><span class="sh-kicker">RELATIONSHIP TYPE</span><span class="sh-title">あなたの関係性タイプ</span></span></div>
         <div class="axes" id="r-axes"></div>
-
-        <p class="sectlabel">人間関係における5つの軸</p>
-        <div class="axes" id="r-spectrums"></div>
-
-        <p class="sectlabel">特徴的な軸と、その活かし方</p>
-        <div class="pv" id="r-focus"></div>
+        <div class="formula" id="r-axes-note"></div>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -300,17 +487,25 @@
           <p id="r-tsuyomi"></p>
         </div>
 
-        <div class="toriset">
-          <div class="ts-label">あなたのトリセツ（取扱説明書）</div>
-          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
+        <div class="toriset-band">
+          <div class="ts-label">TORISETSU</div>
+          <p class="ts-title">わたしのトリセツ</p>
+          <p class="ts-lead">「私はこういう人」<br>周りの人に教えてあげて</p>
           <div id="r-toriset"></div>
-          <button class="btn btn-sm btn-accent ts-share" id="torisetCopy">トリセツをコピーして送る</button>
-          <p class="ts-note" id="torisetNote"></p>
         </div>
 
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h5"/><path d="M13 8h7"/><circle cx="11" cy="8" r="2.2"/><path d="M4 16h11"/><path d="M19 16h1"/><circle cx="17" cy="16" r="2.2"/></svg></span><span class="sh-text"><span class="sh-kicker">5 TENDENCIES</span><span class="sh-title">5つの関わり方傾向</span></span></div>
+        <div class="axes" id="r-spectrums"></div>
+
+        <p class="sectlabel">特徴的な傾向と、その活かし方</p>
+        <div class="pv" id="r-focus"></div>
+
+        <!-- 深層とCTAを1つの章としてまとめる。トリセツと同じ全幅バンドの型に揃え、
+             面の中で「読ませる（上・寒色）→ 行動（下・アクセントの光）」と温度を変える。 -->
+        <div class="deep-section">
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="10"/></svg></span><span class="sh-text"><span class="sh-kicker">DEEP DIVE</span><span class="sh-title">あなたの深層</span></span></div>
         <div class="honshitsu">
-          <div class="hs-label">あなたの深層</div>
-          <p class="hs-sub">タイプの奥にある、あなたがそう振る舞う「ほんとうの理由」。</p>
+          <p class="hs-sub">あなたの振る舞いを決める「ほんとうの理由」</p>
           <p class="hs-core" id="r-hs-core"></p>
           <p class="hs-cost" id="r-hs-cost"></p>
           <p class="hs-loop" id="r-hs-loop"></p>
@@ -319,16 +514,39 @@
         <div class="compat">
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
-            <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
-            <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
-            <p class="cc-text">いま、診断を受けた方に、あなたのタイプに沿った<b>3日間の読み解きガイド</b>（1日1通・無料）をお届けしています。Day1「自然体でいられる環境」／Day2「あなたの『裏モード』」／Day3「あの人との関係を解く」。登録すると、<b>1通目がすぐに届きます</b>。</p>
+            <p class="cc-text" id="r-cc-intro"></p>
+            <div class="cc-label">人間関係の悩みは生きる上で大きな大きな悩みの種です。</div>
+            <p class="cc-text">メールアドレスを登録するだけで、すぐに1通目を受け取れます。</p>
+            <!-- ②紹介（seg=referral）だけに出す商談前ヒアリング。すべて任意。
+                 書いてくれた人には個別の深掘り読み解きを返し、書かない人は3日間ガイドへ分岐する。 -->
+            <div id="hearingBlock" hidden>
+              <div class="cc-label">よろしければ、いまの状況も教えてください（すべて任意）</div>
+              <p class="cc-text">書いていただいた方には、3日間のガイドに代えて、<b>あなたの状況に合わせた読み解き</b>を個別にお返しします。</p>
+              <div class="field">
+                <label for="hearNow">いま、人間関係で悩んでいること</label>
+                <textarea id="hearNow" placeholder="例：任せたいのに、つい自分でやってしまう部下がいて…"></textarea>
+              </div>
+              <div class="field">
+                <label for="hearType">気になっている相手がいる場合、その人はどのタイプに近いですか</label>
+                <select id="hearType"></select>
+                <p class="hear-help"><a href="all-types.html" target="_blank" rel="noopener">全8タイプを見て確かめる →</a></p>
+              </div>
+              <div class="field">
+                <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
+                <textarea id="hearFuture" placeholder="例：安心して任せられるようになって、現場に立つのが楽しくなっている"></textarea>
+              </div>
+            </div>
+
             <div class="field">
               <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
-            <label class="consent"><input type="checkbox" id="guideConsent"><span>3日間の読み解きガイド（無料）と、新しいガイドのご案内をお送りします。配信はいつでも停止できます。</span></label>
             <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
+            <p class="day-head">この読み解きガイドでわかること</p>
+            <p class="day-list">Day1　自然体でいられる環境<br>Day2　あなたの「裏モード」<br>Day3　あの人との関係を解く</p>
+            <p class="optout-note">ご案内の配信は、いつでも停止できます。</p>
           </div>
+        </div>
         </div>
 
         <div class="row-block" style="margin-top:28px">
@@ -394,7 +612,7 @@
                 <label class="vq-opt"><input type="radio" name="miss" value="あるある"><span>あるある</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="強み"><span>強み</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="5つの軸"><span>5つの軸</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="5つの関わり方傾向"><span>5つの関わり方傾向</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="特になし"><span>特になし</span></label>
               </div>
             </div>
@@ -406,12 +624,7 @@
         </div>
 
         <div class="afterbar">
-          <button class="btn btn-sm btn-ghost" id="shareBtn">結果をコピー</button>
           <button class="btn btn-sm btn-ghost" id="restartBtn">もう一度診断する</button>
-        </div>
-        <div id="copyManual" hidden>
-          <p class="copy-manual-note">下のテキストを選択してコピーしてください：</p>
-          <textarea id="copyText" class="copy-manual-box" readonly rows="2"></textarea>
         </div>
       </div>
     </div>
@@ -423,11 +636,32 @@
 //   空のままだと送信せず、回答は記録されません（体験のみ）。apps-script/README.md 参照。
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
 
-// ▼ モード判定：?ref=<紹介者> 付き（または ?mode=lead）で紹介者向け（深掘り申込）、
-//   それ以外は8名（過去客）向けの検証アンケート。ref は紹介元としてログに残す。
+// ▼ セグメント判定：?ref= の値から「受け手の立場」を決める。セグメントごとに必要な情報とCTAだけを
+//   出し、ファネルの通過率を上げるのが狙い。判定は4つ。
+//     general   … 一般（refなし。認知・拡散）
+//     referral  … 紹介・知人（紹介者コードのref。マネジメント・リーダー・店長）
+//     leader-lp … 店長・リーダー（法人LPの体験版から。corp-lp / wedding-lp / coffee-lp）
+//     member    … メンバー（法人LP経由でチームに配られるリンク。team_ で始まるref）
+//   ?seg= を付けると判定を上書きできる（プレビュー・検証用）。
 const _params = new URLSearchParams(location.search);
 const REF = _params.get('ref') || '';
-const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
+const LP_REFS = ['corp-lp', 'wedding-lp', 'coffee-lp'];
+const SEGMENTS = ['general', 'referral', 'leader-lp', 'member'];
+function resolveSeg(){
+  const q = _params.get('seg');
+  if(q && SEGMENTS.includes(q)) return q;
+  if(!REF) return 'general';
+  if(REF.startsWith('team_')) return 'member';
+  if(LP_REFS.includes(REF)) return 'leader-lp';
+  return 'referral';
+}
+const SEG = resolveSeg();
+// ▼ モードはログの継続性のために残す。従来「refなし＝feedback」だったが、一般公開の受診が
+//   検証コホート（8名）に混ざらないよう general を新設して分離した。
+const MODE = _params.get('mode') || (REF ? 'lead' : 'general');
+// ▼ 検証アンケート（5問）は ?mode=feedback を明示したときだけ出す。セグメント判定とは独立。
+const FEEDBACK = MODE === 'feedback';
+document.body.dataset.seg = SEG;
 
 const QUESTIONS = [
   {axis:'h', text:'誰かと話していて違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといい？」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
@@ -557,7 +791,7 @@ const HONSHITSU = {
  GKS:{core:'あなたが自分を後回しにするのは、遠慮からではありません。ほんとうは「みんなが心地よくいられる場を、守りたい」。合わせることが、あなたの愛情表現なのです。',
       cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
 };
-const HONSHITSU_LOOP='この根っこは、相手や場面によって、良い形にも、苦しい形にも変わります。あなたの「いま引っかかっている関係」では、どちらに転んでいるでしょうか。そこからが、読み解きの本番です。';
+const HONSHITSU_LOOP='まさに光と影のようなもので、あなたの中にあるこの2つをどうしたら自由自在に操ることができるのか、興味はありませんか？';
 
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
@@ -601,6 +835,17 @@ const RADAR_Q = [
   {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
   {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
 ];
+// 8タイプのエンブレム用アイコン（lp-corporate.html の自作インラインSVGを流用。外部素材は使わない）
+const TYPE_ICON = {
+  OBL: '<path d="M7 21V4h10l-3 3.5 3 3.5H7"/>',
+  OBS: '<path d="M4 20l7-7"/><path d="M9 8l3-3 7 7-3 3z"/>',
+  OKL: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  OKS: '<rect x="3.5" y="5" width="17" height="11" rx="3"/><path d="M8.5 16v3.5L13 16"/><path d="M8 10.5h8"/>',
+  GBL: '<path d="M4 21h16"/><path d="M12 21V10"/><path d="M4 10l8-6 8 6"/>',
+  GBS: '<circle cx="12" cy="12" r="3.2"/><path d="M12 4.5v2.3M12 17.2v2.3M4.5 12h2.3M17.2 12h2.3M6.7 6.7l1.7 1.7M15.6 15.6l1.7 1.7M17.3 6.7l-1.7 1.7M8.4 15.6l-1.7 1.7"/>',
+  GKL: '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="8" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M8.2 6.4l7.6 1.2"/><path d="M7 8l4 8"/><path d="M16.9 9.9l-3.8 6.2"/>',
+  GKS: '<path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/>',
+};
 const LIKERT = [
   {t:'とてもそう思う',  v:4},
   {t:'ややそう思う',    v:3},
@@ -617,15 +862,24 @@ let workplaceFrame='';
 const answers=new Array(ITEMS.length).fill(null);
 const $=id=>document.getElementById(id);
 
+// 画面・設問が切り替わったら必ずページ最上部から見せる。
+// scrollTo(0,0) だけでは環境によって残ることがあるため、要素側の scrollTop も明示的に戻す。
+function toTop(){
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop=0;
+  if(document.body) document.body.scrollTop=0;
+}
 function show(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $(screen).classList.add('active');
-  window.scrollTo({top:0,behavior:'auto'});
+  toTop();
 }
 function renderQ(){
   const q=ITEMS[idx];
+  const pct=Math.round(idx/ITEMS.length*100);
   $('qcount').textContent=(idx+1)+' / '+ITEMS.length;
-  $('barfill').style.width=((idx)/ITEMS.length*100)+'%';
+  $('qpct').textContent=pct+'%';
+  $('barfill').style.width=pct+'%';
   $('qtext').textContent=q.text;
   const c=$('choices'); c.innerHTML='';
   if(q.kind==='bin'){
@@ -636,18 +890,29 @@ function renderQ(){
       b.onclick=()=>pick(opt.p);
       c.appendChild(b);
     });
-    $('qhint').textContent='どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。';
+    $('qhint').innerHTML='どちらがより自分に近いかで直感的に。<br>迷ったら第一印象で大丈夫です。';
   }else{
-    LIKERT.forEach(opt=>{
+    // 円形スケール：左（当てはまらない）から右（当てはまる）へ。値は従来どおり1〜4で採点は不変。
+    const scale=document.createElement('div');
+    scale.className='scale';
+    const dots=document.createElement('div');
+    dots.className='scale-dots'; dots.setAttribute('role','radiogroup');
+    [...LIKERT].reverse().forEach(opt=>{
       const b=document.createElement('button');
-      b.className='choice choice-lik'; b.type='button';
-      b.innerHTML='<span>'+opt.t+'</span>';
+      b.className='dot dot-'+opt.v; b.type='button';
+      b.setAttribute('aria-label',opt.t); b.title=opt.t;
       b.onclick=()=>pick(opt.v);
-      c.appendChild(b);
+      dots.appendChild(b);
     });
-    $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
+    scale.appendChild(dots);
+    // 端のラベルはスケールの下に置く（横に置くと狭い画面で折り返して読みにくくなるため）
+    scale.insertAdjacentHTML('beforeend',
+      '<div class="scale-legend"><span>当てはまらない</span><span>当てはまる</span></div>');
+    c.appendChild(scale);
+    $('qhint').innerHTML='ふだんの自分を思い浮かべて、<br>どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
+  toTop();
 }
 function pick(val){
   answers[idx]=val;
@@ -676,30 +941,25 @@ function finish(){
   const h=tally('h'), c=tally('c'), w=tally('w');
   const code=(h.L>=2?'O':'G')+(c.L>=2?'B':'K')+(w.L>=2?'L':'S');
   _pending={code, counts:{h,c,w}, radar:radarScores()};
-  show('position');
-}
-// 立場（任意）：24問の回答後・結果表示の前に取得。タイプ結果は変えず、アドバイス精度を高めるための情報。
-$('positionSel').onchange=()=>{ $('positionOtherWrap').hidden = ($('positionSel').value!=='その他'); };
-function currentPosition(){
-  const sel=$('positionSel').value;
-  if(sel==='その他'){ const o=$('positionOther').value.trim(); return o ? ('その他：'+o) : 'その他'; }
-  return sel;
-}
-function showResultFromPending(pos){
-  if(!_pending) return;
-  window._position = pos;
   renderResult(_pending.code, _pending.counts, _pending.radar);
 }
-$('positionNext').onclick=()=>showResultFromPending(currentPosition());
-$('positionSkip').onclick=()=>showResultFromPending('');
 function renderResult(code,counts,radar){
   const t=TYPES[code]; const card=$('card');
   card.classList.remove('result-accent');
-  if(t.pole==='guard'){ card.style.setProperty('--accent','var(--teal)'); card.style.setProperty('--accent-soft','var(--teal-soft)'); card.style.setProperty('--accent-ink','var(--teal-ink)'); }
-  else{ card.style.setProperty('--accent','var(--coral)'); card.style.setProperty('--accent-soft','var(--coral-soft)'); card.style.setProperty('--accent-ink','var(--coral-ink)'); }
+  if(t.pole==='guard'){ card.style.setProperty('--accent','var(--teal)'); card.style.setProperty('--accent-soft','var(--teal-soft)'); card.style.setProperty('--accent-ink','var(--teal-ink)'); card.style.setProperty('--accent-deep','#0E5040'); }
+  else{ card.style.setProperty('--accent','var(--coral)'); card.style.setProperty('--accent-soft','var(--coral-soft)'); card.style.setProperty('--accent-ink','var(--coral-ink)'); card.style.setProperty('--accent-deep','#7A2E1A'); }
   $('r-code').textContent=code;
   $('r-name').textContent=t.name;
   $('r-catch').textContent=t.catch;
+  $('r-emblem').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(TYPE_ICON[code]||'')+'</svg>';
+  // エンブレムから放射する3つのキーワード＝出ている側の軸名（オープン／ぶつかる／引っ張る 等）。
+  // 判定済みのタイプコードから引くので、新しいデータは要らない。
+  const rayPos=['ray-r1','ray-l','ray-r2'];
+  $('r-rays').innerHTML=['h','c','w'].map((axis,i)=>{
+    const meta=AX[axis];
+    const word = code[i]===meta.poles[0] ? meta.left : meta.right;
+    return '<span class="ray '+rayPos[i]+'"><b></b><i></i>'+word+'</span>';
+  }).join('');
   // axes
   const axBox=$('r-axes'); axBox.innerHTML='';
   [['h',counts.h],['c',counts.c],['w',counts.w]].forEach(([axis,ct])=>{
@@ -718,6 +978,18 @@ function renderResult(code,counts,radar){
     const dot=row.querySelector('.axis-dot');
     requestAnimationFrame(()=>{ dot.style.left=(8+fracRight*84)+'%'; });
   });
+  // 定量（3軸）と定性（あるある・強み・トリセツ）の関係を、文章で明示的につなぐ。
+  // タイプコードの3文字が3軸に1対1で対応していることも、ここで見せる。
+  const picked=['h','c','w'].map((axis,i)=>{
+    const meta=AX[axis];
+    return code[i]===meta.poles[0] ? meta.left : meta.right;
+  });
+  // 文章で説明せず、組み立てを図で見せる（3つの極 → タイプ）。
+  $('r-axes-note').innerHTML =
+    '<div class="f-row">'+picked.map(p=>'<span class="f-chip">'+p+'</span>').join('<span class="f-op">+</span>')+'</div>'+
+    '<div class="f-arrow">↓</div>'+
+    '<div class="f-type">'+t.name+'<small>'+code+'</small></div>';
+  $('r-cc-intro').innerHTML='そこで、人間関係の悩みを解決し自然体の時間を増やせるように、あなたのタイプ〈<b>'+t.name+'</b>〉のタイプ別読み解きガイドをお届けしています。';
   renderRelations(radar);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
@@ -726,7 +998,6 @@ function renderResult(code,counts,radar){
   renderToriset(code);
   renderHonshitsu(code);
   $('protoNote').textContent='';
-  $('torisetNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
@@ -734,12 +1005,14 @@ function renderResult(code,counts,radar){
   show('result');
 }
 
-// トリセツ：タイプ別の「私との付き合い方」を描画
+// トリセツ：タイプ別の「私との付き合い方」を、番号つきカードで描画（取扱説明書の見立て）
+const NUMS=['\u2460','\u2461','\u2462','\u2463'];
 function renderToriset(code){
   const box=$('r-toriset'); if(!box) return; box.innerHTML='';
-  (TORISET[code]||[]).forEach(it=>{
-    const d=document.createElement('div'); d.className='ts-item';
-    d.innerHTML='<span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span>';
+  (TORISET[code]||[]).forEach((it,i)=>{
+    const d=document.createElement('div'); d.className='ts-card';
+    d.innerHTML='<span class="ts-l"><span class="num">'+NUMS[i]+'</span>'+it.l+'</span>'
+              + '<span class="ts-t">'+it.t+'</span>';
     box.appendChild(d);
   });
 }
@@ -749,12 +1022,6 @@ function renderHonshitsu(code){
   $('r-hs-core').textContent=h.core;
   $('r-hs-cost').textContent=h.cost;
   $('r-hs-loop').textContent=HONSHITSU_LOOP;
-}
-// トリセツを送れるテキストに（LINE等に貼って大切な人へ）
-function torisetText(){
-  const r=window._lastResult; if(!r) return '';
-  const items=(TORISET[r.code]||[]).map(it=>'・'+it.l+'：'+it.t).join('\n');
-  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\n#人間関係タイプ診断';
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -781,11 +1048,13 @@ function renderRelations(scores){
   const m=M[f], right=scores[f]>=0.5;
   const pole=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
   $('r-focus').innerHTML =
-    '<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
-    '<div class="cap-axis">「'+pole+'」寄り</div>'+
-    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
-    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
-    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
+    '<div class="pv-head"><span class="pv-kicker">いちばん出ている傾向</span><b>'+m.name+'</b></div>'+
+    '<div class="pv-body">'+
+      '<div class="pv-pole">「'+pole+'」</div>'+
+      '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+      '<div class="focus-item"><span class="focus-tag focus-tag-side">惜しい</span><p>'+side+'</p></div>'+
+      '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>'+
+    '</div>';
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
@@ -800,12 +1069,11 @@ function post(payload){
 function recordDiagnosis(r){
   if(!SHEET_ENDPOINT) return;
   post({
-    action:'create', id:r.id, mode:MODE, ref:REF,
+    action:'create', id:r.id, mode:MODE, ref:REF, seg:SEG,
     answers:answers.slice(0, QUESTIONS.length),
     axes:{h:r.code[0], c:r.code[1], w:r.code[2]},
     code:r.code, name:r.name,
     radar:r.radar,
-    position: window._position || '',
     workplaceFrame: workplaceFrame || '', // 回答アンカー（自然体。ログ保存には Code.gs に列追加＋再デプロイが必要）
   }).catch(()=>{});
 }
@@ -846,81 +1114,51 @@ $('submitFeedback').onclick=()=>{
 $('submitLead').onclick=()=>{
   const email=$('mail').value.trim();
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  if(!$('guideConsent').checked){ $('protoNote').textContent='ご案内の送付に同意いただける場合は、チェックを入れてください。'; return; }
   const r=window._lastResult||{};
-  sendSurvey({email, guide:true, code:r.code, name:r.name}, $('submitLead'), '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。');
+  // ②紹介のみ、商談前ヒアリング（すべて任意）を一緒に送る。
+  // 悩みが書かれていれば個別の深掘り読み解きへ、空なら従来どおり3日間ガイドへ振り分ける。
+  const hear = SEG==='referral' ? {
+    hearNow:    $('hearNow').value.trim(),
+    hearType:   $('hearType').value,
+    hearFuture: $('hearFuture').value.trim(),
+  } : {};
+  const wantsPersonal = !!hear.hearNow;
+  const okMsg = wantsPersonal
+    ? 'ありがとうございます。いただいた状況をもとに、あなたに合わせた読み解きを個別にお送りします。数日お待ちください。'
+    : '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。';
+  sendSurvey({email, guide:!wantsPersonal, personal:wantsPersonal, ...hear, code:r.code, name:r.name}, $('submitLead'), okMsg);
 };
 
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
-  $('copyManual').hidden=true;
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  $('mail').value=''; $('guideConsent').checked=false;
-  $('positionSel').value=''; $('positionOther').value=''; $('positionOtherWrap').hidden=true;
-  window._position=''; _pending=null;
+  $('mail').value='';
+  ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
+  $('hearType').value='';
+  _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
   show('frame');
 };
 
-function legacyCopy(text){
-  try{
-    const ta=document.createElement('textarea');
-    ta.value=text; ta.setAttribute('readonly','');
-    ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.select(); ta.setSelectionRange(0, text.length);
-    const ok=document.execCommand('copy');
-    document.body.removeChild(ta);
-    return ok;
-  }catch(e){ return false; }
-}
-async function copyText(text){
-  if(navigator.clipboard && window.isSecureContext){
-    try{ await navigator.clipboard.writeText(text); return true; }
-    catch(e){ return legacyCopy(text); }
-  }
-  return legacyCopy(text);
-}
-$('torisetCopy').onclick=async ()=>{
-  const text=torisetText(); if(!text) return;
-  const b=$('torisetCopy');
-  let ok=false;
-  try{ ok=await copyText(text); }catch(e){ ok=false; }
-  if(ok){
-    $('torisetNote').textContent='コピーしました。大切な人に送ってみてください。';
-    b.textContent='コピーしました'; b.classList.add('copied');
-    setTimeout(()=>{ b.textContent='トリセツをコピーして送る'; b.classList.remove('copied'); },2200);
-  } else {
-    const box=$('copyText'); box.value=text;
-    $('copyManual').hidden=false; box.focus(); box.select();
-    $('torisetNote').textContent='下のテキスト欄からコピーして送ってください。';
-  }
-};
-$('shareBtn').onclick=async ()=>{
-  const r=window._lastResult; if(!r)return;
-  const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#人間関係タイプ診断';
-  const b=$('shareBtn');
-  let ok=false;
-  try{ ok=await copyText(text); }catch(e){ ok=false; }
-  if(ok){
-    $('copyManual').hidden=true;
-    b.textContent='コピーしました'; b.classList.add('copied');
-    setTimeout(()=>{ b.textContent='結果をコピー'; b.classList.remove('copied'); },1800);
-  } else {
-    // クリップボードが使えない環境では手動コピー欄を表示
-    const box=$('copyText'); box.value=text;
-    $('copyManual').hidden=false;
-    box.focus(); box.select();
-  }
-};
 
-// モード切替：lead は検証アンケートを隠す／feedback（8名）は深掘りフォームを「紹介先プレビュー」と明示
-if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
-else { $('deepPreviewNote').hidden=false; }
+// 検証アンケート（5問）は ?mode=feedback のときだけ表示。深掘りフォームを「紹介先プレビュー」と
+// 明示する注記も同じ条件で出す。セグメントごとの出し分けは今後ここに足していく。
+$('feedbackBlock').hidden = !FEEDBACK;
+$('deepPreviewNote').hidden = !FEEDBACK;
+document.querySelector('.bridge').classList.toggle('is-bare', !FEEDBACK);
+
+// ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意で、書いた人には個別の読み解きを返す。
+if(SEG==='referral'){
+  $('hearingBlock').hidden = false;
+  const sel=$('hearType');
+  sel.innerHTML='<option value="">選ぶ（わからない場合は空のままで大丈夫です）</option>'
+    + Object.keys(TYPES).map(c=>`<option value="${c}">${TYPES[c].name}（${TYPES[c].catch}）</option>`).join('');
+  $('submitLead').textContent='読み解きを受け取る';
+}
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
   workplaceFrame='自然体';
