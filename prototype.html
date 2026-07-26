@@ -311,25 +311,29 @@
   /* 深層：ページで唯一の暗い面にして「奥に沈む」感じを出す。
      トリセツ（アクセントの色面）とは別の軸で強調するので、見せ場は競合しない。
      右上に同心の弧を薄く重ね、層の奥行きを示す。 */
-  .honshitsu{
-    position:relative; overflow:hidden; border:none; border-radius:var(--radius) var(--radius) 8px 8px;
-    padding:30px 22px 38px; margin-bottom:10px;
-    background:radial-gradient(120% 90% at 50% -10%, #3B4652 0%, #2B333D 55%, #222A33 100%);
+  /* 深層とCTAをまとめた章。トリセツと同じく全幅で抜き、1本のグラデーションで
+     上（内省・寒色）から下（行動・アクセントの光）へ温度を上げる。 */
+  .deep-section{
+    position:relative; overflow:hidden;
+    margin:40px calc(-1 * var(--card-pad-x)) 30px; padding:34px 22px 34px;
     color:#fff;
+    background:
+      radial-gradient(96% 38% at 50% -6%, #3F4A57 0%, rgba(0,0,0,0) 62%),
+      radial-gradient(74% 42% at 24% 80%, var(--accent-deep, #7A2E1A) 0%, rgba(0,0,0,0) 64%),
+      linear-gradient(180deg, #2B333D 0%, #232B34 38%, #1A2028 72%, #141A20 100%);
   }
-  /* 下へ続くことを示すしるし。深層の問いかけがCTAへ渡ることを視覚でも示す。 */
-  .honshitsu::after{
-    content:""; position:absolute; left:50%; bottom:15px; width:10px; height:10px;
-    border-right:2px solid rgba(255,255,255,.38); border-bottom:2px solid rgba(255,255,255,.38);
-    transform:translateX(-50%) rotate(45deg);
-  }
-  .honshitsu::before{
-    content:""; position:absolute; top:-96px; right:-72px; width:220px; height:220px;
+  .deep-section > *{position:relative}
+  .deep-section .secthead{margin-top:0; border-bottom-color:rgba(255,255,255,.2)}
+  .deep-section .sh-title{color:#fff}
+  .deep-section .sh-kicker{color:rgba(255,255,255,.68)}
+  /* 章の中では、深層もCTAも面を持たない。区切りは細い線だけにする。 */
+  .honshitsu{position:relative; padding:0; margin:0; background:none; border:none}
+  .deep-section::before{
+    content:""; position:absolute; top:-104px; right:-78px; width:220px; height:220px;
     border-radius:50%; border:1px solid rgba(255,255,255,.10);
     box-shadow:0 0 0 22px rgba(255,255,255,.05), 0 0 0 46px rgba(255,255,255,.035);
     pointer-events:none;
   }
-  .honshitsu > *{position:relative}
   .hs-sub{font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px}
   .hs-core{font-size:15px; line-height:1.95; color:#fff; margin-bottom:16px}
   .hs-cost{font-size:14px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
@@ -359,12 +363,10 @@
   .ct-text{font-size:14px; line-height:1.9; color:var(--ink)}
     /* 読み解きガイドのCTA：深層と同じく暗い面にするが、こちらは奥行きでなく
      「引き込む」ための面。左上から差すアクセント色の光を、ほぼ黒へ落としていく。 */
+  .compat{margin:0}
   .compat-cta{
-    position:relative; overflow:hidden; border-radius:8px 8px 22px 22px; padding:26px 22px 24px; margin-top:0;
-    background:
-      radial-gradient(78% 55% at 22% 42%, var(--accent-deep, #7A2E1A) 0%, rgba(0,0,0,0) 66%),
-      linear-gradient(180deg, #222A33 0%, #1A2028 52%, #131920 100%);
-    color:#fff;
+    margin-top:30px; padding-top:28px; border-top:1px solid rgba(255,255,255,.16);
+    background:none; border-radius:0;
   }
   .compat-cta > *{position:relative}
   .compat-cta .cc-label{font-family:var(--display); font-weight:900; font-size:17px; color:#fff; margin-bottom:10px; letter-spacing:.02em}
@@ -495,6 +497,9 @@
         <p class="sectlabel">特徴的な傾向と、その活かし方</p>
         <div class="pv" id="r-focus"></div>
 
+        <!-- 深層とCTAを1つの章としてまとめる。トリセツと同じ全幅バンドの型に揃え、
+             面の中で「読ませる（上・寒色）→ 行動（下・アクセントの光）」と温度を変える。 -->
+        <div class="deep-section">
         <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="10"/></svg></span><span class="sh-text"><span class="sh-kicker">DEEP DIVE</span><span class="sh-title">あなたの深層</span></span></div>
         <div class="honshitsu">
           <p class="hs-sub">あなたの振る舞いを決める「ほんとうの理由」</p>
@@ -537,6 +542,7 @@
             <p class="day-list">Day1　自然体でいられる環境<br>Day2　あなたの「裏モード」<br>Day3　あの人との関係を解く</p>
             <p class="optout-note">ご案内の配信は、いつでも停止できます。</p>
           </div>
+        </div>
         </div>
 
         <div class="row-block" style="margin-top:28px">
