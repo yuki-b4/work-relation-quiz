@@ -138,6 +138,36 @@
     border:1px solid var(--line); color:var(--accent);
   }
   .emblem svg{width:44px; height:44px}
+  /* エンブレムから3軸のキーワードが放射する構造。スマホ幅で完結させるため、
+     ラベルは短い軸名（最大4文字）だけを使い、位置は固定で決め打ちする。 */
+  .emblem-wrap{position:relative; width:100%; max-width:330px; height:150px; margin:0 auto 6px}
+  .emblem-wrap .emblem{position:absolute; left:50%; top:23px; transform:translateX(-50%); margin:0}
+  .ray{position:absolute; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--accent-ink); white-space:nowrap}
+  .ray i{display:block; height:1px; background:var(--accent); opacity:.45; width:26px}
+  .ray b{display:block; width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.65; flex:none}
+  .ray-l{left:0; top:52px; flex-direction:row}
+  .ray-r1{right:0; top:26px; flex-direction:row-reverse}
+  .ray-r2{right:0; top:86px; flex-direction:row-reverse}
+  @media (max-width:360px){ .ray{font-size:11.5px} .ray i{width:16px} }
+
+  /* ===== トリセツ：全幅のアクセント面に番号つきカード（拡散のための「切り取れる塊」） ===== */
+  .toriset-band{
+    margin:34px -30px 30px; padding:30px 22px 32px; background:var(--accent);
+    color:#fff; text-align:center;
+  }
+  .toriset-band .ts-label{font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
+  .toriset-band .ts-title{font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
+  .toriset-band .ts-lead{font-size:12.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8}
+  .ts-card{background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left}
+  .ts-card .ts-l{
+    display:block; font-size:13px; font-weight:700; color:var(--accent-ink);
+    padding:11px 16px; border-bottom:1px solid var(--line); margin:0;
+  }
+  .ts-card .ts-l .num{font-weight:900; margin-right:6px}
+  .ts-card .ts-t{display:block; font-size:14px; line-height:1.85; color:var(--ink); padding:14px 16px}
+  .toriset-band .ts-share{margin-top:8px; background:#fff; color:var(--accent-ink)}
+  .toriset-band .ts-note{color:#fff; opacity:.85}
+  @media (max-width:420px){ .toriset-band{margin-left:-26px; margin-right:-26px} }
   .qback:hover{color:var(--muted)}
   .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
 
@@ -338,7 +368,10 @@
   <section class="screen" id="result">
     <div class="card result-accent" id="card">
       <div class="card-head">
-        <div class="emblem" id="r-emblem" aria-hidden="true"></div>
+        <div class="emblem-wrap">
+          <div class="emblem" id="r-emblem" aria-hidden="true"></div>
+          <div class="rays" id="r-rays" aria-hidden="true"></div>
+        </div>
         <p class="tcatch" id="r-catch"></p>
         <h2 class="tname" id="r-name"></h2>
         <span class="chip" id="r-code"></span>
@@ -361,11 +394,12 @@
           <p id="r-tsuyomi"></p>
         </div>
 
-        <div class="toriset">
-          <div class="ts-label">あなたのトリセツ（取扱説明書）</div>
-          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
+        <div class="toriset-band">
+          <div class="ts-label">TORISETSU</div>
+          <p class="ts-title">わたしのトリセツ</p>
+          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、<br>あなたとうまくやっていくコツ。</p>
           <div id="r-toriset"></div>
-          <button class="btn btn-sm btn-accent ts-share" id="torisetCopy">トリセツをコピーして送る</button>
+          <button class="btn btn-sm ts-share" id="torisetCopy">トリセツをコピーして送る</button>
           <p class="ts-note" id="torisetNote"></p>
         </div>
 
@@ -812,6 +846,14 @@ function renderResult(code,counts,radar){
   $('r-name').textContent=t.name;
   $('r-catch').textContent=t.catch;
   $('r-emblem').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(TYPE_ICON[code]||'')+'</svg>';
+  // エンブレムから放射する3つのキーワード＝出ている側の軸名（オープン／ぶつかる／引っ張る 等）。
+  // 判定済みのタイプコードから引くので、新しいデータは要らない。
+  const rayPos=['ray-r1','ray-l','ray-r2'];
+  $('r-rays').innerHTML=['h','c','w'].map((axis,i)=>{
+    const meta=AX[axis];
+    const word = code[i]===meta.poles[0] ? meta.left : meta.right;
+    return '<span class="ray '+rayPos[i]+'"><b></b><i></i>'+word+'</span>';
+  }).join('');
   // axes
   const axBox=$('r-axes'); axBox.innerHTML='';
   [['h',counts.h],['c',counts.c],['w',counts.w]].forEach(([axis,ct])=>{
@@ -846,12 +888,14 @@ function renderResult(code,counts,radar){
   show('result');
 }
 
-// トリセツ：タイプ別の「私との付き合い方」を描画
+// トリセツ：タイプ別の「私との付き合い方」を、番号つきカードで描画（取扱説明書の見立て）
+const NUMS=['\u2460','\u2461','\u2462','\u2463'];
 function renderToriset(code){
   const box=$('r-toriset'); if(!box) return; box.innerHTML='';
-  (TORISET[code]||[]).forEach(it=>{
-    const d=document.createElement('div'); d.className='ts-item';
-    d.innerHTML='<span class="ts-l">'+it.l+'</span><span class="ts-t">'+it.t+'</span>';
+  (TORISET[code]||[]).forEach((it,i)=>{
+    const d=document.createElement('div'); d.className='ts-card';
+    d.innerHTML='<span class="ts-l"><span class="num">'+NUMS[i]+'</span>'+it.l+'</span>'
+              + '<span class="ts-t">'+it.t+'</span>';
     box.appendChild(d);
   });
 }
