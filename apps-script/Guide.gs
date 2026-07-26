@@ -123,6 +123,26 @@ function enrollGuideLead(sheet, rownum) {
   }
 }
 
+// 既に登録済みなのにガイド配信に載っていない行を、あとから登録して Day1 を送る。
+// Guide.gs を後から導入した場合など、「メールアドレスはあるがガイドトークンが空」の行が対象。
+// 日次バッチはトークンが無い行をスキップするため、この関数で拾い直す必要がある。
+function backfillGuideEnroll() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return '対象なし';
+  ensureHeader(sheet);
+  var emailCol = HEADERS.indexOf('メールアドレス') + 1;
+  var tokenCol = HEADERS.indexOf('ガイドトークン') + 1;
+  var done = 0, failed = 0;
+  for (var r = 2; r <= sheet.getLastRow(); r++) {
+    if (!sheet.getRange(r, emailCol).getValue()) continue;
+    if (sheet.getRange(r, tokenCol).getValue()) continue;
+    try { enrollGuideLead(sheet, r); done++; }
+    catch (err) { failed++; console.error('backfill失敗: row=' + r + ' ' + err); }
+  }
+  return '配信登録: ' + done + '件 / 失敗: ' + failed + '件';
+}
+
 // ================= 日次バッチ（時間主導トリガー） =================
 
 function sendGuideDailyBatch() {
