@@ -312,10 +312,16 @@
      トリセツ（アクセントの色面）とは別の軸で強調するので、見せ場は競合しない。
      右上に同心の弧を薄く重ね、層の奥行きを示す。 */
   .honshitsu{
-    position:relative; overflow:hidden; border:none; border-radius:var(--radius);
-    padding:30px 22px 26px; margin-bottom:26px;
+    position:relative; overflow:hidden; border:none; border-radius:var(--radius) var(--radius) 8px 8px;
+    padding:30px 22px 38px; margin-bottom:10px;
     background:radial-gradient(120% 90% at 50% -10%, #3B4652 0%, #2B333D 55%, #222A33 100%);
     color:#fff;
+  }
+  /* 下へ続くことを示すしるし。深層の問いかけがCTAへ渡ることを視覚でも示す。 */
+  .honshitsu::after{
+    content:""; position:absolute; left:50%; bottom:15px; width:10px; height:10px;
+    border-right:2px solid rgba(255,255,255,.38); border-bottom:2px solid rgba(255,255,255,.38);
+    transform:translateX(-50%) rotate(45deg);
   }
   .honshitsu::before{
     content:""; position:absolute; top:-96px; right:-72px; width:220px; height:220px;
@@ -354,10 +360,10 @@
     /* 読み解きガイドのCTA：深層と同じく暗い面にするが、こちらは奥行きでなく
      「引き込む」ための面。左上から差すアクセント色の光を、ほぼ黒へ落としていく。 */
   .compat-cta{
-    position:relative; overflow:hidden; border-radius:22px; padding:26px 22px 24px; margin-top:18px;
+    position:relative; overflow:hidden; border-radius:8px 8px 22px 22px; padding:26px 22px 24px; margin-top:0;
     background:
-      radial-gradient(78% 62% at 14% -6%, var(--accent-deep, #7A2E1A) 0%, rgba(0,0,0,0) 62%),
-      linear-gradient(168deg, #26221F 0%, #191614 55%, #100E0D 100%);
+      radial-gradient(78% 55% at 22% 42%, var(--accent-deep, #7A2E1A) 0%, rgba(0,0,0,0) 66%),
+      linear-gradient(180deg, #222A33 0%, #1A2028 52%, #131920 100%);
     color:#fff;
   }
   .compat-cta > *{position:relative}
