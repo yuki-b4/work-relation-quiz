@@ -296,7 +296,8 @@
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
   .optout-note{margin-top:10px; font-size:11.5px; color:var(--faint)}
-  .day-list{margin-top:14px; font-size:12.5px; line-height:2; color:var(--muted)}
+  .day-head{margin-top:18px; font-size:13px; font-weight:700; color:rgba(255,255,255,.9)}
+  .day-list{margin-top:6px; font-size:12.5px; line-height:2; color:var(--muted)}
   .hear-help{margin:6px 0 0; font-size:13px}
   .hear-help a{color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
@@ -317,10 +318,12 @@
     position:relative; overflow:hidden;
     margin:40px calc(-1 * var(--card-pad-x)) 30px; padding:34px 22px 34px;
     color:#fff;
+    /* 上から下へ一方向に流す。上は明るい寒色（内省）、下へ向かうほど暗く沈み、
+       アクセント色が下から立ち上がってボタンのある行動側へつなぐ。
+       アクセントの停止位置を125%に置くことで、最下部でも色が飽和しすぎない。 */
     background:
-      radial-gradient(96% 38% at 50% -6%, #3F4A57 0%, rgba(0,0,0,0) 62%),
-      radial-gradient(74% 42% at 24% 80%, var(--accent-deep, #7A2E1A) 0%, rgba(0,0,0,0) 64%),
-      linear-gradient(180deg, #2B333D 0%, #232B34 38%, #1A2028 72%, #141A20 100%);
+      linear-gradient(180deg, rgba(0,0,0,0) 38%, var(--accent-deep, #7A2E1A) 125%),
+      linear-gradient(180deg, #37414E 0%, #2B333D 18%, #232B34 45%, #1A2028 78%, #141A20 100%);
   }
   .deep-section > *{position:relative}
   .deep-section .secthead{margin-top:0; border-bottom-color:rgba(255,255,255,.2)}
@@ -512,7 +515,7 @@
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text" id="r-cc-intro"></p>
-            <div class="cc-label">人間関係の悩みは毎日の幸福度に大きく影響します。</div>
+            <div class="cc-label">人間関係の悩みは生きる上で大きな大きな悩みの種です。</div>
             <p class="cc-text">メールアドレスを登録するだけで、すぐに1通目を受け取れます。</p>
             <!-- ②紹介（seg=referral）だけに出す商談前ヒアリング。すべて任意。
                  書いてくれた人には個別の深掘り読み解きを返し、書かない人は3日間ガイドへ分岐する。 -->
@@ -539,6 +542,7 @@
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
             <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
+            <p class="day-head">この読み解きガイドでわかること</p>
             <p class="day-list">Day1　自然体でいられる環境<br>Day2　あなたの「裏モード」<br>Day3　あの人との関係を解く</p>
             <p class="optout-note">ご案内の配信は、いつでも停止できます。</p>
           </div>
