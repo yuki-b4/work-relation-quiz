@@ -39,12 +39,17 @@
 
   /* INTRO */
   .eyebrow{font-size:13px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
+  /* 日本語の折り返し品質。balance＝行長を均等化（見出し・中央揃えの短文向け）、
+     pretty＝最終行に1文字だけ残るのを防ぐ（長い本文向け）。非対応ブラウザでは無視される。 */
+  .hero,.qtext,.tname,.tcatch,.ts-title,.cc-label,.lead-cta,.vq-intro{text-wrap:balance}
+  .lead,.step-d,.frame-why,.hs-core,.hs-cost,.hs-loop,.ts-card .ts-t,.focus-item p,
+  .focus-grow,.aru li,.row-block p,.cc-text,.ct-text,.sect-sub,.consent{text-wrap:pretty}
   .hero{
     font-family:var(--display); font-weight:900; line-height:1.4;
     font-size:clamp(25px,5.6vw,34px); letter-spacing:.01em; margin-bottom:16px;
   }
   .lead{font-size:17px; color:var(--muted); margin-bottom:14px; max-width:34em}
-  .meta{font-size:14px; color:var(--faint); margin-bottom:34px}
+  .meta{text-align:center; font-size:14px; color:var(--faint); margin-bottom:34px}
   .meta b{color:var(--ink); font-weight:500}
   .btn{
     font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
@@ -169,7 +174,7 @@
   .toriset-band .ts-note{color:#fff; opacity:.85}
   @media (max-width:420px){ .toriset-band{margin-left:-26px; margin-right:-26px} }
   .qback:hover{color:var(--muted)}
-  .qhint{text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
+  .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
 
   /* RESULT */
   .result-accent{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
@@ -223,7 +228,7 @@
   .axis-track{position:relative; height:5px; background:var(--line); border-radius:99px}
   .axis-dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1)}
   ul.aru{list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px}
-  ul.aru li{position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink)}
+  ul.aru li{margin-bottom:10px; position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink)}
   ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .row-block{margin-bottom:26px}
   .row-block p{font-size:16px; line-height:1.9; color:var(--ink)}
@@ -243,7 +248,7 @@
   }
   .honshitsu .hs-label{font-family:var(--display); font-weight:900; font-size:18px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px}
   .honshitsu .hs-sub{font-size:14.5px; color:var(--faint); margin-bottom:15px}
-  .honshitsu .hs-core{font-size:17px; line-height:1.95; color:var(--ink); margin-bottom:12px}
+  .honshitsu .hs-core{font-size:17px; line-height:1.95; color:var(--ink); margin-bottom:16px}
   .honshitsu .hs-cost{font-size:16px; line-height:1.9; color:var(--muted); margin-bottom:16px}
   .honshitsu .hs-loop{font-size:16px; line-height:1.9; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
@@ -263,7 +268,6 @@
   .focus-tag-side{background:#565A60}
   .focus-item p{font-size:16px; line-height:1.9; color:var(--ink)}
   .focus-grow{font-size:16px; line-height:1.9; color:var(--ink); margin-top:15px}
-  .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
