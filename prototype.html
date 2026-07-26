@@ -277,10 +277,9 @@
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
+  .day-list{margin-top:14px; font-size:12.5px; line-height:2; color:var(--muted); text-align:center}
   .hear-help{margin:6px 0 0; font-size:13px}
   .hear-help a{color:var(--accent)}
-  .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
-  .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:13px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
@@ -418,7 +417,7 @@
         <!-- 並びは「定量 → その定量が生む定性」の対で構成する。
              3軸（タイプを決める）→ あるある・強み・トリセツ、
              5軸（同じタイプ内の個人差）→ 特徴的な軸、の2セット。 -->
-        <p class="sectlabel">タイプを決める3つの軸</p>
+        <p class="sectlabel">あなたの関係性タイプ</p>
         <div class="axes" id="r-axes"></div>
         <div class="formula" id="r-axes-note"></div>
 
@@ -433,12 +432,11 @@
         <div class="toriset-band">
           <div class="ts-label">TORISETSU</div>
           <p class="ts-title">わたしのトリセツ</p>
-          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
+          <p class="ts-lead">「私はこういう人」<br>周りの人に教えてあげて</p>
           <div id="r-toriset"></div>
         </div>
 
-        <p class="sectlabel">人間関係における5つの軸</p>
-        <p class="sect-sub">同じタイプでも、ここは人によって違います</p>
+        <p class="sectlabel">5つの関わり方傾向</p>
         <div class="axes" id="r-spectrums"></div>
 
         <p class="sectlabel">特徴的な軸と、その活かし方</p>
@@ -446,7 +444,7 @@
 
         <p class="sectlabel">あなたの深層</p>
         <div class="honshitsu">
-          <p class="hs-sub">タイプの奥にある、あなたがそう振る舞う「ほんとうの理由」。</p>
+          <p class="hs-sub">あなたの振る舞いを決める「ほんとうの理由」</p>
           <p class="hs-core" id="r-hs-core"></p>
           <p class="hs-cost" id="r-hs-cost"></p>
           <p class="hs-loop" id="r-hs-loop"></p>
@@ -455,9 +453,9 @@
         <div class="compat">
           <div class="compat-cta" id="deepBlock">
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
-            <p class="cc-text"><b>タイプは、入り口です。</b>タイプがわかっても、それだけで目の前の関係が変わるわけではありません。大切なのは、あなたのタイプを「いま引っかかっている相手」にどう当てはめ、どう動くか。その読み解きまでが、この診断の本番です。</p>
-            <div class="cc-label">たった1人との関係が、毎日の居心地を左右していませんか？</div>
-            <p class="cc-text">いま、診断を受けた方に、あなたのタイプに沿った<b>3日間の読み解きガイド</b>（1日1通・無料）をお届けしています。Day1「自然体でいられる環境」／Day2「あなたの『裏モード』」／Day3「あの人との関係を解く」。登録すると、<b>1通目がすぐに届きます</b>。</p>
+            <p class="cc-text" id="r-cc-intro"></p>
+            <div class="cc-label">人間関係の悩みは毎日の幸福度に大きく影響します。</div>
+            <p class="cc-text">そこで、あなたのタイプに沿った<b>3日間の読み解きガイド</b>を無料でお届けしています。メールアドレスを登録するだけで、すぐに1通目を受け取れます。</p>
             <!-- ②紹介（seg=referral）だけに出す商談前ヒアリング。すべて任意。
                  書いてくれた人には個別の深掘り読み解きを返し、書かない人は3日間ガイドへ分岐する。 -->
             <div id="hearingBlock" hidden>
@@ -482,8 +480,8 @@
               <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
               <input id="mail" type="email" placeholder="you@example.com">
             </div>
-            <label class="consent"><input type="checkbox" id="guideConsent"><span>3日間の読み解きガイド（無料）と、新しいガイドのご案内をお送りします。配信はいつでも停止できます。</span></label>
             <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
+            <p class="day-list">Day1　自然体でいられる環境<br>Day2　あなたの「裏モード」<br>Day3　あの人との関係を解く</p>
           </div>
         </div>
 
@@ -729,7 +727,7 @@ const HONSHITSU = {
  GKS:{core:'あなたが自分を後回しにするのは、遠慮からではありません。ほんとうは「みんなが心地よくいられる場を、守りたい」。合わせることが、あなたの愛情表現なのです。',
       cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
 };
-const HONSHITSU_LOOP='この根っこは、相手や場面によって、良い形にも、苦しい形にも変わります。あなたの「いま引っかかっている関係」では、どちらに転んでいるでしょうか。そこからが、読み解きの本番です。';
+const HONSHITSU_LOOP='あなたの「いま引っかかっている関係」では、どちらに転んでいるでしょうか。どうしたら、良い面を活かせるようになるか、興味はありませんか？';
 
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
@@ -927,6 +925,7 @@ function renderResult(code,counts,radar){
     '<div class="f-row">'+picked.map(p=>'<span class="f-chip">'+p+'</span>').join('<span class="f-op">+</span>')+'</div>'+
     '<div class="f-arrow">↓</div>'+
     '<div class="f-type">'+t.name+'<small>'+code+'</small></div>';
+  $('r-cc-intro').innerHTML='そこで、あなたの<b>'+t.name+'</b>を入り口に、あなたの人間関係の悩みを解決し自然体で生き始められるきっかけを提供しています。';
   renderRelations(radar);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
@@ -987,9 +986,9 @@ function renderRelations(scores){
   $('r-focus').innerHTML =
     '<div class="pv-head"><span class="pv-kicker">いちばん出ている軸</span><b>'+m.name+'</b></div>'+
     '<div class="pv-body">'+
-      '<div class="pv-pole">「'+pole+'」寄り</div>'+
+      '<div class="pv-pole">「'+pole+'」</div>'+
       '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
-      '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+      '<div class="focus-item"><span class="focus-tag focus-tag-side">惜しい</span><p>'+side+'</p></div>'+
       '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>'+
     '</div>';
 }
@@ -1051,7 +1050,6 @@ $('submitFeedback').onclick=()=>{
 $('submitLead').onclick=()=>{
   const email=$('mail').value.trim();
   if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  if(!$('guideConsent').checked){ $('protoNote').textContent='ご案内の送付に同意いただける場合は、チェックを入れてください。'; return; }
   const r=window._lastResult||{};
   // ②紹介のみ、商談前ヒアリング（すべて任意）を一緒に送る。
   // 悩みが書かれていれば個別の深掘り読み解きへ、空なら従来どおり3日間ガイドへ振り分ける。
@@ -1074,7 +1072,7 @@ $('restartBtn').onclick=()=>{
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  $('mail').value=''; $('guideConsent').checked=false;
+  $('mail').value='';
   ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
   $('hearType').value='';
   _pending=null;

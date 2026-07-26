@@ -160,6 +160,8 @@
     background:rgba(255,255,255,.09); border-left:3px solid rgba(255,255,255,.34);
     border-radius:0 12px 12px 0; padding:15px 16px;
   }
+  /* 印刷ボタンはPCでのみ出す（スマホでは使わないため） */
+  @media (max-width:640px){ .pc-only{ display:none } }
   /* 8タイプを紙に出すと暗い面が8つ並んで重くなるため、印刷時だけ白地に戻す */
   @media print{
     .honshitsu{ background:#fff !important; color:var(--ink) !important; border:1px solid var(--line) !important }
@@ -170,7 +172,7 @@
 
     body{ background:#fff }
     .wrap{ max-width:none; padding:0 }
-    .no-print{ display:none !important }
+  .no-print{ display:none !important }
     .index{ margin-bottom:12px }
     .card{ box-shadow:none; margin-bottom:12px }
     @page{ size:A4; margin:12mm }
@@ -180,13 +182,11 @@
 <body>
 <div class="wrap">
 
-  <div class="toolbar no-print">
+  <div class="toolbar no-print pc-only">
     <button onclick="window.print()">印刷 / PDFで保存</button>
-    <span class="note">各タイプはページ内で改ページされません（PDF化に最適）。</span>
   </div>
 
   <h1>人間関係タイプ 全8タイプ</h1>
-  <p class="sub">8つのタイプそれぞれの診断結果を一覧で。<br>※「人間関係における5つの軸」と「特徴的な軸」は回答により一人ひとり異なります。本ページは各タイプの代表例です。</p>
 
   <div class="index no-print">
     <a class="ix open"  href="#OBL"><span class="c">OBL</span><span>突撃隊長</span></a>
@@ -391,11 +391,11 @@ function buildCard(code){
          + '<span class="ts-t">'+it.t+'</span></div>'; }).join('');
   const toriset='<div class="toriset-band"><div class="ts-label">TORISETSU</div>'+
     '<p class="ts-title">このタイプのトリセツ</p>'+
-    '<p class="ts-lead">このタイプの人と、うまくやっていくコツ。</p>'+tsItems+'</div>';
+    '<p class="ts-lead">「この人はこういう人」<br>関わり方のコツ</p>'+tsItems+'</div>';
   // 深層（なぜそう振る舞うのか）
   const hs=HONSHITSU[code];
   const honshitsu=hs?('<p class="sectlabel">深層</p><div class="honshitsu">'+
-    '<p class="hs-sub">このタイプが、そう振る舞う「ほんとうの理由」。</p>'+
+    '<p class="hs-sub">このタイプの振る舞いを決める「ほんとうの理由」</p>'+
     '<p class="hs-core">'+hs.core+'</p><p class="hs-cost">'+hs.cost+'</p></div>'):'';
   const el=document.createElement('section');
   el.className='card '+pole; el.id=code;
@@ -408,7 +408,7 @@ function buildCard(code){
       '<p class="tcatch">'+t.catch+'</p><h2 class="tname">'+t.name+'</h2><span class="chip">'+code+'</span>'+
     '</div>'+
     '<div class="card-body">'+
-      '<p class="sectlabel">タイプを決める3つの軸</p><div class="poles">'+ax3+'</div>'+
+      '<p class="sectlabel">このタイプの関係性</p><div class="poles">'+ax3+'</div>'+
       '<div class="formula">'+
         '<div class="f-row">'+picked.map(function(p){return '<span class="f-chip">'+p+'</span>';}).join('<span class="f-op">+</span>')+'</div>'+
         '<div class="f-arrow">↓</div>'+
