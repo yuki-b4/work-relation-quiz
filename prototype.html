@@ -188,7 +188,12 @@
   .tname{font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
   .tcatch{font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
   .card-body{padding:28px 30px 32px}
-  .sectlabel{font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px}
+  .sectlabel{
+    font-size:16px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:32px 0 14px; display:flex; align-items:center; gap:9px; line-height:1.5;
+  }
+  .sectlabel::before{content:""; width:4px; height:17px; border-radius:2px; background:var(--accent); flex:none}
+  .card-body > .sectlabel:first-child, .row-block > .sectlabel{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
   .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
   .axis-name{font-size:12px; color:var(--muted); font-weight:500}
@@ -228,7 +233,15 @@
   .honshitsu .hs-loop{font-size:14.5px; line-height:1.75; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
-  .pv{border-radius:var(--radius); padding:18px 18px; margin-bottom:12px; background:var(--accent-soft)}
+  .pv{border-radius:var(--radius); margin-bottom:12px; background:var(--accent-soft); overflow:hidden}
+  .pv-head{
+    display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+    padding:13px 18px; background:var(--accent); color:#fff;
+  }
+  .pv-kicker{font-size:11.5px; font-weight:700; letter-spacing:.1em; opacity:.85}
+  .pv-head b{font-size:17px; font-weight:900; letter-spacing:.02em}
+  .pv-body{padding:16px 18px 18px}
+  .pv-pole{font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--accent-ink)}
   .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
   .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink)}
   .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
@@ -241,6 +254,8 @@
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
+  /* 検証アンケートを出さないときは、上の装飾と余白ごと畳む（全8タイプとの間が空きすぎるため） */
+  .bridge.is-bare{margin-top:0; padding-top:0; border-top:none}
   .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
   .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
   .vq{margin-bottom:20px}
@@ -270,7 +285,7 @@
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
-  .afterbar{display:flex; gap:12px; flex-wrap:wrap; margin-top:26px}
+  .afterbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:30px}
   .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
   .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
   .btn-sm{font-size:14px; padding:12px 22px}
@@ -526,7 +541,6 @@
         </div>
 
         <div class="afterbar">
-          <button class="btn btn-sm btn-ghost" id="shareBtn">結果をコピー</button>
           <button class="btn btn-sm btn-ghost" id="restartBtn">もう一度診断する</button>
         </div>
         <div id="copyManual" hidden>
@@ -915,7 +929,10 @@ function renderHonshitsu(code){
 function torisetText(){
   const r=window._lastResult; if(!r) return '';
   const items=(TORISET[r.code]||[]).map(it=>'・'+it.l+'：'+it.t).join('\n');
-  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\n#人間関係タイプ診断';
+  // 受け取った人がそのまま診断へ進めるよう、共有テキストに入口のURLを添える。
+  // refは付けない（refを付けると紹介セグメント扱いになるが、共有された相手は温度の低い一般層のため）。
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'');
+  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\nあなたのタイプも診断できます\n'+url+'\n#人間関係タイプ診断';
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -942,11 +959,13 @@ function renderRelations(scores){
   const m=M[f], right=scores[f]>=0.5;
   const pole=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
   $('r-focus').innerHTML =
-    '<div class="cap">いちばん出ている軸：'+m.name+'</div>'+
-    '<div class="cap-axis">「'+pole+'」寄り</div>'+
-    '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
-    '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
-    '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>';
+    '<div class="pv-head"><span class="pv-kicker">いちばん出ている軸</span><b>'+m.name+'</b></div>'+
+    '<div class="pv-body">'+
+      '<div class="pv-pole">「'+pole+'」寄り</div>'+
+      '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+
+      '<div class="focus-item"><span class="focus-tag focus-tag-side">つい出る面</span><p>'+side+'</p></div>'+
+      '<p class="focus-grow">意識して「'+other+'」を少し取り入れると、関わり方の幅が広がります。</p>'+
+    '</div>';
 }
 
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
@@ -1060,6 +1079,12 @@ async function copyText(text){
 $('torisetCopy').onclick=async ()=>{
   const text=torisetText(); if(!text) return;
   const b=$('torisetCopy');
+  // スマホではOSの共有シートを開き、LINE等を直接選べるようにする。
+  // 使えない環境（PCブラウザ等）では従来どおりクリップボードへコピーする。
+  if(navigator.share){
+    try{ await navigator.share({text}); $('torisetNote').textContent='送信ありがとうございます。'; return; }
+    catch(e){ if(e && e.name==='AbortError') return; }
+  }
   let ok=false;
   try{ ok=await copyText(text); }catch(e){ ok=false; }
   if(ok){
@@ -1072,28 +1097,12 @@ $('torisetCopy').onclick=async ()=>{
     $('torisetNote').textContent='下のテキスト欄からコピーして送ってください。';
   }
 };
-$('shareBtn').onclick=async ()=>{
-  const r=window._lastResult; if(!r)return;
-  const text='私は【'+r.name+'】でした。「'+r.catch+'」\n#人間関係タイプ診断';
-  const b=$('shareBtn');
-  let ok=false;
-  try{ ok=await copyText(text); }catch(e){ ok=false; }
-  if(ok){
-    $('copyManual').hidden=true;
-    b.textContent='コピーしました'; b.classList.add('copied');
-    setTimeout(()=>{ b.textContent='結果をコピー'; b.classList.remove('copied'); },1800);
-  } else {
-    // クリップボードが使えない環境では手動コピー欄を表示
-    const box=$('copyText'); box.value=text;
-    $('copyManual').hidden=false;
-    box.focus(); box.select();
-  }
-};
 
 // 検証アンケート（5問）は ?mode=feedback のときだけ表示。深掘りフォームを「紹介先プレビュー」と
 // 明示する注記も同じ条件で出す。セグメントごとの出し分けは今後ここに足していく。
 $('feedbackBlock').hidden = !FEEDBACK;
 $('deepPreviewNote').hidden = !FEEDBACK;
+document.querySelector('.bridge').classList.toggle('is-bare', !FEEDBACK);
 
 // ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意で、書いた人には個別の読み解きを返す。
 if(SEG==='referral'){
