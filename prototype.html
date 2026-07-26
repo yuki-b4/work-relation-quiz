@@ -191,12 +191,21 @@
   .card-body{padding:28px var(--card-pad-x) 32px}
   /* 大見出し：関係性タイプ／関わり方傾向／深層。小見出しの一段上として、
      文字を大きくし、下に区切り線を敷いて節の始まりを示す。 */
+  /* 大見出し：小見出しとは種類ごと変える。アクセント色の面にアイコンを載せ、
+     英字ラベルを添えて、節の始まりであることを一目で分かるようにする。 */
   .secthead{
-    font-size:21px; font-weight:900; color:var(--ink); letter-spacing:.02em;
-    margin:48px 0 18px; padding-bottom:12px; border-bottom:1px solid var(--line);
-    display:flex; align-items:center; gap:10px; line-height:1.5;
+    display:flex; align-items:center; gap:13px;
+    margin:52px 0 20px; padding-bottom:14px; border-bottom:2px solid var(--line);
   }
-  .secthead::before{content:""; width:5px; height:22px; border-radius:2px; background:var(--accent); flex:none}
+  .sh-icon{
+    flex:none; width:40px; height:40px; border-radius:13px;
+    background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;
+  }
+  .sh-icon svg{width:21px; height:21px}
+  .sh-text{display:flex; flex-direction:column; gap:3px; min-width:0}
+  .sh-kicker{font-size:10px; font-weight:700; letter-spacing:.18em; color:var(--accent); line-height:1}
+  .sh-title{font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em; line-height:1.4}
+  @media (max-width:360px){ .sh-title{font-size:18px} .sh-icon{width:36px; height:36px} }
   .card-body > .secthead:first-child{margin-top:0}
   .sectlabel{
     font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
@@ -427,7 +436,7 @@
         <!-- 並びは「定量 → その定量が生む定性」の対で構成する。
              3軸（タイプを決める）→ あるある・強み・トリセツ、
              5軸（同じタイプ内の個人差）→ 特徴的な軸、の2セット。 -->
-        <p class="secthead">あなたの関係性タイプ</p>
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="10.5" r="2.4"/><path d="M3.5 19.5c.5-3.4 2.7-5.3 5.5-5.3s5 1.9 5.5 5.3"/><path d="M15.5 14.6c2.1.4 3.5 2.1 4 5"/></svg></span><span class="sh-text"><span class="sh-kicker">RELATIONSHIP TYPE</span><span class="sh-title">あなたの関係性タイプ</span></span></div>
         <div class="axes" id="r-axes"></div>
         <div class="formula" id="r-axes-note"></div>
 
@@ -446,13 +455,13 @@
           <div id="r-toriset"></div>
         </div>
 
-        <p class="secthead">5つの関わり方傾向</p>
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h5"/><path d="M13 8h7"/><circle cx="11" cy="8" r="2.2"/><path d="M4 16h11"/><path d="M19 16h1"/><circle cx="17" cy="16" r="2.2"/></svg></span><span class="sh-text"><span class="sh-kicker">5 TENDENCIES</span><span class="sh-title">5つの関わり方傾向</span></span></div>
         <div class="axes" id="r-spectrums"></div>
 
         <p class="sectlabel">特徴的な傾向と、その活かし方</p>
         <div class="pv" id="r-focus"></div>
 
-        <p class="secthead">あなたの深層</p>
+        <div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="10"/></svg></span><span class="sh-text"><span class="sh-kicker">DEEP LAYER</span><span class="sh-title">あなたの深層</span></span></div>
         <div class="honshitsu">
           <p class="hs-sub">あなたの振る舞いを決める「ほんとうの理由」</p>
           <p class="hs-core" id="r-hs-core"></p>
