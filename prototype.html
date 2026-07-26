@@ -15,7 +15,7 @@
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
     --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
     --shadow:0 1px 2px rgba(20,20,20,.04),0 12px 34px rgba(20,20,20,.07);
-    --radius:20px;
+    --radius:20px; --card-pad-x:30px;
     /* 回答スケール（4段階）の配色。左＝思わない側は落ち着いたブルーグレー、右＝そう思う側はコーラル。
        ブランドのcoral/tealはタイプの極（open/guard）を表す色なので、意味が混ざらないよう別系統にする。 */
     --sc1:#8E9BB0; --sc2:#C3CBD8; --sc3:#F0C3B2; --sc4:#D9755A;
@@ -39,11 +39,10 @@
 
   /* INTRO */
   .eyebrow{font-size:13px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
-  /* 日本語の折り返し品質。balance＝行長を均等化（見出し・中央揃えの短文向け）、
-     pretty＝最終行に1文字だけ残るのを防ぐ（長い本文向け）。非対応ブラウザでは無視される。 */
-  .hero,.qtext,.tname,.tcatch,.ts-title,.cc-label,.lead-cta,.vq-intro{text-wrap:balance}
-  .lead,.step-d,.frame-why,.hs-core,.hs-cost,.hs-loop,.ts-card .ts-t,.focus-item p,
-  .focus-grow,.aru li,.row-block p,.cc-text,.ct-text,.sect-sub,.consent{text-wrap:pretty}
+  /* 日本語の折り返し。text-wrap:pretty は iOS Safari で行を過剰に短くし、
+     本文の右側に大きな余白ができてしまうため使わない。
+     balance は中央揃えの短い設問だけに限定して使う（行長を均等化する効果が確実に出る範囲）。 */
+  .qtext,.qhint{text-wrap:balance}
   .hero{
     font-family:var(--display); font-weight:900; line-height:1.4;
     font-size:clamp(25px,5.6vw,34px); letter-spacing:.01em; margin-bottom:16px;
@@ -157,12 +156,12 @@
 
   /* ===== トリセツ：全幅のアクセント面に番号つきカード（拡散のための「切り取れる塊」） ===== */
   .toriset-band{
-    margin:34px -30px 30px; padding:30px 22px 32px; background:var(--accent);
+    margin:34px calc(-1 * var(--card-pad-x)) 30px; padding:30px 22px 32px; background:var(--accent);
     color:#fff; text-align:center;
   }
   .toriset-band .ts-label{font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
   .toriset-band .ts-title{font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
-  .toriset-band .ts-lead{font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8}
+  .toriset-band .ts-lead{font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8; max-width:19em; margin-inline:auto; text-wrap:balance}
   .ts-card{background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left}
   .ts-card .ts-l{
     display:block; font-size:15px; font-weight:700; color:var(--accent-ink);
@@ -172,7 +171,6 @@
   .ts-card .ts-t{display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px}
   .toriset-band .ts-share{margin-top:8px; background:#fff; color:var(--accent-ink)}
   .toriset-band .ts-note{color:#fff; opacity:.85}
-  @media (max-width:420px){ .toriset-band{margin-left:-26px; margin-right:-26px} }
   .qback:hover{color:var(--muted)}
   .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
 
@@ -192,7 +190,7 @@
   }
   .tname{font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
   .tcatch{font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
-  .card-body{padding:28px 30px 32px}
+  .card-body{padding:28px var(--card-pad-x) 32px}
   .sectlabel{
     font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em;
     margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5;
@@ -432,7 +430,7 @@
         <div class="toriset-band">
           <div class="ts-label">TORISETSU</div>
           <p class="ts-title">わたしのトリセツ</p>
-          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、<br>あなたとうまくやっていくコツ。</p>
+          <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
           <div id="r-toriset"></div>
           <button class="btn btn-sm ts-share" id="torisetCopy">トリセツをコピーして送る</button>
           <p class="ts-note" id="torisetNote"></p>
