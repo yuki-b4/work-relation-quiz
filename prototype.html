@@ -38,20 +38,20 @@
   @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none} *{transition:none!important}}
 
   /* INTRO */
-  .eyebrow{font-size:13px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
+  .eyebrow{font-size:12.5px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
   /* 日本語の折り返し。text-wrap:pretty は iOS Safari で行を過剰に短くし、
      本文の右側に大きな余白ができてしまうため使わない。
      balance は中央揃えの短い設問だけに限定して使う（行長を均等化する効果が確実に出る範囲）。 */
   .qtext,.qhint{text-wrap:balance}
   .hero{
     font-family:var(--display); font-weight:900; line-height:1.4;
-    font-size:clamp(25px,5.6vw,34px); letter-spacing:.01em; margin-bottom:16px;
+    font-size:clamp(22px,5vw,30px); letter-spacing:.01em; margin-bottom:16px;
   }
-  .lead{font-size:17px; color:var(--muted); margin-bottom:14px; max-width:34em}
-  .meta{text-align:center; font-size:14px; color:var(--faint); margin-bottom:34px}
+  .lead{font-size:15px; color:var(--muted); margin-bottom:14px; max-width:34em}
+  .meta{text-align:center; font-size:13px; color:var(--faint); margin-bottom:34px}
   .meta b{color:var(--ink); font-weight:500}
   .btn{
-    font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
+    font-family:var(--body); font-size:15px; font-weight:700; cursor:pointer;
     color:#fff; background:var(--chrome); border:none; border-radius:99px;
     padding:15px 34px; transition:background .2s, transform .1s; letter-spacing:.04em;
   }
@@ -72,17 +72,17 @@
 
   /* QUIZ */
   .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
-  .qcount{font-family:var(--display); font-weight:500; font-size:13.5px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
-  .qpct{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; min-width:36px}
+  .qcount{font-family:var(--display); font-weight:500; font-size:12.5px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
+  .qpct{font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted); white-space:nowrap; min-width:36px}
   .bar{flex:1; height:8px; background:var(--line); border-radius:99px; overflow:hidden}
   .bar > i{display:block; height:100%; width:0; background:var(--chrome); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
   .qtext{
-    font-family:var(--display); font-weight:700; font-size:clamp(19px,4.4vw,24px);
+    font-family:var(--display); font-weight:700; font-size:clamp(17px,4vw,21px);
     line-height:1.6; letter-spacing:.01em; margin-bottom:30px; text-align:center;
   }
   .choices{display:flex; flex-direction:column; gap:14px}
   .choice{
-    text-align:left; font-family:var(--body); font-size:17px; color:var(--ink); cursor:pointer;
+    text-align:left; font-family:var(--body); font-size:15px; color:var(--ink); cursor:pointer;
     background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius);
     padding:20px 22px; line-height:1.75; transition:border-color .15s, background .15s, transform .1s;
     display:flex; gap:14px; align-items:flex-start;
@@ -92,10 +92,10 @@
   .choice:focus-visible{outline:3px solid #B9C2CC; outline-offset:2px}
   .choice .mk{
     flex:none; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line);
-    font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted);
+    font-family:var(--display); font-weight:700; font-size:12.5px; color:var(--muted);
     display:flex; align-items:center; justify-content:center; margin-top:1px;
   }
-  .qback{margin-top:34px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:14px; padding:6px 0}
+  .qback{margin-top:34px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:13px; padding:6px 0}
 
   /* ===== トップ：3ステップ（何ができるかの明示） ===== */
   .steps{list-style:none; margin:30px 0 34px; padding:0; display:grid; gap:20px; text-align:left}
@@ -103,17 +103,17 @@
   .step-no{
     flex:none; width:30px; height:30px; border-radius:50%;
     background:var(--coral-soft); color:var(--coral-ink);
-    font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
   }
-  .step-t{margin:2px 0 4px; font-weight:700; font-size:18px; color:var(--ink); line-height:1.5}
-  .step-d{margin:0; font-size:16px; color:var(--muted); line-height:1.95}
+  .step-t{margin:2px 0 4px; font-weight:700; font-size:16px; color:var(--ink); line-height:1.5}
+  .step-d{margin:0; font-size:14px; color:var(--muted); line-height:1.95}
 
   /* ===== 回答：円形スケール ===== */
   .scale{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:10px}
   .scale-dots{display:flex; align-items:center; justify-content:center; gap:clamp(12px,4.5vw,22px)}
   .scale-legend{
     display:flex; justify-content:space-between; width:100%; max-width:330px;
-    font-size:14px; color:var(--faint);
+    font-size:13px; color:var(--faint);
   }
   .dot{
     border-radius:50%; cursor:pointer; padding:0; background:var(--surface);
@@ -146,7 +146,7 @@
      ラベルは短い軸名（最大4文字）だけを使い、位置は固定で決め打ちする。 */
   .emblem-wrap{position:relative; width:100%; max-width:330px; height:150px; margin:0 auto 6px}
   .emblem-wrap .emblem{position:absolute; left:50%; top:23px; transform:translateX(-50%); margin:0}
-  .ray{position:absolute; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--accent-ink); white-space:nowrap}
+  .ray{position:absolute; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--accent-ink); white-space:nowrap}
   .ray i{display:block; height:1px; background:var(--accent); opacity:.45; width:26px}
   .ray b{display:block; width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.65; flex:none}
   .ray-l{left:0; top:52px; flex-direction:row}
@@ -159,18 +159,18 @@
     margin:34px calc(-1 * var(--card-pad-x)) 30px; padding:30px 22px 32px; background:var(--accent);
     color:#fff; text-align:center;
   }
-  .toriset-band .ts-label{font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
-  .toriset-band .ts-title{font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
-  .toriset-band .ts-lead{font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8; max-width:19em; margin-inline:auto; text-wrap:balance}
+  .toriset-band .ts-label{font-size:12.5px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
+  .toriset-band .ts-title{font-size:22px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
+  .toriset-band .ts-lead{font-size:13px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.85; text-wrap:balance}
   .ts-card{background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left}
   .ts-card .ts-l{
-    display:block; font-size:15px; font-weight:700; color:var(--accent-ink);
+    display:block; font-size:13.5px; font-weight:700; color:var(--accent-ink);
     padding:11px 16px; border-bottom:1px solid var(--line); margin:0;
   }
   .ts-card .ts-l .num{font-weight:900; margin-right:6px}
-  .ts-card .ts-t{display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px}
+  .ts-card .ts-t{display:block; font-size:14px; line-height:1.95; color:var(--ink); padding:14px 16px}
   .qback:hover{color:var(--muted)}
-  .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
+  .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
 
   /* RESULT */
   .result-accent{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
@@ -183,50 +183,50 @@
     background:linear-gradient(180deg, var(--accent-soft) 0%, #fff 100%);
   }
   .chip{
-    display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
+    display:inline-block; font-family:var(--display); font-weight:700; font-size:14px; letter-spacing:.26em;
     color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px;
   }
-  .tname{font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
-  .tcatch{font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
+  .tname{font-family:var(--display); font-weight:900; font-size:clamp(25px,5.8vw,32px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
+  .tcatch{font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
   .card-body{padding:28px var(--card-pad-x) 32px}
   .sectlabel{
-    font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
     margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5;
   }
   .formula{display:flex; flex-direction:column; align-items:center; gap:7px;
     margin:18px 0 4px; padding:18px 14px; background:var(--bg); border-radius:14px}
   /* 3チップ＋演算子が1行に収まらない端末があるため、折り返さず縮めて1行に保つ */
   .f-row{display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:6px}
-  @media (max-width:400px){ .f-chip{font-size:12.5px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
+  @media (max-width:400px){ .f-chip{font-size:12px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
   @media (max-width:340px){ .f-row{flex-direction:column; gap:3px} }
-  .f-chip{font-size:14px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
+  .f-chip{font-size:13px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
     border-radius:99px; padding:6px 13px; white-space:nowrap; flex:none}
-  .f-op{color:var(--faint); font-size:14px; font-weight:700}
-  .f-arrow{color:var(--accent); font-size:16px; line-height:1}
-  .f-type{font-size:19px; font-weight:900; color:var(--accent-ink)}
+  .f-op{color:var(--faint); font-size:13px; font-weight:700}
+  .f-arrow{color:var(--accent); font-size:14px; line-height:1}
+  .f-type{font-size:17px; font-weight:900; color:var(--accent-ink)}
   .f-type small{font-size:12px; font-weight:700; color:var(--muted); margin-left:7px; letter-spacing:.1em}
-  .sect-sub{font-size:14px; color:var(--muted); margin:-8px 0 16px}
+  .sect-sub{font-size:13px; color:var(--muted); margin:-8px 0 16px}
   .link-note{
-    font-size:15px; line-height:1.9; color:var(--muted);
+    font-size:13.5px; line-height:1.9; color:var(--muted);
     background:var(--bg); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
     padding:12px 14px; margin:14px 0 4px;
   }
   .link-note b{color:var(--accent-ink)}
-  .sectlabel::before{content:""; width:4px; height:21px; border-radius:2px; background:var(--accent); flex:none}
+  .sectlabel::before{content:""; width:4px; height:19px; border-radius:2px; background:var(--accent); flex:none}
   .card-body > .sectlabel:first-child, .row-block > .sectlabel{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
   .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
-  .axis-name{font-size:14px; color:var(--muted); font-weight:500}
+  .axis-name{font-size:13px; color:var(--muted); font-weight:500}
   .axis-track-wrap{position:relative}
-  .axis-ends{display:flex; justify-content:space-between; font-size:13px; color:var(--faint); margin-bottom:5px}
+  .axis-ends{display:flex; justify-content:space-between; font-size:12.5px; color:var(--faint); margin-bottom:5px}
   .axis-ends .on{color:var(--ink); font-weight:700}
   .axis-track{position:relative; height:5px; background:var(--line); border-radius:99px}
   .axis-dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1)}
   ul.aru{list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px}
-  ul.aru li{margin-bottom:10px; position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink)}
+  ul.aru li{margin-bottom:10px; position:relative; padding-left:22px; font-size:14px; line-height:1.9; color:var(--ink)}
   ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .row-block{margin-bottom:26px}
-  .row-block p{font-size:16px; line-height:1.9; color:var(--ink)}
+  .row-block p{font-size:14px; line-height:1.9; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
   .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
@@ -240,29 +240,29 @@
     display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
     padding:13px 18px; background:var(--accent); color:#fff;
   }
-  .pv-kicker{font-size:13px; font-weight:700; letter-spacing:.1em; opacity:.85}
-  .pv-head b{font-size:17px; font-weight:900; letter-spacing:.02em}
+  .pv-kicker{font-size:12.5px; font-weight:700; letter-spacing:.1em; opacity:.85}
+  .pv-head b{font-size:15px; font-weight:900; letter-spacing:.02em}
   .pv-body{padding:16px 18px 18px}
-  .pv-pole{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:4px; color:var(--accent-ink)}
+  .pv-pole{font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--accent-ink)}
   .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
   .focus-tag{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap}
   .focus-tag-gift{background:var(--accent)}
   .focus-tag-side{background:#565A60}
-  .focus-item p{font-size:16px; line-height:1.9; color:var(--ink)}
-  .focus-grow{font-size:16px; line-height:1.9; color:var(--ink); margin-top:15px}
+  .focus-item p{font-size:14px; line-height:1.9; color:var(--ink)}
+  .focus-grow{font-size:14px; line-height:1.9; color:var(--ink); margin-top:15px}
 
   /* BRIDGE */
   .bridge{margin-top:30px; padding-top:30px; border-top:1px dashed var(--line)}
   /* 検証アンケートを出さないときは、上の装飾と余白ごと畳む（全8タイプとの間が空きすぎるため） */
   .bridge.is-bare{margin-top:0; padding-top:0; border-top:none}
-  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
-  .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
+  .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(14px,3.2vw,17px); line-height:1.5; color:var(--ink); margin-bottom:22px}
+  .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(16px,3.8vw,19px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
   .vq{margin-bottom:20px}
-  .vq-q{font-size:16px; font-weight:700; color:var(--ink); line-height:1.7; margin-bottom:10px}
+  .vq-q{font-size:14px; font-weight:700; color:var(--ink); line-height:1.7; margin-bottom:10px}
   .vq-opts{display:flex; flex-direction:column; gap:8px}
   .vq-opt{
     display:flex; align-items:center; gap:11px; cursor:pointer;
-    font-size:16px; color:var(--ink); background:var(--surface);
+    font-size:14px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
     transition:border-color .15s, background .15s;
   }
@@ -270,24 +270,24 @@
   .vq-opt input{accent-color:var(--accent); width:16px; height:16px; flex:none; margin:0}
   .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .field{margin-bottom:14px}
-  .field label{display:block; font-size:14.5px; color:var(--muted); margin-bottom:7px; font-weight:500}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
   .field textarea, .field input, .field select{
-    width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
+    width:100%; font-family:var(--body); font-size:13.5px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
-  .hear-help{margin:6px 0 0; font-size:14.5px}
+  .hear-help{margin:6px 0 0; font-size:13px}
   .hear-help a{color:var(--accent)}
-  .consent{display:flex; gap:9px; align-items:flex-start; font-size:14.5px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
+  .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
   .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
-  .proto-note{font-size:14px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
+  .proto-note{font-size:13px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
   .afterbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:30px}
   .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
   .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
-  .btn-sm{font-size:15px; padding:12px 22px}
+  .btn-sm{font-size:13.5px; padding:12px 22px}
 
   /* 相性一覧（自分×全8タイプ） */
   /* 深層：ページで唯一の暗い面にして「奥に沈む」感じを出す。
@@ -306,21 +306,21 @@
     pointer-events:none;
   }
   .honshitsu > *{position:relative}
-  .hs-sub{font-size:14.5px; color:rgba(255,255,255,.62); margin-bottom:16px}
-  .hs-core{font-size:17px; line-height:1.95; color:#fff; margin-bottom:16px}
-  .hs-cost{font-size:16px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
+  .hs-sub{font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px}
+  .hs-core{font-size:15px; line-height:1.95; color:#fff; margin-bottom:16px}
+  .hs-cost{font-size:14px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
   .hs-loop{
-    font-size:16px; line-height:1.9; color:#fff;
+    font-size:14px; line-height:1.9; color:#fff;
     background:rgba(255,255,255,.09); border-left:3px solid rgba(255,255,255,.34);
     border-radius:0 12px 12px 0; padding:15px 16px;
   }
   .compat{margin-bottom:26px}
-  .compat-hint{font-size:14.5px; color:var(--muted); margin:-2px 0 14px}
+  .compat-hint{font-size:13px; color:var(--muted); margin:-2px 0 14px}
   .compat-list{display:flex; flex-direction:column}
   .compat-row{padding:13px 0; border-top:1px solid var(--line)}
   .compat-row:first-child{border-top:none}
   .ct-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
-  .ct-name{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
+  .ct-name{font-family:var(--display); font-weight:700; font-size:14px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
   .compat-row.pole-open .ct-name{background:var(--coral-soft); color:var(--coral-ink)}
   .compat-row.pole-guard .ct-name{background:var(--teal-soft); color:var(--teal-ink)}
   .ct-code{font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700}
@@ -332,15 +332,15 @@
   .compat-row.is-best.pole-open{box-shadow:inset 3px 0 0 var(--coral); padding-left:12px}
   .compat-row.is-best.pole-guard{box-shadow:inset 3px 0 0 var(--teal); padding-left:12px}
   .ct-self{margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700}
-  .ct-text{font-size:16px; line-height:1.9; color:var(--ink)}
+  .ct-text{font-size:14px; line-height:1.9; color:var(--ink)}
   .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
-  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:18px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
-  .compat-cta .cc-text{font-size:16px; line-height:1.9; color:var(--ink); margin-bottom:14px}
-  .cc-preview{font-size:14px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
+  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
+  .compat-cta .cc-text{font-size:14px; line-height:1.9; color:var(--ink); margin-bottom:14px}
+  .cc-preview{font-size:13px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
-  .frame-why{font-size:16px; line-height:1.95; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
-  .frame-note{font-size:14px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
-  .qframe{font-size:13.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
+  .frame-why{font-size:14px; line-height:1.95; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
+  .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
+  .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
 </style>
 </head>
 <body>

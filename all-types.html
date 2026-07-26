@@ -23,16 +23,16 @@
 
   .toolbar{position:sticky; top:0; z-index:9; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     background:var(--bg); padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:18px}
-  .toolbar button{font-family:var(--body); font-size:14px; font-weight:700; cursor:pointer; color:#fff;
+  .toolbar button{font-family:var(--body); font-size:13px; font-weight:700; cursor:pointer; color:#fff;
     background:var(--chrome); border:none; border-radius:99px; padding:10px 20px}
-  .toolbar .note{font-size:12.5px; color:var(--muted)}
+  .toolbar .note{font-size:12px; color:var(--muted)}
 
   h1{font-family:var(--display); font-weight:700; font-size:clamp(22px,4.6vw,30px); letter-spacing:.02em; margin-bottom:8px}
-  .sub{font-size:13.5px; color:var(--muted); margin-bottom:16px; max-width:60em}
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px; max-width:60em}
 
   .index{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-bottom:26px}
   .ix{display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink);
-    border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface); font-size:13.5px}
+    border:1px solid var(--line); border-radius:10px; padding:8px 10px; background:var(--surface); font-size:12.5px}
   .ix .c{font-family:var(--display); font-weight:700; font-size:10.5px; letter-spacing:.14em; color:#fff; border-radius:6px; padding:2px 7px}
   .ix.open .c{background:var(--coral)} .ix.guard .c{background:var(--teal)}
 
@@ -44,41 +44,41 @@
   .card.pole-guard{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
   .card-head{ padding:36px 26px 30px; text-align:center; border-bottom:1px solid var(--line);
     background:linear-gradient(180deg, var(--accent-soft) 0%, #fff 100%) }
-  .chip{ display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
+  .chip{ display:inline-block; font-family:var(--display); font-weight:700; font-size:14px; letter-spacing:.26em;
     color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px }
-  .tname{ font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px }
-  .tcatch{ font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px }
+  .tname{ font-family:var(--display); font-weight:900; font-size:clamp(25px,5.8vw,32px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px }
+  .tcatch{ font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px }
   .card-body{ padding:28px var(--card-pad-x) 32px }
-  .sectlabel{ font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+  .sectlabel{ font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
     margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5 }
-  .sectlabel::before{ content:""; width:4px; height:21px; border-radius:2px; background:var(--accent); flex:none }
+  .sectlabel::before{ content:""; width:4px; height:19px; border-radius:2px; background:var(--accent); flex:none }
   .card-body > .sectlabel:first-child, .row-block > .sectlabel{ margin-top:0 }
   .axis-track-wrap{ position:relative }
   .axis-ends .on{ color:var(--ink); font-weight:700 }
   ul.aru{ list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px }
-  ul.aru li{ position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink) }
+  ul.aru li{ position:relative; padding-left:22px; font-size:14px; line-height:1.9; color:var(--ink) }
   ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
   .row-block{ margin-bottom:26px }
-  .row-block p{ font-size:16px; line-height:1.9; color:var(--ink) }
+  .row-block p{ font-size:14px; line-height:1.9; color:var(--ink) }
   /* トリセツ（取扱説明書）：このタイプとの付き合い方 */
   .toriset{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px }
-  .toriset .ts-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px }
-  .toriset .ts-lead{ font-size:13px; color:var(--muted); margin-bottom:14px }
+  .toriset .ts-label{ font-family:var(--display); font-weight:700; font-size:14px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px }
+  .toriset .ts-lead{ font-size:12.5px; color:var(--muted); margin-bottom:14px }
   .ts-item{ padding:12px 0; border-top:1px solid rgba(0,0,0,.06) }
   .ts-item:first-child{ border-top:none; padding-top:2px }
-  .ts-item .ts-l{ display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px }
-  .ts-item .ts-t{ font-size:14.5px; line-height:1.7; color:var(--ink) }
+  .ts-item .ts-l{ display:block; font-weight:700; font-size:12.5px; color:var(--accent-ink); margin-bottom:3px }
+  .ts-item .ts-t{ font-size:13px; line-height:1.7; color:var(--ink) }
   /* 深層（本質）：なぜそう振る舞うのか */
   .pv .cap{ font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink) }
-  .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink) }
-  .focus-item p{ font-size:14.5px; line-height:1.7; color:var(--ink) }
+  .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:14px; color:var(--accent-ink) }
+  .focus-item p{ font-size:13px; line-height:1.7; color:var(--ink) }
   .compat{ margin-bottom:26px }
-  .compat-hint{ font-size:13px; color:var(--muted); margin:-2px 0 14px }
+  .compat-hint{ font-size:12.5px; color:var(--muted); margin:-2px 0 14px }
   .compat-list{ display:flex; flex-direction:column }
   .compat-row{ padding:13px 0; border-top:1px solid var(--line) }
   .compat-row:first-child{ border-top:none }
   .ct-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px }
-  .ct-name{ font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px }
+  .ct-name{ font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px }
   .compat-row.pole-open .ct-name{ background:var(--coral-soft); color:var(--coral-ink) }
   .compat-row.pole-guard .ct-name{ background:var(--teal-soft); color:var(--teal-ink) }
   .ct-code{ font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700 }
@@ -90,30 +90,30 @@
   .compat-row.is-best.pole-open{ box-shadow:inset 3px 0 0 var(--coral); padding-left:12px }
   .compat-row.is-best.pole-guard{ box-shadow:inset 3px 0 0 var(--teal); padding-left:12px }
   .ct-self{ margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700 }
-  .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
+  .ct-text{ font-size:13px; line-height:1.65; color:var(--ink) }
 
 
   .formula{ display:flex; flex-direction:column; align-items:center; gap:7px;
     margin:18px 0 4px; padding:18px 14px; background:var(--bg); border-radius:14px }
   .f-row{ display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:6px }
-  @media (max-width:400px){ .f-chip{font-size:12.5px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
+  @media (max-width:400px){ .f-chip{font-size:12px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
   @media (max-width:340px){ .f-row{flex-direction:column; gap:3px} }
-  .f-chip{ font-size:14px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
+  .f-chip{ font-size:13px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
     border-radius:99px; padding:6px 13px; white-space:nowrap; flex:none }
-  .f-op{ color:var(--faint); font-size:14px; font-weight:700 }
-  .f-arrow{ color:var(--accent); font-size:16px; line-height:1 }
-  .f-type{ font-size:19px; font-weight:900; color:var(--accent-ink) }
+  .f-op{ color:var(--faint); font-size:13px; font-weight:700 }
+  .f-arrow{ color:var(--accent); font-size:14px; line-height:1 }
+  .f-type{ font-size:17px; font-weight:900; color:var(--accent-ink) }
   .f-type small{ font-size:12px; font-weight:700; color:var(--muted); margin-left:7px; letter-spacing:.1em }
-  .link-note{ font-size:15px; line-height:1.9; color:var(--muted); background:var(--bg);
+  .link-note{ font-size:13.5px; line-height:1.9; color:var(--muted); background:var(--bg);
     border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:12px 14px; margin:14px 0 4px }
   .link-note b{ color:var(--accent-ink) }
   /* 3つの軸：回答に依存しないので、目盛りでなく「どちら側か」だけを示す */
   .poles{ display:grid; gap:10px; margin-bottom:4px }
   .pole-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-  .pole-name{ flex:none; width:44px; font-size:14px; color:var(--muted) }
-  .pole-pick{ font-size:17px; font-weight:900; color:var(--accent-ink); background:var(--accent-soft);
+  .pole-name{ flex:none; width:44px; font-size:13px; color:var(--muted) }
+  .pole-pick{ font-size:15px; font-weight:900; color:var(--accent-ink); background:var(--accent-soft);
     border-radius:99px; padding:5px 14px }
-  .pole-alt{ font-size:16px; color:var(--faint) }
+  .pole-alt{ font-size:14px; color:var(--faint) }
   .pole-alt::before{ content:"／ "; color:var(--line) }
   /* ===== 診断（prototype.html）と揃えた表現：エンブレム・放射・トリセツのバンド ===== */
   .emblem{ width:104px; height:104px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -121,20 +121,20 @@
   .emblem svg{ width:44px; height:44px }
   .emblem-wrap{ position:relative; width:100%; max-width:330px; height:150px; margin:0 auto 6px }
   .emblem-wrap .emblem{ position:absolute; left:50%; top:23px; transform:translateX(-50%); margin:0 }
-  .ray{ position:absolute; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--accent-ink); white-space:nowrap }
+  .ray{ position:absolute; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--accent-ink); white-space:nowrap }
   .ray i{ display:block; height:1px; background:var(--accent); opacity:.45; width:26px }
   .ray b{ display:block; width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.65; flex:none }
   .ray-l{ left:0; top:52px; flex-direction:row }
   .ray-r1{ right:0; top:26px; flex-direction:row-reverse }
   .ray-r2{ right:0; top:86px; flex-direction:row-reverse }
   .toriset-band{ margin:34px calc(-1 * var(--card-pad-x)) 30px; padding:30px 22px 32px; background:var(--accent); color:#fff; text-align:center }
-  .toriset-band .ts-label{ font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px }
-  .toriset-band .ts-title{ font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px }
-  .toriset-band .ts-lead{ font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8; max-width:19em; margin-inline:auto; text-wrap:balance }
+  .toriset-band .ts-label{ font-size:12.5px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px }
+  .toriset-band .ts-title{ font-size:22px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px }
+  .toriset-band .ts-lead{ font-size:13px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.85; text-wrap:balance }
   .ts-card{ background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left }
-  .ts-card .ts-l{ display:block; font-size:15px; font-weight:700; color:var(--accent-ink); padding:11px 16px; border-bottom:1px solid var(--line); margin:0 }
+  .ts-card .ts-l{ display:block; font-size:13.5px; font-weight:700; color:var(--accent-ink); padding:11px 16px; border-bottom:1px solid var(--line); margin:0 }
   .ts-card .ts-l .num{ font-weight:900; margin-right:6px }
-  .ts-card .ts-t{ display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px }
+  .ts-card .ts-t{ display:block; font-size:14px; line-height:1.95; color:var(--ink); padding:14px 16px }
   @media (max-width:360px){ .ray{ font-size:11.5px } .ray i{ width:16px } }
   /* 深層：ページで唯一の暗い面にして「奥に沈む」感じを出す。
      トリセツ（アクセントの色面）とは別の軸で強調するので、見せ場は競合しない。
@@ -152,11 +152,11 @@
     pointer-events:none;
   }
   .honshitsu > *{position:relative}
-  .honshitsu .hs-sub{font-size:14.5px; color:rgba(255,255,255,.62); margin-bottom:16px}
-  .honshitsu .hs-core{font-size:17px; line-height:1.95; color:#fff; margin-bottom:16px}
-  .honshitsu .hs-cost{font-size:16px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
+  .honshitsu .hs-sub{font-size:13px; color:rgba(255,255,255,.62); margin-bottom:16px}
+  .honshitsu .hs-core{font-size:15px; line-height:1.95; color:#fff; margin-bottom:16px}
+  .honshitsu .hs-cost{font-size:14px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
   .honshitsu .hs-loop{
-    font-size:16px; line-height:1.9; color:#fff;
+    font-size:14px; line-height:1.9; color:#fff;
     background:rgba(255,255,255,.09); border-left:3px solid rgba(255,255,255,.34);
     border-radius:0 12px 12px 0; padding:15px 16px;
   }
