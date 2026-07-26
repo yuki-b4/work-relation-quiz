@@ -423,11 +423,32 @@
 //   空のままだと送信せず、回答は記録されません（体験のみ）。apps-script/README.md 参照。
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
 
-// ▼ モード判定：?ref=<紹介者> 付き（または ?mode=lead）で紹介者向け（深掘り申込）、
-//   それ以外は8名（過去客）向けの検証アンケート。ref は紹介元としてログに残す。
+// ▼ セグメント判定：?ref= の値から「受け手の立場」を決める。セグメントごとに必要な情報とCTAだけを
+//   出し、ファネルの通過率を上げるのが狙い。判定は4つ。
+//     general   … 一般（refなし。認知・拡散）
+//     referral  … 紹介・知人（紹介者コードのref。マネジメント・リーダー・店長）
+//     leader-lp … 店長・リーダー（法人LPの体験版から。corp-lp / wedding-lp / coffee-lp）
+//     member    … メンバー（法人LP経由でチームに配られるリンク。team_ で始まるref）
+//   ?seg= を付けると判定を上書きできる（プレビュー・検証用）。
 const _params = new URLSearchParams(location.search);
 const REF = _params.get('ref') || '';
-const MODE = _params.get('mode') || (REF ? 'lead' : 'feedback');
+const LP_REFS = ['corp-lp', 'wedding-lp', 'coffee-lp'];
+const SEGMENTS = ['general', 'referral', 'leader-lp', 'member'];
+function resolveSeg(){
+  const q = _params.get('seg');
+  if(q && SEGMENTS.includes(q)) return q;
+  if(!REF) return 'general';
+  if(REF.startsWith('team_')) return 'member';
+  if(LP_REFS.includes(REF)) return 'leader-lp';
+  return 'referral';
+}
+const SEG = resolveSeg();
+// ▼ モードはログの継続性のために残す。従来「refなし＝feedback」だったが、一般公開の受診が
+//   検証コホート（8名）に混ざらないよう general を新設して分離した。
+const MODE = _params.get('mode') || (REF ? 'lead' : 'general');
+// ▼ 検証アンケート（5問）は ?mode=feedback を明示したときだけ出す。セグメント判定とは独立。
+const FEEDBACK = MODE === 'feedback';
+document.body.dataset.seg = SEG;
 
 const QUESTIONS = [
   {axis:'h', text:'誰かと話していて違和感を覚えたとき、あなたは？', a:{t:'その場で「ちょっといい？」と口に出す',p:'O'}, b:{t:'ひとまず飲み込んで、あとで個別に言うか考える',p:'G'}},
@@ -800,7 +821,7 @@ function post(payload){
 function recordDiagnosis(r){
   if(!SHEET_ENDPOINT) return;
   post({
-    action:'create', id:r.id, mode:MODE, ref:REF,
+    action:'create', id:r.id, mode:MODE, ref:REF, seg:SEG,
     answers:answers.slice(0, QUESTIONS.length),
     axes:{h:r.code[0], c:r.code[1], w:r.code[2]},
     code:r.code, name:r.name,
@@ -918,9 +939,10 @@ $('shareBtn').onclick=async ()=>{
   }
 };
 
-// モード切替：lead は検証アンケートを隠す／feedback（8名）は深掘りフォームを「紹介先プレビュー」と明示
-if(MODE==='lead'){ $('feedbackBlock').hidden=true; }
-else { $('deepPreviewNote').hidden=false; }
+// 検証アンケート（5問）は ?mode=feedback のときだけ表示。深掘りフォームを「紹介先プレビュー」と
+// 明示する注記も同じ条件で出す。セグメントごとの出し分けは今後ここに足していく。
+$('feedbackBlock').hidden = !FEEDBACK;
+$('deepPreviewNote').hidden = !FEEDBACK;
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
   workplaceFrame='自然体';

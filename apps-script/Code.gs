@@ -39,7 +39,10 @@ var HEADERS = [
   // 「立場」は24問回答後に取得する任意項目（アドバイス精度向上のための情報）。末尾に追加。
   '紹介者名', '備考', '立場',
   // 3日間読み解きガイドの配信記録（Guide.gs が使用。guide-3day-spec.md §9）
-  'guide_day1_at', 'guide_day2_at', 'guide_day3_at', 'optout_at', 'ガイドトークン'
+  'guide_day1_at', 'guide_day2_at', 'guide_day3_at', 'optout_at', 'ガイドトークン',
+  // 受け手の立場を表すセグメント（general／referral／leader-lp／member）。?ref= から判定してフロントが送る。
+  // 既存列の位置を動かさないため末尾に追加する。
+  'セグメント'
 ];
 
 function doPost(e) {
@@ -92,7 +95,8 @@ function handleCreate(sheet, data) {
     'メールアドレス': data.email || '', '自由記述': data.relationship || '',
     '回答ID': data.id || '',
     // 紹介者名・備考は手入力列のため新規行では空のまま。立場はフロントから受け取って記録。
-    '立場': data.position || ''
+    '立場': data.position || '',
+    'セグメント': data.seg || ''
   };
   sheet.appendRow(HEADERS.map(function (h) { return values.hasOwnProperty(h) ? values[h] : ''; }));
 
