@@ -169,8 +169,6 @@
   }
   .ts-card .ts-l .num{font-weight:900; margin-right:6px}
   .ts-card .ts-t{display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px}
-  .toriset-band .ts-share{margin-top:8px; background:#fff; color:var(--accent-ink)}
-  .toriset-band .ts-note{color:#fff; opacity:.85}
   .qback:hover{color:var(--muted)}
   .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
 
@@ -214,7 +212,6 @@
     padding:12px 14px; margin:14px 0 4px;
   }
   .link-note b{color:var(--accent-ink)}
-  .axis-score{font-size:13px; color:var(--faint); margin-top:5px; text-align:right; letter-spacing:.02em}
   .sectlabel::before{content:""; width:4px; height:21px; border-radius:2px; background:var(--accent); flex:none}
   .card-body > .sectlabel:first-child, .row-block > .sectlabel{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
@@ -234,8 +231,6 @@
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
   .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
   .ts-item:first-child{border-top:none; padding-top:2px}
-  .ts-share{margin-top:16px}
-  .ts-note{font-size:14px; color:var(--muted); margin-top:9px; min-height:1em}
 
   /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
   .honshitsu{
@@ -304,11 +299,6 @@
   .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
   .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
   .btn-sm{font-size:15px; padding:12px 22px}
-  .copied{color:var(--teal); font-weight:700}
-  #copyManual{margin-top:14px}
-  .copy-manual-note{font-size:14px; color:var(--muted); margin-bottom:7px}
-  .copy-manual-box{width:100%; font-family:var(--body); font-size:14px; color:var(--ink); background:var(--surface); border:1.5px solid var(--accent,#0F6E56); border-radius:12px; padding:12px 14px; line-height:1.6; resize:none}
-  .copy-manual-box:focus{outline:none}
 
   /* 相性一覧（自分×全8タイプ） */
   .compat{margin-bottom:26px}
@@ -432,8 +422,6 @@
           <p class="ts-title">わたしのトリセツ</p>
           <p class="ts-lead">大切な人に「私ってこういう人」と渡すための、あなたとうまくやっていくコツ。</p>
           <div id="r-toriset"></div>
-          <button class="btn btn-sm ts-share" id="torisetCopy">トリセツをコピーして送る</button>
-          <p class="ts-note" id="torisetNote"></p>
         </div>
 
         <p class="sectlabel">人間関係における5つの軸</p>
@@ -562,10 +550,6 @@
 
         <div class="afterbar">
           <button class="btn btn-sm btn-ghost" id="restartBtn">もう一度診断する</button>
-        </div>
-        <div id="copyManual" hidden>
-          <p class="copy-manual-note">下のテキストを選択してコピーしてください：</p>
-          <textarea id="copyText" class="copy-manual-box" readonly rows="2"></textarea>
         </div>
       </div>
     </div>
@@ -913,7 +897,6 @@ function renderResult(code,counts,radar){
       '<div class="axis-track-wrap">'+
         '<div class="axis-ends"><span class="'+(leftOn?'on':'')+'">'+meta.left+'</span><span class="'+(rightOn?'on':'')+'">'+meta.right+'</span></div>'+
         '<div class="axis-track"><span class="axis-dot" style="left:0%"></span></div>'+
-        '<div class="axis-score">'+meta.left+' '+ct.L+' ／ '+meta.right+' '+ct.R+'（全'+ct.total+'問）</div>'+
       '</div>';
     axBox.appendChild(row);
     // animate dot after paint
@@ -939,7 +922,6 @@ function renderResult(code,counts,radar){
   renderToriset(code);
   renderHonshitsu(code);
   $('protoNote').textContent='';
-  $('torisetNote').textContent='';
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
@@ -964,15 +946,6 @@ function renderHonshitsu(code){
   $('r-hs-core').textContent=h.core;
   $('r-hs-cost').textContent=h.cost;
   $('r-hs-loop').textContent=HONSHITSU_LOOP;
-}
-// トリセツを送れるテキストに（LINE等に貼って大切な人へ）
-function torisetText(){
-  const r=window._lastResult; if(!r) return '';
-  const items=(TORISET[r.code]||[]).map(it=>'・'+it.l+'：'+it.t).join('\n');
-  // 受け取った人がそのまま診断へ進めるよう、共有テキストに入口のURLを添える。
-  // refは付けない（refを付けると紹介セグメント扱いになるが、共有された相手は温度の低い一般層のため）。
-  const url=location.origin+location.pathname.replace(/[^/]*$/,'');
-  return '【私のトリセツ】\n私は「'+r.name+'」タイプ。\n'+items+'\n\nあなたのタイプも診断できます\n'+url+'\n#人間関係タイプ診断';
 }
 
 // 5つの軸：スペクトル表示＋振れが最大の1軸を「ノビシロ」として両面提示（優劣はつけない）
@@ -1084,7 +1057,6 @@ $('submitLead').onclick=()=>{
 // 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
-  $('copyManual').hidden=true;
   $('submitFeedback').disabled=false; $('submitLead').disabled=false;
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
@@ -1097,46 +1069,6 @@ $('restartBtn').onclick=()=>{
   show('frame');
 };
 
-function legacyCopy(text){
-  try{
-    const ta=document.createElement('textarea');
-    ta.value=text; ta.setAttribute('readonly','');
-    ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.select(); ta.setSelectionRange(0, text.length);
-    const ok=document.execCommand('copy');
-    document.body.removeChild(ta);
-    return ok;
-  }catch(e){ return false; }
-}
-async function copyText(text){
-  if(navigator.clipboard && window.isSecureContext){
-    try{ await navigator.clipboard.writeText(text); return true; }
-    catch(e){ return legacyCopy(text); }
-  }
-  return legacyCopy(text);
-}
-$('torisetCopy').onclick=async ()=>{
-  const text=torisetText(); if(!text) return;
-  const b=$('torisetCopy');
-  // スマホではOSの共有シートを開き、LINE等を直接選べるようにする。
-  // 使えない環境（PCブラウザ等）では従来どおりクリップボードへコピーする。
-  if(navigator.share){
-    try{ await navigator.share({text}); $('torisetNote').textContent='送信ありがとうございます。'; return; }
-    catch(e){ if(e && e.name==='AbortError') return; }
-  }
-  let ok=false;
-  try{ ok=await copyText(text); }catch(e){ ok=false; }
-  if(ok){
-    $('torisetNote').textContent='コピーしました。大切な人に送ってみてください。';
-    b.textContent='コピーしました'; b.classList.add('copied');
-    setTimeout(()=>{ b.textContent='トリセツをコピーして送る'; b.classList.remove('copied'); },2200);
-  } else {
-    const box=$('copyText'); box.value=text;
-    $('copyManual').hidden=false; box.focus(); box.select();
-    $('torisetNote').textContent='下のテキスト欄からコピーして送ってください。';
-  }
-};
 
 // 検証アンケート（5問）は ?mode=feedback のときだけ表示。深掘りフォームを「紹介先プレビュー」と
 // 明示する注記も同じ条件で出す。セグメントごとの出し分けは今後ここに足していく。
