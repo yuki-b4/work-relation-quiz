@@ -6,17 +6,23 @@
 <title>人間関係タイプ診断（プロトタイプ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
     --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
-    --display:"Shippori Mincho",serif; --body:"Noto Sans JP",sans-serif;
-    --shadow:0 1px 2px rgba(20,20,20,.05),0 10px 30px rgba(20,20,20,.06);
-    --radius:16px;
+    --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
+    --shadow:0 1px 2px rgba(20,20,20,.04),0 12px 34px rgba(20,20,20,.07);
+    --radius:20px;
+    /* 回答スケール（4段階）の配色。左＝思わない側は落ち着いたブルーグレー、右＝そう思う側はコーラル。
+       ブランドのcoral/tealはタイプの極（open/guard）を表す色なので、意味が混ざらないよう別系統にする。 */
+    --sc1:#8E9BB0; --sc2:#C3CBD8; --sc3:#F0C3B2; --sc4:#D9755A;
+    /* タイプの極ごとのアクセント。結果画面のエンブレムと見出しに使う。 */
+    --accent:var(--coral); --accent-soft:var(--coral-soft); --accent-ink:var(--coral-ink);
   }
+  .pole-guard{--accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink)}
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{
@@ -32,10 +38,10 @@
   @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none} *{transition:none!important}}
 
   /* INTRO */
-  .eyebrow{font-size:15px; letter-spacing:.14em; font-weight:700; color:var(--teal); text-transform:none; margin-bottom:14px}
+  .eyebrow{font-size:13px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
   .hero{
-    font-family:var(--display); font-weight:700; line-height:1.42;
-    font-size:clamp(25px,5.6vw,36px); letter-spacing:.02em; margin-bottom:18px;
+    font-family:var(--display); font-weight:900; line-height:1.4;
+    font-size:clamp(25px,5.6vw,34px); letter-spacing:.01em; margin-bottom:16px;
   }
   .lead{font-size:16px; color:var(--muted); margin-bottom:14px; max-width:34em}
   .meta{font-size:13px; color:var(--faint); margin-bottom:34px}
@@ -62,12 +68,13 @@
 
   /* QUIZ */
   .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
-  .qcount{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; letter-spacing:.05em}
-  .bar{flex:1; height:4px; background:var(--line); border-radius:99px; overflow:hidden}
+  .qcount{font-family:var(--display); font-weight:500; font-size:13px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
+  .qpct{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; min-width:36px}
+  .bar{flex:1; height:8px; background:var(--line); border-radius:99px; overflow:hidden}
   .bar > i{display:block; height:100%; width:0; background:var(--chrome); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
   .qtext{
-    font-family:var(--display); font-weight:500; font-size:clamp(20px,4.6vw,26px);
-    line-height:1.55; letter-spacing:.02em; margin-bottom:28px;
+    font-family:var(--display); font-weight:700; font-size:clamp(19px,4.4vw,24px);
+    line-height:1.6; letter-spacing:.01em; margin-bottom:30px; text-align:center;
   }
   .choices{display:flex; flex-direction:column; gap:14px}
   .choice{
@@ -84,7 +91,53 @@
     font-family:var(--display); font-weight:700; font-size:13px; color:var(--muted);
     display:flex; align-items:center; justify-content:center; margin-top:1px;
   }
-  .qback{margin-top:26px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:14px; padding:6px 0}
+  .qback{margin-top:34px; background:none; border:none; cursor:pointer; color:var(--faint); font-family:var(--body); font-size:14px; padding:6px 0}
+
+  /* ===== トップ：3ステップ（何ができるかの明示） ===== */
+  .steps{list-style:none; margin:30px 0 34px; padding:0; display:grid; gap:20px; text-align:left}
+  .step{display:flex; gap:14px; align-items:flex-start}
+  .step-no{
+    flex:none; width:30px; height:30px; border-radius:50%;
+    background:var(--coral-soft); color:var(--coral-ink);
+    font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
+  }
+  .step-t{margin:2px 0 4px; font-weight:700; font-size:16px; color:var(--ink); line-height:1.5}
+  .step-d{margin:0; font-size:14.5px; color:var(--muted); line-height:1.85}
+
+  /* ===== 回答：円形スケール ===== */
+  .scale{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:10px}
+  .scale-dots{display:flex; align-items:center; justify-content:center; gap:clamp(12px,4.5vw,22px)}
+  .scale-legend{
+    display:flex; justify-content:space-between; width:100%; max-width:330px;
+    font-size:12.5px; color:var(--faint);
+  }
+  .dot{
+    border-radius:50%; cursor:pointer; padding:0; background:var(--surface);
+    transition:transform .12s, box-shadow .15s, background .15s;
+  }
+  .dot-1{width:52px; height:52px; border:2px solid var(--sc1)}
+  .dot-2{width:40px; height:40px; border:2px solid var(--sc2)}
+  .dot-3{width:40px; height:40px; border:2px solid var(--sc3)}
+  .dot-4{width:52px; height:52px; border:2px solid var(--sc4)}
+  .dot-1:hover{background:var(--sc1)} .dot-2:hover{background:var(--sc2)}
+  .dot-3:hover{background:var(--sc3)} .dot-4:hover{background:var(--sc4)}
+  .dot:hover{transform:scale(1.08)}
+  .dot:active{transform:scale(.96)}
+  .dot:focus-visible{outline:3px solid #B9C2CC; outline-offset:3px}
+  @media (max-width:380px){
+    .dot-1,.dot-4{width:44px; height:44px}
+    .dot-2,.dot-3{width:34px; height:34px}
+    .scale-end{font-size:11px; max-width:48px}
+  }
+
+  /* ===== 結果：タイプのエンブレム ===== */
+  .emblem{
+    width:104px; height:104px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 25%, var(--accent-soft), #fff 78%);
+    border:1px solid var(--line); color:var(--accent);
+  }
+  .emblem svg{width:44px; height:44px}
   .qback:hover{color:var(--muted)}
   .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
 
@@ -94,13 +147,16 @@
     background:var(--surface); border-radius:22px; box-shadow:var(--shadow);
     overflow:hidden; border:1px solid var(--line);
   }
-  .card-head{ padding:34px 30px 28px; background:var(--accent-soft); border-bottom:1px solid var(--line) }
+  .card-head{
+    padding:36px 26px 30px; text-align:center; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, var(--accent-soft) 0%, #fff 100%);
+  }
   .chip{
     display:inline-block; font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.26em;
     color:#fff; background:var(--accent); border:1px solid var(--accent); border-radius:99px; padding:5px 14px 5px 20px; margin-bottom:16px;
   }
-  .tname{font-family:var(--display); font-weight:700; font-size:clamp(28px,6.4vw,38px); color:var(--accent-ink); letter-spacing:.03em; margin-bottom:10px}
-  .tcatch{font-family:var(--display); font-weight:500; font-size:clamp(17px,4vw,21px); color:var(--ink); letter-spacing:.02em}
+  .tname{font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
+  .tcatch{font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
   .card-body{padding:28px 30px 32px}
   .sectlabel{font-size:11px; letter-spacing:.2em; font-weight:700; color:var(--faint); margin:0 0 12px}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
@@ -225,9 +281,34 @@
   <section class="screen active" id="intro">
     <div class="eyebrow">人間関係タイプ診断</div>
     <h1 class="hero">自然体のあなたを知ることが、居心地のいい関係づくりの第一歩。</h1>
-    <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。自分を知り、身近なあの人を知るほど、関わりはラクになっていきます。</p>
-    <p class="meta"><b>24問</b> ・ 約4分 ・ 登録不要</p>
-    <button class="btn" id="startBtn">診断を始める</button>
+    <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。</p>
+
+    <ol class="steps">
+      <li class="step">
+        <span class="step-no">1</span>
+        <div class="step-body">
+          <p class="step-t">24問に答える（無料）</p>
+          <p class="step-d">約4分、登録もいりません。特定の場面ではなく、力を抜いた「普段のあなた」で答えていきます。</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-no">2</span>
+        <div class="step-body">
+          <p class="step-t">自分のタイプを知る</p>
+          <p class="step-d">本音の出し方、衝突への向き合い方、チームでの重心。3つの軸の組み合わせが、あなたを8つのタイプのどれかに映し出します。</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-no">3</span>
+        <div class="step-body">
+          <p class="step-t">関わり方のヒントを受け取る</p>
+          <p class="step-d">強みと、つい出てしまうクセ。身近なあの人との距離の取り方まで、そのまま使える言葉でお渡しします。</p>
+        </div>
+      </li>
+    </ol>
+
+    <button class="btn btn-wide" id="startBtn">診断を始める</button>
+    <p class="meta">24問 ・ 約4分 ・ 登録不要</p>
   </section>
 
   <!-- FRAME（診断冒頭：特定の場面ではなく "自然体の自分" で答えるよう促し、回答のブレを防ぐ） -->
@@ -242,8 +323,9 @@
   <!-- QUIZ -->
   <section class="screen" id="quiz">
     <div class="qtop">
-      <span class="qcount" id="qcount">1 / 24</span>
+      <span class="qpct" id="qpct">0%</span>
       <div class="bar"><i id="barfill"></i></div>
+      <span class="qcount" id="qcount">1 / 24</span>
     </div>
     <p class="qframe" id="qframe"></p>
     <p class="qtext" id="qtext"></p>
@@ -280,9 +362,10 @@
   <section class="screen" id="result">
     <div class="card result-accent" id="card">
       <div class="card-head">
-        <span class="chip" id="r-code"></span>
-        <h2 class="tname" id="r-name"></h2>
+        <div class="emblem" id="r-emblem" aria-hidden="true"></div>
         <p class="tcatch" id="r-catch"></p>
+        <h2 class="tname" id="r-name"></h2>
+        <span class="chip" id="r-code"></span>
       </div>
       <div class="card-body">
         <p class="sectlabel">あなたの人間関係タイプ</p>
@@ -644,6 +727,17 @@ const RADAR_Q = [
   {axis:'conflict',text:'揉めたあとも、自分から関係を立て直すほうだ'},
   {axis:'connect', text:'立場を超えて、自分からつながりを築きにいくほうだ'},
 ];
+// 8タイプのエンブレム用アイコン（lp-corporate.html の自作インラインSVGを流用。外部素材は使わない）
+const TYPE_ICON = {
+  OBL: '<path d="M7 21V4h10l-3 3.5 3 3.5H7"/>',
+  OBS: '<path d="M4 20l7-7"/><path d="M9 8l3-3 7 7-3 3z"/>',
+  OKL: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  OKS: '<rect x="3.5" y="5" width="17" height="11" rx="3"/><path d="M8.5 16v3.5L13 16"/><path d="M8 10.5h8"/>',
+  GBL: '<path d="M4 21h16"/><path d="M12 21V10"/><path d="M4 10l8-6 8 6"/>',
+  GBS: '<circle cx="12" cy="12" r="3.2"/><path d="M12 4.5v2.3M12 17.2v2.3M4.5 12h2.3M17.2 12h2.3M6.7 6.7l1.7 1.7M15.6 15.6l1.7 1.7M17.3 6.7l-1.7 1.7M8.4 15.6l-1.7 1.7"/>',
+  GKL: '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="8" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M8.2 6.4l7.6 1.2"/><path d="M7 8l4 8"/><path d="M16.9 9.9l-3.8 6.2"/>',
+  GKS: '<path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/>',
+};
 const LIKERT = [
   {t:'とてもそう思う',  v:4},
   {t:'ややそう思う',    v:3},
@@ -667,8 +761,10 @@ function show(screen){
 }
 function renderQ(){
   const q=ITEMS[idx];
+  const pct=Math.round(idx/ITEMS.length*100);
   $('qcount').textContent=(idx+1)+' / '+ITEMS.length;
-  $('barfill').style.width=((idx)/ITEMS.length*100)+'%';
+  $('qpct').textContent=pct+'%';
+  $('barfill').style.width=pct+'%';
   $('qtext').textContent=q.text;
   const c=$('choices'); c.innerHTML='';
   if(q.kind==='bin'){
@@ -681,13 +777,23 @@ function renderQ(){
     });
     $('qhint').textContent='どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。';
   }else{
-    LIKERT.forEach(opt=>{
+    // 円形スケール：左（当てはまらない）から右（当てはまる）へ。値は従来どおり1〜4で採点は不変。
+    const scale=document.createElement('div');
+    scale.className='scale';
+    const dots=document.createElement('div');
+    dots.className='scale-dots'; dots.setAttribute('role','radiogroup');
+    [...LIKERT].reverse().forEach(opt=>{
       const b=document.createElement('button');
-      b.className='choice choice-lik'; b.type='button';
-      b.innerHTML='<span>'+opt.t+'</span>';
+      b.className='dot dot-'+opt.v; b.type='button';
+      b.setAttribute('aria-label',opt.t); b.title=opt.t;
       b.onclick=()=>pick(opt.v);
-      c.appendChild(b);
+      dots.appendChild(b);
     });
+    scale.appendChild(dots);
+    // 端のラベルはスケールの下に置く（横に置くと狭い画面で折り返して読みにくくなるため）
+    scale.insertAdjacentHTML('beforeend',
+      '<div class="scale-legend"><span>当てはまらない</span><span>当てはまる</span></div>');
+    c.appendChild(scale);
     $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
@@ -743,6 +849,7 @@ function renderResult(code,counts,radar){
   $('r-code').textContent=code;
   $('r-name').textContent=t.name;
   $('r-catch').textContent=t.catch;
+  $('r-emblem').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(TYPE_ICON[code]||'')+'</svg>';
   // axes
   const axBox=$('r-axes'); axBox.innerHTML='';
   [['h',counts.h],['c',counts.c],['w',counts.w]].forEach(([axis,ct])=>{
