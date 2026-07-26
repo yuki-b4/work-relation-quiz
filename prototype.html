@@ -189,6 +189,15 @@
   .tname{font-family:var(--display); font-weight:900; font-size:clamp(25px,5.8vw,32px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px}
   .tcatch{font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
   .card-body{padding:28px var(--card-pad-x) 32px}
+  /* 大見出し：関係性タイプ／関わり方傾向／深層。小見出しの一段上として、
+     文字を大きくし、下に区切り線を敷いて節の始まりを示す。 */
+  .secthead{
+    font-size:21px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:48px 0 18px; padding-bottom:12px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:10px; line-height:1.5;
+  }
+  .secthead::before{content:""; width:5px; height:22px; border-radius:2px; background:var(--accent); flex:none}
+  .card-body > .secthead:first-child{margin-top:0}
   .sectlabel{
     font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
     margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5;
@@ -213,7 +222,7 @@
   }
   .link-note b{color:var(--accent-ink)}
   .sectlabel::before{content:""; width:4px; height:19px; border-radius:2px; background:var(--accent); flex:none}
-  .card-body > .sectlabel:first-child, .row-block > .sectlabel{margin-top:0}
+  .card-body > .sectlabel:first-child{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
   .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
   .axis-name{font-size:13px; color:var(--muted); font-weight:500}
@@ -226,7 +235,7 @@
   ul.aru li{margin-bottom:10px; position:relative; padding-left:22px; font-size:14px; line-height:1.9; color:var(--ink)}
   ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .row-block{margin-bottom:26px}
-  .row-block p{font-size:14px; line-height:1.9; color:var(--ink)}
+  .row-block p:not(.sectlabel):not(.secthead){font-size:14px; line-height:1.9; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
   .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
@@ -418,7 +427,7 @@
         <!-- 並びは「定量 → その定量が生む定性」の対で構成する。
              3軸（タイプを決める）→ あるある・強み・トリセツ、
              5軸（同じタイプ内の個人差）→ 特徴的な軸、の2セット。 -->
-        <p class="sectlabel">あなたの関係性タイプ</p>
+        <p class="secthead">あなたの関係性タイプ</p>
         <div class="axes" id="r-axes"></div>
         <div class="formula" id="r-axes-note"></div>
 
@@ -437,13 +446,13 @@
           <div id="r-toriset"></div>
         </div>
 
-        <p class="sectlabel">5つの関わり方傾向</p>
+        <p class="secthead">5つの関わり方傾向</p>
         <div class="axes" id="r-spectrums"></div>
 
-        <p class="sectlabel">特徴的な軸と、その活かし方</p>
+        <p class="sectlabel">特徴的な傾向と、その活かし方</p>
         <div class="pv" id="r-focus"></div>
 
-        <p class="sectlabel">あなたの深層</p>
+        <p class="secthead">あなたの深層</p>
         <div class="honshitsu">
           <p class="hs-sub">あなたの振る舞いを決める「ほんとうの理由」</p>
           <p class="hs-core" id="r-hs-core"></p>
@@ -550,7 +559,7 @@
                 <label class="vq-opt"><input type="radio" name="miss" value="あるある"><span>あるある</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="強み"><span>強み</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="ワンポイント"><span>ワンポイント</span></label>
-                <label class="vq-opt"><input type="radio" name="miss" value="5つの軸"><span>5つの軸</span></label>
+                <label class="vq-opt"><input type="radio" name="miss" value="5つの関わり方傾向"><span>5つの関わり方傾向</span></label>
                 <label class="vq-opt"><input type="radio" name="miss" value="特になし"><span>特になし</span></label>
               </div>
             </div>
@@ -986,7 +995,7 @@ function renderRelations(scores){
   const m=M[f], right=scores[f]>=0.5;
   const pole=right?m.right:m.left, gift=right?m.rightGift:m.leftGift, side=right?m.rightSide:m.leftSide, other=right?m.left:m.right;
   $('r-focus').innerHTML =
-    '<div class="pv-head"><span class="pv-kicker">いちばん出ている軸</span><b>'+m.name+'</b></div>'+
+    '<div class="pv-head"><span class="pv-kicker">いちばん出ている傾向</span><b>'+m.name+'</b></div>'+
     '<div class="pv-body">'+
       '<div class="pv-pole">「'+pole+'」</div>'+
       '<div class="focus-item"><span class="focus-tag focus-tag-gift">持ち味</span><p>'+gift+'</p></div>'+

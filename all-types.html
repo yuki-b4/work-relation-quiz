@@ -49,17 +49,22 @@
   .tname{ font-family:var(--display); font-weight:900; font-size:clamp(25px,5.8vw,32px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px }
   .tcatch{ font-family:var(--display); font-weight:700; font-size:13.5px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px }
   .card-body{ padding:28px var(--card-pad-x) 32px }
+  .secthead{ font-size:21px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:48px 0 18px; padding-bottom:12px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:10px; line-height:1.5 }
+  .secthead::before{ content:""; width:5px; height:22px; border-radius:2px; background:var(--accent); flex:none }
+  .card-body > .secthead:first-child{ margin-top:0 }
   .sectlabel{ font-size:18px; font-weight:900; color:var(--ink); letter-spacing:.02em;
     margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5 }
   .sectlabel::before{ content:""; width:4px; height:19px; border-radius:2px; background:var(--accent); flex:none }
-  .card-body > .sectlabel:first-child, .row-block > .sectlabel{ margin-top:0 }
+  .card-body > .sectlabel:first-child{ margin-top:0 }
   .axis-track-wrap{ position:relative }
   .axis-ends .on{ color:var(--ink); font-weight:700 }
   ul.aru{ list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px }
   ul.aru li{ position:relative; padding-left:22px; font-size:14px; line-height:1.9; color:var(--ink) }
   ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
   .row-block{ margin-bottom:26px }
-  .row-block p{ font-size:14px; line-height:1.9; color:var(--ink) }
+  .row-block p:not(.sectlabel):not(.secthead){ font-size:14px; line-height:1.9; color:var(--ink) }
   /* トリセツ（取扱説明書）：このタイプとの付き合い方 */
   .toriset{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px }
   .toriset .ts-label{ font-family:var(--display); font-weight:700; font-size:14px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px }
@@ -394,7 +399,7 @@ function buildCard(code){
     '<p class="ts-lead">「この人はこういう人」<br>関わり方のコツ</p>'+tsItems+'</div>';
   // 深層（なぜそう振る舞うのか）
   const hs=HONSHITSU[code];
-  const honshitsu=hs?('<p class="sectlabel">深層</p><div class="honshitsu">'+
+  const honshitsu=hs?('<p class="secthead">深層</p><div class="honshitsu">'+
     '<p class="hs-sub">このタイプの振る舞いを決める「ほんとうの理由」</p>'+
     '<p class="hs-core">'+hs.core+'</p><p class="hs-cost">'+hs.cost+'</p></div>'):'';
   const el=document.createElement('section');
@@ -408,7 +413,7 @@ function buildCard(code){
       '<p class="tcatch">'+t.catch+'</p><h2 class="tname">'+t.name+'</h2><span class="chip">'+code+'</span>'+
     '</div>'+
     '<div class="card-body">'+
-      '<p class="sectlabel">このタイプの関係性</p><div class="poles">'+ax3+'</div>'+
+      '<p class="secthead">このタイプの関係性</p><div class="poles">'+ax3+'</div>'+
       '<div class="formula">'+
         '<div class="f-row">'+picked.map(function(p){return '<span class="f-chip">'+p+'</span>';}).join('<span class="f-op">+</span>')+'</div>'+
         '<div class="f-arrow">↓</div>'+
