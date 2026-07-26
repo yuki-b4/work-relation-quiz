@@ -805,10 +805,17 @@ let workplaceFrame='';
 const answers=new Array(ITEMS.length).fill(null);
 const $=id=>document.getElementById(id);
 
+// 画面・設問が切り替わったら必ずページ最上部から見せる。
+// scrollTo(0,0) だけでは環境によって残ることがあるため、要素側の scrollTop も明示的に戻す。
+function toTop(){
+  window.scrollTo(0,0);
+  document.documentElement.scrollTop=0;
+  if(document.body) document.body.scrollTop=0;
+}
 function show(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $(screen).classList.add('active');
-  window.scrollTo({top:0,behavior:'auto'});
+  toTop();
 }
 function renderQ(){
   const q=ITEMS[idx];
@@ -848,6 +855,7 @@ function renderQ(){
     $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
+  toTop();
 }
 function pick(val){
   answers[idx]=val;
