@@ -215,8 +215,13 @@
   .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
 
   /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
-  .honshitsu{border:1px solid var(--line); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px; background:var(--surface)}
-  .honshitsu .hs-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.03em; margin-bottom:3px}
+  .honshitsu{
+    border:1px solid var(--line); border-radius:var(--radius); padding:24px 22px; margin-bottom:26px;
+    /* トリセツ（全面アクセント）の次に強い階調。上だけ淡く色を差して白へ抜く。
+       あるある・強み（素のまま）との間に、もう一段の中間層をつくる。 */
+    background:linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 58%);
+  }
+  .honshitsu .hs-label{font-family:var(--display); font-weight:900; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px}
   .honshitsu .hs-sub{font-size:12.5px; color:var(--faint); margin-bottom:15px}
   .honshitsu .hs-core{font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px}
   .honshitsu .hs-cost{font-size:14.5px; line-height:1.8; color:var(--muted); margin-bottom:16px}
