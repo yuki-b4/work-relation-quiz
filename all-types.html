@@ -410,7 +410,7 @@ function buildCard(code){
     '<p class="ts-lead">「この人はこういう人」<br>関わり方のコツ</p>'+tsItems+'</div>';
   // 深層（なぜそう振る舞うのか）
   const hs=HONSHITSU[code];
-  const honshitsu=hs?('<div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="10"/></svg></span><span class="sh-text"><span class="sh-kicker">DEEP LAYER</span><span class="sh-title">深層</span></span></div><div class="honshitsu">'+
+  const honshitsu=hs?('<div class="secthead"><span class="sh-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="10"/></svg></span><span class="sh-text"><span class="sh-kicker">DEEP DIVE</span><span class="sh-title">深層</span></span></div><div class="honshitsu">'+
     '<p class="hs-sub">このタイプの振る舞いを決める「ほんとうの理由」</p>'+
     '<p class="hs-core">'+hs.core+'</p><p class="hs-cost">'+hs.cost+'</p></div>'):'';
   const el=document.createElement('section');
