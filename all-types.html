@@ -18,7 +18,7 @@
     --radius:20px;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact}
-  body{font-family:var(--body); color:var(--ink); background:var(--bg); line-height:1.7; letter-spacing:.01em}
+  body{font-family:var(--body); color:var(--ink); background:var(--bg); line-height:1.85; letter-spacing:.01em}
   .wrap{max-width:680px; margin:0 auto; padding:22px 16px 60px}
 
   .toolbar{position:sticky; top:0; z-index:9; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
@@ -49,23 +49,17 @@
   .tname{ font-family:var(--display); font-weight:900; font-size:clamp(28px,6.4vw,36px); color:var(--accent-ink); letter-spacing:.02em; margin:0 0 12px }
   .tcatch{ font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px }
   .card-body{ padding:28px 30px 32px }
-  .sectlabel{ font-size:16px; font-weight:900; color:var(--ink); letter-spacing:.02em;
-    margin:32px 0 14px; display:flex; align-items:center; gap:9px; line-height:1.5 }
-  .sectlabel::before{ content:""; width:4px; height:17px; border-radius:2px; background:var(--accent); flex:none }
+  .sectlabel{ font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5 }
+  .sectlabel::before{ content:""; width:4px; height:21px; border-radius:2px; background:var(--accent); flex:none }
   .card-body > .sectlabel:first-child, .row-block > .sectlabel{ margin-top:0 }
-  .axes{ display:flex; flex-direction:column; gap:16px; margin-bottom:30px }
-  .axis-row{ display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center }
-  .axis-name{ font-size:12px; color:var(--muted); font-weight:500 }
   .axis-track-wrap{ position:relative }
-  .axis-ends{ display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px }
   .axis-ends .on{ color:var(--ink); font-weight:700 }
-  .axis-track{ position:relative; height:5px; background:var(--line); border-radius:99px }
-  .axis-dot{ position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%) }
   ul.aru{ list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px }
-  ul.aru li{ position:relative; padding-left:22px; font-size:15.5px; color:var(--ink) }
+  ul.aru li{ position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink) }
   ul.aru li::before{ content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent) }
   .row-block{ margin-bottom:26px }
-  .row-block p{ font-size:15px; color:var(--ink) }
+  .row-block p{ font-size:16px; line-height:1.9; color:var(--ink) }
   /* トリセツ（取扱説明書）：このタイプとの付き合い方 */
   .toriset{ background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px }
   .toriset .ts-label{ font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px }
@@ -76,25 +70,14 @@
   .ts-item .ts-t{ font-size:14.5px; line-height:1.7; color:var(--ink) }
   /* 深層（本質）：なぜそう振る舞うのか */
   .honshitsu{ border:1px solid var(--line); border-radius:var(--radius); padding:24px 22px; margin-bottom:26px;
-    background:linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 58%) }
-  .honshitsu .hs-label{ font-family:var(--display); font-weight:900; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px }
-  .honshitsu .hs-sub{ font-size:12.5px; color:var(--faint); margin-bottom:15px }
-  .honshitsu .hs-core{ font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px }
-  .honshitsu .hs-cost{ font-size:14.5px; line-height:1.8; color:var(--muted) }
-  .pv{ border-radius:var(--radius); margin-bottom:12px; background:var(--accent-soft); overflow:hidden }
-  .pv-head{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding:13px 18px; background:var(--accent); color:#fff }
-  .pv-kicker{ font-size:11.5px; font-weight:700; letter-spacing:.1em; opacity:.85 }
-  .pv-head b{ font-size:17px; font-weight:900; letter-spacing:.02em }
-  .pv-body{ padding:16px 18px 18px }
-  .pv-pole{ font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--accent-ink) }
+    background:var(--surface) }
+  .honshitsu .hs-label{ font-family:var(--display); font-weight:900; font-size:18px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px }
+  .honshitsu .hs-sub{ font-size:14.5px; color:var(--faint); margin-bottom:15px }
+  .honshitsu .hs-core{ font-size:17px; line-height:1.95; color:var(--ink); margin-bottom:12px }
+  .honshitsu .hs-cost{ font-size:16px; line-height:1.9; color:var(--muted) }
   .pv .cap{ font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink) }
   .pv .cap-axis{ font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink) }
-  .focus-item{ display:flex; gap:10px; align-items:flex-start; margin-top:11px }
-  .focus-tag{ flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap }
-  .focus-tag-gift{ background:var(--accent) }
-  .focus-tag-side{ background:#565A60 }
   .focus-item p{ font-size:14.5px; line-height:1.7; color:var(--ink) }
-  .focus-grow{ font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px }
   .compat{ margin-bottom:26px }
   .compat-hint{ font-size:13px; color:var(--muted); margin:-2px 0 14px }
   .compat-list{ display:flex; flex-direction:column }
@@ -116,16 +99,27 @@
   .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
 
 
-  .link-note{ font-size:13.5px; line-height:1.85; color:var(--muted); background:var(--bg);
+  .formula{ display:flex; flex-direction:column; align-items:center; gap:7px;
+    margin:18px 0 4px; padding:18px 14px; background:var(--bg); border-radius:14px }
+  .f-row{ display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:6px }
+  @media (max-width:400px){ .f-chip{font-size:12.5px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
+  @media (max-width:340px){ .f-row{flex-direction:column; gap:3px} }
+  .f-chip{ font-size:14px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
+    border-radius:99px; padding:6px 13px; white-space:nowrap; flex:none }
+  .f-op{ color:var(--faint); font-size:14px; font-weight:700 }
+  .f-arrow{ color:var(--accent); font-size:16px; line-height:1 }
+  .f-type{ font-size:19px; font-weight:900; color:var(--accent-ink) }
+  .f-type small{ font-size:12px; font-weight:700; color:var(--muted); margin-left:7px; letter-spacing:.1em }
+  .link-note{ font-size:15px; line-height:1.9; color:var(--muted); background:var(--bg);
     border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:12px 14px; margin:14px 0 4px }
   .link-note b{ color:var(--accent-ink) }
   /* 3つの軸：回答に依存しないので、目盛りでなく「どちら側か」だけを示す */
   .poles{ display:grid; gap:10px; margin-bottom:4px }
   .pole-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-  .pole-name{ flex:none; width:44px; font-size:13px; color:var(--muted) }
-  .pole-pick{ font-size:15px; font-weight:900; color:var(--accent-ink); background:var(--accent-soft);
+  .pole-name{ flex:none; width:44px; font-size:14px; color:var(--muted) }
+  .pole-pick{ font-size:17px; font-weight:900; color:var(--accent-ink); background:var(--accent-soft);
     border-radius:99px; padding:5px 14px }
-  .pole-alt{ font-size:14px; color:var(--faint) }
+  .pole-alt{ font-size:16px; color:var(--faint) }
   .pole-alt::before{ content:"／ "; color:var(--line) }
   /* ===== 診断（prototype.html）と揃えた表現：エンブレム・放射・トリセツのバンド ===== */
   .emblem{ width:104px; height:104px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -142,11 +136,11 @@
   .toriset-band{ margin:34px -30px 30px; padding:30px 22px 32px; background:var(--accent); color:#fff; text-align:center }
   .toriset-band .ts-label{ font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px }
   .toriset-band .ts-title{ font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px }
-  .toriset-band .ts-lead{ font-size:12.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8 }
+  .toriset-band .ts-lead{ font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8 }
   .ts-card{ background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left }
-  .ts-card .ts-l{ display:block; font-size:13px; font-weight:700; color:var(--accent-ink); padding:11px 16px; border-bottom:1px solid var(--line); margin:0 }
+  .ts-card .ts-l{ display:block; font-size:15px; font-weight:700; color:var(--accent-ink); padding:11px 16px; border-bottom:1px solid var(--line); margin:0 }
   .ts-card .ts-l .num{ font-weight:900; margin-right:6px }
-  .ts-card .ts-t{ display:block; font-size:14px; line-height:1.85; color:var(--ink); padding:14px 16px }
+  .ts-card .ts-t{ display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px }
   @media (max-width:420px){ .toriset-band{ margin-left:-26px; margin-right:-26px } }
   @media (max-width:360px){ .ray{ font-size:11.5px } .ray i{ width:16px } }
   @media print{
@@ -376,7 +370,7 @@ function buildCard(code){
     '<p class="ts-lead">このタイプの人と、うまくやっていくコツ。</p>'+tsItems+'</div>';
   // 深層（なぜそう振る舞うのか）
   const hs=HONSHITSU[code];
-  const honshitsu=hs?('<div class="honshitsu"><div class="hs-label">深層</div>'+
+  const honshitsu=hs?('<p class="sectlabel">深層</p><div class="honshitsu">'+
     '<p class="hs-sub">このタイプが、そう振る舞う「ほんとうの理由」。</p>'+
     '<p class="hs-core">'+hs.core+'</p><p class="hs-cost">'+hs.cost+'</p></div>'):'';
   const el=document.createElement('section');
@@ -391,8 +385,11 @@ function buildCard(code){
     '</div>'+
     '<div class="card-body">'+
       '<p class="sectlabel">タイプを決める3つの軸</p><div class="poles">'+ax3+'</div>'+
-      '<p class="link-note">この3つ（<b>'+picked.join('・')+'</b>）の組み合わせが、タイプ<b>「'+t.name+'」</b>（'+code+'）です。'+
-      'このあとの「あるある」「強み」「トリセツ」は、すべてこの3軸から導かれています。</p>'+
+      '<div class="formula">'+
+        '<div class="f-row">'+picked.map(function(p){return '<span class="f-chip">'+p+'</span>';}).join('<span class="f-op">+</span>')+'</div>'+
+        '<div class="f-arrow">↓</div>'+
+        '<div class="f-type">'+t.name+'<small>'+code+'</small></div>'+
+      '</div>'+
       '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
       '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
       toriset+

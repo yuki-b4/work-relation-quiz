@@ -27,7 +27,7 @@
   html{-webkit-text-size-adjust:100%}
   body{
     font-family:var(--body); color:var(--ink); background:var(--bg);
-    line-height:1.7; letter-spacing:.01em;
+    line-height:1.85; letter-spacing:.01em;
     min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
     padding:clamp(16px,4vw,48px) 16px;
   }
@@ -43,8 +43,8 @@
     font-family:var(--display); font-weight:900; line-height:1.4;
     font-size:clamp(25px,5.6vw,34px); letter-spacing:.01em; margin-bottom:16px;
   }
-  .lead{font-size:16px; color:var(--muted); margin-bottom:14px; max-width:34em}
-  .meta{font-size:13px; color:var(--faint); margin-bottom:34px}
+  .lead{font-size:17px; color:var(--muted); margin-bottom:14px; max-width:34em}
+  .meta{font-size:14px; color:var(--faint); margin-bottom:34px}
   .meta b{color:var(--ink); font-weight:500}
   .btn{
     font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
@@ -68,7 +68,7 @@
 
   /* QUIZ */
   .qtop{display:flex; align-items:center; gap:14px; margin-bottom:34px}
-  .qcount{font-family:var(--display); font-weight:500; font-size:13px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
+  .qcount{font-family:var(--display); font-weight:500; font-size:13.5px; color:var(--faint); white-space:nowrap; letter-spacing:.04em}
   .qpct{font-family:var(--display); font-weight:700; font-size:14px; color:var(--muted); white-space:nowrap; min-width:36px}
   .bar{flex:1; height:8px; background:var(--line); border-radius:99px; overflow:hidden}
   .bar > i{display:block; height:100%; width:0; background:var(--chrome); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
@@ -78,9 +78,9 @@
   }
   .choices{display:flex; flex-direction:column; gap:14px}
   .choice{
-    text-align:left; font-family:var(--body); font-size:16px; color:var(--ink); cursor:pointer;
+    text-align:left; font-family:var(--body); font-size:17px; color:var(--ink); cursor:pointer;
     background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius);
-    padding:20px 22px; line-height:1.6; transition:border-color .15s, background .15s, transform .1s;
+    padding:20px 22px; line-height:1.75; transition:border-color .15s, background .15s, transform .1s;
     display:flex; gap:14px; align-items:flex-start;
   }
   .choice:hover{border-color:#C9C8C1; background:#FCFCFA}
@@ -101,15 +101,15 @@
     background:var(--coral-soft); color:var(--coral-ink);
     font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;
   }
-  .step-t{margin:2px 0 4px; font-weight:700; font-size:16px; color:var(--ink); line-height:1.5}
-  .step-d{margin:0; font-size:14.5px; color:var(--muted); line-height:1.85}
+  .step-t{margin:2px 0 4px; font-weight:700; font-size:18px; color:var(--ink); line-height:1.5}
+  .step-d{margin:0; font-size:16px; color:var(--muted); line-height:1.95}
 
   /* ===== 回答：円形スケール ===== */
   .scale{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:10px}
   .scale-dots{display:flex; align-items:center; justify-content:center; gap:clamp(12px,4.5vw,22px)}
   .scale-legend{
     display:flex; justify-content:space-between; width:100%; max-width:330px;
-    font-size:12.5px; color:var(--faint);
+    font-size:14px; color:var(--faint);
   }
   .dot{
     border-radius:50%; cursor:pointer; padding:0; background:var(--surface);
@@ -157,19 +157,19 @@
   }
   .toriset-band .ts-label{font-size:13px; font-weight:700; color:#fff; opacity:.85; letter-spacing:.14em; margin-bottom:6px}
   .toriset-band .ts-title{font-size:26px; font-weight:900; color:#fff; letter-spacing:.04em; margin:0 0 8px}
-  .toriset-band .ts-lead{font-size:12.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8}
+  .toriset-band .ts-lead{font-size:14.5px; color:#fff; opacity:.82; margin-bottom:20px; line-height:1.8}
   .ts-card{background:#fff; border-radius:14px; overflow:hidden; margin-bottom:12px; text-align:left}
   .ts-card .ts-l{
-    display:block; font-size:13px; font-weight:700; color:var(--accent-ink);
+    display:block; font-size:15px; font-weight:700; color:var(--accent-ink);
     padding:11px 16px; border-bottom:1px solid var(--line); margin:0;
   }
   .ts-card .ts-l .num{font-weight:900; margin-right:6px}
-  .ts-card .ts-t{display:block; font-size:14px; line-height:1.85; color:var(--ink); padding:14px 16px}
+  .ts-card .ts-t{display:block; font-size:16px; line-height:1.95; color:var(--ink); padding:14px 16px}
   .toriset-band .ts-share{margin-top:8px; background:#fff; color:var(--accent-ink)}
   .toriset-band .ts-note{color:#fff; opacity:.85}
   @media (max-width:420px){ .toriset-band{margin-left:-26px; margin-right:-26px} }
   .qback:hover{color:var(--muted)}
-  .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
+  .qhint{text-align:center; color:var(--faint); font-size:14.5px; margin-top:30px}
 
   /* RESULT */
   .result-accent{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
@@ -189,55 +189,63 @@
   .tcatch{font-family:var(--display); font-weight:700; font-size:15px; color:var(--accent); letter-spacing:.04em; margin:0 0 6px}
   .card-body{padding:28px 30px 32px}
   .sectlabel{
-    font-size:16px; font-weight:900; color:var(--ink); letter-spacing:.02em;
-    margin:32px 0 14px; display:flex; align-items:center; gap:9px; line-height:1.5;
+    font-size:20px; font-weight:900; color:var(--ink); letter-spacing:.02em;
+    margin:42px 0 16px; display:flex; align-items:center; gap:10px; line-height:1.5;
   }
+  .formula{display:flex; flex-direction:column; align-items:center; gap:7px;
+    margin:18px 0 4px; padding:18px 14px; background:var(--bg); border-radius:14px}
+  /* 3チップ＋演算子が1行に収まらない端末があるため、折り返さず縮めて1行に保つ */
+  .f-row{display:flex; flex-wrap:nowrap; justify-content:center; align-items:center; gap:6px}
+  @media (max-width:400px){ .f-chip{font-size:12.5px; padding:5px 9px} .f-op{font-size:12px} .f-row{gap:4px} }
+  @media (max-width:340px){ .f-row{flex-direction:column; gap:3px} }
+  .f-chip{font-size:14px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft);
+    border-radius:99px; padding:6px 13px; white-space:nowrap; flex:none}
+  .f-op{color:var(--faint); font-size:14px; font-weight:700}
+  .f-arrow{color:var(--accent); font-size:16px; line-height:1}
+  .f-type{font-size:19px; font-weight:900; color:var(--accent-ink)}
+  .f-type small{font-size:12px; font-weight:700; color:var(--muted); margin-left:7px; letter-spacing:.1em}
+  .sect-sub{font-size:14px; color:var(--muted); margin:-8px 0 16px}
   .link-note{
-    font-size:13.5px; line-height:1.85; color:var(--muted);
+    font-size:15px; line-height:1.9; color:var(--muted);
     background:var(--bg); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
     padding:12px 14px; margin:14px 0 4px;
   }
   .link-note b{color:var(--accent-ink)}
-  .axis-score{font-size:11.5px; color:var(--faint); margin-top:5px; text-align:right; letter-spacing:.02em}
-  .sectlabel::before{content:""; width:4px; height:17px; border-radius:2px; background:var(--accent); flex:none}
+  .axis-score{font-size:13px; color:var(--faint); margin-top:5px; text-align:right; letter-spacing:.02em}
+  .sectlabel::before{content:""; width:4px; height:21px; border-radius:2px; background:var(--accent); flex:none}
   .card-body > .sectlabel:first-child, .row-block > .sectlabel{margin-top:0}
   .axes{display:flex; flex-direction:column; gap:16px; margin-bottom:30px}
   .axis-row{display:grid; grid-template-columns:54px 1fr; gap:14px; align-items:center}
-  .axis-name{font-size:12px; color:var(--muted); font-weight:500}
+  .axis-name{font-size:14px; color:var(--muted); font-weight:500}
   .axis-track-wrap{position:relative}
-  .axis-ends{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin-bottom:5px}
+  .axis-ends{display:flex; justify-content:space-between; font-size:13px; color:var(--faint); margin-bottom:5px}
   .axis-ends .on{color:var(--ink); font-weight:700}
   .axis-track{position:relative; height:5px; background:var(--line); border-radius:99px}
   .axis-dot{position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.18); transform:translate(-50%,-50%); transition:left .6s cubic-bezier(.4,0,.2,1)}
   ul.aru{list-style:none; margin:0 0 28px; display:flex; flex-direction:column; gap:11px}
-  ul.aru li{position:relative; padding-left:22px; font-size:15.5px; color:var(--ink)}
+  ul.aru li{position:relative; padding-left:22px; font-size:16px; line-height:1.9; color:var(--ink)}
   ul.aru li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent)}
   .row-block{margin-bottom:26px}
-  .row-block p{font-size:15px; color:var(--ink)}
+  .row-block p{font-size:16px; line-height:1.9; color:var(--ink)}
   .row-block .lead-in{font-weight:700; color:var(--accent-ink)}
   /* トリセツ（取扱説明書）：大切な人に渡す・送れる形。相性の代替＝理解と関わり方 */
-  .toriset{background:var(--accent-soft); border-radius:var(--radius); padding:22px 22px; margin-bottom:26px}
-  .toriset .ts-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:4px}
-  .toriset .ts-lead{font-size:13px; color:var(--muted); margin-bottom:14px}
   .ts-item{padding:12px 0; border-top:1px solid rgba(0,0,0,.06)}
   .ts-item:first-child{border-top:none; padding-top:2px}
-  .ts-item .ts-l{display:block; font-weight:700; font-size:13.5px; color:var(--accent-ink); margin-bottom:3px}
-  .ts-item .ts-t{font-size:14.5px; line-height:1.7; color:var(--ink)}
   .ts-share{margin-top:16px}
-  .ts-note{font-size:12.5px; color:var(--muted); margin-top:9px; min-height:1em}
+  .ts-note{font-size:14px; color:var(--muted); margin-top:9px; min-height:1em}
 
   /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
   .honshitsu{
     border:1px solid var(--line); border-radius:var(--radius); padding:24px 22px; margin-bottom:26px;
     /* トリセツ（全面アクセント）の次に強い階調。上だけ淡く色を差して白へ抜く。
        あるある・強み（素のまま）との間に、もう一段の中間層をつくる。 */
-    background:linear-gradient(180deg, var(--accent-soft) 0%, var(--surface) 58%);
+    background:var(--surface);
   }
-  .honshitsu .hs-label{font-family:var(--display); font-weight:900; font-size:16px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px}
-  .honshitsu .hs-sub{font-size:12.5px; color:var(--faint); margin-bottom:15px}
-  .honshitsu .hs-core{font-size:15px; line-height:1.9; color:var(--ink); margin-bottom:12px}
-  .honshitsu .hs-cost{font-size:14.5px; line-height:1.8; color:var(--muted); margin-bottom:16px}
-  .honshitsu .hs-loop{font-size:14.5px; line-height:1.75; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
+  .honshitsu .hs-label{font-family:var(--display); font-weight:900; font-size:18px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px}
+  .honshitsu .hs-sub{font-size:14.5px; color:var(--faint); margin-bottom:15px}
+  .honshitsu .hs-core{font-size:17px; line-height:1.95; color:var(--ink); margin-bottom:12px}
+  .honshitsu .hs-cost{font-size:16px; line-height:1.9; color:var(--muted); margin-bottom:16px}
+  .honshitsu .hs-loop{font-size:16px; line-height:1.9; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); margin-bottom:12px; background:var(--accent-soft); overflow:hidden}
@@ -245,18 +253,16 @@
     display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
     padding:13px 18px; background:var(--accent); color:#fff;
   }
-  .pv-kicker{font-size:11.5px; font-weight:700; letter-spacing:.1em; opacity:.85}
+  .pv-kicker{font-size:13px; font-weight:700; letter-spacing:.1em; opacity:.85}
   .pv-head b{font-size:17px; font-weight:900; letter-spacing:.02em}
   .pv-body{padding:16px 18px 18px}
-  .pv-pole{font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--accent-ink)}
-  .pv .cap{font-size:11px; letter-spacing:.12em; font-weight:700; margin-bottom:6px; color:var(--accent-ink)}
-  .pv .cap-axis{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:14px; color:var(--accent-ink)}
+  .pv-pole{font-family:var(--display); font-weight:700; font-size:17px; margin-bottom:4px; color:var(--accent-ink)}
   .focus-item{display:flex; gap:10px; align-items:flex-start; margin-top:11px}
   .focus-tag{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; border-radius:7px; padding:4px 10px; color:#fff; white-space:nowrap}
   .focus-tag-gift{background:var(--accent)}
   .focus-tag-side{background:#565A60}
-  .focus-item p{font-size:14.5px; line-height:1.7; color:var(--ink)}
-  .focus-grow{font-size:14.5px; line-height:1.65; color:var(--ink); margin-top:15px}
+  .focus-item p{font-size:16px; line-height:1.9; color:var(--ink)}
+  .focus-grow{font-size:16px; line-height:1.9; color:var(--ink); margin-top:15px}
   .choice-lik{justify-content:center; text-align:center; font-weight:500}
 
   /* BRIDGE */
@@ -266,11 +272,11 @@
   .vq-intro{font-family:var(--display); font-weight:500; font-size:clamp(16px,3.6vw,19px); line-height:1.5; color:var(--ink); margin-bottom:22px}
   .lead-cta{font-family:var(--display); font-weight:700; font-size:clamp(18px,4.2vw,22px); line-height:1.45; color:var(--accent-ink); margin-bottom:14px}
   .vq{margin-bottom:20px}
-  .vq-q{font-size:14.5px; font-weight:700; color:var(--ink); line-height:1.55; margin-bottom:10px}
+  .vq-q{font-size:16px; font-weight:700; color:var(--ink); line-height:1.7; margin-bottom:10px}
   .vq-opts{display:flex; flex-direction:column; gap:8px}
   .vq-opt{
     display:flex; align-items:center; gap:11px; cursor:pointer;
-    font-size:14.5px; color:var(--ink); background:var(--surface);
+    font-size:16px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:11px 14px;
     transition:border-color .15s, background .15s;
   }
@@ -278,38 +284,38 @@
   .vq-opt input{accent-color:var(--accent); width:16px; height:16px; flex:none; margin:0}
   .vq-opt:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
   .field{margin-bottom:14px}
-  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500}
+  .field label{display:block; font-size:14.5px; color:var(--muted); margin-bottom:7px; font-weight:500}
   .field textarea, .field input, .field select{
     width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
     border:1.5px solid var(--line); border-radius:12px; padding:13px 15px; resize:vertical; line-height:1.6;
   }
   .field textarea:focus, .field input:focus, .field select:focus{outline:none; border-color:var(--accent)}
   .field textarea{min-height:84px}
-  .hear-help{margin:6px 0 0; font-size:13px}
+  .hear-help{margin:6px 0 0; font-size:14.5px}
   .hear-help a{color:var(--accent)}
-  .consent{display:flex; gap:9px; align-items:flex-start; font-size:13px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
+  .consent{display:flex; gap:9px; align-items:flex-start; font-size:14.5px; color:var(--muted); line-height:1.7; margin:2px 0 14px; cursor:pointer}
   .consent input{margin-top:4px; flex:none; width:16px; height:16px; accent-color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
-  .proto-note{font-size:12.5px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
+  .proto-note{font-size:14px; color:var(--faint); margin-top:12px; text-align:center; min-height:18px}
   .afterbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:30px}
   .btn-ghost{background:none; color:var(--muted); border:1.5px solid var(--line)}
   .btn-ghost:hover{background:#FCFCFA; color:var(--ink)}
-  .btn-sm{font-size:14px; padding:12px 22px}
+  .btn-sm{font-size:15px; padding:12px 22px}
   .copied{color:var(--teal); font-weight:700}
   #copyManual{margin-top:14px}
-  .copy-manual-note{font-size:12.5px; color:var(--muted); margin-bottom:7px}
+  .copy-manual-note{font-size:14px; color:var(--muted); margin-bottom:7px}
   .copy-manual-box{width:100%; font-family:var(--body); font-size:14px; color:var(--ink); background:var(--surface); border:1.5px solid var(--accent,#0F6E56); border-radius:12px; padding:12px 14px; line-height:1.6; resize:none}
   .copy-manual-box:focus{outline:none}
 
   /* 相性一覧（自分×全8タイプ） */
   .compat{margin-bottom:26px}
-  .compat-hint{font-size:13px; color:var(--muted); margin:-2px 0 14px}
+  .compat-hint{font-size:14.5px; color:var(--muted); margin:-2px 0 14px}
   .compat-list{display:flex; flex-direction:column}
   .compat-row{padding:13px 0; border-top:1px solid var(--line)}
   .compat-row:first-child{border-top:none}
   .ct-head{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
-  .ct-name{font-family:var(--display); font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
+  .ct-name{font-family:var(--display); font-weight:700; font-size:16px; color:var(--ink); letter-spacing:.02em; border-radius:8px; padding:3px 10px}
   .compat-row.pole-open .ct-name{background:var(--coral-soft); color:var(--coral-ink)}
   .compat-row.pole-guard .ct-name{background:var(--teal-soft); color:var(--teal-ink)}
   .ct-code{font-size:10.5px; letter-spacing:.16em; color:var(--faint); font-weight:700}
@@ -321,15 +327,15 @@
   .compat-row.is-best.pole-open{box-shadow:inset 3px 0 0 var(--coral); padding-left:12px}
   .compat-row.is-best.pole-guard{box-shadow:inset 3px 0 0 var(--teal); padding-left:12px}
   .ct-self{margin-left:auto; font-size:10px; letter-spacing:.06em; color:#fff; background:var(--accent); border-radius:99px; padding:2px 9px; font-weight:700}
-  .ct-text{font-size:14px; line-height:1.65; color:var(--ink)}
+  .ct-text{font-size:16px; line-height:1.9; color:var(--ink)}
   .compat-cta{background:var(--accent-soft); border-radius:var(--radius); padding:20px 20px; margin-top:18px}
-  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:16px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
-  .compat-cta .cc-text{font-size:14px; line-height:1.65; color:var(--ink); margin-bottom:14px}
-  .cc-preview{font-size:12.5px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
+  .compat-cta .cc-label{font-family:var(--display); font-weight:700; font-size:18px; color:var(--accent-ink); margin-bottom:8px; letter-spacing:.03em}
+  .compat-cta .cc-text{font-size:16px; line-height:1.9; color:var(--ink); margin-bottom:14px}
+  .cc-preview{font-size:14px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
-  .frame-why{font-size:13.5px; line-height:1.7; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
-  .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
-  .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
+  .frame-why{font-size:16px; line-height:1.95; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
+  .frame-note{font-size:14px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
+  .qframe{font-size:13.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
 </style>
 </head>
 <body>
@@ -345,21 +351,21 @@
         <span class="step-no">1</span>
         <div class="step-body">
           <p class="step-t">24問に答える（無料）</p>
-          <p class="step-d">約2分、登録もいりません。特定の場面ではなく、力を抜いた「普段のあなた」で答えていきます。</p>
+          <p class="step-d">約2分、登録は不要。力を抜いた「普段のあなた」で答えます。</p>
         </div>
       </li>
       <li class="step">
         <span class="step-no">2</span>
         <div class="step-body">
           <p class="step-t">自分のタイプを知る</p>
-          <p class="step-d">本音の出し方、衝突への向き合い方、チームでの重心。3つの軸の組み合わせが、あなたを8つのタイプのどれかに映し出します。</p>
+          <p class="step-d">本音・衝突・重心の3軸の組み合わせで、8つのタイプに映し出します。</p>
         </div>
       </li>
       <li class="step">
         <span class="step-no">3</span>
         <div class="step-body">
           <p class="step-t">関わり方のヒントを受け取る</p>
-          <p class="step-d">強みと、つい出てしまうクセ。身近なあの人との距離の取り方まで、そのまま使える言葉でお渡しします。</p>
+          <p class="step-d">強みと、つい出るクセ。あの人との距離の取り方まで受け取れます。</p>
         </div>
       </li>
     </ol>
@@ -409,7 +415,7 @@
              5軸（同じタイプ内の個人差）→ 特徴的な軸、の2セット。 -->
         <p class="sectlabel">タイプを決める3つの軸</p>
         <div class="axes" id="r-axes"></div>
-        <p class="link-note" id="r-axes-note"></p>
+        <div class="formula" id="r-axes-note"></div>
 
         <p class="sectlabel">あるある</p>
         <ul class="aru" id="r-aru"></ul>
@@ -429,14 +435,14 @@
         </div>
 
         <p class="sectlabel">人間関係における5つの軸</p>
+        <p class="sect-sub">同じタイプでも、ここは人によって違います</p>
         <div class="axes" id="r-spectrums"></div>
-        <p class="link-note">3つの軸が同じでタイプが一致していても、この5つの出かたは人によって違います。次の「特徴的な軸」は、同じタイプの中での<b>あなただけの傾向</b>です。</p>
 
         <p class="sectlabel">特徴的な軸と、その活かし方</p>
         <div class="pv" id="r-focus"></div>
 
+        <p class="sectlabel">あなたの深層</p>
         <div class="honshitsu">
-          <div class="hs-label">あなたの深層</div>
           <p class="hs-sub">タイプの奥にある、あなたがそう振る舞う「ほんとうの理由」。</p>
           <p class="hs-core" id="r-hs-core"></p>
           <p class="hs-cost" id="r-hs-cost"></p>
@@ -910,9 +916,11 @@ function renderResult(code,counts,radar){
     const meta=AX[axis];
     return code[i]===meta.poles[0] ? meta.left : meta.right;
   });
+  // 文章で説明せず、組み立てを図で見せる（3つの極 → タイプ）。
   $('r-axes-note').innerHTML =
-    'この3つ（<b>'+picked.join('・')+'</b>）の組み合わせが、あなたのタイプ<b>「'+t.name+'」</b>（'+code+'）です。'+
-    'このあとの「あるある」「強み」「トリセツ」は、すべてこの3軸から導かれています。';
+    '<div class="f-row">'+picked.map(p=>'<span class="f-chip">'+p+'</span>').join('<span class="f-op">+</span>')+'</div>'+
+    '<div class="f-arrow">↓</div>'+
+    '<div class="f-type">'+t.name+'<small>'+code+'</small></div>';
   renderRelations(radar);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
