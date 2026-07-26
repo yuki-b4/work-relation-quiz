@@ -162,6 +162,9 @@
       linear-gradient(180deg, rgba(0,0,0,0) 38%, var(--accent-deep, #7A2E1A) 125%),
       linear-gradient(180deg, #37414E 0%, #2B333D 18%, #232B34 45%, #1A2028 78%, #141A20 100%) }
   .deep-section > *{ position:relative }
+  /* 章がカードの最後に来る場合、下に白い余白が残るので、カード下端まで面を伸ばす */
+  .card-body > .deep-section:last-child{ margin-bottom:-32px }
+  .deep-section .honshitsu > *:last-child{ margin-bottom:0 }
   .deep-section .secthead{ margin-top:0; border-bottom-color:rgba(255,255,255,.2) }
   .deep-section .sh-title{ color:#fff }
   .deep-section .sh-kicker{ color:rgba(255,255,255,.68) }
