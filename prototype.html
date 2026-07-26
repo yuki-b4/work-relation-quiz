@@ -170,7 +170,7 @@
   .ts-card .ts-l .num{font-weight:900; margin-right:6px}
   .ts-card .ts-t{display:block; font-size:14px; line-height:1.95; color:var(--ink); padding:14px 16px}
   .qback:hover{color:var(--muted)}
-  .qhint{max-width:22em; margin-inline:auto; text-wrap:balance; text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
+  .qhint{text-align:center; color:var(--faint); font-size:13px; margin-top:30px}
 
   /* RESULT */
   .result-accent{ --accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink) }
@@ -886,7 +886,7 @@ function renderQ(){
       b.onclick=()=>pick(opt.p);
       c.appendChild(b);
     });
-    $('qhint').textContent='どちらがより自分に近いかで直感的に。迷ったら第一印象で大丈夫です。';
+    $('qhint').innerHTML='どちらがより自分に近いかで直感的に。<br>迷ったら第一印象で大丈夫です。';
   }else{
     // 円形スケール：左（当てはまらない）から右（当てはまる）へ。値は従来どおり1〜4で採点は不変。
     const scale=document.createElement('div');
@@ -905,7 +905,7 @@ function renderQ(){
     scale.insertAdjacentHTML('beforeend',
       '<div class="scale-legend"><span>当てはまらない</span><span>当てはまる</span></div>');
     c.appendChild(scale);
-    $('qhint').textContent='ふだんの自分を思い浮かべて、どれくらい当てはまるか直感で。';
+    $('qhint').innerHTML='ふだんの自分を思い浮かべて、<br>どれくらい当てはまるか直感で。';
   }
   $('backBtn').hidden = idx===0;
   toTop();
