@@ -116,6 +116,9 @@
   .ct-text{ font-size:14px; line-height:1.65; color:var(--ink) }
 
 
+  .link-note{ font-size:13.5px; line-height:1.85; color:var(--muted); background:var(--bg);
+    border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:12px 14px; margin:14px 0 4px }
+  .link-note b{ color:var(--accent-ink) }
   /* 3つの軸：回答に依存しないので、目盛りでなく「どちら側か」だけを示す */
   .poles{ display:grid; gap:10px; margin-bottom:4px }
   .pole-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
@@ -362,6 +365,7 @@ function buildCard(code){
     return '<div class="pole-row"><span class="pole-name">'+r[0]+'</span>'+
       '<span class="pole-pick">'+on+'</span><span class="pole-alt">'+off+'</span></div>';
   }).join('');
+  const picked=[code[0]==='O'?AX.h.left:AX.h.right, code[1]==='B'?AX.c.left:AX.c.right, code[2]==='L'?AX.w.left:AX.w.right];
   const aru=t.aru.map(function(a){ return '<li>'+a+'</li>'; }).join('');
   // トリセツ（このタイプとの付き合い方）
   const tsItems=(TORISET[code]||[]).map(function(it,i){
@@ -386,7 +390,9 @@ function buildCard(code){
       '<p class="tcatch">'+t.catch+'</p><h2 class="tname">'+t.name+'</h2><span class="chip">'+code+'</span>'+
     '</div>'+
     '<div class="card-body">'+
-      '<p class="sectlabel">3つの軸</p><div class="poles">'+ax3+'</div>'+
+      '<p class="sectlabel">タイプを決める3つの軸</p><div class="poles">'+ax3+'</div>'+
+      '<p class="link-note">この3つ（<b>'+picked.join('・')+'</b>）の組み合わせが、タイプ<b>「'+t.name+'」</b>（'+code+'）です。'+
+      'このあとの「あるある」「強み」「トリセツ」は、すべてこの3軸から導かれています。</p>'+
       '<p class="sectlabel">あるある</p><ul class="aru">'+aru+'</ul>'+
       '<div class="row-block"><p class="sectlabel">強み</p><p>'+t.tsuyomi+'</p></div>'+
       toriset+
