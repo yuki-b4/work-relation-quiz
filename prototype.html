@@ -233,17 +233,6 @@
   .ts-item:first-child{border-top:none; padding-top:2px}
 
   /* 深層（本質）：あるある/強みより一段深い「なぜそう振る舞うのか」。開いたループでCTAへ橋渡し */
-  .honshitsu{
-    border:1px solid var(--line); border-radius:var(--radius); padding:24px 22px; margin-bottom:26px;
-    /* トリセツ（全面アクセント）の次に強い階調。上だけ淡く色を差して白へ抜く。
-       あるある・強み（素のまま）との間に、もう一段の中間層をつくる。 */
-    background:var(--surface);
-  }
-  .honshitsu .hs-label{font-family:var(--display); font-weight:900; font-size:18px; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:3px}
-  .honshitsu .hs-sub{font-size:14.5px; color:var(--faint); margin-bottom:15px}
-  .honshitsu .hs-core{font-size:17px; line-height:1.95; color:var(--ink); margin-bottom:16px}
-  .honshitsu .hs-cost{font-size:16px; line-height:1.9; color:var(--muted); margin-bottom:16px}
-  .honshitsu .hs-loop{font-size:16px; line-height:1.9; color:var(--accent-ink); background:var(--accent-soft); border-radius:12px; padding:14px 16px}
 
   /* 5つの軸：ノビシロの読み解きボックス */
   .pv{border-radius:var(--radius); margin-bottom:12px; background:var(--accent-soft); overflow:hidden}
@@ -301,6 +290,30 @@
   .btn-sm{font-size:15px; padding:12px 22px}
 
   /* 相性一覧（自分×全8タイプ） */
+  /* 深層：ページで唯一の暗い面にして「奥に沈む」感じを出す。
+     トリセツ（アクセントの色面）とは別の軸で強調するので、見せ場は競合しない。
+     右上に同心の弧を薄く重ね、層の奥行きを示す。 */
+  .honshitsu{
+    position:relative; overflow:hidden; border:none; border-radius:var(--radius);
+    padding:30px 22px 26px; margin-bottom:26px;
+    background:radial-gradient(120% 90% at 50% -10%, #3B4652 0%, #2B333D 55%, #222A33 100%);
+    color:#fff;
+  }
+  .honshitsu::before{
+    content:""; position:absolute; top:-96px; right:-72px; width:220px; height:220px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 0 0 22px rgba(255,255,255,.05), 0 0 0 46px rgba(255,255,255,.035);
+    pointer-events:none;
+  }
+  .honshitsu > *{position:relative}
+  .hs-sub{font-size:14.5px; color:rgba(255,255,255,.62); margin-bottom:16px}
+  .hs-core{font-size:17px; line-height:1.95; color:#fff; margin-bottom:16px}
+  .hs-cost{font-size:16px; line-height:1.9; color:rgba(255,255,255,.74); margin-bottom:18px}
+  .hs-loop{
+    font-size:16px; line-height:1.9; color:#fff;
+    background:rgba(255,255,255,.09); border-left:3px solid rgba(255,255,255,.34);
+    border-radius:0 12px 12px 0; padding:15px 16px;
+  }
   .compat{margin-bottom:26px}
   .compat-hint{font-size:14.5px; color:var(--muted); margin:-2px 0 14px}
   .compat-list{display:flex; flex-direction:column}
