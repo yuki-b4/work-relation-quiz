@@ -353,8 +353,11 @@ function handleGuideUnsub(token) {
 // ================= テスト =================
 
 // 自分のアドレスに3通まとめて送って文面を確認する（ログには何も記録しない）
-// 例: sendGuideTest('you@example.com', 'OBL')
+// エディタの関数リストから引数なしで実行できる（実行中のアカウント宛に OBL の3通が届く）。
+// 別のタイプや宛先を試すときだけ引数を渡す。例: sendGuideTest('you@example.com', 'GKS')
 function sendGuideTest(email, typeCode) {
+  email = email || Session.getActiveUser().getEmail();
+  typeCode = typeCode || 'OBL';
   var names = {};
   GUIDE_TYPES.forEach(function (t) { names[t.code] = true; });
   if (!names[typeCode]) throw new Error('タイプコードが不正です: ' + typeCode);
@@ -364,5 +367,5 @@ function sendGuideTest(email, typeCode) {
     var mail = buildGuideMail(day, typeCode, typeName, 'TEST-TOKEN');
     sendGuideMail_(email, '【テスト】' + mail.subject, mail.body);
   });
-  return typeCode + ' の3通を ' + email + ' に送信しました';
+  return report_(typeCode + ' の3通を ' + email + ' に送信しました');
 }

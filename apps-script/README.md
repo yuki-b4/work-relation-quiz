@@ -60,7 +60,7 @@ const SHEET_ENDPOINT = 'ここにウェブアプリのURL';
    - `sender_name`（送信者名）／`sender_contact`（フッターの連絡先表示）／`sender_signature`（Day3署名）
    - `quiz_url`（診断URL）／`survey_url`（アンケートフォームURL）／`webapp_url`（このWebアプリのURL。配信停止リンクに使う）
    - `sender_from`（差出人アドレス。空欄ならスクリプトを承認したGoogleアカウントから送る）／`reply_to`（返信先。空欄なら差出人と同じ）。詳細は下記「差出人アドレスを変える」
-3. **テスト送信**：エディタで `sendGuideTest('自分のメール', 'OBL')` を実行すると、3通まとめて届く（ログには記録されない）。
+3. **テスト送信**：エディタで **`sendGuideTest`** を選んで実行すると、実行中のアカウント宛にOBLの3通がまとめて届く（ログには記録されない）。宛先やタイプを変えたいときだけ、エディタは引数を渡せないので `function t(){ sendGuideTest('you@example.com','GKS'); }` のような呼び出し用の関数を一時的に足して実行する。
 4. **通しテスト**：`prototype.html?mode=lead` から自分のメールで申込 → Day1が即時に届く → 翌朝8時にDay2（待てない場合は `sendGuideDailyBatch` を手動実行。ただし日数条件があるため、検証時は回答ログの `guide_day1_at` を前日の日付に書き換えてから実行する）→ フッターの配信停止リンクで `optout_at` が記録されることを確認。
 
 ### あとから Guide.gs を導入した場合（既存の登録者を救済する）
