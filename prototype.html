@@ -465,8 +465,39 @@
   .bk-body{font-family:var(--serif); font-size:15.5px; line-height:2.15; letter-spacing:.02em; color:var(--bk-ink)}
   .bk-body p{margin-bottom:1.55em}
   .bk-body p:last-child{margin-bottom:0}
-  .bk-em{font-weight:600; color:var(--bk-ink); background:linear-gradient(transparent 62%, var(--accent-soft) 62%)}
-  .bk-hit{font-size:17px; font-weight:600; line-height:1.95; color:var(--bk-ink)}
+  /* 強調は4段階。上から順に強く、章の中で使う数を絞って効かせる。
+       ①傍点（.bk-kt）… 文中のひと呼吸。日本語の本の基本の強調
+       ②太ゴシック（.bk-b）… 明朝の地に混ぜる。具体的な言葉・セリフに
+       ③マーカー（.bk-em）… 著者が【】で括った語
+       ④抜き出し（.bk-pull）／白抜きの帯（.bk-band）… 章に1つだけ置く山 */
+  .bk-kt{
+    font-style:normal; font-weight:600;
+    -webkit-text-emphasis:filled sesame var(--accent-ink); text-emphasis:filled sesame var(--accent-ink);
+    -webkit-text-emphasis-position:over right; text-emphasis-position:over right;
+  }
+  .bk-b{font-family:var(--display); font-weight:700; font-size:.93em; letter-spacing:.005em}
+  .bk-em{font-weight:700; color:var(--bk-ink); background:linear-gradient(transparent 56%, var(--accent-soft) 56%); padding:0 .08em}
+  .bk-pull{
+    margin:2em 0 1.8em; padding:17px 6px; text-align:center;
+    border-top:2px solid var(--bk-ink); border-bottom:1px solid var(--bk-rule);
+    font-family:var(--serif); font-weight:600; font-size:17px; line-height:1.9; letter-spacing:.04em; color:var(--bk-ink);
+  }
+  .bk-band{
+    margin:2em 0 1.8em; padding:20px 18px; border-radius:4px; color:#fff;
+    background:linear-gradient(165deg, #3A444F 0%, #1E252D 100%);
+    font-family:var(--serif); font-weight:600; font-size:16px; line-height:2; letter-spacing:.03em;
+  }
+  /* 暗い面ではマーカーが濁るので、アクセント色の下線に置き換える */
+  .bk-band .bk-em{color:#fff; background:linear-gradient(transparent 86%, var(--accent) 86%); padding:0}
+  .bk-band .bk-kt{-webkit-text-emphasis-color:#fff; text-emphasis-color:#fff}
+  /* 約束・効能の箇条書きは、色面で囲って一目で拾えるようにする */
+  .bk-promise{margin:0 0 1.6em; padding:18px 18px 10px; border:1.5px solid var(--accent); border-radius:4px; background:var(--accent-soft)}
+  .bk-promise .bk-star{margin-bottom:0}
+  .bk-promise .bk-star li{font-weight:600}
+  .bk-hit{
+    font-size:18.5px; font-weight:600; line-height:1.9; color:var(--bk-ink); letter-spacing:.02em;
+    padding:2px 0 2px 16px; border-left:4px solid var(--accent); margin-bottom:1.5em !important;
+  }
   .bk-ready{font-weight:600; letter-spacing:.04em}
   .bk-div{text-align:center; letter-spacing:.7em; color:var(--bk-faint); font-size:11px; margin:0 0 1.9em}
   /* 節見出し（⭐️⚠️などの記号見出しは、本の体裁では組版で表す） */
@@ -477,21 +508,23 @@
   /* 環境カード・特徴カード：枠で囲わず、罫線と見出しで区切る（本文の流れを切らない） */
   .bk-card{margin-bottom:1.4em; padding-left:14px; border-left:1px solid var(--bk-rule)}
   .bk-card-l{font-family:var(--serif); font-weight:600; font-size:14.5px; color:var(--bk-ink); margin-bottom:.35em !important; letter-spacing:.03em}
+  .bk-card-l::before{content:"■"; color:var(--accent); font-size:.72em; margin-right:.6em; vertical-align:.1em}
   .bk-card-t{font-size:14.5px; line-height:2.05; color:var(--bk-soft); margin-bottom:0 !important}
   .bk-card-drain{border-left-color:var(--accent)}
   .bk-card-drain .bk-card-l{color:var(--accent-ink)}
-  /* コラム（トリセツ・裏モード）：本の中の別枠 */
-  .bk-col{background:rgba(255,255,255,.7); border:1px solid var(--bk-rule); border-radius:4px; padding:20px 18px 18px; margin:0 0 1.9em}
+  /* コラム（トリセツ・裏モード）：本の中の別枠。見出しは色面で抜いて、面として強く見せる。 */
+  .bk-col{background:rgba(255,255,255,.75); border:1px solid var(--bk-rule); border-radius:4px; margin:0 0 1.9em; overflow:hidden}
   .bk-col-l{
-    font-family:var(--serif); font-weight:600; font-size:13px; letter-spacing:.18em; color:var(--accent-ink);
-    text-align:center; margin-bottom:1.1em !important;
-    padding-bottom:11px; border-bottom:1px solid var(--bk-rule);
+    font-family:var(--serif); font-weight:600; font-size:13.5px; letter-spacing:.2em;
+    background:var(--accent); color:#fff; text-align:center; padding:13px 14px; margin:0 !important;
   }
+  .bk-col-in{padding:17px 18px 8px}
   .bk-col-lead{font-size:13.5px; line-height:2; color:var(--bk-soft)}
   .bk-ts{padding:11px 0; border-top:1px solid var(--bk-rule)}
-  .bk-ts-l{display:block; font-family:var(--serif); font-weight:600; font-size:13px; color:var(--accent-ink); margin-bottom:3px}
+  .bk-ts-l{display:block; font-family:var(--display); font-weight:700; font-size:12.5px; color:var(--accent-ink); margin-bottom:4px; letter-spacing:.02em}
   .bk-ts-t{display:block; font-size:14px; line-height:2}
-  .bk-col-warn{background:rgba(255,255,255,.55); border-style:dashed}
+  .bk-col-warn .bk-col-l{background:#3A424C}
+  .bk-col-warn .bk-ts-l{color:#3A424C}
   /* 箇条書き（☆・□・①②③）。原文の記号をそのまま組版に写す。 */
   .bk-star, .bk-box, .bk-num{list-style:none; margin:0 0 1.55em; padding-left:2px}
   .bk-star li, .bk-box li, .bk-num li{position:relative; padding-left:1.6em; line-height:2.05; margin-bottom:.35em; font-size:15px}
@@ -512,9 +545,30 @@
   /* 転（あなたという半分）：ページで一番強い段落 */
   .bk-turn{margin:0 0 1.55em; padding:20px 18px; background:rgba(38,34,29,.045); border-radius:4px}
   .bk-turn p:last-child{margin-bottom:0 !important}
-  /* 次章の引き */
-  .bk-teaser{margin:0 0 1.55em; padding-left:14px; border-left:3px solid var(--accent-soft)}
+  /* 次章の引き：枠に見出しラベルを食い込ませる（本の囲み記事の型） */
+  .bk-teaser{position:relative; margin:2.4em 0 1.55em; padding:20px 16px 6px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.6)}
+  .bk-teaser-l{
+    position:absolute; top:-9px; left:14px; padding:0 9px; background:var(--paper);
+    font-family:var(--serif); font-weight:600; font-size:11px; letter-spacing:.24em; color:var(--accent-ink);
+  }
   .bk-teaser p:last-child{margin-bottom:0 !important}
+  /* 図解：テンポを変えるための挿図。外部素材は使わず、自作のインラインSVGで組む。 */
+  .bk-fig{margin:0 0 1.9em; padding:20px 15px 16px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.72)}
+  .bk-fig-cap{
+    font-family:var(--serif); font-weight:600; font-size:11.5px; letter-spacing:.2em; color:var(--bk-faint);
+    text-align:center; margin-bottom:16px !important;
+  }
+  .bk-fig-step{display:flex; align-items:center; gap:13px; padding:11px 13px; border:1px solid var(--bk-rule); border-radius:4px; background:var(--paper)}
+  .bk-fig-step.is-goal{border-color:var(--accent); background:var(--accent-soft)}
+  .bk-fig-ico{
+    flex:none; width:40px; height:40px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bk-fig-step.is-goal .bk-fig-ico{background:var(--accent); color:#fff}
+  .bk-fig-ico svg{width:23px; height:23px}
+  .bk-fig-t{font-family:var(--serif); font-weight:600; font-size:14.5px; line-height:1.7; color:var(--bk-ink)}
+  .bk-fig-ar{text-align:center; color:var(--accent); font-size:12px; line-height:1; padding:8px 0}
+  .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
   /* 診断を送る（第三章の次の一歩） */
   .bk-share{margin:0 0 1.55em; padding:16px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
   .bk-share-url{
@@ -848,7 +902,7 @@ const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxT
 //   空のままだとボタンは押せない見た目になり、未設定であることを画面に出す。
 const SESSION_FORM_URL = '';
 // ▼ 読み解きガイド冒頭の名乗り。Apps Script「ガイド設定」シートの sender_name と同じ値を入れる。
-const GUIDE_AUTHOR = '〔送信者名（要確定）〕';
+const GUIDE_AUTHOR = 'Mikata事務局 齋藤 祐希';
 
 // ▼ セグメント判定：?ref= の値から「受け手の立場」を決める。セグメントごとに必要な情報とCTAだけを
 //   出し、ファネルの通過率を上げるのが狙い。判定は4つ。
@@ -1513,14 +1567,32 @@ function bkRows(pairs){
   }).join('');
 }
 const BK_DIV='<div class="bk-div">＊　＊　＊</div>';
+// タイプ別本文への強調は、8タイプで同じ形をしている箇所に機械的に当てる（文言はmdのまま）。
+// bkQ：n番目の「」を太ゴシックに（具体的なセリフ・行動を拾う）／bkKt：語句に傍点。
+function bkQ(s,n){
+  let i=0;
+  return s.replace(/「([^」]*)」/g, function(m,inner){
+    i++; return i===n ? '「<b class="bk-b">'+inner+'</b>」' : m;
+  });
+}
+function bkKt(s,phrase){
+  return s.indexOf(phrase)<0 ? s : s.replace(phrase, '<em class="bk-kt">'+phrase+'</em>');
+}
+// 挿図：ひと続きの理屈を3つの段に分けて見せる。アイコンは結果画面のエンブレムと同じ線の太さで自作。
+function bkFigStep(icon,text,goal){
+  return '<div class="bk-fig-step'+(goal?' is-goal':'')+'"><span class="bk-fig-ico">'
+       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg>'
+       + '</span><span class="bk-fig-t">'+text+'</span></div>';
+}
 
 // 序章：自己紹介・目的の設定・目次（Day1冒頭のガワ）
 function bkPrologue(t){
   return ''
-  + '<p>こんにちは。<br>人間関係タイプ診断をつくっている'+GUIDE_AUTHOR+'と申します。<br>診断を受けてくださり、ありがとうございます。</p>'
-  + '<p>このガイドを開いたあなたは、きっと人間関係に不安や苦手意識を抱えている方だと思います。<br>大丈夫です、私も実はそうでした。</p>'
+  + '<p>こんにちは。<br>人間関係タイプ診断をつくっている<br>'+GUIDE_AUTHOR+'と申します。<br>診断を受けてくださり、ありがとうございます。</p>'
+  + '<p>このガイドを開いたあなたは、きっと人間関係に不安や苦手意識を抱えている方だと思います。<br>大丈夫です、<em class="bk-kt">私も実はそうでした</em>。</p>'
   + BK_DIV
-  + '<p>少しだけ、自己紹介をさせてください。<br>実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</p>'
+  + '<p>少しだけ、自己紹介をさせてください。</p>'
+  + '<div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>'
   + '<p>相手のことが好きになっても、相手を傷つけて嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>'
   + '<p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>'
   + BK_DIV
@@ -1529,18 +1601,28 @@ function bkPrologue(t){
   + '<p>なぜなら、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになったからです。</p>'
   + '<p>このガイドでは、私自身があなたのタイプ「'+t.name+'」を、3つの章で読み解いていきます。</p>'
   + '<p>読み終えたあなたは、</p>'
-  + '<ul class="bk-star"><li>人間関係の不安の正体が見えている</li>'
+  + '<div class="bk-promise"><ul class="bk-star"><li>人間関係の不安の正体が見えている</li>'
   + '<li>あなたにとって大切な人を、いまより深く理解するきっかけを得られている</li>'
-  + '<li>自然体でいるための方法が分かっている</li></ul>'
+  + '<li>自然体でいるための方法が分かっている</li></ul></div>'
   + '<p>と確信しています。</p>'
   + BK_DIV
   + '<p>第一章は、あなたが自然体でいられる環境についてお話しします。</p>'
   + '<p>なぜ、このテーマなのか？<br>それは、あなたが自然体でいられる環境がわかることで、相手のことを深く理解する土台ができるからです。</p>'
   + '<p>どういうことかというと、あなたが自然体でいられる自由を手に入れると、相手を深く理解しようという余裕と気持ちが生まれるので、まずは自分が自然体でいられるように自分を見つめ直した方が良い。ということです。</p>'
+  // 理屈が一本道であることを図で見せる（文字が続く区間のテンポを変える）
+  + '<div class="bk-fig">'
+  + '<p class="bk-fig-cap">図　まず自分、それから相手</p>'
+  + bkFigStep('<circle cx="12" cy="5.6" r="2.8"/><path d="M12 8.6v6.2"/><path d="M12 10.8L7.4 13.6"/><path d="M12 10.8l4.6 2.8"/><path d="M12 14.8l-3.2 5.2"/><path d="M12 14.8l3.2 5.2"/>','自分が自然体でいられる')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<circle cx="12" cy="12" r="9.2" stroke-dasharray="2.6 3.2"/><circle cx="12" cy="10.2" r="2.2"/><path d="M8.3 16.6c0-2 1.7-3.6 3.7-3.6s3.7 1.6 3.7 3.6"/>','心に余裕が生まれる')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<circle cx="7.4" cy="8.4" r="2.6"/><path d="M3.2 17.8c0-2.3 1.9-4.2 4.2-4.2s4.2 1.9 4.2 4.2"/><circle cx="17" cy="9.4" r="2.2"/><path d="M13.4 17.8c0-2 1.6-3.6 3.6-3.6s3.6 1.6 3.6 3.6"/><path d="M11 6.4c1.6-1.1 3.4-1.3 5 0"/>','相手を深く理解できる', true)
+  + '<p class="bk-fig-note">だから、遠回りに見えても、<br>先に自分を見つめ直す。</p>'
+  + '</div>'
   + '<p>想像してみてほしいのですが、</p>'
   + '<div class="bk-ab"><p><span class="bk-ab-k">A.</span>自分のことを全然理解してくれず、一緒にいて窮屈に感じる人</p>'
   + '<p><span class="bk-ab-k">B.</span>自分のことを深く理解してくれて、自然体で居させてくれる人</p></div>'
-  + '<p>圧倒的にBさんの方が、「もっと理解してあげたい」と思えるはずです。</p>'
+  + '<p class="bk-pull">圧倒的にBさんの方が、<br>「もっと理解してあげたい」と思えるはずです。</p>'
   + '<p>つまりこのガイドは、相手のことよりも、あなた自身と深く向き合い、あなたの強みや弱みを正しく理解し、大切な人の目の前で自然体でいられる準備をしよう、という3つの章になります。</p>'
   + '<p>そのために、この順番で進めます。</p>'
   + '<div class="bk-toc"><p class="bk-toc-h">目次</p>'
@@ -1555,22 +1637,24 @@ function bkPrologue(t){
 function bkChapter1(t,g){
   return ''
   + '<p class="bk-hit">'+g.hit+'</p>'
-  + '<p>それは、'+t.name+'のあなたの「自然体」が、ふと顔を出した瞬間です。</p>'
-  + '<p>あなたの持ち味をそのまま'+g.ikashi+'にしたいなら、「あなたの持ち味がどんな環境で活きるのか？」ということを知っておく必要があります。'+t.name+'タイプのあなたが自然体でいられるのは、こんな環境です。</p>'
+  + '<p>それは、'+t.name+'のあなたの「<b class="bk-b">自然体</b>」が、<em class="bk-kt">ふと顔を出した瞬間</em>です。</p>'
+  + '<p>あなたの持ち味を<em class="bk-kt">そのまま'+g.ikashi+'にしたい</em>なら、「あなたの持ち味がどんな環境で活きるのか？」ということを知っておく必要があります。'+t.name+'タイプのあなたが自然体でいられるのは、こんな環境です。</p>'
   + bkCards(g.envs)
-  + bkCards([{l:'逆に、消耗しやすい場',t:g.drain}],' bk-card-drain')
-  + '<div class="bk-col"><p class="bk-col-l">私のトリセツ</p>'
+  + bkCards([{l:'逆に、消耗しやすい場',t:bkKt(g.drain,'あなたの良さはむしろ空回りして消耗してしまいます')}],' bk-card-drain')
+  + '<div class="bk-col"><p class="bk-col-l">私のトリセツ</p><div class="bk-col-in">'
   + '<p class="bk-col-lead">これは、大切な人や身近な人に「私はこういう人間です」と渡せる要約です。パートナーでも、家族でも、職場の人でも構いません。まずは渡すのが苦ではない人から、順番に渡していきましょう。あなたの思わぬ一面に相手が気づくはずです。</p>'
   + bkRows(g.tori.map(function(x,i){ return [TORI_LABEL[i],x]; }))
-  + '</div>'
+  + '</div></div>'
   + BK_DIV
   + '<p>ここまで読んで、<br>「当たってる。」<br>「そんな一面あるかな？」<br>それぞれの感想があると思います。</p>'
   + '<p>この章の最後に一つだけお伝えします。</p>'
-  + '<p>「この「トリセツ」を、わざわざ渡すなんてなぁ」と感じたかもしれませんが、やはり察するだけでは理解し合うには限界があります。そこで、こうして見える形にした「道具」が必要になります。</p>'
+  + '<p>「この「トリセツ」を、わざわざ渡すなんてなぁ」と感じたかもしれませんが、やはり<em class="bk-kt">察するだけでは理解し合うには限界があります</em>。そこで、こうして見える形にした「<b class="bk-b">道具</b>」が必要になります。</p>'
   + '<p>このガイドでは、あなたが今日から使える道具が何個も出てきます。</p>'
-  + '<p>この章では「あなたのトリセツ」をお渡ししました。<br>この道具は、第三章でもう一度、大きな意味を持って戻ってきます。</p>'
-  + '<div class="bk-teaser"><p>次の章では、あなたの中の「もう一人のあなた」の話をします。</p>'
-  + '<p>なぜ、大切にしたい人にこそ、きつく当たってしまう日があるのか。<br>その正体を、名指しでお伝えします。</p></div>';
+  + '<p>この章では「あなたのトリセツ」をお渡ししました。</p>'
+  + '<p class="bk-pull">この道具は、第三章でもう一度、<br>大きな意味を持って戻ってきます。</p>'
+  + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
+  + '<p>次の章では、あなたの中の「もう一人のあなた」の話をします。</p>'
+  + '<p>なぜ、大切にしたい人にこそ、きつく当たってしまう日があるのか。<br>その正体を、<em class="bk-kt">名指しで</em>お伝えします。</p></div>';
 }
 // 第二章：関わり方のパターンと裏モード（Day2冒頭＋本文＋教育ブロック）
 function bkChapter2(t,g){
@@ -1579,28 +1663,29 @@ function bkChapter2(t,g){
   + '<p>まだ渡せていない人は、ぜひ一人に渡してみてください。<br>この章では、そのトリセツの「裏側」に踏み込みます。</p>'
   + BK_DIV
   + '<p>ひとつ、質問をさせてください。</p>'
-  + '<p>最近、帰ってきたらどっと疲れていたり、イライラしやすかったりしていませんか？<br>それ実は、あなたが無理をして人間関係を頑張ろうとしてしまっている「サイン」かもしれません。</p>'
-  + '<p>無理をしてしまう仕組みには、タイプごとのパターンがあります。<br>この章では、あなたのパターンを読み解きます。</p>'
+  + '<p>最近、帰ってきたらどっと疲れていたり、イライラしやすかったりしていませんか？<br>それ実は、あなたが無理をして人間関係を頑張ろうとしてしまっている「<b class="bk-b">サイン</b>」かもしれません。</p>'
+  + '<p>無理をしてしまう仕組みには、<em class="bk-kt">タイプごとのパターン</em>があります。<br>この章では、あなたのパターンを読み解きます。</p>'
   + '<p>少しだけ、耳の痛い話になるかもしれません。<br>でも、読んだ後には、あなたがハマりやすい落とし穴が見えてきているはずです。</p>'
   + '<p class="bk-ready">それでは、第二章を始めましょう。</p>'
   + BK_DIV
   + '<p>「あなたが無意識のうちに身近な人とどう関わっているか」を理解して、注意するポイントがわかると、やりがちな人間関係のエラーを避けられます。</p>'
   + '<div class="bk-sec">あなたの関わり方の特徴</div>'
   + bkCards(g.traits)
-  + '<div class="bk-col bk-col-warn"><p class="bk-col-l">あなたの「裏モード」</p>'
-  + '<p class="bk-col-lead">余裕がある時のあなたは、'+g.calm+'です。でも、余裕を失うと別の顔が現れることがあります。</p>'
-  + bkRows([['引き金',g.trigger],['裏モードの症状',g.symptom],['予防策',g.prevent]])
-  + '</div>'
+  + '<div class="bk-col bk-col-warn"><p class="bk-col-l">あなたの「裏モード」</p><div class="bk-col-in">'
+  + '<p class="bk-col-lead">余裕がある時のあなたは、'+g.calm+'です。でも、<em class="bk-kt">余裕を失うと別の顔が現れる</em>ことがあります。</p>'
+  + bkRows([['引き金',g.trigger],['裏モードの症状',bkQ(g.symptom,1)],['予防策',bkQ(g.prevent,1)]])
+  + '</div></div>'
   + BK_DIV
   + '<p>ここまで読んで、「裏モード、身に覚えがある...」という方も多いと思います。</p>'
-  + '<p>先に、大事なことを言わせてください。<br>裏モードは、人のダメなところでもなく欠陥でもありません。</p>'
-  + '<p>もっと自然体で人間関係を構築するための「伸び代」です。</p>'
+  + '<p>先に、大事なことを言わせてください。<br>裏モードは、<em class="bk-kt">人のダメなところでもなく欠陥でもありません</em>。</p>'
+  + '<p>もっと自然体で人間関係を構築するための「<b class="bk-b">伸び代</b>」です。</p>'
   + '<p>その上で、この章の最後に一つだけお伝えします。</p>'
   + '<p>クセは自分だけでは気づくことができません。<br>あなたが無意識にやっていることだからです。</p>'
   + '<p>つまり、どれだけ予防しようと知識を蓄えても、裏モードに入って抜けた時にようやく「やっちまった...」と気づくことしかできないのです。</p>'
-  + '<p>多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</p>'
-  + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、あまりにもったいないと思いませんか。</p>'
-  + '<div class="bk-teaser"><p>そこで、次の第三章では、あなたの「あの人」の見え方が変わる、最後の種明かしを用意しています。</p>'
+  + '<div class="bk-band">多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</div>'
+  + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、<em class="bk-kt">あまりにもったいない</em>と思いませんか。</p>'
+  + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
+  + '<p>そこで、次の第三章では、あなたの「あの人」の見え方が変わる、<em class="bk-kt">最後の種明かし</em>を用意しています。</p>'
   + '<p>身近な誰か一人を思い浮かべながら読むと、効き目が何倍にもなります。</p></div>'
   + '<p>この章では「裏モードの引き金と予防策」をお渡ししました。<br>まずは予防策を、今日か明日、ひとつ試してみてください。</p>';
 }
@@ -1610,22 +1695,23 @@ function bkChapter3(t,g){
   + '<p>いよいよ、読み解きの最終章です。</p>'
   + '<p>その前に、一つだけ。<br>ここまで読み進めてきたあなたは、実はかなり少数派です。<br>耳の痛いことを言ってしまってすみません（笑）<br>でも、ここまで自分と向き合い続けたこと、誇って良いと思います。</p>'
   + '<p>はじめに置いたゴールを、もう一度だけ確認させてください。</p>'
-  + '<p>このガイドのゴールは、<b class="bk-em">【あなたにとって大切な人を、いまより深く理解してあげられるようになる】</b>こと。</p>'
+  + '<div class="bk-band">このガイドのゴールは、<b class="bk-em">【あなたにとって大切な人を、いまより深く理解してあげられるようになる】</b>こと。</div>'
   + '<p>第一章では「あなたが自然体でいられる環境」を、第二章では「関わり方のクセと裏モード」を読み解きました。</p>'
-  + '<p>自分のことがわかったら、次はいよいよ、相手のことです。</p>'
+  + '<p>自分のことがわかったら、<em class="bk-kt">次はいよいよ、相手のこと</em>です。</p>'
   + '<p>前の章で予告した「最後の種明かし」も、この中に用意してあります。</p>'
   + '<p>ここからは、その実践編。</p>'
   + '<p class="bk-ready">それでは、第三章を始めましょう。</p>'
   + BK_DIV
   + '<p>第一章と第二章では、あなた自身のことに目を向けてきました。この章では、あなたの身近な関係に目を向けます。パートナー、家族、友人、職場の人。「この人との関わりを、もう少し楽にしたい・良くしたい」と感じる相手を、一人思い浮かべてください。</p>'
   + '<div class="bk-sec">あなたの「関係のクセ」</div>'
-  + '<p>'+g.kuse+'</p>'
-  + '<p>'+g.notice1+'</p>'
-  + '<p>'+g.notice2+'</p>'
+  + '<p>'+bkKt(g.kuse,'それが相性の正体です。')+'</p>'
+  + '<p>'+bkQ(g.notice1,2)+'</p>'
+  + '<p>'+bkQ(g.notice2,2)+'</p>'
   + '<div class="bk-turn">'
-  + '<p>このように、<br>あなたが良しとしていることが、<br>相手にとっては苦手なこと・嫌なことになってしまっているかもしれません。</p>'
+  + '<p>このように、<br>あなたが良しとしていることが、<br><em class="bk-kt">相手にとっては苦手なこと・嫌なこと</em>になってしまっているかもしれません。</p>'
   + '<p>ここで、このガイドで大切なことをお伝えします。</p>'
-  + '<p>人間関係は、必ず「あなた」と「相手」の二人でできています。<br>ここまでで読み解いてきたのは、そのうちの<b class="bk-em">【あなたという半分】</b>です。</p>'
+  + '<p>人間関係は、必ず「あなた」と「相手」の二人でできています。</p>'
+  + '<div class="bk-band">ここまでで読み解いてきたのは、そのうちの<b class="bk-em">【あなたという半分】</b>です。</div>'
   + '<p>あなたが自然体でいられる環境。<br>あなたの関わり方のクセ。<br>相手からどう見られることが多いのか。<br>ここまでは、見えるようになりました。</p>'
   + '<p>で、もう半分。<br>相手が何を心地よく感じ、何を苦手とし、あなたの関わりをどう受け取っているのか。<br>これは、相手のタイプが分からないと読み解けません。</p>'
   + '</div>'
@@ -1639,18 +1725,18 @@ function bkChapter3(t,g){
 function bkEpilogue(){
   return ''
   + '<p>最後に、ここまでの読み解きができるようになったことで、私自身に起きた変化を二つだけお話しさせてください。</p>'
-  + '<p>特に若い時には悩んでいた恋愛では、「相手からどう思われるか」という不安が消えて、自然体のままで相手を喜ばせられるようになりました。</p>'
+  + '<p>特に若い時には悩んでいた恋愛では、「相手からどう思われるか」という<em class="bk-kt">不安が消えて</em>、自然体のままで相手を喜ばせられるようになりました。</p>'
   + '<p>素を隠すために使っていた力を、そのまま相手に向けられるようになったんですね。これは素直に嬉しかったし、妻が喜んでいるのを見ると、ああ、よかったなぁと思えます。</p>'
   + '<p>そして、母のこと。</p>'
   + '<p>母は心配性でした。<br>「それって大丈夫なの？」という言葉に、私はずっとイライラしていました。</p>'
-  + '<p>でもある時、母親の心配は愛情表現であると気付けました。相手への理解が深まったら、こんなにも捉え方が変わるんだと、身をもって感じることができたんです。</p>'
+  + '<p>でもある時、<em class="bk-kt">母親の心配は愛情表現である</em>と気付けました。相手への理解が深まったら、こんなにも捉え方が変わるんだと、身をもって感じることができたんです。</p>'
   + '<p>距離を置きたくなるようなストレスを感じる言葉も、無償の愛として受け取れたら、家族の関係は、想像できないほど温かいものになります。</p>'
   + BK_DIV
   + '<p>このガイドで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>「あなたの関係のクセ」<br>という道具をお渡ししました。</p>'
   + '<p>正直にお伝えすると、これらの道具があっても、まだあなたの人間関係の悩みや不安は解消されません。</p>'
   + '<p>なぜなら、あなた自身がこの道具を使いこなし、自分が自然体でいられる環境を作っていかないといけないからです。</p>'
   + '<p>もう気づいていると思いますが、人間関係は人生の中で最も大きな悩みの種の一つです。でも実は、この悩みがなくならない理由があります。</p>'
-  + '<p>それは、<b class="bk-em">【一人では何をどう変えたら良いかわからないから】</b></p>'
+  + '<div class="bk-band">それは、<b class="bk-em">【一人では何をどう変えたら良いかわからないから】</b></div>'
   + '<p>あなたが理想とする人生や人間関係を想像してみてください。<br>それを叶えるために</p>'
   + '<ul class="bk-box"><li>生かせる強みはどれか</li><li>どこを変えたら良いのか</li><li>どこから手をつけたら良いのか</li></ul>'
   + '<p>これらの問いにパッとすぐに答えが出る人は、ほとんどいません。</p>'
@@ -1659,11 +1745,11 @@ function bkEpilogue(){
   + '<li data-n="②">自分の本当の伸び代に気づけていない</li>'
   + '<li data-n="③">どうやったら自分の伸び代を伸ばせるかがわからない</li></ol>'
   + '<p>という難しさがあるからです。</p>'
-  + '<p>でも、あなたと同じように人間関係の苦しみや辛さを乗り越えた心の専門家である私と一緒に読み解けば、</p>'
-  + '<ul class="bk-star"><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
+  + '<p>でも、あなたと同じように人間関係の苦しみや辛さを乗り越えた<em class="bk-kt">心の専門家である私と一緒に読み解けば</em>、</p>'
+  + '<div class="bk-promise"><ul class="bk-star"><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
   + '<li>あなた自身が生きやすい状態で</li>'
-  + '<li>自然体で相手を大切にできるようになります。</li></ul>'
-  + '<p>まさに、霧が晴れたような感覚です。</p>';
+  + '<li>自然体で相手を大切にできるようになります。</li></ul></div>'
+  + '<p class="bk-pull">まさに、霧が晴れたような感覚です。</p>';
 }
 function bkChapters(code){
   const t=TYPES[code], g=GUIDE_BODY[code];
