@@ -33,25 +33,42 @@ COMMON = [
 # M4切替は「ガイド文面」シートのこの行を差し替えるだけ（§9）。
 CTA_BETA = """最後に、一つだけお願いがあります。
 
-いま、特定の相手との関係を一対一で読み解く
-「関係性読み解きガイド」と「読み解きセッション」を準備しています。
+いま、あなたの
+「いま引っかかっている関係」を
+一緒に読み解く体験セッションを
+準備しています。
 
-完成したら、下のアンケートにお答えいただいた方に、
-先行してご案内します（一般のご案内より早くお届けします）。
+下のアンケートにお答えいただいた方に、
+案内ができ次第、先行してお知らせします
+（一般のご案内より早くお届けします）。
 
 ▼ 3日間のアンケート（2問・約1分）
 →〔アンケートURL〕
 
-① 3日間で、いちばん刺さった日はどれでしたか？（Day1／Day2／Day3）
-② この読み解きが、特定の相手との関係を一対一で深掘りする有料ガイドになったら、いくらまでなら試したいですか？（〜500円／〜1,000円／〜3,000円／〜5,000円／試さない）
-＋任意の感想もいただけると嬉しいです。メール欄は必須です（先行案内の照合に使います）。
+① 3日間で、
+いちばん刺さった日はどれでしたか？
+（Day1／Day2／Day3）
+
+② あなたの
+「いま引っかかっている関係」を
+一緒に読み解く体験セッション
+（無料・30〜45分）があったら、
+受けてみたいですか？
+（ぜひ受けたい／内容次第で受けたい／
+今はいい）
+
+＋任意の感想もいただけると嬉しいです。
+メール欄は必須です
+（先行案内の照合に使います）。
 
 〔送信者名・連絡先（要確定）〕"""
 
 # フッター（§8・特定電子メール法対応）
-FOOTER = """診断の深掘り申込をいただいた方にお送りしています。
+FOOTER = """診断の深掘り申込をいただいた方に
+お送りしています。
 送信者：〔氏名または名称・連絡先（要確定）〕
-このガイドの配信を停止する →〔配信停止URL〕"""
+このガイドの配信を停止する
+→〔配信停止URL〕"""
 
 COMMON.append((3, "cta", CTA_BETA))
 COMMON.append((0, "footer", FOOTER))
@@ -66,12 +83,80 @@ def md_to_plain(md):
         elif line == ">":
             line = ""
         if line.startswith("- "):
-            line = "・" + line[2:]
+            line = "◎ " + line[2:]
         line = re.sub(r"\*\*(.+?)\*\*", r"\1", line)  # 太字は装飾なしに（【】は本文が明示指定した箇所のみ）
         out.append(line)
     text = "\n".join(out)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+# ---------- 配信用の整形（スマホ前提：1行20文字・リストは1件ずつ離す） ----------
+WRAP_WIDTH = 20
+BREAK_AFTER = "、。！？）」』】〕"   # この文字の直後は強い切れ目
+NO_START    = "、。！？」』）】〕｝〉・ー：；，．ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ々"
+NO_END      = "「『（【〔｛〈"        # 行末に置かない
+HIRAGANA    = re.compile(r"[ぁ-ん]")
+KATAKANA    = re.compile(r"[ァ-ヴー]")
+UNBREAKABLE = re.compile(r"〔[^〕]*〕|https?://\S+")  # プレースホルダとURLは分断しない
+
+PARTICLES = "をはがにでとものかねよへ"  # 1文字の助詞
+
+def hira_run(s, i):
+    """s[i-1] を末尾とするひらがなの連続長"""
+    n = 0
+    while i - 1 - n >= 0 and HIRAGANA.match(s[i - 1 - n]):
+        n += 1
+    return n
+
+def find_break(s, lo, hi):
+    """lo〜hi の範囲で自然な切れ目を右から探す。見つからなければ -1。
+    句読点・閉じ括弧の直後か、助詞から漢字・カタカナへ移る境目を文節の切れ目とみなす。"""
+    for i in range(hi, lo - 1, -1):
+        if s[i] in PARTICLES:
+            continue  # 助詞は前の語にくっつくので、行頭に置かない
+        if s[i - 1] in BREAK_AFTER:
+            return i
+        if s[i - 1] in "おご":
+            continue  # 「お送りします」のような接頭辞を切り離さない
+        if HIRAGANA.match(s[i - 1]) and not HIRAGANA.match(s[i]) and s[i] not in NO_START:
+            # 漢字＋送り仮名1文字＋漢字は「引っ張る」「言い切る」のような複合語。切らない
+            if s[i - 1] in PARTICLES or hira_run(s, i) >= 2:
+                return i
+    return -1
+
+def wrap_line(s, width=WRAP_WIDTH):
+    """1行を width 文字以内に折る。既存の改行は尊重し、この関数は1行だけを見る。"""
+    out = []
+    while len(s) > width:
+        hi = min(width, len(s) - 3)  # 余りが2文字以下の孤立行にならないようにする
+        lo = max(int(width * 0.4), 1)
+        cut = find_break(s, lo, hi) if hi >= lo else -1
+        if cut <= 0:  # 自然な切れ目がないので詰めて切る。禁則とカタカナ語の分断だけ避ける
+            cut = max(hi, 1)
+            for _ in range(4):
+                if cut > 1 and (s[cut] in NO_START or s[cut - 1] in NO_END or
+                                (KATAKANA.match(s[cut]) and KATAKANA.match(s[cut - 1]))):
+                    cut -= 1
+                else:
+                    break
+        for m in UNBREAKABLE.finditer(s):  # 〔〕やURLの内側で切らない
+            if m.start() < cut < m.end():
+                cut = m.start() if m.start() > 0 else m.end()
+                break
+        if cut <= 0:
+            cut = min(width, len(s))
+        out.append(s[:cut].rstrip())
+        s = s[cut:].lstrip()
+    out.append(s)
+    return out
+
+def format_for_mail(text):
+    lines = []
+    for line in text.split("\n"):
+        if line.startswith("◎ ") and lines and lines[-1] != "":
+            lines.append("")  # リストは1件ずつ空行で離す（折り返すと塊が潰れるため）
+        lines.extend(wrap_line(line))
+    return "\n".join(lines)
 
 NAMES = {"OBL":"突撃隊長","OBS":"正論ハンマー","OKL":"お祭り隊長","OKS":"自由人コメンテーター",
          "GBL":"沈黙の大黒柱","GBS":"縁の下の職人","GKL":"根回しの仕掛け人","GKS":"がんばり屋の調整役"}
@@ -103,6 +188,17 @@ for r in TYPES_ROWS:
     if r["day"] == 3: assert "〔診断URL〕" in r["body"]
 for d, b, t in COMMON:
     assert not re.search(r"[—–―]", t), f"ダッシュ: common {d} {b}"
+
+# ---------- 配信用に整形（検証はプレーンな状態で済ませてから折り返す） ----------
+COMMON = [(d, b, format_for_mail(t)) for d, b, t in COMMON]
+for r in TYPES_ROWS:
+    r["body"] = format_for_mail(r["body"])
+for d, b, t in COMMON:
+    for line in t.split("\n"):
+        assert len(line) <= WRAP_WIDTH or UNBREAKABLE.search(line), f"20字超: common {d} {b} / {line}"
+for r in TYPES_ROWS:
+    for line in r["body"].split("\n"):
+        assert len(line) <= WRAP_WIDTH or UNBREAKABLE.search(line), f"20字超: {r['code']} D{r['day']} / {line}"
 
 # ---------- .gs 出力 ----------
 def js(s): return json.dumps(s, ensure_ascii=False)

@@ -36,6 +36,13 @@ var GUIDE_CONFIG_KEYS = [
   ['reply_to',         '', '返信先アドレス。空なら差出人と同じ。問い合わせ窓口を分けたいときに設定する']
 ];
 
+// エディタから手動実行する関数の結果表示。
+// 戻り値は実行ログに出ないため、ログにも書いてから返す。
+function report_(msg) {
+  console.log(msg);
+  return msg;
+}
+
 // ================= 初回セットアップ =================
 
 // これを一度実行すれば配信の準備が整う（何度実行しても安全）
@@ -45,8 +52,8 @@ function setupGuideDelivery() {
   ensureHeader(log); // guide_day1_at 等の列を追加
   var seeded = seedGuideSheet();
   var trigger = ensureGuideTrigger();
-  return 'セットアップ完了：' + seeded + ' / ' + trigger +
-    ' / 残タスク：「ガイド設定」シートの〔要確定〕を実際の値に書き換えてください';
+  return report_('セットアップ完了：' + seeded + ' / ' + trigger +
+    ' / 残タスク：「ガイド設定」シートの〔要確定〕を実際の値に書き換えてください');
 }
 
 // 「ガイド文面」「ガイド設定」シートを作成し、空なら GuideContent.gs のシードを投入する。
@@ -86,7 +93,7 @@ function seedGuideSheet() {
     if (!existing[k[0]]) { cfg.appendRow(k); added++; }
   });
   msgs.push('「ガイド設定」にキーを' + added + '件追加');
-  return msgs.join('、');
+  return report_(msgs.join('、'));
 }
 
 // 共通ガワ（opening / education / closing / cta / footer）だけを GuideContent.gs の最新版で上書きする。
@@ -106,7 +113,7 @@ function resetGuideCommonBlocks() {
     if (row) { sheet.getRange(row, 5).setValue(b.body); updated++; }
     else { sheet.appendRow(['common', b.day, b.block, '', b.body]); added++; }
   });
-  return '共通ガワを更新: ' + updated + '行 / 追加: ' + added + '行（タイプ別本文は変更なし）';
+  return report_('共通ガワを更新: ' + updated + '行 / 追加: ' + added + '行（タイプ別本文は変更なし）');
 }
 
 // 毎朝8時の日次トリガーを登録する（既にあれば何もしない）
@@ -151,7 +158,7 @@ function enrollGuideLead(sheet, rownum) {
 function backfillGuideEnroll() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet || sheet.getLastRow() < 2) return '対象なし';
+  if (!sheet || sheet.getLastRow() < 2) return report_('対象なし');
   ensureHeader(sheet);
   var emailCol = HEADERS.indexOf('メールアドレス') + 1;
   var tokenCol = HEADERS.indexOf('ガイドトークン') + 1;
@@ -162,14 +169,15 @@ function backfillGuideEnroll() {
     try { enrollGuideLead(sheet, r); done++; }
     catch (err) { failed++; console.error('backfill失敗: row=' + r + ' ' + err); }
   }
-  return '配信登録: ' + done + '件 / 失敗: ' + failed + '件';
+  return report_('配信登録: ' + done + '件 / 失敗: ' + failed + '件');
 }
 
 // sender_from に指定できるアドレス（Gmailの「他のメールアドレスを追加」で確認済みのもの）を一覧する。
 // ここに出ないアドレスを sender_from に書くと送信できないので、設定前の確認に使う。
 function listGmailAliases() {
   var aliases = GmailApp.getAliases();
-  return aliases.length ? aliases.join(' / ') : '（エイリアスなし。承認アカウントのアドレスからのみ送信できます）';
+  return report_('sender_from に指定できるアドレス：' +
+    (aliases.length ? aliases.join(' / ') : 'なし（承認アカウントのアドレスからのみ送信できます）'));
 }
 
 // ガイドメールの実送信。差出人・表示名・返信先は「ガイド設定」シートに従う。
@@ -345,8 +353,11 @@ function handleGuideUnsub(token) {
 // ================= テスト =================
 
 // 自分のアドレスに3通まとめて送って文面を確認する（ログには何も記録しない）
-// 例: sendGuideTest('you@example.com', 'OBL')
+// エディタの関数リストから引数なしで実行できる（実行中のアカウント宛に OBL の3通が届く）。
+// 別のタイプや宛先を試すときだけ引数を渡す。例: sendGuideTest('you@example.com', 'GKS')
 function sendGuideTest(email, typeCode) {
+  email = email || Session.getActiveUser().getEmail();
+  typeCode = typeCode || 'OBL';
   var names = {};
   GUIDE_TYPES.forEach(function (t) { names[t.code] = true; });
   if (!names[typeCode]) throw new Error('タイプコードが不正です: ' + typeCode);
@@ -356,5 +367,5 @@ function sendGuideTest(email, typeCode) {
     var mail = buildGuideMail(day, typeCode, typeName, 'TEST-TOKEN');
     sendGuideMail_(email, '【テスト】' + mail.subject, mail.body);
   });
-  return typeCode + ' の3通を ' + email + ' に送信しました';
+  return report_(typeCode + ' の3通を ' + email + ' に送信しました');
 }
