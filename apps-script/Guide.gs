@@ -31,7 +31,9 @@ var GUIDE_CONFIG_KEYS = [
   ['sender_signature', '〔要確定〕', 'Day3末尾の署名（送信者名・連絡先）'],
   ['quiz_url',         '〔要確定〕', '診断URL（Day3「この診断をそのまま送ってみてください」のリンク）'],
   ['survey_url',       '〔要確定〕', 'アンケートフォームのURL（Day3のCTA）'],
-  ['webapp_url',       '〔要確定〕', 'このWebアプリのデプロイURL（配信停止リンクの生成に使う）']
+  ['webapp_url',       '〔要確定〕', 'このWebアプリのデプロイURL（配信停止リンクの生成に使う）'],
+  ['sender_from',      '', '差出人アドレス。空ならスクリプトを承認したGoogleアカウントから送る。指定する場合、Gmailの「設定 > アカウント > 他のメールアドレスを追加」で確認済みのエイリアスであること'],
+  ['reply_to',         '', '返信先アドレス。空なら差出人と同じ。問い合わせ窓口を分けたいときに設定する']
 ];
 
 // ================= 初回セットアップ =================
@@ -85,6 +87,26 @@ function seedGuideSheet() {
   });
   msgs.push('「ガイド設定」にキーを' + added + '件追加');
   return msgs.join('、');
+}
+
+// 共通ガワ（opening / education / closing / cta / footer）だけを GuideContent.gs の最新版で上書きする。
+// seedGuideSheet は既存データがあると一切上書きしないため、セットアップ後に共通文面を直した場合はこれを使う。
+// タイプ別24本には触れないので、シート上でタイプ本文を手直ししていても失われない。
+function resetGuideCommonBlocks() {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(GUIDE_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) throw new Error('「ガイド文面」シートが未作成です。setupGuideDelivery() を実行してください');
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
+  var index = {};
+  values.forEach(function (r, i) {
+    if (String(r[0]).trim() === 'common') index[Number(r[1]) + '_' + String(r[2]).trim()] = i + 2;
+  });
+  var updated = 0, added = 0;
+  GUIDE_COMMON.forEach(function (b) {
+    var row = index[b.day + '_' + b.block];
+    if (row) { sheet.getRange(row, 5).setValue(b.body); updated++; }
+    else { sheet.appendRow(['common', b.day, b.block, '', b.body]); added++; }
+  });
+  return '共通ガワを更新: ' + updated + '行 / 追加: ' + added + '行（タイプ別本文は変更なし）';
 }
 
 // 毎朝8時の日次トリガーを登録する（既にあれば何もしない）
@@ -141,6 +163,23 @@ function backfillGuideEnroll() {
     catch (err) { failed++; console.error('backfill失敗: row=' + r + ' ' + err); }
   }
   return '配信登録: ' + done + '件 / 失敗: ' + failed + '件';
+}
+
+// ガイドメールの実送信。差出人・表示名・返信先は「ガイド設定」シートに従う。
+// sender_from が空なら従来どおり、スクリプトを承認したアカウントから送る。
+function sendGuideMail_(to, subject, body) {
+  var cfg = getGuideConfig();
+  var opts = {};
+  if (cfg.sender_name && cfg.sender_name.indexOf('要確定') === -1) opts.name = cfg.sender_name;
+  if (cfg.reply_to) opts.replyTo = cfg.reply_to;
+  if (cfg.sender_from) {
+    // from はGmailに登録済みのエイリアスのみ指定できる（未登録だと送信時にエラーになる）
+    opts.from = cfg.sender_from;
+    GmailApp.sendEmail(to, subject, body, opts);
+  } else {
+    opts.to = to; opts.subject = subject; opts.body = body;
+    MailApp.sendMail(opts);
+  }
 }
 
 // ================= 日次バッチ（時間主導トリガー） =================
@@ -208,10 +247,7 @@ function sendGuideMailForRow(sheet, rownum, day) {
   if (!email || !code) return;
 
   var mail = buildGuideMail(day, code, name, token);
-  var cfg = getGuideConfig();
-  var opts = { to: email, subject: mail.subject, body: mail.body };
-  if (cfg.sender_name && cfg.sender_name.indexOf('要確定') === -1) opts.name = cfg.sender_name;
-  MailApp.sendMail(opts);
+  sendGuideMail_(email, mail.subject, mail.body);
   atCell.setValue(new Date());
 }
 
@@ -311,7 +347,7 @@ function sendGuideTest(email, typeCode) {
                    GBL: '沈黙の大黒柱', GBS: '縁の下の職人', GKL: '根回しの仕掛け人', GKS: 'がんばり屋の調整役' }[typeCode];
   [1, 2, 3].forEach(function (day) {
     var mail = buildGuideMail(day, typeCode, typeName, 'TEST-TOKEN');
-    MailApp.sendMail({ to: email, subject: '【テスト】' + mail.subject, body: mail.body });
+    sendGuideMail_(email, '【テスト】' + mail.subject, mail.body);
   });
   return typeCode + ' の3通を ' + email + ' に送信しました';
 }
