@@ -165,6 +165,13 @@ function backfillGuideEnroll() {
   return '配信登録: ' + done + '件 / 失敗: ' + failed + '件';
 }
 
+// sender_from に指定できるアドレス（Gmailの「他のメールアドレスを追加」で確認済みのもの）を一覧する。
+// ここに出ないアドレスを sender_from に書くと送信できないので、設定前の確認に使う。
+function listGmailAliases() {
+  var aliases = GmailApp.getAliases();
+  return aliases.length ? aliases.join(' / ') : '（エイリアスなし。承認アカウントのアドレスからのみ送信できます）';
+}
+
 // ガイドメールの実送信。差出人・表示名・返信先は「ガイド設定」シートに従う。
 // sender_from が空なら従来どおり、スクリプトを承認したアカウントから送る。
 function sendGuideMail_(to, subject, body) {
