@@ -116,6 +116,34 @@ function resetGuideCommonBlocks() {
   return report_('共通ガワを更新: ' + updated + '行 / 追加: ' + added + '行（タイプ別本文は変更なし）');
 }
 
+// タイプ別24本（件名・本文）だけを GuideContent.gs の最新版で上書きする。共通ガワには触れない。
+function resetGuideTypeBodies() {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(GUIDE_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) throw new Error('「ガイド文面」シートが未作成です。setupGuideDelivery() を実行してください');
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
+  var index = {};
+  values.forEach(function (r, i) {
+    var code = String(r[0]).trim();
+    if (code && code !== 'common') index[code + '_' + Number(r[1])] = i + 2;
+  });
+  var updated = 0, added = 0;
+  GUIDE_TYPES.forEach(function (t) {
+    var row = index[t.code + '_' + t.day];
+    if (row) { sheet.getRange(row, 4, 1, 2).setValues([[t.subject, t.body]]); updated++; }
+    else { sheet.appendRow([t.code, t.day, 'body', t.subject, t.body]); added++; }
+  });
+  return report_('タイプ別本文を更新: ' + updated + '行 / 追加: ' + added + '行（共通ガワは変更なし）');
+}
+
+// 「ガイド文面」シート全体を GuideContent.gs の最新版に揃える（共通ガワ＋タイプ別24本）。
+// GuideContent.gs を貼り替えたあとはこれ1つを実行すればよい。
+// 行の削除はしないので、シートに増やした行や並び順はそのまま残る。
+function resetGuideContent() {
+  var common = resetGuideCommonBlocks();
+  var types = resetGuideTypeBodies();
+  return report_(common + ' ／ ' + types);
+}
+
 // 毎朝8時の日次トリガーを登録する（既にあれば何もしない）
 function ensureGuideTrigger() {
   var exists = ScriptApp.getProjectTriggers().some(function (t) {
