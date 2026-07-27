@@ -85,7 +85,7 @@ const SHEET_ENDPOINT = 'ここにウェブアプリのURL';
 ### 運用メモ
 
 - **文面の修正は「ガイド文面」シートを直接編集**すればよい（コード変更・再デプロイ不要）。
-- **共通ガワをリポジトリの最新版に揃えたい**ときは `resetGuideCommonBlocks()` を実行する。`common` 行（opening / education / closing / cta / footer）だけを `GuideContent.gs` の内容で上書きし、タイプ別24本には触れない。`seedGuideSheet()` は既存データがあると一切上書きしないため、セットアップ後に共通文面を直した場合はこちらを使う。行の意味：`common` 行＝共通ガワ（`day` × `block`。`day=0` の `footer` は全日共通）、タイプ行＝`type_code` × `day` の本文と件名。メールは `opening → 本文 → education →（closing / cta）→ footer` の順に区切り線で連結される。
+- **文面をリポジトリの最新版に揃えたい**ときは、`GuideContent.gs` をスクリプトエディタに貼り直してから **`resetGuideContent()`** を実行する。`seedGuideSheet()` は**シートがヘッダ行だけのときしか動かず**（動くときは `clearContents()` で全消し）、運用開始後は使えないため。範囲を絞りたいときは `resetGuideCommonBlocks()`（共通ガワのみ）／`resetGuideTypeBodies()`（タイプ別24本のみ）を個別に呼ぶ。いずれも `type_code` × `day` で既存行を探して上書きするので、シートの並び順や追加した行は保たれる。行の意味：`common` 行＝共通ガワ（`day` × `block`。`day=0` の `footer` は全日共通）、タイプ行＝`type_code` × `day` の本文と件名。メールは `opening → 本文 → education →（closing / cta）→ footer` の順に区切り線で連結される。
 - **β期→M4の切替**は、「ガイド文面」シートの `common / day=3 / cta` 行の本文を体験セッション案内に差し替えるだけ（guide-3day-spec.md §8）。
 - 送信は `MailApp`（テキストメール）。Gmail無料枠は**1日約100通**。バッチは枠が尽きたら安全に中断し、翌朝のトリガーで続きから再開する。
 - Day1の即時送信が失敗した行（一時的なエラー等）は、翌朝のバッチが自動でリトライする。
