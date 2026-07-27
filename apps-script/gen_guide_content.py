@@ -99,6 +99,21 @@ HIRAGANA    = re.compile(r"[ぁ-ん]")
 KATAKANA    = re.compile(r"[ァ-ヴー]")
 UNBREAKABLE = re.compile(r"〔[^〕]*〕|https?://\S+")  # プレースホルダとURLは分断しない
 
+def protected(s):
+    """折り返してはいけない範囲。〔〕とURLに加え、かぎ括弧の中身は途中で切らない
+    （入れ子の「」があるので、対応の取れた一番外側だけを1つの塊として扱う）。
+    括弧の中が長ければ、その行だけ20文字を超えてもよい。"""
+    spans = [(m.start(), m.end()) for m in UNBREAKABLE.finditer(s)]
+    stack = []
+    for i, c in enumerate(s):
+        if c in "「『":
+            stack.append(i)
+        elif c in "」』" and stack:
+            start = stack.pop()
+            if not stack:
+                spans.append((start, i + 1))
+    return spans
+
 PARTICLES = "をはがにでとものかねよへ"  # 1文字の助詞
 
 def hira_run(s, i):
@@ -139,9 +154,13 @@ def wrap_line(s, width=WRAP_WIDTH):
                     cut -= 1
                 else:
                     break
-        for m in UNBREAKABLE.finditer(s):  # 〔〕やURLの内側で切らない
-            if m.start() < cut < m.end():
-                cut = m.start() if m.start() > 0 else m.end()
+        for a, b in protected(s):  # 〔〕・URL・かぎ括弧の内側では切らない
+            if a < cut < b:
+                cut = a if a > 0 else b
+                if cut == b:  # 閉じ括弧の直後の句読点・助詞は、次の行の頭に送らない
+                    for _ in range(2):
+                        if cut < len(s) and (s[cut] in NO_START or s[cut] in "をはがにでとも"):
+                            cut += 1
                 break
         if cut <= 0:
             cut = min(width, len(s))
@@ -193,12 +212,21 @@ for d, b, t in COMMON:
 COMMON = [(d, b, format_for_mail(t)) for d, b, t in COMMON]
 for r in TYPES_ROWS:
     r["body"] = format_for_mail(r["body"])
+def residual(line):
+    """折り返せない塊（〔〕・URL・かぎ括弧）を除いた長さ。ここが20字以内なら折り方は正しい。"""
+    keep, prev = [], 0
+    for a, b in sorted(protected(line)):
+        if a >= prev:
+            keep.append(line[prev:a]); prev = b
+    keep.append(line[prev:])
+    return "".join(keep)
+
 for d, b, t in COMMON:
     for line in t.split("\n"):
-        assert len(line) <= WRAP_WIDTH or UNBREAKABLE.search(line), f"20字超: common {d} {b} / {line}"
+        assert len(residual(line)) <= WRAP_WIDTH, f"20字超: common {d} {b} / {line}"
 for r in TYPES_ROWS:
     for line in r["body"].split("\n"):
-        assert len(line) <= WRAP_WIDTH or UNBREAKABLE.search(line), f"20字超: {r['code']} D{r['day']} / {line}"
+        assert len(residual(line)) <= WRAP_WIDTH, f"20字超: {r['code']} D{r['day']} / {line}"
 
 # ---------- .gs 出力 ----------
 def js(s): return json.dumps(s, ensure_ascii=False)
