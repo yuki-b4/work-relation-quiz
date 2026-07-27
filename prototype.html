@@ -857,7 +857,15 @@ const GUIDE_AUTHOR = '〔送信者名（要確定）〕';
 //     leader-lp … 店長・リーダー（法人LPの体験版から。corp-lp / wedding-lp / coffee-lp）
 //     member    … メンバー（法人LP経由でチームに配られるリンク。team_ で始まるref）
 //   ?seg= を付けると判定を上書きできる（プレビュー・検証用）。
-const _params = new URLSearchParams(location.search);
+// htmlpreview.github.io は「?＋rawファイルのURL」の形でファイルを渡すため、そこに ?ref= を足すと
+// location.search が「rawのURL＋こちらのクエリ」になり、素直に読むと ref を取りこぼす。
+// 最後の "?" 以降を自分のクエリとして読むことで、公開URLでもプレビューURLでも同じ判定になる。
+function readParams(){
+  const q = location.search || '';
+  const cut = q.lastIndexOf('?');
+  return new URLSearchParams(cut >= 0 ? q.slice(cut + 1) : q);
+}
+const _params = readParams();
 const REF = _params.get('ref') || '';
 const LP_REFS = ['corp-lp', 'wedding-lp', 'coffee-lp'];
 const SEGMENTS = ['general', 'referral', 'leader-lp', 'member'];
@@ -1683,14 +1691,11 @@ function bkChapters(code){
 }
 
 // 診断を共有するURL。プレビュー用の ?mode= ?seg= だけ落とし、紹介元（?ref=）は引き継ぐ。
+// htmlpreview の「?＋rawのURL」形式を壊さないよう、URLを組み立て直さず文字列で取り除く。
 function shareUrl(){
-  const href=location.href.split('#')[0];
-  if(!/[?&](mode|seg)=/.test(href)) return href;
-  try{
-    const u=new URL(href);
-    u.searchParams.delete('mode'); u.searchParams.delete('seg');
-    return u.toString();
-  }catch(e){ return href; }
+  return location.href.split('#')[0]
+    .replace(/([?&])(mode|seg)=[^&]*(&|$)/g, '$1')
+    .replace(/[?&]$/, '');
 }
 
 let bkIdx=0, bkSeen=0, bkList=[];
