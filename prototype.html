@@ -465,18 +465,14 @@
   .bk-body{font-family:var(--serif); font-size:15.5px; line-height:2.15; letter-spacing:.02em; color:var(--bk-ink)}
   .bk-body p{margin-bottom:1.55em}
   .bk-body p:last-child{margin-bottom:0}
-  /* 強調は4段階。上から順に強く、章の中で使う数を絞って効かせる。
-       ①傍点（.bk-kt）… 文中のひと呼吸。日本語の本の基本の強調
+  /* 強調は3段階。章の中で使う数を絞って効かせる。
+       ①マーカー（.bk-kt＝文中のひと呼吸／.bk-em＝著者が【】で括った語）。見た目は同じで、
+         使い分けは編集上の区別として持つ
        ②太ゴシック（.bk-b）… 明朝の地に混ぜる。具体的な言葉・セリフに
-       ③マーカー（.bk-em）… 著者が【】で括った語
-       ④抜き出し（.bk-pull）／白抜きの帯（.bk-band）… 章に1つだけ置く山 */
-  .bk-kt{
-    font-style:normal; font-weight:600;
-    -webkit-text-emphasis:filled sesame var(--accent-ink); text-emphasis:filled sesame var(--accent-ink);
-    -webkit-text-emphasis-position:over right; text-emphasis-position:over right;
-  }
+       ③抜き出し（.bk-pull）／白抜きの帯（.bk-band）… 章に1つだけ置く山 */
+  .bk-kt, .bk-em{font-weight:700; color:var(--bk-ink); background:linear-gradient(transparent 56%, var(--accent-soft) 56%); padding:0 .08em}
+  .bk-kt{font-style:normal}
   .bk-b{font-family:var(--display); font-weight:700; font-size:.93em; letter-spacing:.005em}
-  .bk-em{font-weight:700; color:var(--bk-ink); background:linear-gradient(transparent 56%, var(--accent-soft) 56%); padding:0 .08em}
   .bk-pull{
     margin:2em 0 1.8em; padding:17px 6px; text-align:center;
     border-top:2px solid var(--bk-ink); border-bottom:1px solid var(--bk-rule);
@@ -488,8 +484,7 @@
     font-family:var(--serif); font-weight:600; font-size:16px; line-height:2; letter-spacing:.03em;
   }
   /* 暗い面ではマーカーが濁るので、アクセント色の下線に置き換える */
-  .bk-band .bk-em{color:#fff; background:linear-gradient(transparent 86%, var(--accent) 86%); padding:0}
-  .bk-band .bk-kt{-webkit-text-emphasis-color:#fff; text-emphasis-color:#fff}
+  .bk-band .bk-em, .bk-band .bk-kt{color:#fff; background:linear-gradient(transparent 86%, var(--accent) 86%); padding:0}
   /* 約束・効能の箇条書きは、色面で囲って一目で拾えるようにする */
   .bk-promise{margin:0 0 1.6em; padding:18px 18px 10px; border:1.5px solid var(--accent); border-radius:4px; background:var(--accent-soft)}
   .bk-promise .bk-star{margin-bottom:0}
