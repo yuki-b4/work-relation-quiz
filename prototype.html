@@ -571,15 +571,6 @@
   .bk-fig-step.is-blind .bk-fig-ico{background:rgba(38,34,29,.06); color:var(--bk-faint)}
   .bk-fig-step.is-blind .bk-fig-t{color:var(--bk-soft)}
   .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
-  /* 診断を送る（終章・申込CTAの下） */
-  .bk-share{margin:22px 0 0; padding:16px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
-  .bk-share-lead{font-family:var(--serif); font-size:13.5px; line-height:1.95; color:var(--bk-ink); margin-bottom:.8em}
-  .bk-share-url{
-    font-family:var(--body); font-size:12px; color:var(--bk-soft); background:var(--bg);
-    border-radius:6px; padding:9px 11px; margin-bottom:.8em !important;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.6;
-  }
-  .bk-share-note{font-size:12px !important; color:var(--bk-faint); margin:8px 0 0 !important; min-height:1.2em}
   /* 終章のCTA：本の中で唯一の色面。読み物から申し込みへ温度を上げる。 */
   .bk-cta{
     margin-top:30px; padding:26px 20px 22px; border-radius:6px; color:#fff;
@@ -875,13 +866,6 @@
           <a class="bk-apply" id="sessionApply" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
           <p class="bk-cta-note" id="sessionNote">オンラインで30〜45分。日程は申込フォームで選べます。</p>
         </div>
-        <!-- 診断の共有。旧・第三章の「次の一歩」から移設した。 -->
-        <div class="bk-share">
-          <p class="bk-share-lead">この診断が役に立ちそうな人がいたら、そのまま送ってみてください。</p>
-          <p class="bk-share-url" id="shareUrl"></p>
-          <button class="btn btn-sm btn-ghost" type="button" id="shareCopy">リンクをコピーする</button>
-          <p class="bk-share-note" id="shareNote"></p>
-        </div>
         <div class="bk-endbar">
           <button class="btn btn-sm btn-ghost" id="bkRestart">最初から読み直す</button>
           <button class="btn btn-sm btn-ghost" id="bkBackBottom">結果に戻る</button>
@@ -1015,37 +999,37 @@ const TYPES = {
 // 相性（良し悪しの判定）の代替として、理解と関わり方に振り切る。優劣はつけない。
 const TORISET = {
  OBL:[
-  {l:'こう接すると、うまくいく', t:'スピード感を否定せず、まず一緒に走ってみて。方向がずれたら、走りながら直せば大丈夫。'},
+  {l:'こう接すると、うまくいく', t:'走り出す勇気を認めてあげて。止まるのが怖くて、先に動いているから。'},
   {l:'こんな時は、気づいてほしい', t:'勢いよく進めている時ほど、実は不安。「大丈夫？」の一言で、すっと力が抜けます。'},
   {l:'心を開くのは、こんな瞬間', t:'弱さや迷いを、否定せずに受け止めてもらえた時。'},
   {l:'誤解しないでほしいのは', t:'強く見えても、止まるのが怖いだけ。自信家でも自分勝手でもありません。'}],
  OBS:[
-  {l:'こう接すると、うまくいく', t:'意見を頭ごなしに否定せず、まず筋を聞いて。納得できれば、すっと引きます。'},
+  {l:'こう接すると、うまくいく', t:'指摘の裏の誠実さを認めてあげて。場を守りたくて、言っているから。'},
   {l:'こんな時は、気づいてほしい', t:'正論を言った後は、たいてい「きつかったかな」と反省中。追い打ちをかけないで。'},
   {l:'心を開くのは、こんな瞬間', t:'正しさより先に、気持ちを分かろうとしてもらえた時。'},
   {l:'誤解しないでほしいのは', t:'批判したいのではなく、良くしたいだけ。根っこはいつも味方です。'}],
  OKL:[
-  {l:'こう接すると、うまくいく', t:'明るさに乗ってあげて。ノリを楽しんでくれる人には、全力で場を作ります。'},
+  {l:'こう接すると、うまくいく', t:'明るさの裏の気配りを認めてあげて。場が重くならないよう、ずっと見ているから。'},
   {l:'こんな時は、気づいてほしい', t:'やたら明るい時は、重い話にフタをしているサイン。そっと本音を聞いて。'},
   {l:'心を開くのは、こんな瞬間', t:'笑わせなくても、そのままでいていいと感じられた時。'},
   {l:'誤解しないでほしいのは', t:'軽そうに見えて、実はすごく気を遣っています。嫌われるのが、けっこう怖い。'}],
  OKS:[
-  {l:'こう接すると、うまくいく', t:'自由と距離感を尊重して。縛らない相手には、鋭い視点をどんどん出します。'},
+  {l:'こう接すると、うまくいく', t:'よく見ていることを認めてあげて。冷めているのではなく、ちゃんと見ているから。'},
   {l:'こんな時は、気づいてほしい', t:'一歩引いている時は、当事者になるのが少し怖い時。責めずに背中を押して。'},
   {l:'心を開くのは、こんな瞬間', t:'意見を否定せず、面白がってもらえた時。'},
   {l:'誤解しないでほしいのは', t:'他人事に見えて、本当はよく見ています。冷めているわけではありません。'}],
  GBL:[
-  {l:'こう接すると、うまくいく', t:'多くを語らなくても、信じて任せて。いざという時は、必ず引き受けます。'},
+  {l:'こう接すると、うまくいく', t:'言葉にしない責任感を認めてあげて。多くを語らず、背負っているから。'},
   {l:'こんな時は、気づいてほしい', t:'「大丈夫」と言う時ほど、抱えていることが多い。気づいてもらえると救われます。'},
   {l:'心を開くのは、こんな瞬間', t:'弱音を、弱さとして扱われなかった時。'},
   {l:'誤解しないでほしいのは', t:'怖いのではなく、伝えるのが下手なだけ。本当は面倒見がいいんです。'}],
  GBS:[
-  {l:'こう接すると、うまくいく', t:'見えない働きに気づいて、言葉にして。それだけで、また頑張れます。'},
+  {l:'こう接すると、うまくいく', t:'見えない働きを認めてあげて。黙って、やり切っているから。'},
   {l:'こんな時は、気づいてほしい', t:'何も言わない時ほど、限界が近いかも。「無理してない？」と聞いて。'},
   {l:'心を開くのは、こんな瞬間', t:'「ありがとう」を、ちゃんと受け取ってもらえた時。'},
   {l:'誤解しないでほしいのは', t:'便利な人ではありません。断らないのは、あなたを困らせたくないからです。'}],
  GKL:[
-  {l:'こう接すると、うまくいく', t:'正面から問い詰めず、まず安心させて。安全だと分かれば、本音を出します。'},
+  {l:'こう接すると、うまくいく', t:'見えないところの段取りを認めてあげて。誰も傷つけずに進めようとしているから。'},
   {l:'こんな時は、気づいてほしい', t:'はっきり言わない時は、波風を立てたくない時。急かさないで。'},
   {l:'心を開くのは、こんな瞬間', t:'探り合いでなく、まっすぐ信頼を示してもらえた時。'},
   {l:'誤解しないでほしいのは', t:'裏があるのではなく、みんなが穏やかでいられる道を探しているだけ。'}],
@@ -1721,12 +1705,6 @@ function bkEpilogue(){
   + '<p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。</p>'
   + '<p>それでも、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになりました。</p>'
   + BK_DIV
-  + '<p>そして、ここまでの読み解きができるようになったことで、私自身に起きた変化を一つだけお話しさせてください。</p>'
-  + '<p>それは、特に若いときには、同じサークルの仲間、同僚、恋人から「どう思われるか」とビクビクしていたこと。<br>そんな不安も<em class="bk-kt">今は全く感じず</em>、自然体のまま自分の良さを存分に発揮できる関係性を築けています。</p>'
-  + '<p>こんな関係性を築けるようになってから、あることに気づきました。</p>'
-  + '<p>素を隠すために使っていた力を、そのまま相手に向けられるようになって、妻や周りの仲間を幸せにできていることがすごく嬉しいということ。</p>'
-  + '<p>これって「<b class="bk-b">自分に余裕ができたから、出来たこと</b>」だと思うんです。</p>'
-  + BK_DIV
   + '<p>このガイドで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>という道具をお渡ししました。</p>'
   + '<p>正直にお伝えすると、これらの道具があっても、まだあなたの人間関係の悩みや不安は解消されません。</p>'
   + '<p>なぜなら、あなた自身がこの道具を使いこなし、自分が自然体でいられる環境を作っていかないといけないからです。</p>'
@@ -1770,18 +1748,6 @@ function bkChapters(code){
   ];
 }
 
-// 診断を共有するURL。プレビュー用の ?mode= ?seg= だけ落とし、紹介元（?ref=）は引き継ぐ。
-// htmlpreview の「?＋rawのURL」形式を壊さないよう、URLを組み立て直さず文字列で取り除く。
-// このURLで受診した人にも必ず読み解きガイドが出るよう、?ref= が無い場合だけ ref=share を補う
-// （ガイドは②紹介＝ref付きにだけ出るため。ref があれば紹介元をそのまま引き継ぐ）。
-function shareUrl(){
-  const base = location.href.split('#')[0]
-    .replace(/([?&])(mode|seg)=[^&]*(&|$)/g, '$1')
-    .replace(/[?&]$/, '');
-  if(/[?&]ref=/.test(base)) return base;
-  return base + (base.indexOf('?') < 0 ? '?' : '&') + 'ref=share';
-}
-
 let bkIdx=0, bkSeen=0, bkList=[];
 function bkStart(at){
   const r=window._lastResult; if(!r) return;
@@ -1808,7 +1774,6 @@ function bkGo(i){
   $('bkPrev').hidden=bkIdx===0;
   if(!last) $('bkNextT').textContent=bkList[bkIdx+1].label;
   bkRenderRail();
-  bkBindShare();
   // ページをめくった感じを出す（同じ要素を使い回すので、アニメーションを掛け直す）
   const pg=$('bkPage'); pg.classList.remove('is-turn'); void pg.offsetWidth; pg.classList.add('is-turn');
   toTop();
@@ -1822,20 +1787,6 @@ function bkRenderRail(){
     b.onclick=()=>bkGo(i);
     rail.appendChild(b);
   });
-}
-function bkBindShare(){
-  const btn=$('shareCopy'); if(!btn) return;
-  $('shareUrl').textContent=shareUrl();
-  btn.onclick=()=>{
-    const note=$('shareNote');
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(shareUrl())
-        .then(()=>{ note.textContent='リンクをコピーしました。あの人に送ってみてください。'; })
-        .catch(()=>{ note.textContent='コピーできませんでした。上のURLを長押しで選んでコピーしてください。'; });
-    }else{
-      note.textContent='上のURLを長押しで選んでコピーしてください。';
-    }
-  };
 }
 function backToResult(){
   show('result');
