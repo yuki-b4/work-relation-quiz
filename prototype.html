@@ -561,6 +561,15 @@
   .bk-fig-ico svg{width:23px; height:23px}
   .bk-fig-t{font-family:var(--serif); font-weight:600; font-size:14.5px; line-height:1.7; color:var(--bk-ink)}
   .bk-fig-ar{text-align:center; color:var(--accent); font-size:12px; line-height:1; padding:8px 0}
+  /* 図の中の「自分では見えない」区間。破線の囲みにラベルを食い込ませて、範囲そのものを見せる。 */
+  .bk-blind{position:relative; padding:20px 11px 11px; border:1px dashed var(--bk-rule); border-radius:4px; background:rgba(38,34,29,.03)}
+  .bk-blind-l{
+    position:absolute; top:-9px; left:12px; padding:0 8px; background:#FEFDFB;
+    font-family:var(--display); font-weight:700; font-size:10.5px; letter-spacing:.16em; color:var(--bk-faint);
+  }
+  .bk-fig-step.is-blind{border-style:dashed; background:transparent}
+  .bk-fig-step.is-blind .bk-fig-ico{background:rgba(38,34,29,.06); color:var(--bk-faint)}
+  .bk-fig-step.is-blind .bk-fig-t{color:var(--bk-soft)}
   .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
   /* 情景の図（終章のBEFORE／AFTER）。線画のシーンを敷き、その下に原文の箇条書きを並べる。
      いまは寒色の面と「？」、読み解いたあとはアクセントの面と「☆」で、面の色ごと変える。 */
@@ -1588,8 +1597,8 @@ function bkKt(s,phrase){
   return s.indexOf(phrase)<0 ? s : s.replace(phrase, '<em class="bk-kt">'+phrase+'</em>');
 }
 // 挿図：ひと続きの理屈を3つの段に分けて見せる。アイコンは結果画面のエンブレムと同じ線の太さで自作。
-function bkFigStep(icon,text,goal){
-  return '<div class="bk-fig-step'+(goal?' is-goal':'')+'"><span class="bk-fig-ico">'
+function bkFigStep(icon,text,mod){
+  return '<div class="bk-fig-step'+(mod?' '+mod:'')+'"><span class="bk-fig-ico">'
        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg>'
        + '</span><span class="bk-fig-t">'+text+'</span></div>';
 }
@@ -1628,14 +1637,14 @@ function bkPrologue(t){
   + '<div class="bk-fig-ar">▼</div>'
   + bkFigStep('<circle cx="12" cy="6.6" r="2.5"/><path d="M8.2 13.6c0-2.1 1.7-3.8 3.8-3.8s3.8 1.7 3.8 3.8"/><circle cx="4.9" cy="11.6" r="1.9"/><path d="M1.8 18c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1"/><circle cx="19.1" cy="11.6" r="1.9"/><path d="M15.9 18c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1"/>','周りにも自然体の人が増える')
   + '<div class="bk-fig-ar">▼</div>'
-  + bkFigStep('<rect x="2.6" y="4.6" width="18.8" height="12.2" rx="3.2"/><path d="M8.4 16.8v3.8l4.4-3.8"/><path d="M12 13.6s-3.1-1.9-3.1-3.7a1.75 1.75 0 0 1 3.1-1.05 1.75 1.75 0 0 1 3.1 1.05c0 1.8-3.1 3.7-3.1 3.7z"/>','周りの人たちの本音がわかる', true)
+  + bkFigStep('<rect x="2.6" y="4.6" width="18.8" height="12.2" rx="3.2"/><path d="M8.4 16.8v3.8l4.4-3.8"/><path d="M12 13.6s-3.1-1.9-3.1-3.7a1.75 1.75 0 0 1 3.1-1.05 1.75 1.75 0 0 1 3.1 1.05c0 1.8-3.1 3.7-3.1 3.7z"/>','周りの人たちの本音がわかる','is-goal')
   + '<p class="bk-fig-note">だから、遠回りに見えても、<br>先に自分を見つめ直す。</p>'
   + '</div>'
   + '<p>想像してみてほしいのですが、</p>'
   + '<div class="bk-ab"><p><span class="bk-ab-k">A.</span>自分のことを全然理解してくれず、一緒にいて窮屈に感じる人</p>'
   + '<p><span class="bk-ab-k">B.</span>自分のことを深く理解してくれて、自然体で居させてくれる人</p></div>'
   + '<p class="bk-pull">圧倒的にBさんの方が、<br>「もっと理解してあげたい」と思えるはずです。</p>'
-  + '<p>つまりこのガイドは、相手ではなく、自分自身と深く向き合い、自分の強みや弱みを正しく理解し、大切な人の目の前で自然体でいられる準備をしよう、という3つの章になります。</p>'
+  + '<p>そこで、このガイドは、自分自身の「<b class="bk-b">強み</b>」や「<b class="bk-b">つい出ちゃう癖</b>」を正しく理解し、自然体でいられる準備をすることを目的として書きました。</p>'
   + '<p>そのために、この順番で進めます。<br>肩の力を抜いて、リラックスして読んでみてくださいね。</p>'
   + '<div class="bk-toc"><p class="bk-toc-h">目次</p>'
   + '<div class="bk-toc-i"><span class="bk-toc-n">第一章</span><span class="bk-toc-t">あなたが自然体でいられる環境。最後に、大切な人へそのまま渡せる「あなたのトリセツ」をお渡しします。</span></div>'
@@ -1693,6 +1702,18 @@ function bkChapter2(t,g){
   + '<p>その上で、この章の最後に一つだけお伝えします。</p>'
   + '<p>クセは自分だけでは気づくことができません。<br>あなたが無意識にやっていることだからです。</p>'
   + '<p>つまり、どれだけ予防しようと知識を蓄えても、裏モードに入って抜けた時にようやく「やっちまった...」と気づくことしかできないのです。</p>'
+  // 「気づけるのは事後だけ」を図で見せる。手前の2つを破線の囲みに入れ、見えない区間そのものを示す。
+  + '<div class="bk-fig">'
+  + '<p class="bk-fig-cap">図　気づけるのは、いつも「あとから」</p>'
+  + '<div class="bk-blind"><span class="bk-blind-l">自分では見えない</span>'
+  + bkFigStep('<path d="M13 2.5L5.5 13.5H11l-1 8 8.5-11.5H13z"/>','引き金がくる','is-blind')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<circle cx="9.5" cy="8.4" r="3.6"/><path d="M3.4 20c0-3.4 2.7-6.1 6.1-6.1s6.1 2.7 6.1 6.1"/><path d="M15.4 5.2a4.6 4.6 0 0 1 0 6.4" opacity=".55"/><path d="M18.6 20c0-2.2-.7-4.2-1.9-5.7" opacity=".55"/>','裏モードに入っている','is-blind')
+  + '</div>'
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<path d="M9.6 18.4h4.8"/><path d="M10.4 21h3.2"/><path d="M12 3a5.8 5.8 0 0 0-3.4 10.5c.6.5.9 1.2.9 1.9v.3h5v-.3c0-.7.3-1.4.9-1.9A5.8 5.8 0 0 0 12 3z"/>','抜けたあと、はじめて気づく','is-goal')
+  + '<p class="bk-fig-note">知識を蓄えても、気づけるのは<br>いちばん最後の一つだけ。</p>'
+  + '</div>'
   + '<div class="bk-band">多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</div>'
   + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、<em class="bk-kt">あまりにもったいない</em>と思いませんか。</p>'
   + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
