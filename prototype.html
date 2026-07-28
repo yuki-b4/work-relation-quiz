@@ -401,7 +401,7 @@
   .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
   .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
 
-  /* ===== 読み解きガイド（アプリ内・全5章） =====
+  /* ===== 読み解きガイド（アプリ内・全4章） =====
      3日間のステップメールを、本の章立てに置き換えたもの。1章＝1画面で、メール登録なしに
      クリックだけで読み進められる。明朝・柱・ノンブル・章扉・＊＊＊の区切りで「本」の体裁に寄せ、
      診断結果カード（サンセリフのUI）と読み物レイヤーを視覚的に切り分ける。 */
@@ -571,25 +571,9 @@
   .bk-fig-step.is-blind .bk-fig-ico{background:rgba(38,34,29,.06); color:var(--bk-faint)}
   .bk-fig-step.is-blind .bk-fig-t{color:var(--bk-soft)}
   .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
-  /* 情景の図（終章のBEFORE／AFTER）。線画のシーンを敷き、その下に原文の箇条書きを並べる。
-     いまは寒色の面と「？」、読み解いたあとはアクセントの面と「☆」で、面の色ごと変える。 */
-  .bk-scene{border:1px solid var(--bk-rule); border-radius:4px; overflow:hidden; margin:0 0 1.6em}
-  .bk-scene-img{display:block; width:100%; height:auto}
-  .bk-scene-now .bk-scene-img{background:rgba(38,34,29,.05); color:#8A8272}
-  .bk-scene-next{border-color:var(--accent)}
-  .bk-scene-next .bk-scene-img{background:var(--accent-soft); color:var(--accent)}
-  .bk-scene-l{font-family:var(--display); font-weight:700; font-size:11.5px; letter-spacing:.14em; padding:12px 15px 0; margin:0 !important}
-  .bk-scene-now .bk-scene-l{color:var(--bk-faint)}
-  .bk-scene-next .bk-scene-l{color:var(--accent-ink)}
-  .bk-scene ul{list-style:none; padding:7px 15px 15px; margin:0}
-  .bk-scene li{position:relative; padding-left:1.5em; font-size:14px; line-height:1.95; margin-bottom:6px}
-  .bk-scene li:last-child{margin-bottom:0}
-  .bk-scene-now li{color:var(--bk-soft)}
-  .bk-scene-now li::before{content:"？"; position:absolute; left:0; color:var(--bk-faint); font-size:.9em}
-  .bk-scene-next li{font-weight:600; color:var(--bk-ink)}
-  .bk-scene-next li::before{content:"☆"; position:absolute; left:0; color:var(--accent)}
-  /* 診断を送る（第三章の次の一歩） */
-  .bk-share{margin:0 0 1.55em; padding:16px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
+  /* 診断を送る（終章・申込CTAの下） */
+  .bk-share{margin:22px 0 0; padding:16px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
+  .bk-share-lead{font-family:var(--serif); font-size:13.5px; line-height:1.95; color:var(--bk-ink); margin-bottom:.8em}
   .bk-share-url{
     font-family:var(--body); font-size:12px; color:var(--bk-soft); background:var(--bg);
     border-radius:6px; padding:9px 11px; margin-bottom:.8em !important;
@@ -756,13 +740,13 @@
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text" id="r-cc-intro"></p>
             <div class="cc-label">人間関係の悩みは生きる上で大きな大きな悩みの種です。</div>
-            <!-- メール配信（3daysステップメール）から、アプリ内で読み切る5章のガイドへ変更。
+            <!-- メール配信（3daysステップメール）から、アプリ内で読み切る4章のガイドへ変更。
                  登録という関門をなくし、クリックだけで読み進められるようにする。 -->
             <p class="cc-text"><b>登録不要</b>で読み始めることができます。</p>
             <button class="btn btn-wide btn-accent" id="openGuide">読み解きガイドを開く</button>
             <p class="day-head">この読み解きガイドでわかること</p>
-            <p class="day-list">序章　なぜ、相手ではなく自分から始めるのか<br>第一章　あなたが自然体でいられる環境<br>第二章　あなたの「裏モード」<br>第三章　あの人との関係を解く<br>終章　最後に伝えたい「霧が晴れる感覚」</p>
-            <p class="optout-note">全5章。10分ほどで読み終わります。</p>
+            <p class="day-list">序章　なぜ、相手ではなく自分から始めるのか<br>第一章　あなたが自然体でいられる環境<br>第二章　あなたの「裏モード」<br>終章　最後に伝えたい「霧が晴れる感覚」</p>
+            <p class="optout-note">全4章。8分ほどで読み終わります。</p>
           </div>
         </div>
         </div>
@@ -848,7 +832,7 @@
     </div>
   </section>
 
-  <!-- GUIDE（読み解きガイド：アプリ内・全5章）
+  <!-- GUIDE（読み解きガイド：アプリ内・全4章）
        ②紹介セグメントの受け皿。3日間のステップメール（guide-3day-spec.md §8＋ガイド文面24本.md）を
        本の章立てに移し、メール登録なしでクリックだけで読み進められるようにしたもの。
        本文は1章ずつ #bk-prose に描画し、終章だけ静的なCTA（#guideEnd）を出す。 -->
@@ -890,6 +874,13 @@
           </div>
           <a class="bk-apply" id="sessionApply" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
           <p class="bk-cta-note" id="sessionNote">オンラインで30〜45分。日程は申込フォームで選べます。</p>
+        </div>
+        <!-- 診断の共有。旧・第三章の「次の一歩」から移設した。 -->
+        <div class="bk-share">
+          <p class="bk-share-lead">この診断が役に立ちそうな人がいたら、そのまま送ってみてください。</p>
+          <p class="bk-share-url" id="shareUrl"></p>
+          <button class="btn btn-sm btn-ghost" type="button" id="shareCopy">リンクをコピーする</button>
+          <p class="bk-share-note" id="shareNote"></p>
         </div>
         <div class="bk-endbar">
           <button class="btn btn-sm btn-ghost" id="bkRestart">最初から読み直す</button>
@@ -1087,7 +1078,7 @@ const HONSHITSU = {
 };
 const HONSHITSU_LOOP='まさに光と影のようなもので、あなたの中にあるこの2つをどうしたら自由自在に操ることができるのか、興味はありませんか？';
 
-// ===== 読み解きガイド（アプリ内・全5章）のタイプ別本文 =====
+// ===== 読み解きガイド（アプリ内・全4章）のタイプ別本文 =====
 // 出所は `ガイド文面24本.md`（＝8タイプ×Day1〜3の固定文）。文言の正は同mdのまま。
 // タイプで変わる部分だけをここに持ち、全タイプ共通の言い回しは下の章テンプレート側に置く。
 //   hit … 図星の一行 ／ jinen … 「自然体のまま〔　〕あなたでいたいと思うなら」のあり方
@@ -1607,17 +1598,10 @@ function bkFigStep(icon,text,mod){
 function bkPrologue(t){
   return ''
   + '<p>こんにちは。<br>人間関係タイプ診断をつくっている<br>'+GUIDE_AUTHOR+'と申します。<br>診断を受けてくださり、ありがとうございます。</p>'
-  + '<p>このガイドを開いたあなたは、きっと人間関係に不安や苦手意識を抱えている方だと思います。<br>大丈夫です、<em class="bk-kt">私も実はそうでした</em>。</p>'
-  + BK_DIV
-  + '<p>少しだけ、自己紹介をさせてください。</p>'
-  + '<div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>'
-  + '<p>相手のことが好きになっても、嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>'
-  + '<p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>'
-  + BK_DIV
-  + '<p>このガイドにたどり着いたということは、もしかしたら、あなたは過去の私に似ているのかもしれません。</p>'
-  + '<p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。そこで、当時苦しんだ経験をもとにこの診断を作りました。</p>'
-  + '<p>なぜなら、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになったからです。</p>'
-  + '<p>このガイドでは、私自身があなたのタイプ「'+t.name+'」を、3つの章で読み解いていきます。</p>'
+  + '<p>このガイドを開いたあなたは、きっと人間関係に不安や苦手意識を抱えている方だと思います。</p>'
+  // 自己紹介（過去の私）は終章へ移し、ここは軽い先出しだけにする。先に中身を読みたい人を待たせない。
+  + '<p><em class="bk-kt">私も過去に、人間関係に悩み、傷ついてきました</em>。<br>だから、この診断を作りました。</p>'
+  + '<p>このガイドでは、私自身があなたのタイプ「'+t.name+'」を、2つの章で読み解いていきます。</p>'
   + '<p>読み終えたあなたは、</p>'
   + '<div class="bk-promise"><ul class="bk-star"><li>人間関係の不安の正体が見えている</li>'
   + '<li>周りの人を今よりも深く理解するきっかけを得られている</li>'
@@ -1649,7 +1633,6 @@ function bkPrologue(t){
   + '<div class="bk-toc"><p class="bk-toc-h">目次</p>'
   + '<div class="bk-toc-i"><span class="bk-toc-n">第一章</span><span class="bk-toc-t">あなたが自然体でいられる環境。最後に、大切な人へそのまま渡せる「あなたのトリセツ」をお渡しします。</span></div>'
   + '<div class="bk-toc-i"><span class="bk-toc-n">第二章</span><span class="bk-toc-t">あなたの中の「もう一人のあなた」に会ってもらいます。人間関係がうまくいかない時、あなたに何が起きているのか。その正体です。</span></div>'
-  + '<div class="bk-toc-i"><span class="bk-toc-n">第三章</span><span class="bk-toc-t">あの人との関係を解きます。第一章と第二章の道具が、ここで一気につながります。</span></div>'
   + '<div class="bk-toc-i"><span class="bk-toc-n">終章</span><span class="bk-toc-t">最後に伝えたい「霧が晴れる感覚」。読み解きの道具を、実際の関係で使えるようにするために。</span></div>'
   + '</div>'
   + '<p class="bk-ready">それでは、第一章を始めましょう。</p>';
@@ -1674,7 +1657,7 @@ function bkChapter1(t,g){
   + '<p>この章では「あなたのトリセツ」をお渡ししました。</p>'
   + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
   + '<p>次の章では、あなたの中の「もう一人のあなた」の話をします。</p>'
-  + '<p>なぜ、大切にしたい人にこそ、きつく当たってしまう日があるのか。<br>その正体を、<em class="bk-kt">名指しで</em>お伝えします。</p></div>';
+  + '<p>なぜ、大切にしたい人にこそ、きつく当たってしまう日があるのか。<br>その正体を<em class="bk-kt">一緒に突き止めましょう</em>。</p></div>';
 }
 // 第二章：関わり方のパターンと裏モード（Day2冒頭＋本文＋教育ブロック）
 function bkChapter2(t,g){
@@ -1717,55 +1700,34 @@ function bkChapter2(t,g){
   + '<div class="bk-band">多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</div>'
   + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、<em class="bk-kt">あまりにもったいない</em>と思いませんか。</p>'
   + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
-  + '<p>そこで、次の第三章では、あなたの「あの人」の見え方が変わる、<em class="bk-kt">最後の種明かし</em>を用意しています。</p>'
-  + '<p>身近な誰か一人を思い浮かべながら読むと、効き目が何倍にもなります。</p></div>'
+  + '<p>そこで、最後の章では、同じ裏モードを抱えて生きてきた私自身の話と、そこから<em class="bk-kt">何が変わったのか</em>をお伝えします。</p>'
+  + '<p>あなたの裏モードを、これからどう扱っていけるのか。その道筋も一緒に置いておきます。</p></div>'
   + '<p>この章では「裏モードの引き金と予防策」をお渡ししました。<br>まずは予防策を、今日か明日、ひとつ試してみてください。</p>';
 }
-// 第三章：あの人との関係を解く（Day3冒頭＋本文。締めは「あなたという半分」と診断の共有）
-function bkChapter3(t,g){
-  return ''
-  + '<p>いよいよ、読み解きの最終章です。</p>'
-  + '<p>その前に、一つだけ。<br>ここまで読み進めてきたあなたは、実はかなり少数派です。<br>いろいろと、耳の痛いことを言ってしまってすみません（笑）<br>でも、ここまで自分と向き合い続けたこと、誇って良いと思います。</p>'
-  + '<p>このガイドでは、あなたが自然体でいるために必要な知識やコツをお伝えしてきました。<br>全ては、あなたを<em class="bk-kt">人間関係の悩みから解放する</em>ためです。</p>'
-  + '<p>第一章では「あなたが自然体でいられる環境」を、第二章では「関わり方のクセと裏モード」を読み解きました。</p>'
-  + '<p>自分のことがわかったら、<em class="bk-kt">次はいよいよ、相手のこと</em>です。</p>'
-  + '<p>前の章で予告した「最後の種明かし」も、この章に用意しています。</p>'
-  + '<p>ここからは、その実践編。</p>'
-  + '<p class="bk-ready">それでは、第三章を始めましょう。</p>'
-  + BK_DIV
-  + '<p>第一章と第二章では、あなた自身のことに目を向けてきました。この章では、あなたの身近な関係に目を向けます。パートナー、家族、友人、職場の人。まずは、「この人との関わりを、もう少し楽にしたい・良くしたい」と感じる相手を、一人思い浮かべてください。</p>'
-  + '<div class="bk-sec">あなたの「関係のクセ」</div>'
-  + '<p>'+bkKt(g.kuse,'それが相性の正体です。')+'</p>'
-  + '<p>'+bkQ(g.notice1,2)+'</p>'
-  + '<p>'+bkQ(g.notice2,2)+'</p>'
-  + '<div class="bk-turn">'
-  + '<p>このように、<br>あなたが良しとしていることが、<br><em class="bk-kt">相手にとっては苦手なこと・嫌なこと</em>になってしまっているかもしれません。</p>'
-  + '<p>ここで、人間関係の本質をお伝えします。</p>'
-  + '<p>人間関係は、必ず「あなた」と「相手」の二人でできています。</p>'
-  + '<div class="bk-band">ここまでで読み解いてきたのは、そのうちの<b class="bk-em">【あなたという半分】</b>です。</div>'
-  + '<p>あなたが自然体でいられる環境。<br>あなたの関わり方のクセ。<br>相手からどう見られることが多いのか。<br>ここまでは、見えるようになりました。</p>'
-  + '<p>で、もう半分。<br>相手が何を心地よく感じ、何を苦手とし、あなたの関わりをどう受け取っているのか。<br>これは、相手のタイプが分からないと読み解けません。</p>'
-  + '</div>'
-  + '<p>だから、次の一歩はシンプルです。<br>あなたがここまでで自分を知ったように、あの人にも、自分を知ってもらいましょう。</p>'
-  + '<p>よければ、この診断をそのまま送ってみてください。</p>'
-  + '<div class="bk-share"><p class="bk-share-url" id="shareUrl">'+shareUrl()+'</p>'
-  + '<button class="btn btn-sm btn-ghost" type="button" id="shareCopy">リンクをコピーする</button>'
-  + '<p class="bk-share-note" id="shareNote"></p></div>';
-}
-// 終章：変化ストーリーと、一人では変えられない理由（Day3教育ブロック）。この後にCTA（#guideEnd）。
+// 旧・第三章「あの人との関係を解く」（Day3本文）は廃止した。裏モードから終章へ直接つなぐ構成に変更。
+// タイプ別の kuse／notice1／notice2 は GUIDE_BODY と `ガイド文面24本.md` にそのまま残してあるので、
+// 章を復活させたくなったらここに書き戻せばよい。診断の共有は終章のCTAの下へ移した。
+
+// 終章：自己紹介と変化、そして一人では変えられない理由（Day3教育ブロック）。この後にCTA（#guideEnd）。
 function bkEpilogue(){
   return ''
-  + '<p>最後に、ここまでの読み解きができるようになったことで、私自身に起きた変化を二つだけお話しさせてください。</p>'
-  + '<p><b class="bk-b">1つ目は</b>、特に若いときには、同じサークルの仲間、同僚、恋人から「どう思われるか」とビクビクしていたこと。<br>そんな不安も<em class="bk-kt">今は全く感じず</em>、自然体のまま自分の良さを存分に発揮できる関係性を築けています。</p>'
+  // 自己紹介（過去の私）は序章から移設。過去 → 変化 → いま渡せるもの、の順で終章に置く。
+  + '<p>ここまで読んでくださったあなたに、少しだけ自己紹介をさせてください。</p>'
+  + '<div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>'
+  + '<p>相手のことが好きになっても、嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>'
+  + '<p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>'
+  + BK_DIV
+  + '<p>このガイドにたどり着いたということは、もしかしたら、あなたは過去の私に似ているのかもしれません。</p>'
+  + '<p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。</p>'
+  + '<p>それでも、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになりました。</p>'
+  + BK_DIV
+  + '<p>そして、ここまでの読み解きができるようになったことで、私自身に起きた変化を一つだけお話しさせてください。</p>'
+  + '<p>それは、特に若いときには、同じサークルの仲間、同僚、恋人から「どう思われるか」とビクビクしていたこと。<br>そんな不安も<em class="bk-kt">今は全く感じず</em>、自然体のまま自分の良さを存分に発揮できる関係性を築けています。</p>'
   + '<p>こんな関係性を築けるようになってから、あることに気づきました。</p>'
   + '<p>素を隠すために使っていた力を、そのまま相手に向けられるようになって、妻や周りの仲間を幸せにできていることがすごく嬉しいということ。</p>'
   + '<p>これって「<b class="bk-b">自分に余裕ができたから、出来たこと</b>」だと思うんです。</p>'
-  + '<p><b class="bk-b">2つ目は</b>、母のこと。</p>'
-  + '<p>母は心配性でした。<br>「それって大丈夫なの？」という言葉に、私はずっとイライラしていました。</p>'
-  + '<p>でもある時、<em class="bk-kt">母親の心配は愛情表現である</em>と気付けました。相手への理解が深まったら、こんなにも捉え方が変わるんだと、身をもって感じることができたんです。</p>'
-  + '<p>距離を置きたくなるようなストレスを感じる言葉も、無償の愛として受け取れたら、家族の関係は、想像できないほど温かいものになります。</p>'
   + BK_DIV
-  + '<p>このガイドで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>「あなたの関係のクセ」<br>という道具をお渡ししました。</p>'
+  + '<p>このガイドで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>という道具をお渡ししました。</p>'
   + '<p>正直にお伝えすると、これらの道具があっても、まだあなたの人間関係の悩みや不安は解消されません。</p>'
   + '<p>なぜなら、あなた自身がこの道具を使いこなし、自分が自然体でいられる環境を作っていかないといけないからです。</p>'
   + '<p>もう気づいていると思いますが、人間関係は人生の中で最も大きな悩みの種の一つです。でも実は、この悩みがなくならない理由があります。</p>'
@@ -1774,36 +1736,14 @@ function bkEpilogue(){
   + '<ul class="bk-box"><li>生かせる強みはどれか</li><li>どこを変えたら良いのか</li><li>どこから手をつけたら良いのか</li></ul>'
   + '<p>これらの問いにパッとすぐに答えが出る人は、ほとんどいません。</p>'
   + '<p>なぜなら、</p>'
-  // BEFORE／AFTERは、原文の箇条書きをそのまま情景の図に載せる（霧の中 → 霧が晴れる）。
-  // 2枚のあいだの地の文が、そのまま渡りになる。
-  + '<div class="bk-scene bk-scene-now">'
-  + '<svg class="bk-scene-img" viewBox="0 0 240 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">'
-  + '<circle cx="120" cy="36" r="9"/><path d="M104 72c0-8.8 7.2-16 16-16s16 7.2 16 16"/>'
-  + '<g opacity=".5"><path d="M20 50q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/>'
-  + '<path d="M12 64q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/>'
-  + '<path d="M28 78q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/></g>'
-  + '<g fill="currentColor" stroke="none" font-size="20" font-weight="700" opacity=".85">'
-  + '<text x="50" y="34">？</text><text x="86" y="18">？</text><text x="170" y="42">？</text></g>'
-  + '</svg>'
-  + '<p class="bk-scene-l">いま</p>'
-  + '<ul><li>自分の本当の強みに気づけていない</li>'
-  + '<li>自分の本当の伸び代に気づけていない</li>'
-  + '<li>どうやったら自分の伸び代を伸ばせるかがわからない</li></ul>'
-  + '</div>'
+  + '<ol class="bk-num"><li data-n="①">自分の本当の強みに気づけていない</li>'
+  + '<li data-n="②">自分の本当の伸び代に気づけていない</li>'
+  + '<li data-n="③">どうやったら自分の伸び代を伸ばせるかがわからない</li></ol>'
   + '<p>という難しさがあるからです。</p>'
   + '<p>でも、あなたと同じように人間関係の苦しみや辛さを乗り越えた<em class="bk-kt">心の専門家である私と一緒に読み解けば</em>、</p>'
-  + '<div class="bk-scene bk-scene-next">'
-  + '<svg class="bk-scene-img" viewBox="0 0 240 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">'
-  + '<circle cx="196" cy="26" r="11"/>'
-  + '<path d="M196 8V4M196 48v4M214 26h4M174 26h4M209 13l3-3M180 39l-3 3M209 39l3 3M180 13l-3-3"/>'
-  + '<path d="M8 84C60 84 120 70 232 46" opacity=".45"/>'
-  + '<circle cx="70" cy="58" r="8"/><path d="M56 82c0-7.7 6.3-14 14-14s14 6.3 14 14"/>'
-  + '</svg>'
-  + '<p class="bk-scene-l">読み解いたあと</p>'
-  + '<ul><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
+  + '<div class="bk-promise"><ul class="bk-star"><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
   + '<li>あなた自身が生きやすい状態で</li>'
-  + '<li>自然体で相手を大切にできるようになります。</li></ul>'
-  + '</div>'
+  + '<li>自然体で相手を大切にできるようになります。</li></ul></div>'
   + '<p class="bk-pull">まさに、霧が晴れたような感覚に<br>なることを、お約束します。</p>'
   + '<p>本当に私の悩みは解決されるのか？と思ったあなたに、一つだけご案内です。</p>'
   + '<p><em class="bk-kt">このガイドを最後まで読んでくださった方限定</em>で、「今の悩みの根本原因」「人間関係を良くするために次に何をしたら良いのか」がどんどん分かっていく、<b class="bk-em">特別無料セッション</b>をご用意しました。<br>申し込みはこちらから↓</p>';
@@ -1824,9 +1764,6 @@ function bkChapters(code){
     {num:'二', label:'第二章　あなたの「裏モード」', head:'第二章　あなたの「裏モード」',
      open:bkOpen('CHAPTER TWO','第二章','あなたの「裏モード」','人間関係がうまくいかない時、あなたに何が起きているのか'),
      html:bkChapter2(t,g)},
-    {num:'三', label:'第三章　あの人との関係を解く', head:'第三章　あの人との関係を解く',
-     open:bkOpen('CHAPTER THREE','第三章','あの人との関係を解く','第一章と第二章の道具が、ここで一気につながります'),
-     html:bkChapter3(t,g)},
     {num:'終', label:'終章　最後に伝えたい「霧が晴れる感覚」', head:'終章　霧が晴れる感覚',
      open:bkOpen('EPILOGUE','終章','最後に伝えたい「霧が晴れる感覚」','読み解きの道具を、実際の関係で使えるようにするために'),
      html:bkEpilogue()},
@@ -1888,6 +1825,7 @@ function bkRenderRail(){
 }
 function bkBindShare(){
   const btn=$('shareCopy'); if(!btn) return;
+  $('shareUrl').textContent=shareUrl();
   btn.onclick=()=>{
     const note=$('shareNote');
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -2000,7 +1938,7 @@ $('feedbackBlock').hidden = !FEEDBACK;
 $('deepPreviewNote').hidden = !FEEDBACK;
 document.querySelector('.bridge').classList.toggle('is-bare', !FEEDBACK);
 
-// ▼ 読み解きガイド（アプリ内・全5章）は②紹介にだけ出す（guide-3day-spec.md §0の適用セグメント）。
+// ▼ 読み解きガイド（アプリ内・全4章）は②紹介にだけ出す（guide-3day-spec.md §0の適用セグメント）。
 //   ①一般はライブ経由ルートなので、結果画面のCTA枠ごと畳む。CTAを出さない時は、
 //   深層の「開いたループ」（＝CTAへの問いかけ）も受け皿がなくなるため一緒に畳む。
 const GUIDE_ON = SEG === 'referral';
