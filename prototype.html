@@ -596,6 +596,15 @@
   .bk-apply:hover{filter:brightness(.95)}
   .bk-apply.is-off{background:rgba(255,255,255,.22); color:rgba(255,255,255,.7); cursor:default; pointer-events:none}
   .bk-cta-note{font-size:11.5px; color:rgba(255,255,255,.66); margin-top:10px; line-height:1.7}
+  /* 自己紹介（申込フォームの後ろ）と、そのあとの2度目のCTA */
+  .bk-bio{margin-top:26px}
+  .bk-bio p{margin-bottom:1.5em}
+  .bk-bio p:last-child{margin-bottom:0}
+  .bk-cta-2{margin-top:24px; padding:22px 20px}
+  .bk-cta-text2{
+    font-family:var(--serif); font-weight:600; font-size:15.5px; line-height:1.9;
+    color:#fff; margin-bottom:16px; text-align:center;
+  }
   /* ページ送り */
   .bk-nav{display:flex; flex-direction:column; gap:12px; margin-top:20px}
   .bk-next{
@@ -866,6 +875,26 @@
           <a class="bk-apply" id="sessionApply" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
           <p class="bk-cta-note" id="sessionNote">オンラインで30〜45分。日程は申込フォームで選べます。</p>
         </div>
+
+        <!-- 書き手の自己紹介。読み物の中ではなく、申込フォームの後ろに置く（読者の話を先に、
+             書き手の話は最後に）。読んだ人にもう一度フォームを差し出して締める。 -->
+        <div class="bk-body bk-bio">
+          <div class="bk-div">＊　＊　＊</div>
+          <p>ここまで読んでくださったあなたに、少しだけ自己紹介をさせてください。</p>
+          <div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>
+          <p>相手のことが好きになっても、嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>
+          <p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>
+          <p>このガイドにたどり着いたということは、もしかしたら、あなたは過去の私に似ているのかもしれません。</p>
+          <p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。</p>
+          <p>それでも、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになりました。</p>
+        </div>
+
+        <div class="bk-cta bk-cta-2">
+          <p class="bk-cta-text2">まずは申し込みだけでもしてみてください。</p>
+          <a class="bk-apply" id="sessionApply2" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
+          <p class="bk-cta-note" id="sessionNote2"></p>
+        </div>
+
         <div class="bk-endbar">
           <button class="btn btn-sm btn-ghost" id="bkRestart">最初から読み直す</button>
           <button class="btn btn-sm btn-ghost" id="bkBackBottom">結果に戻る</button>
@@ -1684,8 +1713,8 @@ function bkChapter2(t,g){
   + '<div class="bk-band">多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</div>'
   + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、<em class="bk-kt">あまりにもったいない</em>と思いませんか。</p>'
   + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
-  + '<p>そこで、最後の章では、同じ裏モードを抱えて生きてきた私自身の話と、そこから<em class="bk-kt">何が変わったのか</em>をお伝えします。</p>'
-  + '<p>あなたの裏モードを、これからどう扱っていけるのか。その道筋も一緒に置いておきます。</p></div>'
+  + '<p>そこで、最後の章では、この裏モードを抱えたまま、<em class="bk-kt">どうやって関係を変えていくのか</em>をお話しします。</p>'
+  + '<p>知識をもう一つ足すのではなく、ここから先の話です。</p></div>'
   + '<p>この章では「裏モードの引き金と予防策」をお渡ししました。<br>まずは予防策を、今日か明日、ひとつ試してみてください。</p>';
 }
 // 旧・第三章「あの人との関係を解く」（Day3本文）は廃止した。裏モードから終章へ直接つなぐ構成に変更。
@@ -1695,16 +1724,7 @@ function bkChapter2(t,g){
 // 終章：自己紹介と変化、そして一人では変えられない理由（Day3教育ブロック）。この後にCTA（#guideEnd）。
 function bkEpilogue(){
   return ''
-  // 自己紹介（過去の私）は序章から移設。過去 → 変化 → いま渡せるもの、の順で終章に置く。
-  + '<p>ここまで読んでくださったあなたに、少しだけ自己紹介をさせてください。</p>'
-  + '<div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>'
-  + '<p>相手のことが好きになっても、嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>'
-  + '<p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>'
-  + BK_DIV
-  + '<p>このガイドにたどり着いたということは、もしかしたら、あなたは過去の私に似ているのかもしれません。</p>'
-  + '<p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。</p>'
-  + '<p>それでも、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになりました。</p>'
-  + BK_DIV
+  // 自己紹介（過去の私）は書き手の話なので、申込フォームの後ろ（#guideEnd 内）へ置く。
   + '<p>このガイドで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>という道具をお渡ししました。</p>'
   + '<p>正直にお伝えすると、これらの道具があっても、まだあなたの人間関係の悩みや不安は解消されません。</p>'
   + '<p>なぜなら、あなた自身がこの道具を使いこなし、自分が自然体でいられる環境を作っていかないといけないからです。</p>'
@@ -1905,15 +1925,19 @@ if(GUIDE_ON){
   ['hearNow','hearType','hearFuture'].forEach(id=>{ $(id).addEventListener('change', saveHearing); });
 }
 
-// 体験セッションの申込は外部フォーム。未設定なら、押せない状態と理由を出す。
-if(SESSION_FORM_URL){
-  $('sessionApply').href = SESSION_FORM_URL;
-}else{
-  $('sessionApply').classList.add('is-off');
-  $('sessionApply').removeAttribute('href');
-  $('sessionNote').textContent='※ 申込フォームのURLが未設定です（プロトタイプ）。SESSION_FORM_URL に貼ると有効になります。';
-}
-$('sessionApply').addEventListener('click', saveHearing);
+// 体験セッションの申込は外部フォーム。終章に2か所（本文の直後と、自己紹介の後ろ）置く。
+// 未設定なら、押せない状態と理由を出す。
+[['sessionApply','sessionNote'], ['sessionApply2','sessionNote2']].forEach(function(pair){
+  const btn=$(pair[0]);
+  if(SESSION_FORM_URL){
+    btn.href = SESSION_FORM_URL;
+  }else{
+    btn.classList.add('is-off');
+    btn.removeAttribute('href');
+    $(pair[1]).textContent='※ 申込フォームのURLが未設定です（プロトタイプ）。SESSION_FORM_URL に貼ると有効になります。';
+  }
+  btn.addEventListener('click', saveHearing);
+});
 
 // ページ送り
 $('openGuide').onclick=()=>bkStart(0);
