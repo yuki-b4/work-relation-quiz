@@ -562,6 +562,23 @@
   .bk-fig-t{font-family:var(--serif); font-weight:600; font-size:14.5px; line-height:1.7; color:var(--bk-ink)}
   .bk-fig-ar{text-align:center; color:var(--accent); font-size:12px; line-height:1; padding:8px 0}
   .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
+  /* 情景の図（終章のBEFORE／AFTER）。線画のシーンを敷き、その下に原文の箇条書きを並べる。
+     いまは寒色の面と「？」、読み解いたあとはアクセントの面と「☆」で、面の色ごと変える。 */
+  .bk-scene{border:1px solid var(--bk-rule); border-radius:4px; overflow:hidden; margin:0 0 1.6em}
+  .bk-scene-img{display:block; width:100%; height:auto}
+  .bk-scene-now .bk-scene-img{background:rgba(38,34,29,.05); color:#8A8272}
+  .bk-scene-next{border-color:var(--accent)}
+  .bk-scene-next .bk-scene-img{background:var(--accent-soft); color:var(--accent)}
+  .bk-scene-l{font-family:var(--display); font-weight:700; font-size:11.5px; letter-spacing:.14em; padding:12px 15px 0; margin:0 !important}
+  .bk-scene-now .bk-scene-l{color:var(--bk-faint)}
+  .bk-scene-next .bk-scene-l{color:var(--accent-ink)}
+  .bk-scene ul{list-style:none; padding:7px 15px 15px; margin:0}
+  .bk-scene li{position:relative; padding-left:1.5em; font-size:14px; line-height:1.95; margin-bottom:6px}
+  .bk-scene li:last-child{margin-bottom:0}
+  .bk-scene-now li{color:var(--bk-soft)}
+  .bk-scene-now li::before{content:"？"; position:absolute; left:0; color:var(--bk-faint); font-size:.9em}
+  .bk-scene-next li{font-weight:600; color:var(--bk-ink)}
+  .bk-scene-next li::before{content:"☆"; position:absolute; left:0; color:var(--accent)}
   /* 診断を送る（第三章の次の一歩） */
   .bk-share{margin:0 0 1.55em; padding:16px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
   .bk-share-url{
@@ -1736,14 +1753,36 @@ function bkEpilogue(){
   + '<ul class="bk-box"><li>生かせる強みはどれか</li><li>どこを変えたら良いのか</li><li>どこから手をつけたら良いのか</li></ul>'
   + '<p>これらの問いにパッとすぐに答えが出る人は、ほとんどいません。</p>'
   + '<p>なぜなら、</p>'
-  + '<ol class="bk-num"><li data-n="①">自分の本当の強みに気づけていない</li>'
-  + '<li data-n="②">自分の本当の伸び代に気づけていない</li>'
-  + '<li data-n="③">どうやったら自分の伸び代を伸ばせるかがわからない</li></ol>'
+  // BEFORE／AFTERは、原文の箇条書きをそのまま情景の図に載せる（霧の中 → 霧が晴れる）。
+  // 2枚のあいだの地の文が、そのまま渡りになる。
+  + '<div class="bk-scene bk-scene-now">'
+  + '<svg class="bk-scene-img" viewBox="0 0 240 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">'
+  + '<circle cx="120" cy="36" r="9"/><path d="M104 72c0-8.8 7.2-16 16-16s16 7.2 16 16"/>'
+  + '<g opacity=".5"><path d="M20 50q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/>'
+  + '<path d="M12 64q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/>'
+  + '<path d="M28 78q10-6 20 0t20 0 20 0 20 0 20 0 20 0 20 0 20 0 20 0"/></g>'
+  + '<g fill="currentColor" stroke="none" font-size="20" font-weight="700" opacity=".85">'
+  + '<text x="50" y="34">？</text><text x="86" y="18">？</text><text x="170" y="42">？</text></g>'
+  + '</svg>'
+  + '<p class="bk-scene-l">いま</p>'
+  + '<ul><li>自分の本当の強みに気づけていない</li>'
+  + '<li>自分の本当の伸び代に気づけていない</li>'
+  + '<li>どうやったら自分の伸び代を伸ばせるかがわからない</li></ul>'
+  + '</div>'
   + '<p>という難しさがあるからです。</p>'
   + '<p>でも、あなたと同じように人間関係の苦しみや辛さを乗り越えた<em class="bk-kt">心の専門家である私と一緒に読み解けば</em>、</p>'
-  + '<div class="bk-promise"><ul class="bk-star"><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
+  + '<div class="bk-scene bk-scene-next">'
+  + '<svg class="bk-scene-img" viewBox="0 0 240 96" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">'
+  + '<circle cx="196" cy="26" r="11"/>'
+  + '<path d="M196 8V4M196 48v4M214 26h4M174 26h4M209 13l3-3M180 39l-3 3M209 39l3 3M180 13l-3-3"/>'
+  + '<path d="M8 84C60 84 120 70 232 46" opacity=".45"/>'
+  + '<circle cx="70" cy="58" r="8"/><path d="M56 82c0-7.7 6.3-14 14-14s14 6.3 14 14"/>'
+  + '</svg>'
+  + '<p class="bk-scene-l">読み解いたあと</p>'
+  + '<ul><li>何から始めて、どうやれば良いかがすぐに理解できて</li>'
   + '<li>あなた自身が生きやすい状態で</li>'
-  + '<li>自然体で相手を大切にできるようになります。</li></ul></div>'
+  + '<li>自然体で相手を大切にできるようになります。</li></ul>'
+  + '</div>'
   + '<p class="bk-pull">まさに、霧が晴れたような感覚に<br>なることを、お約束します。</p>'
   + '<p>本当に私の悩みは解決されるのか？と思ったあなたに、一つだけご案内です。</p>'
   + '<p><em class="bk-kt">このガイドを最後まで読んでくださった方限定</em>で、「今の悩みの根本原因」「人間関係を良くするために次に何をしたら良いのか」がどんどん分かっていく、<b class="bk-em">特別無料セッション</b>をご用意しました。<br>申し込みはこちらから↓</p>';
