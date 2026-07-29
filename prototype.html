@@ -13,6 +13,9 @@
     --line:#E4E3DD; --chrome:#2B333D; --chrome-hover:#3A444F;
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
+    /* 診断名（ナチュール診断）とイントロの見出し用。coral/teal はタイプの極を表す色なので、
+       診断そのものの色は別系統の「信頼」の色（落ち着いた濃紺）にして意味の混同を避ける。 */
+    --trust:#274A73;
     --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
     /* 読み解きガイド（本の体裁）専用。本文を明朝にすることで「読み物」に切り替える。 */
     --serif:"Noto Serif JP",serif;
@@ -42,7 +45,12 @@
   @media (prefers-reduced-motion:reduce){.screen,.screen.active{animation:none} *{transition:none!important}}
 
   /* INTRO */
-  .eyebrow{font-size:12.5px; letter-spacing:.16em; font-weight:700; color:var(--teal); margin-bottom:12px}
+  .eyebrow{font-size:12.5px; letter-spacing:.16em; font-weight:700; color:var(--trust); margin-bottom:12px}
+  /* 診断名は入口のブランドマーク。eyebrow より一段大きく置き、字間は広げすぎない。 */
+  .eyebrow.brandmark{
+    font-family:var(--display); font-weight:900;
+    font-size:clamp(17px,4.2vw,21px); letter-spacing:.1em; margin-bottom:14px;
+  }
   /* 日本語の折り返し。text-wrap:pretty は iOS Safari で行を過剰に短くし、
      本文の右側に大きな余白ができてしまうため使わない。
      balance は中央揃えの短い設問だけに限定して使う（行長を均等化する効果が確実に出る範囲）。 */
@@ -625,7 +633,7 @@
 <div class="app">
   <!-- INTRO -->
   <section class="screen active" id="intro">
-    <div class="eyebrow">ナチュール診断</div>
+    <div class="eyebrow brandmark">ナチュール診断</div>
     <h1 class="hero">あなたがいつも自然体でいるための診断</h1>
     <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。</p>
 
