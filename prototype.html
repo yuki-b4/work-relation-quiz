@@ -6,7 +6,7 @@
 <title>人間関係タイプ診断（プロトタイプ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F3F3EF; --surface:#FFFFFF; --ink:#232427; --muted:#6E7176; --faint:#9A9CA0;
@@ -14,6 +14,8 @@
     --coral:#C0492B; --coral-soft:#FBEDE7; --coral-ink:#7A2E1A;
     --teal:#0F6E56; --teal-soft:#E3F1EB; --teal-ink:#0A4A3A;
     --display:"Noto Sans JP",sans-serif; --body:"Noto Sans JP",sans-serif;
+    /* 読み解きガイド（本の体裁）専用。本文を明朝にすることで「読み物」に切り替える。 */
+    --serif:"Noto Serif JP",serif;
     --shadow:0 1px 2px rgba(20,20,20,.04),0 12px 34px rgba(20,20,20,.07);
     --radius:20px; --card-pad-x:30px;
     /* 回答スケール（4段階）の配色。左＝思わない側は落ち着いたブルーグレー、右＝そう思う側はコーラル。
@@ -24,6 +26,8 @@
   }
   .pole-guard{--accent:var(--teal); --accent-soft:var(--teal-soft); --accent-ink:var(--teal-ink)}
   *{box-sizing:border-box;margin:0;padding:0}
+  /* display を持つクラス（.bk-next 等）に hidden 属性が負けないようにする */
+  [hidden]{display:none !important}
   html{-webkit-text-size-adjust:100%}
   body{
     font-family:var(--body); color:var(--ink); background:var(--bg);
@@ -48,8 +52,6 @@
     font-size:clamp(22px,5vw,30px); letter-spacing:.01em; margin-bottom:16px;
   }
   .lead{font-size:15px; color:var(--muted); margin-bottom:14px; max-width:34em}
-  .meta{font-size:13px; color:var(--faint); margin-bottom:34px}
-  .meta b{color:var(--ink); font-weight:500}
   .btn{
     font-family:var(--body); font-size:15px; font-weight:700; cursor:pointer;
     color:#fff; background:var(--chrome); border:none; border-radius:99px;
@@ -298,8 +300,6 @@
   .optout-note{margin-top:10px; font-size:11.5px; color:var(--faint)}
   .day-head{margin-top:18px; font-size:13px; font-weight:700; color:rgba(255,255,255,.9)}
   .day-list{margin-top:6px; font-size:12.5px; line-height:2; color:var(--muted)}
-  .hear-help{margin:6px 0 0; font-size:13px}
-  .hear-help a{color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:13px; color:var(--faint); margin-top:12px; min-height:18px}
@@ -391,13 +391,234 @@
   .compat-cta .btn-accent{background:#fff; color:#1A1715}
   .compat-cta .day-list{color:rgba(255,255,255,.62)}
   .compat-cta .optout-note{color:rgba(255,255,255,.42)}
-  .compat-cta .hear-help a{color:#fff; text-decoration-color:rgba(255,255,255,.5)}
   .compat-cta .cc-preview{color:rgba(255,255,255,.7); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.25)}
   .cc-preview{font-size:13px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
   .frame-why{font-size:14px; line-height:1.95; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:13px 15px; margin:4px 0 20px}
   .frame-note{font-size:13px; color:var(--coral-ink); min-height:1.2em; margin-top:10px}
   .qframe{font-size:12.5px; color:var(--muted); margin:0 0 16px; padding:7px 13px; background:var(--surface); border:1px solid var(--line); border-radius:999px; display:inline-block; max-width:100%}
+
+  /* ===== 読み解きガイド（アプリ内・全4章） =====
+     3日間のステップメールを、本の章立てに置き換えたもの。1章＝1画面で、メール登録なしに
+     クリックだけで読み進められる。明朝・柱・ノンブル・章扉・＊＊＊の区切りで「本」の体裁に寄せ、
+     診断結果カード（サンセリフのUI）と読み物レイヤーを視覚的に切り分ける。 */
+  .book{--paper:#FCFAF4; --bk-ink:#26221D; --bk-soft:#5D564B; --bk-rule:#DFD8C8; --bk-faint:#9B9280}
+  .bk-top{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+  .bk-back{
+    background:none; border:none; cursor:pointer; padding:6px 2px;
+    font-family:var(--body); font-size:13px; color:var(--muted); white-space:nowrap;
+  }
+  .bk-back:hover{color:var(--ink)}
+  .bk-rail{display:flex; gap:6px; margin-left:auto}
+  .bk-dot{
+    width:32px; height:32px; border-radius:50%; cursor:pointer; padding:0;
+    background:var(--surface); border:1.5px solid var(--line);
+    font-family:var(--serif); font-weight:600; font-size:13px; color:var(--faint);
+    transition:border-color .15s, background .15s, color .15s;
+  }
+  .bk-dot:hover{border-color:#C9C8C1; color:var(--ink)}
+  .bk-dot.is-read{color:var(--bk-ink); border-color:#CFC7B4}
+  .bk-dot.is-on{background:var(--accent); border-color:var(--accent); color:#fff}
+  .bk-page{
+    position:relative; background:var(--paper); border:1px solid var(--bk-rule); border-radius:6px;
+    box-shadow:0 1px 2px rgba(20,20,20,.04), 0 14px 34px rgba(20,20,20,.07);
+    padding:clamp(20px,5vw,38px) clamp(18px,4.6vw,38px) 26px;
+  }
+  .bk-page.is-turn{animation:fade .4s ease both}
+  /* 綴じ側（左）に落ちる陰。開いた本の見開き感を出す。 */
+  .bk-page::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:16px; border-radius:6px 0 0 6px;
+    background:linear-gradient(90deg, rgba(90,70,40,.07), rgba(90,70,40,0)); pointer-events:none;
+  }
+  @media (prefers-reduced-motion:reduce){.bk-page.is-turn{animation:none}}
+  /* 柱（ランニングヘッド）とノンブル（ページ番号）。本らしさの芯になる2つ。 */
+  .bk-hd{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    font-family:var(--serif); font-size:10.5px; letter-spacing:.1em; color:var(--bk-faint);
+    border-bottom:1px solid var(--bk-rule); padding-bottom:9px; margin-bottom:8px;
+  }
+  .bk-hd span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .bk-folio{
+    font-family:var(--serif); font-size:11px; letter-spacing:.24em; color:var(--bk-faint);
+    text-align:center; margin-top:34px; padding-top:16px; border-top:1px solid var(--bk-rule);
+  }
+  /* 章扉 */
+  .bk-open{text-align:center; margin:30px 0 34px}
+  .bk-kicker{display:block; font-family:var(--serif); font-size:10px; letter-spacing:.36em; color:var(--accent); margin-bottom:16px}
+  .bk-no{font-family:var(--serif); font-weight:600; font-size:clamp(23px,6.4vw,30px); letter-spacing:.2em; color:var(--bk-ink); line-height:1.4}
+  .bk-hairline{width:40px; height:1px; background:var(--accent); margin:15px auto; opacity:.75}
+  .bk-title{font-family:var(--serif); font-weight:600; font-size:clamp(16px,4vw,20px); line-height:1.75; color:var(--bk-ink); letter-spacing:.02em}
+  .bk-sub{font-family:var(--serif); font-size:12.5px; line-height:1.9; color:var(--bk-soft); margin-top:12px}
+  /* 扉（序章だけ・本のタイトルページ） */
+  .bk-cover{text-align:center; padding:16px 0 4px}
+  .bk-cover-kicker{font-family:var(--serif); font-size:10px; letter-spacing:.36em; color:var(--accent)}
+  .bk-cover-title{font-family:var(--serif); font-weight:700; font-size:clamp(24px,6.6vw,32px); letter-spacing:.14em; color:var(--bk-ink); margin:14px 0 0; line-height:1.5}
+  .bk-cover-for{font-family:var(--serif); font-size:14px; color:var(--bk-ink); margin-top:16px; letter-spacing:.04em}
+  .bk-cover-catch{font-family:var(--serif); font-size:12.5px; color:var(--bk-soft); margin-top:6px}
+  .bk-cover-frame{border:1px solid var(--bk-rule); border-width:1px 0; padding:26px 0; margin:6px 0 30px}
+  /* 本文 */
+  .bk-body{font-family:var(--serif); font-size:15.5px; line-height:2.15; letter-spacing:.02em; color:var(--bk-ink)}
+  .bk-body p{margin-bottom:1.55em}
+  .bk-body p:last-child{margin-bottom:0}
+  /* 強調は3段階。章の中で使う数を絞って効かせる。
+       ①マーカー（.bk-kt＝文中のひと呼吸／.bk-em＝著者が【】で括った語）。見た目は同じで、
+         使い分けは編集上の区別として持つ
+       ②太ゴシック（.bk-b）… 明朝の地に混ぜる。具体的な言葉・セリフに
+       ③抜き出し（.bk-pull）／白抜きの帯（.bk-band）… 章に1つだけ置く山 */
+  .bk-kt, .bk-em{font-weight:700; color:var(--bk-ink); background:linear-gradient(transparent 56%, var(--accent-soft) 56%); padding:0 .08em}
+  .bk-kt{font-style:normal}
+  .bk-b{font-family:var(--display); font-weight:700; font-size:.93em; letter-spacing:.005em}
+  .bk-pull{
+    margin:2em 0 1.8em; padding:17px 6px; text-align:center;
+    border-top:2px solid var(--bk-ink); border-bottom:1px solid var(--bk-rule);
+    font-family:var(--serif); font-weight:600; font-size:17px; line-height:1.9; letter-spacing:.04em; color:var(--bk-ink);
+  }
+  .bk-band{
+    margin:2em 0 1.8em; padding:20px 18px; border-radius:4px; color:#fff;
+    background:linear-gradient(165deg, #3A444F 0%, #1E252D 100%);
+    font-family:var(--serif); font-weight:600; font-size:16px; line-height:2; letter-spacing:.03em;
+  }
+  /* 暗い面ではマーカーが濁るので、アクセント色の下線に置き換える */
+  .bk-band .bk-em, .bk-band .bk-kt{color:#fff; background:linear-gradient(transparent 86%, var(--accent) 86%); padding:0}
+  /* 約束・効能の箇条書きは、色面で囲って一目で拾えるようにする */
+  .bk-promise{margin:0 0 1.6em; padding:18px 18px 10px; border:1.5px solid var(--accent); border-radius:4px; background:var(--accent-soft)}
+  .bk-promise .bk-star{margin-bottom:0}
+  .bk-promise .bk-star li{font-weight:600}
+  .bk-hit{
+    font-size:18.5px; font-weight:600; line-height:1.9; color:var(--bk-ink); letter-spacing:.02em;
+    padding:2px 0 2px 16px; border-left:4px solid var(--accent); margin-bottom:1.5em !important;
+  }
+  .bk-ready{font-weight:600; letter-spacing:.04em}
+  .bk-div{text-align:center; letter-spacing:.7em; color:var(--bk-faint); font-size:11px; margin:0 0 1.9em}
+  /* 節見出し（⭐️⚠️などの記号見出しは、本の体裁では組版で表す） */
+  .bk-sec{
+    font-family:var(--serif); font-weight:600; font-size:15px; letter-spacing:.06em; color:var(--bk-ink);
+    margin:0 0 1.2em; padding-left:13px; border-left:3px solid var(--accent); line-height:1.7;
+  }
+  /* 環境カード・特徴カード：枠で囲わず、罫線と見出しで区切る（本文の流れを切らない） */
+  .bk-card{margin-bottom:1.4em; padding-left:14px; border-left:1px solid var(--bk-rule)}
+  .bk-card-l{font-family:var(--serif); font-weight:600; font-size:14.5px; color:var(--bk-ink); margin-bottom:.35em !important; letter-spacing:.03em}
+  .bk-card-l::before{content:"■"; color:var(--accent); font-size:.72em; margin-right:.6em; vertical-align:.1em}
+  .bk-card-t{font-size:14.5px; line-height:2.05; color:var(--bk-soft); margin-bottom:0 !important}
+  .bk-card-drain{border-left-color:var(--accent)}
+  .bk-card-drain .bk-card-l{color:var(--accent-ink)}
+  /* コラム（トリセツ・裏モード）：本の中の別枠。見出しは色面で抜いて、面として強く見せる。 */
+  .bk-col{background:rgba(255,255,255,.75); border:1px solid var(--bk-rule); border-radius:4px; margin:0 0 1.9em; overflow:hidden}
+  .bk-col-l{
+    font-family:var(--serif); font-weight:600; font-size:13.5px; letter-spacing:.2em;
+    background:var(--accent); color:#fff; text-align:center; padding:13px 14px; margin:0 !important;
+  }
+  .bk-col-in{padding:17px 18px 8px}
+  .bk-col-lead{font-size:13.5px; line-height:2; color:var(--bk-soft)}
+  .bk-ts{padding:11px 0; border-top:1px solid var(--bk-rule)}
+  .bk-ts-l{display:block; font-family:var(--display); font-weight:700; font-size:12.5px; color:var(--accent-ink); margin-bottom:4px; letter-spacing:.02em}
+  .bk-ts-t{display:block; font-size:14px; line-height:2}
+  .bk-col-warn .bk-col-l{background:#3A424C}
+  .bk-col-warn .bk-ts-l{color:#3A424C}
+  /* 箇条書き（☆・□・①②③）。原文の記号をそのまま組版に写す。 */
+  .bk-star, .bk-box, .bk-num{list-style:none; margin:0 0 1.55em; padding-left:2px}
+  .bk-star li, .bk-box li, .bk-num li{position:relative; padding-left:1.6em; line-height:2.05; margin-bottom:.35em; font-size:15px}
+  .bk-star li::before{content:"☆"; position:absolute; left:0; color:var(--accent)}
+  .bk-box li::before{content:"□"; position:absolute; left:0; color:var(--bk-faint)}
+  .bk-num li::before{content:attr(data-n); position:absolute; left:0; color:var(--accent)}
+  /* A/Bの対比 */
+  .bk-ab{margin:0 0 1.55em; padding:14px 16px; background:rgba(255,255,255,.7); border:1px solid var(--bk-rule); border-radius:4px}
+  .bk-ab p{margin-bottom:.5em !important; font-size:14.5px; line-height:1.95}
+  .bk-ab p:last-child{margin-bottom:0 !important}
+  .bk-ab-k{font-weight:600; color:var(--accent-ink); margin-right:.4em}
+  /* 目次 */
+  .bk-toc{margin:0 0 1.9em; padding:20px 18px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.7)}
+  .bk-toc-h{font-family:var(--serif); font-weight:600; font-size:12.5px; letter-spacing:.3em; text-align:center; color:var(--bk-faint); margin-bottom:1.2em !important}
+  .bk-toc-i{display:flex; gap:12px; padding:11px 0; border-top:1px solid var(--bk-rule)}
+  .bk-toc-n{flex:none; font-family:var(--serif); font-weight:600; font-size:13px; color:var(--accent-ink); letter-spacing:.06em; padding-top:1px}
+  .bk-toc-t{font-size:13.5px; line-height:1.95; color:var(--bk-soft)}
+  /* 転（あなたという半分）：ページで一番強い段落 */
+  .bk-turn{margin:0 0 1.55em; padding:20px 18px; background:rgba(38,34,29,.045); border-radius:4px}
+  .bk-turn p:last-child{margin-bottom:0 !important}
+  /* 次章の引き：枠に見出しラベルを食い込ませる（本の囲み記事の型） */
+  .bk-teaser{position:relative; margin:2.4em 0 1.55em; padding:20px 16px 6px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.6)}
+  .bk-teaser-l{
+    position:absolute; top:-9px; left:14px; padding:0 9px; background:var(--paper);
+    font-family:var(--serif); font-weight:600; font-size:11px; letter-spacing:.24em; color:var(--accent-ink);
+  }
+  .bk-teaser p:last-child{margin-bottom:0 !important}
+  /* 図解：テンポを変えるための挿図。外部素材は使わず、自作のインラインSVGで組む。 */
+  .bk-fig{margin:0 0 1.9em; padding:20px 15px 16px; border:1px solid var(--bk-rule); border-radius:4px; background:rgba(255,255,255,.72)}
+  .bk-fig-cap{
+    font-family:var(--serif); font-weight:600; font-size:11.5px; letter-spacing:.2em; color:var(--bk-faint);
+    text-align:center; margin-bottom:16px !important;
+  }
+  .bk-fig-step{display:flex; align-items:center; gap:13px; padding:11px 13px; border:1px solid var(--bk-rule); border-radius:4px; background:var(--paper)}
+  .bk-fig-step.is-goal{border-color:var(--accent); background:var(--accent-soft)}
+  .bk-fig-ico{
+    flex:none; width:40px; height:40px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .bk-fig-step.is-goal .bk-fig-ico{background:var(--accent); color:#fff}
+  .bk-fig-ico svg{width:23px; height:23px}
+  .bk-fig-t{font-family:var(--serif); font-weight:600; font-size:14.5px; line-height:1.7; color:var(--bk-ink)}
+  .bk-fig-ar{text-align:center; color:var(--accent); font-size:12px; line-height:1; padding:8px 0}
+  /* 図の中の「自分では見えない」区間。破線の囲みにラベルを食い込ませて、範囲そのものを見せる。 */
+  .bk-blind{position:relative; padding:20px 11px 11px; border:1px dashed var(--bk-rule); border-radius:4px; background:rgba(38,34,29,.03)}
+  .bk-blind-l{
+    position:absolute; top:-9px; left:12px; padding:0 8px; background:#FEFDFB;
+    font-family:var(--display); font-weight:700; font-size:10.5px; letter-spacing:.16em; color:var(--bk-faint);
+  }
+  .bk-fig-step.is-blind{border-style:dashed; background:transparent}
+  .bk-fig-step.is-blind .bk-fig-ico{background:rgba(38,34,29,.06); color:var(--bk-faint)}
+  .bk-fig-step.is-blind .bk-fig-t{color:var(--bk-soft)}
+  .bk-fig-note{font-size:13px !important; line-height:1.95; color:var(--bk-soft); text-align:center; margin:16px 0 0 !important}
+  /* 終章のCTA：本の中で唯一の色面。読み物から申し込みへ温度を上げる。 */
+  .bk-cta{
+    margin-top:30px; padding:26px 20px 22px; border-radius:6px; color:#fff;
+    background:linear-gradient(165deg, var(--accent) 0%, var(--accent-deep, #7A2E1A) 100%);
+  }
+  .bk-cta-kicker{font-family:var(--serif); font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.8); margin-bottom:10px}
+  .bk-cta-title{font-family:var(--serif); font-weight:600; font-size:clamp(16px,4vw,19px); line-height:1.75; margin-bottom:14px}
+  .bk-cta-text{font-family:var(--serif); font-size:14px; line-height:2; color:rgba(255,255,255,.88); margin-bottom:16px}
+  .bk-cta .field label{color:rgba(255,255,255,.78)}
+  .bk-cta .field textarea, .bk-cta .field input, .bk-cta .field select{color:#fff; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.28)}
+  .bk-cta .field textarea::placeholder{color:rgba(255,255,255,.42)}
+  .bk-cta .field select option{color:var(--ink); background:#fff}
+  .bk-cta .field textarea:focus, .bk-cta .field select:focus{border-color:rgba(255,255,255,.7)}
+  .bk-hear-l{font-family:var(--serif); font-weight:600; font-size:14px; color:#fff; margin-bottom:6px}
+  .bk-hear-t{font-size:13px; line-height:1.9; color:rgba(255,255,255,.82); margin-bottom:14px}
+  .bk-hear-note{font-size:12px; color:rgba(255,255,255,.72); min-height:1.3em; margin-top:8px}
+  .bk-apply{
+    display:block; width:100%; text-align:center; text-decoration:none;
+    font-family:var(--body); font-size:15px; font-weight:700; letter-spacing:.04em;
+    background:#fff; color:#1A1715; border:none; border-radius:99px; padding:15px 30px; cursor:pointer;
+  }
+  .bk-apply:hover{filter:brightness(.95)}
+  .bk-apply.is-off{background:rgba(255,255,255,.22); color:rgba(255,255,255,.7); cursor:default; pointer-events:none}
+  .bk-cta-note{font-size:11.5px; color:rgba(255,255,255,.66); margin-top:10px; line-height:1.7}
+  /* 自己紹介（申込フォームの後ろ）と、そのあとの2度目のCTA */
+  .bk-bio{margin-top:26px}
+  .bk-bio p{margin-bottom:1.5em}
+  .bk-bio p:last-child{margin-bottom:0}
+  .bk-cta-2{margin-top:24px; padding:22px 20px}
+  .bk-cta-text2{
+    font-family:var(--serif); font-weight:600; font-size:15.5px; line-height:1.9;
+    color:#fff; margin-bottom:16px; text-align:center;
+  }
+  /* ページ送り */
+  .bk-nav{display:flex; flex-direction:column; gap:12px; margin-top:20px}
+  .bk-next{
+    display:flex; align-items:center; gap:14px; width:100%; cursor:pointer; text-align:left;
+    background:var(--chrome); color:#fff; border:none; border-radius:14px; padding:16px 20px;
+    font-family:var(--body); transition:background .2s, transform .1s;
+  }
+  .bk-next:hover{background:var(--chrome-hover)}
+  .bk-next:active{transform:translateY(1px)}
+  .bk-next-l{flex:none; font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.72)}
+  .bk-next-t{font-family:var(--serif); font-weight:600; font-size:14.5px; line-height:1.6; flex:1}
+  .bk-next-a{flex:none; font-size:16px; color:rgba(255,255,255,.85)}
+  .bk-prev{
+    align-self:center; background:none; border:none; cursor:pointer;
+    font-family:var(--body); font-size:13px; color:var(--faint); padding:6px 10px;
+  }
+  .bk-prev:hover{color:var(--ink)}
+  .bk-endbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:26px}
 </style>
 </head>
 <body>
@@ -433,7 +654,6 @@
     </ol>
 
     <button class="btn btn-wide" id="startBtn">診断を始める</button>
-    <p class="meta">24問 ・ 約2分 ・ 登録不要</p>
   </section>
 
   <!-- FRAME（診断冒頭：特定の場面ではなく "自然体の自分" で答えるよう促し、回答のブレを防ぐ） -->
@@ -516,35 +736,13 @@
             <p class="cc-preview" id="deepPreviewNote" hidden>▼ この読み解きのご案内は、診断を受けた方みなさんに表示される標準のものです。試して、使えそうか感想をいただけると助かります。</p>
             <p class="cc-text" id="r-cc-intro"></p>
             <div class="cc-label">人間関係の悩みは生きる上で大きな大きな悩みの種です。</div>
-            <p class="cc-text">メールアドレスを登録するだけで、すぐに1通目を受け取れます。</p>
-            <!-- ②紹介（seg=referral）だけに出す商談前ヒアリング。すべて任意。
-                 書いてくれた人には個別の深掘り読み解きを返し、書かない人は3日間ガイドへ分岐する。 -->
-            <div id="hearingBlock" hidden>
-              <div class="cc-label">よろしければ、いまの状況も教えてください（すべて任意）</div>
-              <p class="cc-text">書いていただいた方には、3日間のガイドに代えて、<b>あなたの状況に合わせた読み解き</b>を個別にお返しします。</p>
-              <div class="field">
-                <label for="hearNow">いま、人間関係で悩んでいること</label>
-                <textarea id="hearNow" placeholder="例：任せたいのに、つい自分でやってしまう部下がいて…"></textarea>
-              </div>
-              <div class="field">
-                <label for="hearType">気になっている相手がいる場合、その人はどのタイプに近いですか</label>
-                <select id="hearType"></select>
-                <p class="hear-help"><a href="all-types.html" target="_blank" rel="noopener">全8タイプを見て確かめる →</a></p>
-              </div>
-              <div class="field">
-                <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
-                <textarea id="hearFuture" placeholder="例：安心して任せられるようになって、現場に立つのが楽しくなっている"></textarea>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="mail">3日間の読み解きガイドをお届けするメールアドレス</label>
-              <input id="mail" type="email" placeholder="you@example.com">
-            </div>
-            <button class="btn btn-wide btn-accent" id="submitLead">3日間の読み解きガイドを受け取る</button>
+            <!-- メール配信（3daysステップメール）から、アプリ内で読み切る4章のガイドへ変更。
+                 登録という関門をなくし、クリックだけで読み進められるようにする。 -->
+            <p class="cc-text"><b>登録不要</b>で読み始めることができます。</p>
+            <button class="btn btn-wide btn-accent" id="openGuide">読み解きガイドを開く</button>
             <p class="day-head">この読み解きガイドでわかること</p>
-            <p class="day-list">Day1　自然体でいられる環境<br>Day2　あなたの「裏モード」<br>Day3　あの人との関係を解く</p>
-            <p class="optout-note">ご案内の配信は、いつでも停止できます。</p>
+            <p class="day-list">序章　なぜ、相手ではなく自分から始めるのか<br>第一章　あなたが自然体でいられる環境<br>第二章　あなたの中の「もう一人のあなた」<br>終章　「霧が晴れる感覚」をあなたへ</p>
+            <p class="optout-note">全4章。8分ほどで読み終わります。</p>
           </div>
         </div>
         </div>
@@ -629,12 +827,101 @@
       </div>
     </div>
   </section>
+
+  <!-- GUIDE（読み解きガイド：アプリ内・全4章）
+       ②紹介セグメントの受け皿。3日間のステップメール（guide-3day-spec.md §8＋ガイド文面24本.md）を
+       本の章立てに移し、メール登録なしでクリックだけで読み進められるようにしたもの。
+       本文は1章ずつ #bk-prose に描画し、終章だけ静的なCTA（#guideEnd）を出す。 -->
+  <section class="screen book" id="guide">
+    <div class="bk-top">
+      <button class="bk-back" id="bkBack">← 結果に戻る</button>
+      <div class="bk-rail" id="bkRail"></div>
+    </div>
+
+    <article class="bk-page" id="bkPage">
+      <header class="bk-hd"><span id="bkHdL">読み解きガイド</span><span id="bkHdR"></span></header>
+      <div id="bkProse"></div>
+
+      <!-- 終章だけに出す申込ブロック。体験セッションの申込は外部フォーム（SESSION_FORM_URL）。 -->
+      <div id="guideEnd" hidden>
+        <div class="bk-cta">
+          <p class="bk-cta-kicker">体験セッション（30〜45分・無料）</p>
+          <h3 class="bk-cta-title">あなたの人間関係の悩みに終止符を打つ。</h3>
+          <p class="bk-cta-text">実際にどのような悩みが解決できるのか、次に何をしたら良いのかアドバイスさせていただきます。セッションの最後に、継続的なサポートのご案内も用意しております。</p>
+          <!-- ②紹介（seg=referral）の商談前ヒアリング。すべて任意。結果画面から、申込の直前へ移設。
+               入力は change のたびに回答ログへ保存する（送信ボタンを増やさないため）。 -->
+          <div id="hearingBlock" hidden>
+            <p class="bk-hear-l">よろしければ、申込の前に少しだけ教えてください（すべて任意）</p>
+            <p class="bk-hear-t">書いていただくと、当日の読み解きが早く、深くなります。</p>
+            <div class="field">
+              <label for="hearNow">いま、人間関係で悩んでいること</label>
+              <textarea id="hearNow" placeholder="例：部下に任せたいのに、気づいたらつい自分でやってしまっていて..."></textarea>
+            </div>
+            <div class="field">
+              <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
+              <textarea id="hearFuture" placeholder="例：安心して任せられるようになって、現場に立つのが楽しくなっている"></textarea>
+            </div>
+            <p class="bk-hear-note" id="hearNote"></p>
+          </div>
+          <a class="bk-apply" id="sessionApply" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
+          <p class="bk-cta-note" id="sessionNote">オンラインで30〜45分。日程は申込フォームで選べます。</p>
+        </div>
+
+        <!-- 書き手の自己紹介。読み物の中ではなく、申込フォームの後ろに置く（読者の話を先に、
+             書き手の話は最後に）。読んだ人にもう一度フォームを差し出して締める。 -->
+        <div class="bk-body bk-bio">
+          <div class="bk-div">＊　＊　＊</div>
+          <p>ここまで読んでくださったあなたに、少しだけ自己紹介をさせてください。</p>
+          <div class="bk-band">実は私自身、過去には<b class="bk-em">【仲良くなりたい人ほど、嫌われるのが怖くて素を出せない】</b>人間でした。</div>
+          <p>相手のことが好きになっても、嫌われないかどうかばかり気になって、自分らしさを抑え込んで相手の期待に応えようとばかりしてしまい、後悔する日々。</p>
+          <p>職場でも、同僚と仲良くしたいのに気づけば変な距離をとってしまい、あとで一人で「何やってんだ...」と自己嫌悪する。</p>
+          <p>このガイドにたどり着いたということは、もしかしたら、あなたは過去の私に似ているのかもしれません。</p>
+          <p>人間関係の悩みは、人生の大きな割合を占める苦しみだと実感しています。</p>
+          <p>それでも、自分と相手の人間関係のクセを知り、うまくいかない理由に対策できるようになったことで、一気に<b class="bk-em">【自然体の自分】</b>でいられるようになりました。</p>
+          <p>あなたの中に<br>「なんとかしたい」<br>という気持ちが少しでもあるなら、とりあえず申し込むだけでもOKです。<br>お待ちしています。</p>
+        </div>
+
+        <div class="bk-cta bk-cta-2">
+          <a class="bk-apply" id="sessionApply2" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
+          <p class="bk-cta-note" id="sessionNote2"></p>
+        </div>
+
+        <div class="bk-endbar">
+          <button class="btn btn-sm btn-ghost" id="bkRestart">最初から読み直す</button>
+          <button class="btn btn-sm btn-ghost" id="bkBackBottom">結果に戻る</button>
+        </div>
+      </div>
+
+      <footer class="bk-folio" id="bkFolio"></footer>
+    </article>
+
+    <nav class="bk-nav">
+      <button class="bk-next" id="bkNext">
+        <span class="bk-next-l">次の章</span>
+        <span class="bk-next-t" id="bkNextT"></span>
+        <span class="bk-next-a" aria-hidden="true">▶</span>
+      </button>
+      <button class="bk-prev" id="bkPrev">◀ 前の章にもどる</button>
+    </nav>
+  </section>
 </div>
 
 <script>
 // ▼ 回答収集の送信先（Google Apps Script Web AppのURL）。デプロイ後にここへ貼る。
 //   空のままだと送信せず、回答は記録されません（体験のみ）。apps-script/README.md 参照。
 const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxTUFm1vtubSrjrWCX9s2RrTSbVqyv5Nd1BcmSKu4tgPyGRxoVKCIPHw/exec';
+
+// ▼ 体験セッション申込フォーム（外部）のURL。読み解きガイド終章のCTAから別タブで開く。
+//   空のままだとボタンは押せない見た目になり、未設定であることを画面に出す。
+//   短縮URL（https://forms.gle/8UMZBSaHJmGPaegRA）ではなく長いURLを使う。事前入力のため。
+const SESSION_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeuJabgs3MUpI1Jkd5E8F9JFamRMdWAQ-7NVYX4pHXltE-0vg/viewform';
+// ▼ 申込フォームの「診断ID」欄の受け口。ここに回答IDを事前入力して開くことで、
+//   回答ログの行（診断結果・5軸・商談前ヒアリング）と申込者を突き合わせられる。
+//   注意：短縮URL（forms.gle）はリダイレクトでパラメータが落ちるため、事前入力を効かせるには
+//   SESSION_FORM_URL を長いURL（https://docs.google.com/forms/d/e/〇〇/viewform）にする。
+const SESSION_FORM_ID_ENTRY = 'entry.1323157911';
+// ▼ 読み解きガイド冒頭の名乗り。Apps Script「ガイド設定」シートの sender_name と同じ値を入れる。
+const GUIDE_AUTHOR = 'Mikata事務局 齋藤 祐希';
 
 // ▼ セグメント判定：?ref= の値から「受け手の立場」を決める。セグメントごとに必要な情報とCTAだけを
 //   出し、ファネルの通過率を上げるのが狙い。判定は4つ。
@@ -643,7 +930,15 @@ const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxT
 //     leader-lp … 店長・リーダー（法人LPの体験版から。corp-lp / wedding-lp / coffee-lp）
 //     member    … メンバー（法人LP経由でチームに配られるリンク。team_ で始まるref）
 //   ?seg= を付けると判定を上書きできる（プレビュー・検証用）。
-const _params = new URLSearchParams(location.search);
+// htmlpreview.github.io は「?＋rawファイルのURL」の形でファイルを渡すため、そこに ?ref= を足すと
+// location.search が「rawのURL＋こちらのクエリ」になり、素直に読むと ref を取りこぼす。
+// 最後の "?" 以降を自分のクエリとして読むことで、公開URLでもプレビューURLでも同じ判定になる。
+function readParams(){
+  const q = location.search || '';
+  const cut = q.lastIndexOf('?');
+  return new URLSearchParams(cut >= 0 ? q.slice(cut + 1) : q);
+}
+const _params = readParams();
 const REF = _params.get('ref') || '';
 const LP_REFS = ['corp-lp', 'wedding-lp', 'coffee-lp'];
 const SEGMENTS = ['general', 'referral', 'leader-lp', 'member'];
@@ -730,42 +1025,42 @@ const TYPES = {
 // 相性（良し悪しの判定）の代替として、理解と関わり方に振り切る。優劣はつけない。
 const TORISET = {
  OBL:[
-  {l:'こう接すると、うまくいく', t:'スピード感を否定せず、まず一緒に走ってみて。方向がずれたら、走りながら直せば大丈夫。'},
+  {l:'こう接すると、うまくいく', t:'走り出す勇気を認めてあげて。止まるのが怖くて、先に動いているから。'},
   {l:'こんな時は、気づいてほしい', t:'勢いよく進めている時ほど、実は不安。「大丈夫？」の一言で、すっと力が抜けます。'},
   {l:'心を開くのは、こんな瞬間', t:'弱さや迷いを、否定せずに受け止めてもらえた時。'},
   {l:'誤解しないでほしいのは', t:'強く見えても、止まるのが怖いだけ。自信家でも自分勝手でもありません。'}],
  OBS:[
-  {l:'こう接すると、うまくいく', t:'意見を頭ごなしに否定せず、まず筋を聞いて。納得できれば、すっと引きます。'},
+  {l:'こう接すると、うまくいく', t:'指摘の裏の誠実さを認めてあげて。場を守りたくて、言っているから。'},
   {l:'こんな時は、気づいてほしい', t:'正論を言った後は、たいてい「きつかったかな」と反省中。追い打ちをかけないで。'},
   {l:'心を開くのは、こんな瞬間', t:'正しさより先に、気持ちを分かろうとしてもらえた時。'},
   {l:'誤解しないでほしいのは', t:'批判したいのではなく、良くしたいだけ。根っこはいつも味方です。'}],
  OKL:[
-  {l:'こう接すると、うまくいく', t:'明るさに乗ってあげて。ノリを楽しんでくれる人には、全力で場を作ります。'},
+  {l:'こう接すると、うまくいく', t:'明るさの裏の気配りを認めてあげて。場が重くならないよう、ずっと見ているから。'},
   {l:'こんな時は、気づいてほしい', t:'やたら明るい時は、重い話にフタをしているサイン。そっと本音を聞いて。'},
   {l:'心を開くのは、こんな瞬間', t:'笑わせなくても、そのままでいていいと感じられた時。'},
   {l:'誤解しないでほしいのは', t:'軽そうに見えて、実はすごく気を遣っています。嫌われるのが、けっこう怖い。'}],
  OKS:[
-  {l:'こう接すると、うまくいく', t:'自由と距離感を尊重して。縛らない相手には、鋭い視点をどんどん出します。'},
+  {l:'こう接すると、うまくいく', t:'よく見ていることを認めてあげて。冷めているのではなく、ちゃんと見ているから。'},
   {l:'こんな時は、気づいてほしい', t:'一歩引いている時は、当事者になるのが少し怖い時。責めずに背中を押して。'},
   {l:'心を開くのは、こんな瞬間', t:'意見を否定せず、面白がってもらえた時。'},
   {l:'誤解しないでほしいのは', t:'他人事に見えて、本当はよく見ています。冷めているわけではありません。'}],
  GBL:[
-  {l:'こう接すると、うまくいく', t:'多くを語らなくても、信じて任せて。いざという時は、必ず引き受けます。'},
+  {l:'こう接すると、うまくいく', t:'言葉にしない責任感を認めてあげて。多くを語らず、背負っているから。'},
   {l:'こんな時は、気づいてほしい', t:'「大丈夫」と言う時ほど、抱えていることが多い。気づいてもらえると救われます。'},
   {l:'心を開くのは、こんな瞬間', t:'弱音を、弱さとして扱われなかった時。'},
   {l:'誤解しないでほしいのは', t:'怖いのではなく、伝えるのが下手なだけ。本当は面倒見がいいんです。'}],
  GBS:[
-  {l:'こう接すると、うまくいく', t:'見えない働きに気づいて、言葉にして。それだけで、また頑張れます。'},
+  {l:'こう接すると、うまくいく', t:'見えない働きを認めてあげて。黙って、やり切っているから。'},
   {l:'こんな時は、気づいてほしい', t:'何も言わない時ほど、限界が近いかも。「無理してない？」と聞いて。'},
   {l:'心を開くのは、こんな瞬間', t:'「ありがとう」を、ちゃんと受け取ってもらえた時。'},
   {l:'誤解しないでほしいのは', t:'便利な人ではありません。断らないのは、あなたを困らせたくないからです。'}],
  GKL:[
-  {l:'こう接すると、うまくいく', t:'正面から問い詰めず、まず安心させて。安全だと分かれば、本音を出します。'},
+  {l:'こう接すると、うまくいく', t:'見えないところの段取りを認めてあげて。誰も傷つけずに進めようとしているから。'},
   {l:'こんな時は、気づいてほしい', t:'はっきり言わない時は、波風を立てたくない時。急かさないで。'},
   {l:'心を開くのは、こんな瞬間', t:'探り合いでなく、まっすぐ信頼を示してもらえた時。'},
   {l:'誤解しないでほしいのは', t:'裏があるのではなく、みんなが穏やかでいられる道を探しているだけ。'}],
  GKS:[
-  {l:'こう接すると、うまくいく', t:'「あなたはどうしたい？」と聞いてあげて。自分を後回しにしがちだから。'},
+  {l:'こう接すると、うまくいく', t:'頑張ってることを認めてあげて。密かに頑張っているから。'},
   {l:'こんな時は、気づいてほしい', t:'笑顔で「大丈夫」と言う時ほど、我慢しているかも。気にかけて。'},
   {l:'心を開くのは、こんな瞬間', t:'気を遣わなくていい、と心から思えた時。'},
   {l:'誤解しないでほしいのは', t:'ただの「いい人」ではありません。あなたとの居心地を守るために、無理をしています。'}],
@@ -792,6 +1087,211 @@ const HONSHITSU = {
       cost:'でも、合わせすぎるほど自分の本音はどこかへ行き、家に帰るとどっと疲れる。あなたの優しさが、あなた自身をすり減らしてしまいます。'},
 };
 const HONSHITSU_LOOP='まさに光と影のようなもので、あなたの中にあるこの2つをどうしたら自由自在に操ることができるのか、興味はありませんか？';
+
+// ===== 読み解きガイド（アプリ内・全4章）のタイプ別本文 =====
+// 出所は `ガイド文面24本.md`（＝8タイプ×Day1〜3の固定文）。文言の正は同mdのまま。
+// タイプで変わる部分だけをここに持ち、全タイプ共通の言い回しは下の章テンプレート側に置く。
+//   hit … 図星の一行 ／ jinen … 「自然体のまま〔　〕あなたでいたいと思うなら」のあり方
+//   envs … 自然体でいられる環境4枚（4枚目は相棒）／ drain … 消耗しやすい場
+//   tori … 私のトリセツ4項目（ラベルは TORI_LABEL で共通）
+//   traits … 関わり方の特徴4枚 ／ calm … 「余裕がある時のあなたは、〔　〕です」
+//   trigger・symptom・prevent … 裏モードの3点
+//   kuse・notice1・notice2 … 関係のクセと、気づきの二文
+const TORI_LABEL=['力が出る時','苦手な時','心地よいのはこんな関わり方をされた時','無意識にやりがちなこと'];
+const GUIDE_BODY={
+ OBL:{
+  hit:'沈黙が3秒続くと、つい自分が口火を切っていませんか？',
+  jinen:'前に出る',
+  envs:[
+   {l:'「まずやってみる」が許される環境',t:'完璧な計画よりも、動きながら直していくスピード感が歓迎される場だと、あなたの強みは活かされます。旅行の計画でも新しい仕事でも、「とりあえず一歩目」を一緒に踏んでくれる人がいると心地よくいられます。'},
+   {l:'任せてもらえる環境',t:'細かく口を出されるより、「あなたに任せる」と言われた方が力を出せます。逆に、手順をいちいち管理されると、あなたの持ち味は縮こまってしまうかもしれません。'},
+   {l:'率直に言い合える環境',t:'意見のぶつかりを「攻撃」ではなく「前進」と受け取ってくれる相手と噛み合います。思ったことを口にしても関係が壊れない、そんな相手を選ぶのがコツです。'}],
+  drain:'察し合いを前提とした、結論がなかなか出ない集まりでは、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、思っている半分のペースに落とすだけでも、周りとの波長が合ってきます。',
+  tori:['任せてもらえて、自分のペースでどんどん進められる時。「いいね、やってみよう」と背中を押してもらえた時。',
+        '結論を先延ばしにされる時。自分が思ったような速さで進められない時。細かく口を出される時。',
+        '反対意見を遠慮なくぶつけてもらえる関係だと、力が出ます。相手が黙り込む方が、自分が黙るよりこたえます。勢いが強すぎる時に「一呼吸置こう」と言ってもらえると、ちょうどよく戻れます。',
+        '沈黙を埋めようとして、つい先に答えを言ってしまう。気づくと、一人で話しすぎていることがあります。'],
+  traits:[
+   {l:'先頭に立って巻き込む',t:'自分が動くことで人を動かします。声をかけて集めるより、まず自分が動いて背中で引っ張るタイプです。'},
+   {l:'本音は早めに出す',t:'腹に溜めず、思ったことをその場で言います（言い切ってから「言いすぎたかな」と気づくこともあります）。'},
+   {l:'弱さは見せにくい',t:'引っ張る立場ゆえ、自分から助けを求めるのが苦手です。本当は手一杯でも「大丈夫」と言いがちです。'},
+   {l:'信頼は「やり切る姿」で築く',t:'言葉や愛想より、やり切る姿で人の信頼を勝ち取ります。'}],
+  calm:'頼もしい突破役',
+  trigger:'物事が思うように進まない時。周りが動かず、自分だけが焦っている時。',
+  symptom:'「もういい、自分でやる」と人を置いて先に行ってしまいます。口調が強くなり、正論で相手を黙らせ、気づけば周りが本音を言わなくなっています。',
+  prevent:'一人で突き進みたいと思った時に、あえて「どう思う？」と先に問いを投げてください。あなたが半歩引くと、周りの一歩が出てきます。一人で5歩進むより、みんなで3歩進む旨みがわかってくるはずです。',
+  kuse:'突撃隊長のあなたは、率直に言い、正面からぶつかり、先頭に立ちます。関係の中でも、この3つは同時に出ています。つまり、あなたと一緒にいる人はいつも「率直さ」「直球」「スピード」の3つを受け取っています。これを心地よく受け取れる相手と、圧として受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「スピードを止めない関わり」は、思い浮かべたあの人にとっては、「急かされて本音を言えない時間」になっているかもしれません。',
+  notice2:'もしくは、あなたの「率直さ」が、相手には「傷つくひと言」になっていることもあります。'},
+ OBS:{
+  hit:'話の途中で矛盾を見つけると、つい指摘したくなっていませんか？',
+  jinen:'筋を通す',
+  envs:[
+   {l:'率直に言い合える環境',t:'思ったことを口にしても「攻撃」と受け取られない関係だと、あなたの指摘は場を良くする力として活かされます。言いたいことを飲み込み続ける関係では、モヤモヤが顔に出てしまうかもしれません。'},
+   {l:'筋が通ることが大切にされる環境',t:'ルールや約束がきちんと守られる場だと、あなたは安心して力を発揮できます。逆に、その場の空気やなあなあで物事が決まる場では、一人でモヤモヤを抱えがちです。'},
+   {l:'支えが見えている環境',t:'あなたは前に出て引っ張るより、場のほころびを正すことで支えるタイプです。その働きに気づいて「ありがとう」と言ってくれる人がいる場を選ぶのがコツです。'}],
+  drain:'曖昧なまま物事が流れ、誰も筋を問わない場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、指摘したいことを「一番大事な一つ」に絞るだけでも、あなたの言葉の届き方が変わってきます。',
+  tori:['筋の通った話し合いができている時。決めたことが、きちんと守られている時。',
+        '話が曖昧なまま流される時。約束やルールが軽く扱われる時。',
+        '指摘を頭ごなしに否定されず、まず筋を聞いてもらえると動きやすくなります。納得できれば、すっと引けます。言い切った後はたいてい一人で反省しているので、追い打ちがないと助かります。',
+        '矛盾に気づくと、つい「それ、筋が通ってなくない？」と言ってしまう。言い切った後で、言い方を悔やむこともあります。'],
+  traits:[
+   {l:'おかしいことは、おかしいと言う',t:'見て見ぬふりができないタイプです。多少空気が悪くなっても、筋を通すことを選びます。'},
+   {l:'正しさで、場や人を守る',t:'意地悪で指摘するのではありません。曖昧さやごまかしから、大切な場を守ろうとしています。'},
+   {l:'前に出るより、場を整える',t:'主導権を握るより、話のほころびを直すことで貢献するタイプです。'},
+   {l:'言った後に、一人で痛む',t:'言い切った後で「言い方きつかったかな」と一人反省会をしがちです。外からは見えませんが、実はよく気にしています。'}],
+  calm:'場の品質を守る頼れる番人',
+  trigger:'筋の通らないことが続く時。真っ当な指摘が、聞き流される時。',
+  symptom:'正しさの純度が上がりすぎて、相手の逃げ場を奪ってしまいます。言葉に皮肉が混じり、相手は黙り込み、気づけば「批判ばかりの人」と受け取られています。',
+  prevent:'指摘したくなった瞬間に、あえて「ここは良いと思う」と一つ認めてから本題に入ってみてください。同じ中身でも、相手の受け取り方は驚くほど変わります。その積み重ねが、あなたの正しさを信頼へと変えていきます。',
+  kuse:'正論ハンマーのあなたは、率直に言い、筋の通らないことには正面から切り込み、場を正すことで支えます。つまり、あなたと一緒にいる人はいつも「率直さ」「点検の目」「誠実さ」を受け取っています。これを「信頼できる」と受け取る相手と、「詰められている」と受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「筋の通る関わり」は、思い浮かべたあの人にとっては、「裁かれている時間」に感じられているかもしれません。',
+  notice2:'もしくは、あなたの「率直さ」が、相手には「反論を許さない強さ」に見えていることもあります。'},
+ OKL:{
+  hit:'空気が重くなると、つい冗談で流れを変えにいっていませんか？',
+  jinen:'場を明るくする',
+  envs:[
+   {l:'素の明るさを出せる環境',t:'ノリや冗談が歓迎される場だと、あなたのエネルギーは場全体を温める力として活かされます。真面目一辺倒で笑いのない場では、持ち味が縮こまってしまうかもしれません。'},
+   {l:'攻撃のない穏やかな環境',t:'対立が個人攻撃にならない、安心できる空気の中で、あなたは伸び伸びと動けます。ピリピリした空気は、あなたが一番先に察知して疲れてしまいます。'},
+   {l:'ムードを任せてもらえる環境',t:'場の空気づくりを「あなたの持ち味」として楽しんでくれる人たちといると力が出ます。盛り上げを「うるさい」と受け取らない相手を選ぶのがコツです。'}],
+  drain:'重い話に、重いまま長く向き合うことを求められる場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、無理に空気を変えようとせず、聞き役に回るだけでも十分に貢献できています。',
+  tori:['場の空気づくりを任せてもらえている時。笑いを、ちゃんと受け取ってもらえる時。',
+        '重い沈黙が続く時。正しさで詰められる時。',
+        '明るさに乗ってもらえると、場を作る力が出ます。やたら明るくしている時は、重い話にフタをしているサイン。そっと本音を聞いてもらえると、戻ってこられます。',
+        '空気が重くなると、つい冗談で流してしまう。大事な話ほど、正面から受け止めそこねることがあります。'],
+  traits:[
+   {l:'場のエネルギー源になる',t:'あなたがいるだけで場が明るくなります。誰とでも打ち解け、空気そのものを作るタイプです。'},
+   {l:'対立は、笑いでかわす',t:'ぶつかり合いになりそうな瞬間、冗談や話題転換で空気を変えにいきます。それはあなたなりの、場の守り方です。'},
+   {l:'先頭でムードを引っ張る',t:'仕切るというより、率先して楽しむことで人を巻き込みます。'},
+   {l:'明るさで、限界が隠れる',t:'本当はしんどい時でも、場のために明るく振る舞えてしまいます。実は、嫌われることがけっこう怖い。その不安は、外からはほとんど見えません。'}],
+  calm:'場を温める太陽',
+  trigger:'場の空気が重くなり続ける時。向き合わないといけない対立が、すぐそこまで来ている時。',
+  symptom:'茶化しと話題そらしが止まらなくなり、解くべき話がどこかへ消えていきます。その場は笑いで乗り切れても、家に帰ってから「本当は言うべきだった」と一人で思い出すことになります。',
+  prevent:'空気をゆるめたくなった瞬間に、あえて「私はこう思う」と短く本心を一つ添えてみてください。あなたの明るさは消えるどころか、みんなが安心して本音を出せる空気へと育っていきます。',
+  kuse:'お祭り隊長のあなたは、明るく開けっぴろげで、対立は笑いでかわし、ムードの先頭に立ちます。つまり、あなたと一緒にいる人はいつも「楽しさ」「軽やかさ」「気まずさからの救出」を受け取っています。これを「一緒にいて楽」と受け取る相手と、「本音で話せない」と受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「明るい場づくり」は、思い浮かべたあの人にとっては、「重い話を出せない空気」になっているかもしれません。',
+  notice2:'もしくは、あなたの「軽やかさ」が、相手には「真剣に向き合ってもらえていない」と映っていることもあります。'},
+ OKS:{
+  hit:'意見はしっかり言うのに、いざ「で、どうする？」となると、そっと一歩引いていませんか？',
+  jinen:'自由な',
+  envs:[
+   {l:'思ったことを言える環境',t:'感想やアイデアを歯に衣着せず出しても、面白がって受け取ってもらえる場だと、あなたの視点は場の財産として活かされます。'},
+   {l:'縛られない環境',t:'役割や付き合いで固められるより、出入り自由な距離感を許してもらえると心地よくいられます。逆に、「全員一丸」を強く求められる場では、息苦しくなってしまうかもしれません。'},
+   {l:'前に立たされない環境',t:'主導権を握らされるより、少し離れた場所から鋭い一言を投げる位置が、あなたの定位置です。その位置をそのまま認めてくれる人たちを選ぶのがコツです。'}],
+  drain:'「で、あなたがやってよ」と当事者の役割を求められ続ける場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、引き受ける範囲を先に自分で決めておくだけでも、逃げ腰にならずにいられます。',
+  tori:['自由と距離感を尊重してもらえている時。意見を否定されず、面白がってもらえる時。',
+        '縛られる時。「で、君はどうするの？」と正面から当事者性を問われる時。',
+        '一歩引いている時は、当事者になるのが少し怖い時。責められずに、そっと背中を押してもらえると動けます。',
+        '意見だけ言って、「で、誰がやる？」の場面で静かになりがち。他人事に見えても、本当はよく見ています。'],
+  traits:[
+   {l:'空気に流されない',t:'みんなが同じ方向を向いている時でも、違う角度から本質を突けるタイプです。'},
+   {l:'言いたいことは、言う',t:'忖度で言葉を曲げません。その率直さが、場の見落としを救うことがあります。'},
+   {l:'一歩引いた位置から支える',t:'前に立って引っ張るより、少し離れた場所から観察し、必要な一言を投げ込みます。'},
+   {l:'線を引いて、自分を守る',t:'「自分は自分」の境界線がはっきりしています。冷めているのではなく、それがあなたの身の守り方です。'}],
+  calm:'場に新しい風を入れる自由な観察者',
+  trigger:'当事者の役割を押し付けられそうな時。距離を詰められ、縛られそうになった時。',
+  symptom:'すっと一歩引いて、評論家の位置に立てこもります。言葉の切れ味は増すのに、引き受ける気配は消える。良い意見を言うほど「言うだけの人」と見られ、せっかくの鋭さが信頼に変わりません。',
+  prevent:'意見を述べた直後に、あえて「この部分なら自分がやります」と小さく手を挙げてみてください。引き受けても自由は失われません。むしろ、あなたの言葉に確かな影響力が宿っていきます。',
+  kuse:'自由人コメンテーターのあなたは、率直に言い、対立はかわし、一歩引いた位置に立ちます。つまり、あなたと一緒にいる人はいつも「新鮮な視点」「率直な感想」「ほどよい距離」を受け取っています。これを「気楽で心地よい」と受け取る相手と、「壁がある」と受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「ほどよい距離の取り方」は、思い浮かべたあの人にとっては、「近づくなの合図」に見えているかもしれません。',
+  notice2:'もしくは、あなたの「率直な感想」が、相手には「他人事の評論」に聞こえていることもあります。'},
+ GBL:{
+  hit:'本当は手一杯なのに、つい「大丈夫」と言ってしまっていませんか？',
+  jinen:'頼られる',
+  envs:[
+   {l:'沈黙が許される環境',t:'言葉になる前の間を待ってもらえる場だと、あなたは自分のペースで考えを固め、確かな判断を出せます。次々と即答を求められる場では、力を出し切れないかもしれません。'},
+   {l:'正面から向き合える環境',t:'いざという時に、ごまかさず本題に向き合える相手だと、あなたの覚悟は正しく伝わります。'},
+   {l:'背中を任せてもらえる環境',t:'細かい説明を求められるより、「あなたに任せた」と信頼してもらえた時に、一番力が出ます。口数の少なさを不安がらない相手を選ぶのがコツです。'}],
+  drain:'言葉での説明と即答を常に求められる場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、「少し考えさせて」を先に言うだけでも、自分のペースを守れます。',
+  tori:['信じて任せてもらえている時。自分のペースで考えられる時。',
+        '弱音を吐くこと。次々と言葉での説明を求められる時。',
+        '多くを語らなくても信じて任せてもらえると、一番力が出ます。「大丈夫」と言っている時ほど抱えているので、気づいてもらえると救われます。',
+        '困っても、自分で抱えて相談しないまま進めがち。「大丈夫」と言う時ほど、たぶん少し無理をしています。'],
+  traits:[
+   {l:'危機に強い',t:'場が揺れた時ほど静かに前に出て、収めるタイプです。混乱の中でも軸がぶれません。'},
+   {l:'語らずに、背負う',t:'言葉で約束する代わりに、行動と結果で責任を取ります。'},
+   {l:'本音は、胸の内に',t:'思っていることは多いのに、口に出すのはその一割ほど。周りには「何を考えているか分からない」と映ることがあります。'},
+   {l:'助けを求めるのが、苦手',t:'抱えていても「大丈夫」と言ってしまいます。弱さを見せることが、一番の苦手科目です。'}],
+  calm:'静かで揺るがない大黒柱',
+  trigger:'抱えているものが限界に近づいた時。自分の働きが、軽く扱われたと感じた時。',
+  symptom:'ますます口数が減り、「大丈夫」の一点張りになります。周りはあなたの内側が読めず、頼れるはずの人なのに近寄りがたくなる。そしてある日、糸が切れるように静かに距離を置いてしまうことがあります。',
+  prevent:'抱えきれないと感じた瞬間に、あえて「実はここが難しくて」と短く打ち明けてみてください。弱音は信頼を損なうどころか、人があなたに手を差し伸べられる橋になります。',
+  kuse:'沈黙の大黒柱のあなたは、多くを語らず、逃げずに向き合い、背中で引っ張ります。つまり、あなたと一緒にいる人はいつも「静かな安定」「守られている感覚」「言葉の少なさ」を受け取っています。これを「頼もしい」と受け取る相手と、「何を考えているか分からない」と受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「静かに支える構え」は、思い浮かべたあの人にとっては、「入っていけない沈黙」に見えているかもしれません。',
+  notice2:'もしくは、あなたの「言葉の少なさ」が、相手には「関心がないサイン」と受け取られていることもあります。'},
+ GBS:{
+  hit:'不満があっても口には出さず、気づけば黙って自分で片づけていませんか？',
+  jinen:'やり切る',
+  envs:[
+   {l:'自分のペースで進められる環境',t:'急かされず、目の前のことを一つずつやり切れる場だと、あなたの確実さは最大限活かされます。'},
+   {l:'ごまかしのない環境',t:'口先やその場しのぎより、誠実にやり切ることが大切にされる場だと、安心して力を出せます。'},
+   {l:'働きが見てもらえる環境',t:'あなたは自分から手柄を言わないタイプです。だからこそ、見えない働きに気づいて言葉にしてくれる人がいる場を選ぶのがコツです。逆に、やって当たり前と扱われる場では、静かにすり減ってしまいます。'}],
+  drain:'頼まれごとが一方通行で流れ込み、感謝が返ってこない場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、引き受ける量の上限を先に自分で決めておくだけでも、すり減り方が変わってきます。',
+  tori:['任されたことを、自分のペースでやり切れる時。働きに気づいて「ありがとう」と言ってもらえた時。',
+        '頼まれごとが次々と積み上がる時。急な変更に振り回される時。',
+        '見えない働きに気づいて言葉にしてもらえると、また頑張れます。何も言わない時ほど限界が近いので、「無理してない？」の一言が効きます。',
+        '頼まれると断れず、不満も言わずに黙って抱えがち。相手を困らせたくない一心で、限界まで受け取ってしまいます。'],
+  traits:[
+   {l:'黙って、やり切る',t:'引き受けたことは、目立たなくても最後まで全うします。その確実さが、あなたの信頼の源です。'},
+   {l:'不満は、飲み込む',t:'言いたいことがあっても、波風を立てるくらいならと、自分の中で処理しがちです。'},
+   {l:'支えることが、定位置',t:'前に出るより、誰かの土台になることに安心感があります。'},
+   {l:'限界のサインが、出ない',t:'しんどくても顔に出さず、ペースも落とさないので、周りはあなたの限界に気づけません。'}],
+  calm:'静かに場を支える職人',
+  trigger:'断れない頼まれごとが積み上がった時。自分ばかりが負担を背負っていると感じた時。',
+  symptom:'限界まで我慢して、ある日突然プツンと切れます。周りは「急にどうしたの」と驚きますが、あなたの中では、ずっと前から積もっていたものです。我慢は、自分も周りも気づけない時限爆弾になります。',
+  prevent:'また頼まれそうになった瞬間に、あえて「今は手一杯なので、来週なら」と条件を添えて返してみてください。小さなNOは信頼を壊しません。むしろ、あなたが長く頼られ続ける土台になります。',
+  kuse:'縁の下の職人のあなたは、本音を胸にとどめ、逃げずにやり切り、支える側に立ちます。つまり、あなたと一緒にいる人はいつも「安心感」「確実さ」「静かな支え」を受け取っています。これを「ありがたい」と受け取って言葉にしてくれる相手と、「あって当たり前」と受け取ってしまう相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「黙って支える形」は、思い浮かべたあの人にとっては、「頼っても大丈夫な合図」に見え続けているかもしれません。',
+  notice2:'もしくは、あなたの「静かな支え」が、相手には「当たり前の日常」になって、見えなくなっていることもあります。'},
+ GKL:{
+  hit:'大事な話ほど、いきなり切り出さず、先にそっと外堀を埋めていませんか？',
+  jinen:'穏やかに進める',
+  envs:[
+   {l:'準備の時間がある環境',t:'その場で白黒を迫られるより、事前に考えを整えたり、先に個別に話しておける余裕がある場だと、あなたの段取り力は最大限活かされます。'},
+   {l:'穏やかに物事が進む環境',t:'怒鳴り合いや正面衝突のない、角の立たない空気の中で、あなたは最も良い動きができます。'},
+   {l:'流れを任せてもらえる環境',t:'表立って号令をかけるより、全体の流れをそっと設計する位置にいる時に力が出ます。あなたの見えない段取りに気づいてくれる人がいると、なお心地よくいられます。'}],
+  drain:'準備の余地がなく、その場で本音や即断を迫られる場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、「一度持ち帰らせて」を先に言うだけでも、あなたの持ち味を守れます。',
+  tori:['事前に段取りを整えられる時。穏やかな空気の中で、流れを任せてもらえる時。',
+        'その場で白黒を迫られる時。正面から本音を問い詰められる時。',
+        '正面から問い詰められず、まず安心できると本音が出せます。はっきり言わない時は、波風を立てたくない時。急かされないと、自分から話せます。',
+        '大事な話の前に、先に個別に話をつけておきがち。「察してほしい」も強めに出ます。'],
+  traits:[
+   {l:'敵を作らずに、進める',t:'誰も傷つけない道筋を探しながら、物事を静かに前に動かすタイプです。'},
+   {l:'衝突の前に、動く',t:'ぶつかりそうな気配を早めに察知して、先回りで火種を消しにいきます。'},
+   {l:'見えない所で、舵を取る',t:'表の主役は他の人に譲り、全体の流れを後ろから設計します。'},
+   {l:'本音は、最後まで見せない',t:'考えは深いのに、手の内は明かさないタイプです。その慎重さが、時に「何を考えているか分からない」と映ります。'}],
+  calm:'場を穏やかに保つ流れの設計者',
+  trigger:'根回しが表に出て「裏で手を回した」と受け取られた時。正面から本音を突かれた時。',
+  symptom:'ますます本音を隠し、水面下の調整が増えていきます。守りに入るほど「裏がある人」という誤解が育ち、あなたの穏やかさが、かえって不信の火種になってしまいます。',
+  prevent:'ここぞという場面では、あえて「私はこう考えています」と一言、直接伝えてみてください。根回しの力に率直さが加わると、あなたの影響力はもっと深く信頼されるものになります。',
+  kuse:'根回しの仕掛け人のあなたは、本音を胸にとどめ、衝突を避け、流れを静かに引っ張ります。つまり、あなたと一緒にいる人はいつも「穏やかさ」「整えられた段取り」、そして「読めなさ」を受け取っています。これを「一緒にいて安心」と受け取る相手と、「本心が見えない」と受け取る相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「角の立たない進め方」は、思い浮かべたあの人にとっては、「本心の見えない距離」に感じられているかもしれません。',
+  notice2:'もしくは、あなたの「整えられた段取り」が、相手には「先に決められていた話」と映っていることもあります。'},
+ GKS:{
+  hit:'自分の「こうしたい」より先に、つい場の空気を優先していませんか？',
+  jinen:'優しい',
+  envs:[
+   {l:'急かされない環境',t:'自分の考えをゆっくり言葉にできる場だと、あなたの細やかさは安心して発揮されます。'},
+   {l:'争いのない環境',t:'ピリピリした空気や言い合いのない、穏やかな場所で、あなたは一番自然体でいられます。険悪な空気は、あなたが誰より先に察知して疲れてしまいます。'},
+   {l:'気配りが見てもらえる環境',t:'あなたの目立たない気遣いに気づいてくれる人がいる場を選ぶのがコツです。逆に、やって当たり前と流される場では、優しさが静かにすり減っていきます。'}],
+  drain:'機嫌の悪い人がいつもいて、間を取り持つ役が自分に固定されている場では、あなたの良さはむしろ空回りして消耗してしまいます。そういう場では、その場を離れて一人に戻る時間を確保するだけでも、優しさを取り戻せます。',
+  tori:['場が穏やかで、みんなが機嫌よくいられる時。気遣いに「ありがとう」が返ってくる時。',
+        '対立の間に挟まれる時。自分の意見を急に求められる時。',
+        '密かに頑張っていることを認めてもらえると、力が戻ります。笑顔で「大丈夫」と言っている時ほど我慢しているので、気にかけてもらえると嬉しいです。',
+        '頼まれごとを断れず、自分の意見より場の空気を優先しがち。ただの「いい人」ではなく、その場の居心地を守るために無理をしています。'],
+  traits:[
+   {l:'場の空気を、温める',t:'誰もが安心できる雰囲気を作る、対立の緩衝材です。あなたがいるだけで場が柔らかくなります。'},
+   {l:'機嫌のセンサーが、常時オン',t:'みんなの表情や声色を無意識に観察しています。誰かの不機嫌に、誰より早く気づきます。'},
+   {l:'自分は、後回し',t:'意見を求められても、まず場の空気と相手の気持ちを優先します。'},
+   {l:'疲れは、家で出る',t:'外では笑顔でも、家に帰るとどっと疲れが出ます。それは、外でずっと頑張っていた証拠です。'}],
+  calm:'みんなの安心を作る温かい存在',
+  trigger:'断れない頼まれごとと気遣いが積み重なった時。対立の板挟みが続いた時。',
+  symptom:'笑顔のまま、静かにすり減っていきます。本音がどこかへ行き、家に帰った瞬間に電池が切れる。限界を越えると、大切な人の前でだけ涙が出たり、急に何もかも嫌になったりします。',
+  prevent:'賛成でも反対でも、小さな「私はこう思う」を一日に一つ、言葉にしてみてください。自分を優先するのはわがままではなく、あなたの優しさを長く続けていくためのコツです。',
+  kuse:'がんばり屋の調整役のあなたは、本音を控え、衝突を避け、そっと支える側に立ちます。つまり、あなたと一緒にいる人はいつも「気遣い」「合わせてくれる優しさ」「安心の空気」を受け取っています。これを「かけがえがない」と受け取ってくれる相手と、「何でも大丈夫な人」と受け取ってしまう相手がいる。それが相性の正体です。',
+  notice1:'あなたが得意な「合わせる優しさ」は、思い浮かべたあの人にとっては、「甘えても大丈夫な合図」に見え続けているかもしれません。',
+  notice2:'もしくは、あなたの「気遣い」が、相手には「本音を見せてくれない遠慮」と受け取られていることもあります。'},
+};
 
 const AX = {
   h:{left:'オープン',right:'ガード',poles:['O','G']},
@@ -989,7 +1489,7 @@ function renderResult(code,counts,radar){
     '<div class="f-row">'+picked.map(p=>'<span class="f-chip">'+p+'</span>').join('<span class="f-op">+</span>')+'</div>'+
     '<div class="f-arrow">↓</div>'+
     '<div class="f-type">'+t.name+'<small>'+code+'</small></div>';
-  $('r-cc-intro').innerHTML='そこで、人間関係の悩みを解決し自然体の時間を増やせるように、あなたのタイプ〈<b>'+t.name+'</b>〉のタイプ別読み解きガイドをお届けしています。';
+  $('r-cc-intro').innerHTML='そこで、人間関係の悩みを解決し自然体の時間を増やせるように、あなたのタイプ〈<b>'+t.name+'</b>〉のタイプ別読み解きガイドをご用意しました。';
   renderRelations(radar);
   // aruaru
   const ul=$('r-aru'); ul.innerHTML='';
@@ -998,7 +1498,7 @@ function renderResult(code,counts,radar){
   renderToriset(code);
   renderHonshitsu(code);
   $('protoNote').textContent='';
-  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
+  $('submitFeedback').disabled=false;
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   window._lastResult={code,name:t.name,catch:t.catch,id:newId(),radar:radar};
   recordDiagnosis(window._lastResult);
@@ -1057,6 +1557,250 @@ function renderRelations(scores){
     '</div>';
 }
 
+// ===== 読み解きガイド：章の組み立てと描画 =====
+// 共通ガワの正は guide-3day-spec.md §8。メール前提の語（今日／明日／3日間／1通目）だけを
+// 本の語（この章／次の章／このガイド／第一章）に読み替え、それ以外は原文のまま使う。
+function bkOpen(kicker,no,title,sub){
+  return '<div class="bk-open"><span class="bk-kicker">'+kicker+'</span>'
+       + '<p class="bk-no">'+no+'</p><div class="bk-hairline"></div>'
+       + '<h2 class="bk-title">'+title+'</h2>'
+       + (sub ? '<p class="bk-sub">'+sub+'</p>' : '')
+       + '</div>';
+}
+function bkCards(items,cls){
+  return items.map(function(it){
+    return '<div class="bk-card'+(cls||'')+'"><p class="bk-card-l">'+it.l+'</p><p class="bk-card-t">'+it.t+'</p></div>';
+  }).join('');
+}
+function bkRows(pairs){
+  return pairs.map(function(p){
+    return '<div class="bk-ts"><span class="bk-ts-l">'+p[0]+'</span><span class="bk-ts-t">'+p[1]+'</span></div>';
+  }).join('');
+}
+const BK_DIV='<div class="bk-div">＊　＊　＊</div>';
+// タイプ別本文への強調は、8タイプで同じ形をしている箇所に機械的に当てる（文言はmdのまま）。
+// bkQ：n番目の「」を太ゴシックに（具体的なセリフ・行動を拾う）／bkKt：語句に傍点。
+function bkQ(s,n){
+  let i=0;
+  return s.replace(/「([^」]*)」/g, function(m,inner){
+    i++; return i===n ? '「<b class="bk-b">'+inner+'</b>」' : m;
+  });
+}
+function bkKt(s,phrase){
+  return s.indexOf(phrase)<0 ? s : s.replace(phrase, '<em class="bk-kt">'+phrase+'</em>');
+}
+// 挿図：ひと続きの理屈を3つの段に分けて見せる。アイコンは結果画面のエンブレムと同じ線の太さで自作。
+function bkFigStep(icon,text,mod){
+  return '<div class="bk-fig-step'+(mod?' '+mod:'')+'"><span class="bk-fig-ico">'
+       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg>'
+       + '</span><span class="bk-fig-t">'+text+'</span></div>';
+}
+
+// 序章：自己紹介・目的の設定・目次（Day1冒頭のガワ）
+function bkPrologue(t){
+  return ''
+  + '<p>こんにちは。<br>人間関係タイプ診断をつくっている<br>'+GUIDE_AUTHOR+'と申します。<br>診断を受けてくださり、ありがとうございます。</p>'
+  + '<p>このガイドを開いたあなたは、きっと人間関係に不安や苦手意識を抱えている方だと思います。</p>'
+  // 自己紹介（過去の私）は終章へ移し、ここは軽い先出しだけにする。先に中身を読みたい人を待たせない。
+  + '<p><em class="bk-kt">私も過去に、人間関係に悩み、傷ついてきました</em>。<br>だから、この診断を作りました。</p>'
+  + '<p>このガイドでは、私自身があなたのタイプ「'+t.name+'」を、2つの章で読み解いていきます。</p>'
+  + '<p>読み終えたあなたは、</p>'
+  + '<div class="bk-promise"><ul class="bk-star"><li>人間関係の不安の正体が見えている</li>'
+  + '<li>周りの人を今よりも深く理解するきっかけを得られている</li>'
+  + '<li>あなたが自然体でいるための道筋が見えている</li></ul></div>'
+  + '<p>と確信しています。</p>'
+  + BK_DIV
+  + '<p>第一章は、あなたが自然体でいられる環境についてお話しします。</p>'
+  + '<p>なぜ、このテーマなのか？<br>それは、あなたが自然体でいられる環境がわかることで、相手のことをより深く理解できるからです。</p>'
+  + '<p>どういうことか説明します。</p>'
+  + '<p>前提として、相手のことを深く理解するためには、<em class="bk-kt">相手の本音を理解する必要があります</em>。</p>'
+  + '<p>そして、<b class="bk-b">類は友を呼ぶ</b>と言いますが、あなたが自然体でいると、あなたの周りには自然体でいる人が増えます。<br>そうすると、自然と周りの人たちの本音がわかるようになっていきます。</p>'
+  + '<p>だから、まずは自分が自然体でいられるように自分を見つめ直した方が良いのです。</p>'
+  // 理屈が一本道であることを図で見せる（文字が続く区間のテンポを変える）
+  + '<div class="bk-fig">'
+  + '<p class="bk-fig-cap">図　まず自分、それから相手</p>'
+  + bkFigStep('<circle cx="12" cy="5.6" r="2.8"/><path d="M12 8.6v6.2"/><path d="M12 10.8L7.4 13.6"/><path d="M12 10.8l4.6 2.8"/><path d="M12 14.8l-3.2 5.2"/><path d="M12 14.8l3.2 5.2"/>','あなたが自然体でいる')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<circle cx="12" cy="6.6" r="2.5"/><path d="M8.2 13.6c0-2.1 1.7-3.8 3.8-3.8s3.8 1.7 3.8 3.8"/><circle cx="4.9" cy="11.6" r="1.9"/><path d="M1.8 18c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1"/><circle cx="19.1" cy="11.6" r="1.9"/><path d="M15.9 18c0-1.7 1.4-3.1 3.1-3.1s3.1 1.4 3.1 3.1"/>','周りにも自然体の人が増える')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<rect x="2.6" y="4.6" width="18.8" height="12.2" rx="3.2"/><path d="M8.4 16.8v3.8l4.4-3.8"/><path d="M12 13.6s-3.1-1.9-3.1-3.7a1.75 1.75 0 0 1 3.1-1.05 1.75 1.75 0 0 1 3.1 1.05c0 1.8-3.1 3.7-3.1 3.7z"/>','周りの人たちの本音がわかる','is-goal')
+  + '<p class="bk-fig-note">だから、遠回りに見えても、<br>先に自分を見つめ直す。</p>'
+  + '</div>'
+  + '<p>想像してみてほしいのですが、</p>'
+  + '<div class="bk-ab"><p><span class="bk-ab-k">A.</span>自分のことを全然理解してくれず、一緒にいて窮屈に感じる人</p>'
+  + '<p><span class="bk-ab-k">B.</span>自分のことを深く理解してくれて、自然体で居させてくれる人</p></div>'
+  + '<p class="bk-pull">圧倒的にBさんの方が、<br>「もっと理解してあげたい」と思えるはずです。</p>'
+  + '<p>そこで、このガイドは、自分自身の「<b class="bk-b">強み</b>」や「<b class="bk-b">つい出ちゃう癖</b>」を正しく理解し、自然体でいられる準備をすることを目的として書きました。</p>'
+  + '<p>そのために、この順番で進めます。<br>肩の力を抜いて、リラックスして読んでみてくださいね。</p>'
+  + '<div class="bk-toc"><p class="bk-toc-h">目次</p>'
+  + '<div class="bk-toc-i"><span class="bk-toc-n">第一章</span><span class="bk-toc-t">あなたが自然体でいられる環境</span></div>'
+  + '<div class="bk-toc-i"><span class="bk-toc-n">第二章</span><span class="bk-toc-t">あなたの中の「もう一人のあなた」</span></div>'
+  + '<div class="bk-toc-i"><span class="bk-toc-n">終章</span><span class="bk-toc-t">「霧が晴れる感覚」をあなたへ</span></div>'
+  + '</div>'
+  + '<p class="bk-ready">それでは、第一章を始めましょう。</p>';
+}
+// 第一章：自然体でいられる環境＋私のトリセツ（Day1本文＋教育ブロック）
+function bkChapter1(t,g){
+  return ''
+  + '<p class="bk-hit">'+g.hit+'</p>'
+  + '<p>それは、'+t.name+'のあなたの<em class="bk-kt">無理している部分が出てしまっている状態</em>です。<br>この状態が続けばどんどん苦しくなってしまいます。</p>'
+  + '<p><em class="bk-kt">自然体のまま'+g.jinen+'あなた</em>でいたいと思うなら、「あなたの持ち味がどんな環境で活きるのか？」ということを知っておく必要があります。'+t.name+'タイプのあなたが自然体でいられるのは、こんな環境です。</p>'
+  + bkCards(g.envs)
+  + bkCards([{l:'逆に、消耗しやすい場',t:bkKt(g.drain,'あなたの良さはむしろ空回りして消耗してしまいます')}],' bk-card-drain')
+  + '<div class="bk-col"><p class="bk-col-l">私のトリセツ</p><div class="bk-col-in">'
+  + '<p class="bk-col-lead">これは、あなた自身の取扱説明書です。どんな時に力が出て、どんな時に消耗するのか。言葉にしておくと、環境を選ぶときの物差しになります。</p>'
+  + bkRows(g.tori.map(function(x,i){ return [TORI_LABEL[i],x]; }))
+  + '</div></div>'
+  + BK_DIV
+  + '<p>この章の最後に一つだけお伝えします。</p>'
+  + '<p>「この『トリセツ』を、わざわざ書き出すなんてなぁ」と感じたかもしれませんが、案外と相手は自分のことを理解してくれていませんし、<em class="bk-kt">察してもくれません</em>。そこで、こうして見える形にした「<b class="bk-b">道具</b>」が必要になります。</p>'
+  + '<p>この章では「あなたのトリセツ」をお渡ししました。</p>'
+  + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
+  + '<p>次の章では、あなたの中の「もう一人のあなた」の話をします。</p>'
+  + '<p>なぜ、大切にしたい人にこそ、きつく当たってしまう日があるのか。<br>その正体を<em class="bk-kt">一緒に突き止めましょう</em>。</p></div>';
+}
+// 第二章：関わり方のパターンと裏モード（Day2冒頭＋本文＋教育ブロック）
+function bkChapter2(t,g){
+  return ''
+  + '<p>前の章でお渡しした「あなたのトリセツ」は、誰かに見せたくなりましたか？<br>それとも、まだ手元に置いたままでしょうか。</p>'
+  + '<p>まだ渡せていない人は、ぜひ一人に渡してみてください。<br>この章では、そのトリセツの「裏側」に踏み込みます。</p>'
+  + BK_DIV
+  + '<p>ひとつ、質問をさせてください。</p>'
+  + '<p>最近、帰ってきたらどっと疲れていたり、イライラしやすかったりしていませんか？<br>それ実は、あなたが無理をして人間関係を頑張ろうとしてしまっている「<b class="bk-b">サイン</b>」かもしれません。</p>'
+  + '<p>無理をしてしまう仕組みには、<em class="bk-kt">タイプごとのパターン</em>があります。<br>この章では、あなたのパターンを読み解きます。</p>'
+  + '<p>少しだけ、耳の痛い話になるかもしれません。<br>でも、読んだ後には、あなたがハマりやすい落とし穴が見えてきているはずです。</p>'
+  + '<p class="bk-ready">それでは、第二章を始めましょう。</p>'
+  + BK_DIV
+  + '<p>「あなたが無意識のうちに身近な人とどう関わっているか」を理解して、注意するポイントがわかると、やりがちな人間関係のエラーを避けられます。</p>'
+  + '<div class="bk-sec">あなたの関わり方の特徴</div>'
+  + bkCards(g.traits)
+  + '<div class="bk-col bk-col-warn"><p class="bk-col-l">あなたの「裏モード」</p><div class="bk-col-in">'
+  + '<p class="bk-col-lead">余裕がある時のあなたは、'+g.calm+'です。でも、<em class="bk-kt">余裕を失うと別の顔が現れる</em>ことがあります。</p>'
+  + bkRows([['引き金',g.trigger],['裏モードの症状',bkQ(g.symptom,1)],['予防策',bkQ(g.prevent,1)]])
+  + '</div></div>'
+  + BK_DIV
+  + '<p>ここまで読んで、「裏モード、身に覚えがある...」という方も多いと思います。</p>'
+  + '<p>先に、大事なことを言わせてください。<br>裏モードは、<em class="bk-kt">人のダメなところでもなく欠陥でもありません</em>。</p>'
+  + '<p>もっと自然体で人間関係を構築するための「<b class="bk-b">伸び代</b>」です。</p>'
+  + '<p>その上で、この章の最後に一つだけお伝えします。</p>'
+  + '<p>クセは自分だけでは気づくことができません。<br>あなたが無意識にやっていることだからです。</p>'
+  + '<p>つまり、どれだけ予防しようと知識を蓄えても、裏モードに入って抜けた時にようやく「やっちまった...」と気づくことしかできないのです。</p>'
+  // 「気づけるのは事後だけ」を図で見せる。手前の2つを破線の囲みに入れ、見えない区間そのものを示す。
+  + '<div class="bk-fig">'
+  + '<p class="bk-fig-cap">図　気づけるのは、いつも「あとから」</p>'
+  + '<div class="bk-blind"><span class="bk-blind-l">自分では見えない</span>'
+  + bkFigStep('<path d="M13 2.5L5.5 13.5H11l-1 8 8.5-11.5H13z"/>','引き金がくる','is-blind')
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<circle cx="9.5" cy="8.4" r="3.6"/><path d="M3.4 20c0-3.4 2.7-6.1 6.1-6.1s6.1 2.7 6.1 6.1"/><path d="M15.4 5.2a4.6 4.6 0 0 1 0 6.4" opacity=".55"/><path d="M18.6 20c0-2.2-.7-4.2-1.9-5.7" opacity=".55"/>','裏モードに入っている','is-blind')
+  + '</div>'
+  + '<div class="bk-fig-ar">▼</div>'
+  + bkFigStep('<path d="M9.6 18.4h4.8"/><path d="M10.4 21h3.2"/><path d="M12 3a5.8 5.8 0 0 0-3.4 10.5c.6.5.9 1.2.9 1.9v.3h5v-.3c0-.7.3-1.4.9-1.9A5.8 5.8 0 0 0 12 3z"/>','抜けたあと、はじめて気づく','is-goal')
+  + '<p class="bk-fig-note">知識を蓄えても、気づけるのは<br>裏モードから抜けた後だけ</p>'
+  + '</div>'
+  + '<div class="bk-band">多くの人が<b class="bk-em">【知ってるだけでは変わらない】</b>理由が、ここにあります。</div>'
+  + '<p>ただ、あなたが人間関係で発揮する強みや特徴は本物です。だからこそ、その持ち味を活かせず人間関係の悩みを抱えて生きづらいなんて、<em class="bk-kt">あまりにもったいない</em>と思いませんか。</p>'
+  + '<div class="bk-teaser"><span class="bk-teaser-l">次章予告</span>'
+  + '<p>そこで、最後の章では、この裏モードを抱えたまま、<em class="bk-kt">どうやって関係を変えていくのか</em>をお話しします。</p></div>';
+}
+// 旧・第三章「あの人との関係を解く」（Day3本文）は廃止した。裏モードから終章へ直接つなぐ構成に変更。
+// タイプ別の kuse／notice1／notice2 は GUIDE_BODY と `ガイド文面24本.md` にそのまま残してあるので、
+// 章を復活させたくなったらここに書き戻せばよい。診断の共有は終章のCTAの下へ移した。
+
+// 終章：自己紹介と変化、そして一人では変えられない理由（Day3教育ブロック）。この後にCTA（#guideEnd）。
+function bkEpilogue(){
+  return ''
+  // 自己紹介（過去の私）は書き手の話なので、申込フォームの後ろ（#guideEnd 内）へ置く。
+  + '<p>ここまでで、<br>「あなたのトリセツ」<br>「裏モードの引き金と予防策」<br>という道具をお渡ししました。</p>'
+  + '<p>正直にお伝えすると、これらの道具があっても、まだあなたの人間関係の悩みや不安は解消されません。</p>'
+  + '<p>なぜなら、あなた自身がこの道具を使いこなし、自分が自然体でいられる環境を作っていかないといけないからです。</p>'
+  + '<p>もう気づいていると思いますが、人間関係は人生の中で最も大きな悩みの種の一つです。でも実は、この悩みがなくならない理由があります。</p>'
+  + '<div class="bk-band">それは、<br><b class="bk-em">【一人では何をどう変えたら良いかわからないから】</b></div>'
+  + '<p>あなたが理想とする人生や人間関係を想像してみてください。<br>それを叶えるために</p>'
+  + '<ul class="bk-box"><li>生かせる強みはどれか</li><li>どこを変えたら良いのか</li><li>どこから手をつけたら良いのか</li></ul>'
+  + '<p>これらの問いにパッとすぐに答えが出る人は、ほとんどいません。</p>'
+  + '<p>なぜなら、</p>'
+  + '<ol class="bk-num"><li data-n="①">自分の本当の強みに気づけていない</li>'
+  + '<li data-n="②">自分の本当の伸び代に気づけていない</li>'
+  + '<li data-n="③">どうやったら自分の伸び代を伸ばせるかがわからない</li></ol>'
+  + '<p>という難しさがあるからです。</p>'
+  + '<p>でも、あなたと同じように人間関係の苦しみや辛さを乗り越えた<em class="bk-kt">心の専門家である私と一緒に読み解けば</em>、</p>'
+  + '<div class="bk-promise"><ul class="bk-star"><li>何から始めて、どこに向かえば良いかがすぐに理解できて</li>'
+  + '<li>あなた自身が生きやすい状態で</li>'
+  + '<li>自然体で相手を大切にできるようになります。</li></ul></div>'
+  + '<p class="bk-pull">まさに、霧が晴れたような感覚に<br>なることを、お約束します。</p>'
+  + '<p>本当に私の悩みは解決されるのか？と思ったあなたに、一つだけご案内です。</p>'
+  + '<p><em class="bk-kt">このガイドを最後まで読んでくださった方限定</em>で、「今の悩みの根本原因」「人間関係を良くするために次に何をしたら良いのか」がどんどん分かっていく、<b class="bk-em">特別無料セッション</b>をご用意しました。<br>申し込みはこちらから↓</p>';
+}
+function bkChapters(code){
+  const t=TYPES[code], g=GUIDE_BODY[code];
+  return [
+    {num:'序', label:'序章　はじめに', head:'序章　はじめに',
+     open:'<div class="bk-cover bk-cover-frame"><span class="bk-cover-kicker">READING GUIDE</span>'
+        + '<h2 class="bk-cover-title">読み解きガイド</h2>'
+        + '<p class="bk-cover-for">'+t.name+'のあなたへ</p>'
+        + '<p class="bk-cover-catch">「'+t.catch+'」</p></div>'
+        + bkOpen('PROLOGUE','序章','はじめに','なぜ、相手ではなく自分から始めるのか'),
+     html:bkPrologue(t)},
+    {num:'一', label:'第一章　あなたが自然体でいられる環境', head:'第一章　自然体でいられる環境',
+     open:bkOpen('CHAPTER ONE','第一章','あなたが自然体でいられる環境','あなたが心地よい環境を知る'),
+     html:bkChapter1(t,g)},
+    {num:'二', label:'第二章　あなたの中の「もう一人のあなた」', head:'第二章　もう一人のあなた',
+     open:bkOpen('CHAPTER TWO','第二章','あなたの中の「もう一人のあなた」','人間関係がうまくいかない時、あなたに何が起きているのか'),
+     html:bkChapter2(t,g)},
+    {num:'終', label:'終章　「霧が晴れる感覚」をあなたへ', head:'終章　霧が晴れる感覚',
+     open:bkOpen('EPILOGUE','終章','「霧が晴れる感覚」をあなたへ','読み解きの道具を、実際の関係で使えるようにするために'),
+     html:bkEpilogue()},
+  ];
+}
+
+let bkIdx=0, bkSeen=0, bkList=[];
+function bkStart(at){
+  const r=window._lastResult; if(!r) return;
+  bkList=bkChapters(r.code);
+  // 本の面にもタイプの色を渡す（章番号・罫・終章のCTAの面に使う）
+  const guard=TYPES[r.code].pole==='guard', bk=$('guide');
+  bk.style.setProperty('--accent', guard?'var(--teal)':'var(--coral)');
+  bk.style.setProperty('--accent-soft', guard?'var(--teal-soft)':'var(--coral-soft)');
+  bk.style.setProperty('--accent-ink', guard?'var(--teal-ink)':'var(--coral-ink)');
+  bk.style.setProperty('--accent-deep', guard?'#0E5040':'#7A2E1A');
+  bkGo(at||0);
+  show('guide');
+}
+function bkGo(i){
+  if(!bkList.length) return;
+  bkIdx=Math.max(0, Math.min(bkList.length-1, i));
+  if(bkIdx>bkSeen) bkSeen=bkIdx;
+  const c=bkList[bkIdx], last=bkIdx===bkList.length-1;
+  $('bkHdR').textContent=c.head;
+  $('bkProse').innerHTML=c.open+'<div class="bk-body">'+c.html+'</div>';
+  $('bkFolio').textContent=(bkIdx+1)+' / '+bkList.length;
+  $('guideEnd').hidden=!last;
+  if(last && SESSION_FORM_URL){ SESSION_BTNS.forEach(p=>{ $(p[0]).href=sessionFormUrl(); }); }
+  $('bkNext').hidden=last;
+  $('bkPrev').hidden=bkIdx===0;
+  if(!last) $('bkNextT').textContent=bkList[bkIdx+1].label;
+  bkRenderRail();
+  // ページをめくった感じを出す（同じ要素を使い回すので、アニメーションを掛け直す）
+  const pg=$('bkPage'); pg.classList.remove('is-turn'); void pg.offsetWidth; pg.classList.add('is-turn');
+  toTop();
+}
+function bkRenderRail(){
+  const rail=$('bkRail'); rail.innerHTML='';
+  bkList.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.type='button'; b.textContent=c.num; b.title=c.label; b.setAttribute('aria-label',c.label);
+    b.className='bk-dot'+(i===bkIdx ? ' is-on' : (i<=bkSeen ? ' is-read' : ''));
+    b.onclick=()=>bkGo(i);
+    rail.appendChild(b);
+  });
+}
+function backToResult(){
+  show('result');
+  // 結果の頭ではなく、ガイドの入口（＝出てきた場所）に戻す
+  const el=$('deepBlock');
+  if(el && !el.hidden) requestAnimationFrame(()=>{ el.scrollIntoView({block:'center'}); });
+}
+
 // 送信ヘルパー（CORSプリフライト回避のため Content-Type は既定(text/plain)のまま no-cors で送信）
 function newId(){
   return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
@@ -1109,36 +1853,35 @@ $('submitFeedback').onclick=()=>{
   sendSurvey({me,others,othersWho,share,shareWho,dig,miss}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
-// LEAD（紹介者）：3日間ガイドの申込（メール＋許諾のみ。guide-3day-spec.md §9で簡素化）
-// guide:true を送ると、GAS側がガイド配信に登録してDay1を即時送信する。
-$('submitLead').onclick=()=>{
-  const email=$('mail').value.trim();
-  if(!email){ $('protoNote').textContent='メールアドレスをご入力ください。'; return; }
-  const r=window._lastResult||{};
-  // ②紹介のみ、商談前ヒアリング（すべて任意）を一緒に送る。
-  // 悩みが書かれていれば個別の深掘り読み解きへ、空なら従来どおり3日間ガイドへ振り分ける。
-  const hear = SEG==='referral' ? {
+// LEAD（紹介者）：商談前ヒアリング（すべて任意）。読み解きガイド終章の、申込ボタンの直前に置く。
+// メール登録を廃止したので送信ボタンは持たせず、入力が変わるたびに回答ログの同じ行へ書き足す。
+let _hearSent='';
+function saveHearing(){
+  const r=window._lastResult; if(!r) return;
+  if($('hearingBlock').hidden) return;
+  const fields={
     hearNow:    $('hearNow').value.trim(),
-    hearType:   $('hearType').value,
     hearFuture: $('hearFuture').value.trim(),
-  } : {};
-  const wantsPersonal = !!hear.hearNow;
-  const okMsg = wantsPersonal
-    ? 'ありがとうございます。いただいた状況をもとに、あなたに合わせた読み解きを個別にお送りします。数日お待ちください。'
-    : '登録ありがとうございます。1通目（Day1）をお送りしました。メールをご確認ください。';
-  sendSurvey({email, guide:!wantsPersonal, personal:wantsPersonal, ...hear, code:r.code, name:r.name}, $('submitLead'), okMsg);
-};
+  };
+  const sig=JSON.stringify(fields);
+  if(sig===_hearSent) return;                                        // 変化がなければ送らない
+  if(!fields.hearNow && !fields.hearFuture) return;
+  if(!SHEET_ENDPOINT){ $('hearNote').textContent='※ 送信先URL未設定（プロトタイプ）。まだ記録されていません。'; return; }
+  _hearSent=sig;
+  post(Object.assign({action:'update', id:r.id, code:r.code, name:r.name}, fields))
+    .then(()=>{ $('hearNote').textContent='ここまでの内容をお預かりしました。'; })
+    .catch(()=>{ _hearSent=''; $('hearNote').textContent='送信に失敗しました。通信環境を確認してください。'; });
+}
 
-// 相性CTAの深掘りフォームは相性欄に常時表示（旧：ボタンで別ブロックを開く方式は廃止）
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
-  $('submitFeedback').disabled=false; $('submitLead').disabled=false;
+  $('submitFeedback').disabled=false;
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  $('mail').value='';
   ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
-  $('hearType').value='';
+  $('hearNote').textContent=''; _hearSent='';
+  bkIdx=0; bkSeen=0; bkList=[];
   _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
   show('frame');
@@ -1151,14 +1894,50 @@ $('feedbackBlock').hidden = !FEEDBACK;
 $('deepPreviewNote').hidden = !FEEDBACK;
 document.querySelector('.bridge').classList.toggle('is-bare', !FEEDBACK);
 
-// ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意で、書いた人には個別の読み解きを返す。
-if(SEG==='referral'){
+// ▼ 読み解きガイド（アプリ内・全4章）は②紹介にだけ出す（guide-3day-spec.md §0の適用セグメント）。
+//   ①一般はライブ経由ルートなので、結果画面のCTA枠ごと畳む。CTAを出さない時は、
+//   深層の「開いたループ」（＝CTAへの問いかけ）も受け皿がなくなるため一緒に畳む。
+const GUIDE_ON = SEG === 'referral';
+$('deepBlock').hidden = !GUIDE_ON;
+$('r-hs-loop').hidden = !GUIDE_ON;
+
+// ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意。書かれた内容は体験セッションの下準備になる。
+if(GUIDE_ON){
   $('hearingBlock').hidden = false;
-  const sel=$('hearType');
-  sel.innerHTML='<option value="">選ぶ（わからない場合は空のままで大丈夫です）</option>'
-    + Object.keys(TYPES).map(c=>`<option value="${c}">${TYPES[c].name}（${TYPES[c].catch}）</option>`).join('');
-  $('submitLead').textContent='読み解きを受け取る';
+  ['hearNow','hearFuture'].forEach(id=>{ $(id).addEventListener('change', saveHearing); });
 }
+
+// 体験セッションの申込は外部フォーム。終章に2か所（本文の直後と、自己紹介の後ろ）置く。
+// 未設定なら、押せない状態と理由を出す。
+const SESSION_BTNS=[['sessionApply','sessionNote'], ['sessionApply2','sessionNote2']];
+SESSION_BTNS.forEach(function(pair){
+  const btn=$(pair[0]);
+  if(SESSION_FORM_URL){
+    btn.href = SESSION_FORM_URL;
+  }else{
+    btn.classList.add('is-off');
+    btn.removeAttribute('href');
+    $(pair[1]).textContent='※ 申込フォームのURLが未設定です（プロトタイプ）。SESSION_FORM_URL に貼ると有効になります。';
+  }
+  btn.addEventListener('click', saveHearing);
+});
+// 申込フォームのURLに、その人の回答IDを事前入力の形で足す（終章を開くたびに更新する）
+function sessionFormUrl(){
+  const r=window._lastResult;
+  if(!SESSION_FORM_URL || !SESSION_FORM_ID_ENTRY || !r || !r.id) return SESSION_FORM_URL;
+  return SESSION_FORM_URL
+       + (SESSION_FORM_URL.indexOf('?') < 0 ? '?' : '&')
+       + 'usp=pp_url&' + SESSION_FORM_ID_ENTRY + '=' + encodeURIComponent(r.id);
+}
+
+// ページ送り
+$('openGuide').onclick=()=>bkStart(0);
+$('bkNext').onclick=()=>bkGo(bkIdx+1);
+$('bkPrev').onclick=()=>bkGo(bkIdx-1);
+$('bkRestart').onclick=()=>bkGo(0);
+$('bkBack').onclick=backToResult;
+$('bkBackBottom').onclick=backToResult;
+
 $('startBtn').onclick=()=>{ show('frame'); };
 $('frameStart').onclick=()=>{
   workplaceFrame='自然体';
