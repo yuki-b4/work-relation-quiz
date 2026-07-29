@@ -300,8 +300,6 @@
   .optout-note{margin-top:10px; font-size:11.5px; color:var(--faint)}
   .day-head{margin-top:18px; font-size:13px; font-weight:700; color:rgba(255,255,255,.9)}
   .day-list{margin-top:6px; font-size:12.5px; line-height:2; color:var(--muted)}
-  .hear-help{margin:6px 0 0; font-size:13px}
-  .hear-help a{color:var(--accent)}
   .btn-accent{color:#fff; background:var(--accent)}
   .btn-accent:hover{filter:brightness(.94)}
   .proto-note{font-size:13px; color:var(--faint); margin-top:12px; min-height:18px}
@@ -393,7 +391,6 @@
   .compat-cta .btn-accent{background:#fff; color:#1A1715}
   .compat-cta .day-list{color:rgba(255,255,255,.62)}
   .compat-cta .optout-note{color:rgba(255,255,255,.42)}
-  .compat-cta .hear-help a{color:#fff; text-decoration-color:rgba(255,255,255,.5)}
   .compat-cta .cc-preview{color:rgba(255,255,255,.7); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.25)}
   .cc-preview{font-size:13px; color:var(--muted); background:var(--surface); border:1px dashed var(--line); border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.6}
   /* 自然体の自分での回答を促す：冒頭の説明ボックスと、回答中に出すアンカー */
@@ -583,7 +580,6 @@
   .bk-cta .field textarea, .bk-cta .field input, .bk-cta .field select{color:#fff; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.28)}
   .bk-cta .field textarea::placeholder{color:rgba(255,255,255,.42)}
   .bk-cta .field select option{color:var(--ink); background:#fff}
-  .bk-cta .hear-help a{color:#fff; text-decoration-color:rgba(255,255,255,.5)}
   .bk-cta .field textarea:focus, .bk-cta .field select:focus{border-color:rgba(255,255,255,.7)}
   .bk-hear-l{font-family:var(--serif); font-weight:600; font-size:14px; color:#fff; margin-bottom:6px}
   .bk-hear-t{font-size:13px; line-height:1.9; color:rgba(255,255,255,.82); margin-bottom:14px}
@@ -860,11 +856,6 @@
             <div class="field">
               <label for="hearNow">いま、人間関係で悩んでいること</label>
               <textarea id="hearNow" placeholder="例：部下に任せたいのに、気づいたらつい自分でやってしまっていて..."></textarea>
-            </div>
-            <div class="field">
-              <label for="hearType">気になっている相手がいる場合、その人はどのタイプに近いですか</label>
-              <select id="hearType"></select>
-              <p class="hear-help"><a href="all-types.html" target="_blank" rel="noopener">全8タイプを見て確かめる →</a></p>
             </div>
             <div class="field">
               <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
@@ -1870,12 +1861,11 @@ function saveHearing(){
   if($('hearingBlock').hidden) return;
   const fields={
     hearNow:    $('hearNow').value.trim(),
-    hearType:   $('hearType').value,
     hearFuture: $('hearFuture').value.trim(),
   };
   const sig=JSON.stringify(fields);
   if(sig===_hearSent) return;                                        // 変化がなければ送らない
-  if(!fields.hearNow && !fields.hearType && !fields.hearFuture) return;
+  if(!fields.hearNow && !fields.hearFuture) return;
   if(!SHEET_ENDPOINT){ $('hearNote').textContent='※ 送信先URL未設定（プロトタイプ）。まだ記録されていません。'; return; }
   _hearSent=sig;
   post(Object.assign({action:'update', id:r.id, code:r.code, name:r.name}, fields))
@@ -1890,7 +1880,7 @@ $('restartBtn').onclick=()=>{
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
   ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
-  $('hearType').value=''; $('hearNote').textContent=''; _hearSent='';
+  $('hearNote').textContent=''; _hearSent='';
   bkIdx=0; bkSeen=0; bkList=[];
   _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
@@ -1914,10 +1904,7 @@ $('r-hs-loop').hidden = !GUIDE_ON;
 // ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意。書かれた内容は体験セッションの下準備になる。
 if(GUIDE_ON){
   $('hearingBlock').hidden = false;
-  const sel=$('hearType');
-  sel.innerHTML='<option value="">選ぶ（わからない場合は空のままで大丈夫です）</option>'
-    + Object.keys(TYPES).map(c=>`<option value="${c}">${TYPES[c].name}（${TYPES[c].catch}）</option>`).join('');
-  ['hearNow','hearType','hearFuture'].forEach(id=>{ $(id).addEventListener('change', saveHearing); });
+  ['hearNow','hearFuture'].forEach(id=>{ $(id).addEventListener('change', saveHearing); });
 }
 
 // 体験セッションの申込は外部フォーム。終章に2か所（本文の直後と、自己紹介の後ろ）置く。
