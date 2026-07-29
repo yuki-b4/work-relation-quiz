@@ -922,7 +922,8 @@ const SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwf9xc-StbsmbCxT
 
 // ▼ 体験セッション申込フォーム（外部）のURL。読み解きガイド終章のCTAから別タブで開く。
 //   空のままだとボタンは押せない見た目になり、未設定であることを画面に出す。
-const SESSION_FORM_URL = 'https://forms.gle/8UMZBSaHJmGPaegRA';
+//   短縮URL（https://forms.gle/8UMZBSaHJmGPaegRA）ではなく長いURLを使う。事前入力のため。
+const SESSION_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeuJabgs3MUpI1Jkd5E8F9JFamRMdWAQ-7NVYX4pHXltE-0vg/viewform';
 // ▼ 申込フォームの「診断ID」欄の受け口。ここに回答IDを事前入力して開くことで、
 //   回答ログの行（診断結果・5軸・商談前ヒアリング）と申込者を突き合わせられる。
 //   注意：短縮URL（forms.gle）はリダイレクトでパラメータが落ちるため、事前入力を効かせるには
