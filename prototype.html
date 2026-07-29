@@ -46,10 +46,13 @@
 
   /* INTRO */
   .eyebrow{font-size:12.5px; letter-spacing:.16em; font-weight:700; color:var(--trust); margin-bottom:12px}
-  /* 診断名は入口のブランドマーク。eyebrow より一段大きく置き、字間は広げすぎない。 */
-  .eyebrow.brandmark{
-    font-family:var(--display); font-weight:900;
-    font-size:clamp(17px,4.2vw,21px); letter-spacing:.1em; margin-bottom:14px;
+  /* 診断名は全画面共通のヘッダー。どの画面にいても診断の名前が見える状態にする。
+     スクロールで流れる通常配置にして、スマホの縦幅を占有しない。 */
+  .app-header{
+    font-family:var(--display); font-weight:900; color:var(--trust);
+    font-size:clamp(17px,4.2vw,21px); letter-spacing:.1em; line-height:1.4;
+    text-align:center; padding-bottom:14px; margin-bottom:26px;
+    border-bottom:1px solid var(--line);
   }
   /* 日本語の折り返し。text-wrap:pretty は iOS Safari で行を過剰に短くし、
      本文の右側に大きな余白ができてしまうため使わない。
@@ -631,9 +634,10 @@
 </head>
 <body>
 <div class="app">
+  <header class="app-header">ナチュール診断</header>
+
   <!-- INTRO -->
   <section class="screen active" id="intro">
-    <div class="eyebrow brandmark">ナチュール診断</div>
     <h1 class="hero">あなたがいつも自然体でいるための診断</h1>
     <p class="lead">力を抜いたときの「自然体のあなた」の関わり方を、8つのタイプで映し出します。</p>
 
