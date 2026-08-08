@@ -62,29 +62,38 @@ function updateRoadmapSheets() {
   Logger.log(done.join('\n'));
 }
 
-/** 旧シートを退避してから、同じ位置に同じ名前で作り直す */
+/**
+ * 旧シートを退避してから、同じ位置に同じ名前で作り直す。
+ *
+ * 同じ日に2回目以降を実行したときは、既に当日の退避シートがある。
+ * その場合、いま存在する同名シートは「本スクリプトが生成したもの」なので、
+ * 二重に退避せず作り直す（失敗して途中で止まったときも、そのまま再実行すれば復旧する）。
+ * 生成後に手で加えた変更は消えるので、手直しは退避シート側か、このスクリプトの配列で行うこと。
+ */
 function rebuildSheet_(ss, name, builder) {
+  var stamp = Utilities.formatDate(new Date(), TZ, 'yyyyMMdd');
+  var backupName = name + '_旧' + stamp;
   var old = ss.getSheetByName(name);
   var position = old ? old.getIndex() - 1 : ss.getNumSheets();
   var note = '';
 
   if (old) {
-    var stamp = Utilities.formatDate(new Date(), TZ, 'yyyyMMdd');
-    var backup = name + '_旧' + stamp;
-    var n = 2;
-    while (ss.getSheetByName(backup)) {
-      backup = name + '_旧' + stamp + '_' + n;
-      n++;
+    var backup = ss.getSheetByName(backupName);
+    if (backup) {
+      ss.deleteSheet(old);
+      if (!backup.isSheetHidden()) {
+        backup.hideSheet();
+      }
+      note = '（当日の退避が既にあるので、生成済みシートを作り直した）';
+    } else {
+      old.setName(backupName);
+      old.hideSheet();
+      note = '（旧版は ' + backupName + ' に退避）';
     }
-    old.setName(backup);
-    note = '（旧版は ' + backup + ' に退避）';
   }
 
   var sheet = ss.insertSheet(name, position);
   builder(sheet);
-  if (old) {
-    old.hideSheet();
-  }
   return name + ' を書き換え' + note;
 }
 
@@ -538,7 +547,9 @@ function buildNinetyDayWbs_(sheet) {
   sheet.setRowHeight(2, 26);
   sheet.setRowHeight(3, 30);
   sheet.setFrozenRows(3);
-  sheet.setFrozenColumns(3);
+  // 列は固定しない。A1:O1（全幅の見出し）が結合されているため、
+  // 3列を固定すると結合セルを分断する形になり Sheets が拒否する。
+  // 全体幅は約1,100pxで横スクロールなしに収まるので、実用上の不都合もない。
   trimSheet_(sheet, noteRow + 2, totalCols);
 }
 
