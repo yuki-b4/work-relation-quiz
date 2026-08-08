@@ -2,6 +2,7 @@
  * 事業ロードマップブックの2シートを、2026-08改定の戦略に合わせて書き換えるスクリプト。
  *
  * 対象シート
+ *   - 0_全体サマリー
  *   - 法人_12ヶ月ロードマップ
  *   - 90日WBS_アクション
  *
@@ -17,7 +18,7 @@
  * 安全設計
  *   - 既存シートは削除しない。`<シート名>_旧YYYYMMDD` にリネームして非表示にするだけなので、
  *     いつでも中身を見に行ける。気に入らなければ新シートを消して旧シートを再表示すれば元に戻る。
- *   - 書き換えるのは上記2シートのみ。0_全体サマリー等には触れない。
+ *   - 書き換えるのは上記3シートのみ。個人_12ヶ月ロードマップ等には触れない。
  */
 
 var TZ = 'Asia/Tokyo';
@@ -54,6 +55,7 @@ var C = {
 function updateRoadmapSheets() {
   var ss = SpreadsheetApp.getActive();
   var done = [];
+  done.push(rebuildSheet_(ss, '0_全体サマリー', buildSummary_));
   done.push(rebuildSheet_(ss, '法人_12ヶ月ロードマップ', buildB2bRoadmap_));
   done.push(rebuildSheet_(ss, '90日WBS_アクション', buildNinetyDayWbs_));
   SpreadsheetApp.getActive().toast(done.join(' / '), '書き換え完了', 15);
@@ -84,6 +86,180 @@ function rebuildSheet_(ss, name, builder) {
     old.hideSheet();
   }
   return name + ' を書き換え' + note;
+}
+
+/* ============================================================
+ * 0. 0_全体サマリー
+ * ============================================================ */
+
+function buildSummary_(sheet) {
+  var LAST = 14; // N列まで使う（B〜N＝13列。A列は余白）
+  var r = 1;
+
+  // --- ヘッダ ---
+  put_(sheet, r, 2, '事業全体サマリー（Funnel 1：法人起点・個人波及型）／ 2026-08改定', LAST)
+    .setBackground(C.slate).setFontColor(C.white).setFontSize(15).setFontWeight('bold')
+    .setHorizontalAlignment('center');
+  sheet.setRowHeight(r, 32);
+  r++;
+
+  // --- ① ミッション / 北極星 ---
+  r = section_(sheet, r, '① ミッション / 北極星', C.slate, LAST);
+  r = kv_(sheet, r, '北極星', '職場とプライベート双方の人間関係の質を底上げする。自由な働き方の労働者を増やす。', LAST);
+  r = kv_(sheet, r, '戦略の軸', 'Funnel 1（法人起点・個人波及型）で実績を作り、最終的に Funnel 3（ツインエンジン型）へ移行する。', LAST);
+  r = kv_(sheet, r, '共通の入口', '無料診断（9問・8タイプ）。法人・個人どちらもこの診断が唯一の共通入口。', LAST);
+  r = kv_(sheet, r, '現フェーズ', '0→1（法人③現場責任者の最初の10社）。当面の関門は最初の3社で、ここが価格のアンカーになる。', LAST);
+
+  // --- ② 最初の3ヶ月の方針 ---
+  r = section_(sheet, r, '② 最初の3ヶ月の方針（最重要）', C.gold, LAST);
+  r = kv_(sheet, r, '売上より3社',
+    'M1〜M3は売上でなくアンカー3社を作る期間。最初の3社が価格のアンカーを決めるので値引きせず、代わりに初月のリスクを引き受ける（続けないと決めたら請求しない）。', LAST);
+  r = kv_(sheet, r, '管理変数',
+    '成約数でなく週の接触件数（訪問4件＋手紙6通）。主エンジンは求人を出し続けている事業所への直接接触で、紹介はサブ。実測の成果を持つ顧客が10社そろうまでパイプラインに数えない。', LAST);
+  r = kv_(sheet, r, '個人は維持のみ',
+    '②紹介（アプリ内ガイド → 体験セッション）の稼働を保つだけ。①一般のライブには着手しない。B2Cの本格化は法人が10社に届いてから。', LAST);
+  r = kv_(sheet, r, '無料と有料の線引き',
+    '知ることと一回きりの測定は無料。続く測定・やらせる装置・できているの判定から有料。AIが知識の値段を下げたので、配るのは知識でなく測定（チームの実データ）と実行体験。', LAST);
+
+  // --- ③ 中心価値と商品体系 ---
+  r = section_(sheet, r, '③ 2つの中心価値と商品体系', C.navy, LAST);
+
+  var cols = [[2, 2], [3, 5], [6, 9], [10, LAST]]; // 対象 / 中心価値 / 入口 / 本体
+  var headRow = r;
+  ['対象', '中心価値（約束）', '入口（無償）', '本体（有償）'].forEach(function (t, i) {
+    put_(sheet, headRow, cols[i][0], t, cols[i][1])
+      .setBackground(C.slate).setFontColor(C.white).setFontSize(10).setFontWeight('bold')
+      .setHorizontalAlignment('center');
+  });
+  sheet.setRowHeight(headRow, 24);
+  r++;
+
+  var products = [
+    ['法人(B2B)', '辞めない店をつくる（定着）。動かすレバーは責任者の関わり方で、最高単価もそこに乗せる。',
+     '無料診断 → チーム力学レポート → 解説商談 → 1週間後フォロー（一手の確認）',
+     '定着の伴走（年契約・月10万／15万／20万円）／チーム読み解きWS＋自走キット（年50万円）', C.tintBlue],
+    ['個人(B2C)', 'プライベートの大切な存在を深く理解してあげられるようになる。',
+     '無料診断 →（②紹介）アプリ内ガイド全4章 ／（①一般）3days LIVE・未実装 → 体験セッション',
+     '個別コーチングセッション（1on1・高単価）', C.tintOrange]
+  ];
+  products.forEach(function (p) {
+    for (var i = 0; i < 4; i++) {
+      put_(sheet, r, cols[i][0], p[i], cols[i][1])
+        .setBackground(p[4]).setFontSize(9).setWrap(true).setFontWeight(i === 0 ? 'bold' : 'normal');
+    }
+    sheet.setRowHeight(r, 46);
+    r++;
+  });
+
+  // --- ④ 月商目標 ---
+  r = section_(sheet, r, '④ 月商目標 ＋ 内訳（2026-08改定価格ベース。M1＝2026年8月）', C.green, LAST);
+
+  var monthHead = ['区分', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'];
+  sheet.getRange(r, 2, 1, monthHead.length).setValues([monthHead])
+    .setBackground(C.slate).setFontColor(C.white).setFontSize(9).setFontWeight('bold')
+    .setHorizontalAlignment('center');
+  sheet.setRowHeight(r, 22);
+  r++;
+
+  var moneyRows = [
+    ['月商目標（合計）', [0, 0, 15, 45, 60, 75, 100, 115, 140, 170, 195, 210], C.tintGold, true, '万'],
+    ['└ 法人 月商', [0, 0, 15, 45, 60, 75, 90, 105, 120, 150, 165, 180], C.tintBlue, false, '万'],
+    ['└ 法人 契約累計', [0, 1, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13], C.tintBlue, false, '社'],
+    ['└ 法人 課金社数', [0, 0, 1, 3, 4, 5, 6, 7, 8, 10, 11, 12], C.tintBlue, false, '社'],
+    ['└ 個人 月商（参考）', [0, 0, 0, 0, 0, 0, 10, 10, 20, 20, 30, 30], C.tintOrange, false, '万']
+  ];
+  moneyRows.forEach(function (row) {
+    var cells = [row[0]].concat(row[1].map(function (v) {
+      return row[4] === '万' ? (v === 0 ? '¥0' : '¥' + v + '万') : v + '社';
+    }));
+    sheet.getRange(r, 2, 1, cells.length).setValues([cells])
+      .setBackground(row[2]).setFontSize(9).setFontWeight(row[3] ? 'bold' : 'normal')
+      .setHorizontalAlignment('center');
+    sheet.getRange(r, 2).setHorizontalAlignment('left').setFontWeight('bold');
+    sheet.setRowHeight(r, 20);
+    r++;
+  });
+
+  [
+    '※ 法人の月商＝課金社数 × 平均月15万円（規模帯 5〜9名 月10万／10〜19名 月15万／20〜30名 月20万）。課金社数は前月までの契約累計（初月は継続判断が終わるまで計上しない）。初年度は解約ゼロと置いているので、継続率の実測が出た時点で引き直す。チームWS単独（年50万円）は含まない。',
+    '※ 旧「月利目標（固定）」（M3 ¥20万 → M12 ¥45万）は、ワークショップ中心だった旧価格前提の数字なので廃止し、改定後の価格で月商として引き直した。経費は交通費・郵送費・ツール代が中心で、粗利率は高い。',
+    '※ 個人は②紹介経由の個別コーチングのみの参考値。単価が未確定なので、確定した時点で引き直す。個人_12ヶ月ロードマップは有償ガイド販売を前提にした旧版のままなので、別途の引き直しが要る。'
+  ].forEach(function (t) {
+    put_(sheet, r, 2, t, LAST).setFontSize(8).setFontColor('#808080').setWrap(true);
+    sheet.setRowHeight(r, 26);
+    r++;
+  });
+
+  // --- ⑤ 設計原則 ---
+  r = section_(sheet, r, '⑤ 設計原則・留意点', C.slate, LAST);
+  [
+    '・ 診断は唯一の共通入口。法人・個人どちらから来ても同じ診断を受ける。',
+    '・ 法人受診者がB2Cの入口になる。結果画面の「大切な人にも」導線が波及の起点。',
+    '・ 法人は「約束」と「レバー」を分ける。約束＝辞めない店をつくる（定着）、レバー＝責任者の関わり方。約束を直接売ると相見積もりになるが、レバーには代替がない。',
+    '・ 定着は機序のレベルで約束する。「離職率が◯%下がる」でなく「辞める理由そのものを減らす」。効果は四半期サーベイと離職率の実数で一緒に見る。',
+    '・ セグメントは観測可能な構造条件で切る（単一拠点／5〜30名／中間管理職なし＋トリガー）。業種フォーカスはチャネルであってセグメントではない。',
+    '・ 0→1の主エンジンは紹介でなくトリガー観測型の直接接触。顧客0のとき顧客からの紹介は0で、紹介は入力量を自分で決められない。紹介は実測10社の後に主力へ昇格させる。',
+    '・ 配るのは知識でなく測定と実行体験。AIが解いたのは「知らない→知っている」の段だけで、「知っているがやらない」「やっているができない」は残る。',
+    '・ 自分ごと化は相手の固有情報で起こす（観測の一文 → 本人の回答 → チームの実データ → 本人の1週間）。初回接触では売らない。',
+    '・ 価格は相場でなく「人にかけている金」（パート1人分の人件費・年間の採用予算）と比べる。コンサル・研修・性格診断とは名乗らない。',
+    '・ チームレポートのM3自動化が年5,000万円の前提条件。手動のままだと約4,800万円で頭打ちになる。'
+  ].forEach(function (t) {
+    put_(sheet, r, 2, t, LAST).setFontSize(10).setWrap(true);
+    sheet.setRowHeight(r, 24);
+    r++;
+  });
+
+  // --- ⑥ 年5,000万円までの距離 ---
+  r = section_(sheet, r, '⑥ 年5,000万円までの距離（12ヶ月の先）', C.navy, LAST);
+  [
+    ['1人の提供上限', '月3.17時間／社（月次90分＋週次の返答＋オンデマンド＋半期更新）÷ 提供可能86時間／月 ＝ 約27社'],
+    ['到達式', '28社 × 平均月15万円 × 12ヶ月 ＝ 5,040万円（＋チームWS単独 年300万円）'],
+    ['前提条件', 'チームレポートのM3自動化。手動のままだと25社・約4,800万円で頭打ち'],
+    ['本当の制約', '単価でなく継続率。平均24ヶ月続けば、28社の維持に必要な新規は年14社（月1.2社）で足りる'],
+    ['12ヶ月時点の位置', '契約13社・月商180万円（年商換算2,160万円）。残りは継続率と自動化で埋める']
+  ].forEach(function (kv) {
+    r = kv_(sheet, r, kv[0], kv[1], LAST);
+  });
+
+  var lastRow = r;
+
+  // --- 全体の書式 ---
+  sheet.getRange(1, 1, lastRow, LAST).setFontFamily('Arial').setVerticalAlignment('middle');
+  sheet.setColumnWidth(1, 24);
+  sheet.setColumnWidth(2, 150);
+  for (var c = 3; c <= LAST; c++) {
+    sheet.setColumnWidth(c, 66);
+  }
+  trimSheet_(sheet, lastRow + 2, LAST);
+}
+
+/** 値を書いて、必要なら右端まで結合して返す */
+function put_(sheet, row, col, value, mergeTo) {
+  var span = (mergeTo && mergeTo > col) ? mergeTo - col + 1 : 1;
+  var range = sheet.getRange(row, col, 1, span);
+  sheet.getRange(row, col).setValue(value);
+  if (span > 1) {
+    range.merge();
+  }
+  return range;
+}
+
+/** 見出し行 */
+function section_(sheet, row, text, color, lastCol) {
+  put_(sheet, row, 2, text, lastCol)
+    .setBackground(color).setFontColor(C.white).setFontSize(11).setFontWeight('bold');
+  sheet.setRowHeight(row, 24);
+  return row + 1;
+}
+
+/** ラベル（B列）＋ 本文（C列〜右端） */
+function kv_(sheet, row, label, value, lastCol) {
+  put_(sheet, row, 2, label)
+    .setBackground(C.offWhite).setFontSize(10).setFontWeight('bold').setWrap(true);
+  put_(sheet, row, 3, value, lastCol)
+    .setFontSize(10).setWrap(true);
+  sheet.setRowHeight(row, 34);
+  return row + 1;
 }
 
 /* ============================================================
