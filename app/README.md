@@ -22,21 +22,43 @@ Cloudflare の認証が要る操作は**ブラウザが必要**なので、手�
 
 前提：Node.js 20 以上、Cloudflare アカウント。ドメインを Cloudflare Registrar で取得済みなら、そのアカウントをそのまま使う。
 
-### 1. リポジトリを取ってきて、依存を入れる
+### 1. Cloudflare にログインして D1 を作る（リポジトリは不要）
+
+`wrangler login` はアカウント単位の認証、`d1 create` はアカウントにDBを1つ作るだけなので、
+**どちらもリポジトリの外で動く**。Node.js さえ入っていれば、どのディレクトリからでもよい。
 
 ```
-git clone https://github.com/yuki-b4/work-relation-quiz.git
+npx wrangler login
+npx wrangler d1 create nature-shindan
+```
+
+`npx` が wrangler をその場で取ってくるので、インストールも不要。
+`d1 create` の出力に `database_id` が出るので控える（次の手順で使う）。
+
+### 2. リポジトリを取ってきて、依存を入れる
+
+ローカルでアプリを動かす場合に必要。**`app/` はまだ `main` に入っていない**（PR #33 で入る）ので、
+作業ブランチを指定してクローンする。
+
+```
+git clone -b claude/diagnostic-app-requirements-2v7aq7 https://github.com/yuki-b4/work-relation-quiz.git
 cd work-relation-quiz/app
 npm install
 ```
 
-### 2. Cloudflare にログインする
+すでにクローン済みなら、ブランチを切り替える。
 
 ```
-npx wrangler login
+git fetch origin
+git checkout claude/diagnostic-app-requirements-2v7aq7
 ```
 
-ブラウザが開き、Cloudflare のログインと権限の確認画面が出る。**「Allow」を押す**と、認証情報が手元に保存される（`~/.wrangler/` 配下。以後このコマンドは不要）。
+PR #33 がマージされたあとは、`main` に `app/` が入るのでブランチの指定は不要になる。
+
+### 3. ログインの確認と、ブラウザが使えない場合
+
+`npx wrangler login` を実行するとブラウザが開き、Cloudflare のログインと権限の確認画面が出る。
+**「Allow」を押す**と、認証情報が手元に保存される（`~/.wrangler/` 配下。以後このコマンドは不要）。
 ブラウザが自動で開かない場合は、ターミナルに表示されるURLを手で開く。
 
 確認：
@@ -51,13 +73,9 @@ npx wrangler whoami
 > 「マイプロフィール → APIトークン」で **Workers Scripts:Edit / D1:Edit / Workers Routes:Edit** の権限を持つトークンを作り、
 > `CLOUDFLARE_API_TOKEN` 環境変数に入れる。トークンはリポジトリにコミットしない。
 
-### 3. D1 データベースを作る
+### 4. `database_id` を wrangler.toml に貼る
 
-```
-npm run db:create
-```
-
-出力の中に次のような行が出る。
+手順1の `d1 create` の出力に、次のような行が出ている。
 
 ```
 [[d1_databases]]
@@ -67,7 +85,7 @@ database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
 この **`database_id` を `wrangler.toml` の `[[d1_databases]]` に貼る**（`database_id = ""` になっている箇所）。
-プレビュー用も作る場合は同じ手順で `nature-shindan-preview` を作り、`[env.preview]` 側に貼る。
+プレビュー用も作る場合は `npx wrangler d1 create nature-shindan-preview` を実行し、`[env.preview]` 側に貼る。
 
 ### 3. スキーマを流す
 
@@ -76,7 +94,7 @@ npm run db:migrate:local    # ローカル（.wrangler 配下のSQLite）
 npm run db:migrate:remote   # 本番のD1
 ```
 
-### 4. ローカル開発用の秘密値
+### 5. ローカル開発用の秘密値
 
 ```
 cp .dev.vars.example .dev.vars
@@ -85,7 +103,7 @@ cp .dev.vars.example .dev.vars
 `IP_HASH_SALT` を長いランダム文字列に変える（生IPは保存せず、このソルト付きハッシュだけを持つ）。
 本番へは `npx wrangler secret put IP_HASH_SALT` で入れる。`.dev.vars` はコミットしない。
 
-### 5. 起動して確認
+### 6. 起動して確認
 
 ```
 npm run dev
