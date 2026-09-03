@@ -116,9 +116,13 @@ npm run dev
 文面の正は **`prototype.html`**（と `ガイド文面24本.md`）のままで、アプリはそこから機械的に写している。
 
 ```
-npm run content   # prototype.html → src/content/*.ts を再生成
-npm run parity    # 採点ロジックが prototype.html と一致するか検証
-npm run check     # 上の2つ ＋ 型チェック
+npm run content       # prototype.html → src/content/*.ts を再生成
+npm run parity        # 採点ロジックが prototype.html と一致するか検証
+npm run test:session  # 結果セッションの判定（F4）
+npm run check         # 上の3つ ＋ 型チェック
+
+npm run dev           # 別ターミナルで起動してから
+npm run test:e2e      # 回答送信の疎通試験（POST /api/responses）
 ```
 
 - `src/content/*.ts` は**自動生成なので直接編集しない**。文面を変えるときは `prototype.html` を直してから `npm run content`

@@ -44,3 +44,16 @@ RESULT_MAX_HOURS = "2"
 # binding = "DB"
 # database_name = "nature-shindan-preview"
 # database_id = ""
+
+# 回答送信のレート制限（アプリ化要件定義.md F1-3）。Cloudflare のネイティブ機能。
+# エッジのWAFルール（8.5）とは別に、Worker 側でも1本張っておく。
+[[ratelimits]]
+name = "SUBMIT_LIMIT"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+# 申込フォームの送信。認可が無いページなので、こちらは厳しめ（F4-5）。
+[[ratelimits]]
+name = "APPLY_LIMIT"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }

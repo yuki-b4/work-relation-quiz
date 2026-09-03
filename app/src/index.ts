@@ -5,9 +5,17 @@
  * 中身の実装は Phase 1（アプリ化要件定義.md 第9章）。
  */
 import { Hono } from 'hono';
+import { submitResponse } from './lib/responses.ts';
+import { buildResultCookie, type Limits } from './lib/result-session.ts';
+import { sha256Hex } from './lib/hash.ts';
+
+/** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
+type RateLimiter = { limit(options: { key: string }): Promise<{ success: boolean }> };
 
 type Bindings = {
   DB: D1Database;
+  SUBMIT_LIMIT: RateLimiter;
+  APPLY_LIMIT: RateLimiter;
   QUESTION_SET_VERSION: string;
   SITE_NAME: string;
   RESULT_IDLE_MINUTES: string;
@@ -53,7 +61,57 @@ app.get('/apply/:typeCode', (c) => c.text(`TODO: 申込フォーム ${c.req.para
 app.all('/admin/*', (c) => c.text('TODO: Admin（認証必須）', 501));
 
 // ───────── API（F1-3） ─────────
-app.post('/api/responses', (c) => c.json({ todo: 'diagnosis submit' }, 501));
+
+/** 結果セッションの有効期限。環境変数で変えられるようにしておく（F4-1）。 */
+function limitsOf(c: { env: Bindings }): Limits {
+  return {
+    idleMinutes: Number(c.env.RESULT_IDLE_MINUTES ?? 30) || 30,
+    maxHours: Number(c.env.RESULT_MAX_HOURS ?? 2) || 2,
+  };
+}
+
+function clientIp(req: Request): string | null {
+  return req.headers.get('CF-Connecting-IP') ?? null;
+}
+
+/**
+ * 診断の回答を受け取り、保存して結果セッションを発行する。
+ *
+ * 返すのは tabToken だけ。呼び出し側はこれを sessionStorage に入れてから /result へ進む。
+ * 結果セッションのCookieは Set-Cookie で返る（HttpOnly なのでJSからは読めない。F4-2）。
+ * responseId は返さない。クライアントが持つ必要がなく、持たせると漏れる面が増えるため。
+ */
+app.post('/api/responses', async (c) => {
+  const ip = clientIp(c.req.raw);
+  if (c.env.SUBMIT_LIMIT && ip) {
+    // レート制限のキーにも生IPを渡さない。ハッシュでも同一IPは同じ値になるので機能は変わらず、
+    // 「生IPはリクエストの処理から外へ出さない」を保てる（アプリ化要件定義.md 6.2）。
+    const { success } = await c.env.SUBMIT_LIMIT.limit({ key: await sha256Hex(ip) });
+    if (!success) return c.json({ ok: false, error: 'rate_limited' }, 429);
+  }
+
+  let payload: unknown;
+  try {
+    payload = await c.req.json();
+  } catch {
+    return c.json({ ok: false, error: 'invalid_json' }, 400);
+  }
+
+  const result = await submitResponse(c.env.DB, payload as Record<string, unknown>, {
+    ip,
+    userAgent: c.req.header('User-Agent') ?? null,
+    ipHashSalt: c.env.IP_HASH_SALT,
+    questionSetVersion: c.env.QUESTION_SET_VERSION,
+    limits: limitsOf(c),
+  });
+
+  if (!result.ok) {
+    return c.json({ ok: false, error: 'invalid_answers', details: result.errors }, 400);
+  }
+
+  c.header('Set-Cookie', buildResultCookie(result.sessionId));
+  return c.json({ ok: true, tabToken: result.tabToken, duplicate: result.duplicate });
+});
 app.post('/api/responses/:id/hearing', (c) => c.json({ todo: 'hearing' }, 501));
 app.post('/api/result/close', (c) => c.json({ todo: 'close result session' }, 501));
 app.post('/api/guide/progress', (c) => c.json({ todo: 'guide progress' }, 501));
