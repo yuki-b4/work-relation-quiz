@@ -8,6 +8,9 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
+    // Node の --experimental-strip-types と esbuild(Wrangler) の両方で解決できるよう、
+    // 相対 import は拡張子 .ts を明示する。
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"

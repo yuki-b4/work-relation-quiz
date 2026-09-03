@@ -52,6 +52,22 @@ npm run dev
 
 `http://localhost:8787/api/health` が `{"ok":true,"tables":12,...}` を返せばセットアップ完了。
 
+## 診断の文面と採点ロジック
+
+文面の正は **`prototype.html`**（と `ガイド文面24本.md`）のままで、アプリはそこから機械的に写している。
+
+```
+npm run content   # prototype.html → src/content/*.ts を再生成
+npm run parity    # 採点ロジックが prototype.html と一致するか検証
+npm run check     # 上の2つ ＋ 型チェック
+```
+
+- `src/content/*.ts` は**自動生成なので直接編集しない**。文面を変えるときは `prototype.html` を直してから `npm run content`
+- `src/lib/scoring.ts` は `prototype.html` の `tally()` / `radarScores()` / `finish()` の移植。
+  `npm run parity` が、元の関数のソースを `prototype.html` から抜き出してそのまま実行し、結果を突き合わせる。
+  9問の二択は **512通りを総当たり**、5軸は端の値とランダム5000通りで照合する
+- 採点を触ったら必ず `npm run parity` を通す。ここが崩れると F3-1（現行踏襲）が静かに壊れる
+
 ## デプロイ
 
 ```

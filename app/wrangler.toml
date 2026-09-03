@@ -11,7 +11,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # 本番の独自ドメイン。取得後にコメントを外す（アプリ化要件定義.md 8.6）
 # routes = [
-#   { pattern = "example.com", custom_domain = true }
+#   { pattern = "natur-indicator.com", custom_domain = true }
 # ]
 
 [observability]
