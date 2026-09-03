@@ -1,0 +1,39 @@
+# ナチュール診断 アプリ本体（Cloudflare Workers）
+# 要件：アプリ化要件定義.md 第8章（Cloudflare Workers + D1）
+#
+# 初回セットアップは app/README.md を参照。
+# database_id は `wrangler d1 create` の出力を貼る（作成するまで空のまま）。
+
+name = "nature-shindan"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 本番の独自ドメイン。取得後にコメントを外す（アプリ化要件定義.md 8.6）
+# routes = [
+#   { pattern = "example.com", custom_domain = true }
+# ]
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nature-shindan"
+database_id = ""   # ← wrangler d1 create の出力を貼る
+
+[vars]
+# 機微でない設定のみ。秘密は wrangler secret put で入れる（README参照）
+QUESTION_SET_VERSION = "2026-09"
+SITE_NAME = "ナチュール診断"
+# 結果セッションの有効期限（アプリ化要件定義.md F4-1）
+RESULT_IDLE_MINUTES = "30"
+RESULT_MAX_HOURS = "2"
+
+[env.preview]
+name = "nature-shindan-preview"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "nature-shindan-preview"
+database_id = ""
