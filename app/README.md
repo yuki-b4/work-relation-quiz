@@ -7,25 +7,66 @@
 - フレームワーク：Hono
 - 現状：**Phase 0（環境構築）まで。** ルートの受け口とDBスキーマだけがある
 
-## セットアップ
+## 作業の分担
 
-前提：Node.js 20 以上、Cloudflare アカウント。
+Cloudflare の認証が要る操作は**ブラウザが必要**なので、手元のPCで行う。コードを書くのはどこでもよい。
 
-### 1. 依存を入れる
+| やること | どこで |
+|:--|:--|
+| コードを書く、`npm run check` を通す | どこでも（クラウドのセッションを含む） |
+| `wrangler login`、D1の作成、`wrangler deploy`、`wrangler secret put` | **手元のPC** |
+
+**APIトークンや `.dev.vars` の中身を、チャットやIssueに貼らないこと。** `database_id` は識別子であって秘密ではないので、共有して構わない（このファイルにもコミットする）。
+
+## セットアップ（手元のPCで1回だけ）
+
+前提：Node.js 20 以上、Cloudflare アカウント。ドメインを Cloudflare Registrar で取得済みなら、そのアカウントをそのまま使う。
+
+### 1. リポジトリを取ってきて、依存を入れる
 
 ```
-cd app
+git clone https://github.com/yuki-b4/work-relation-quiz.git
+cd work-relation-quiz/app
 npm install
 ```
 
-### 2. D1 データベースを作る
+### 2. Cloudflare にログインする
 
 ```
 npx wrangler login
+```
+
+ブラウザが開き、Cloudflare のログインと権限の確認画面が出る。**「Allow」を押す**と、認証情報が手元に保存される（`~/.wrangler/` 配下。以後このコマンドは不要）。
+ブラウザが自動で開かない場合は、ターミナルに表示されるURLを手で開く。
+
+確認：
+
+```
+npx wrangler whoami
+```
+
+メールアドレスとアカウントIDが表示されれば成功。
+
+> **ブラウザが使えない環境（サーバー、CI）の場合**は、`wrangler login` の代わりに Cloudflare ダッシュボードの
+> 「マイプロフィール → APIトークン」で **Workers Scripts:Edit / D1:Edit / Workers Routes:Edit** の権限を持つトークンを作り、
+> `CLOUDFLARE_API_TOKEN` 環境変数に入れる。トークンはリポジトリにコミットしない。
+
+### 3. D1 データベースを作る
+
+```
 npm run db:create
 ```
 
-出力される `database_id` を **`wrangler.toml` の `[[d1_databases]]` の `database_id`** に貼る。
+出力の中に次のような行が出る。
+
+```
+[[d1_databases]]
+binding = "DB"
+database_name = "nature-shindan"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+
+この **`database_id` を `wrangler.toml` の `[[d1_databases]]` に貼る**（`database_id = ""` になっている箇所）。
 プレビュー用も作る場合は同じ手順で `nature-shindan-preview` を作り、`[env.preview]` 側に貼る。
 
 ### 3. スキーマを流す
