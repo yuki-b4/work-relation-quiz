@@ -19,6 +19,8 @@ export type PageOptions = {
   noindex?: boolean;
   canonical?: string;
   bodyClass?: string;
+  /** <head> に足すもの（OGP・構造化データなど）。 */
+  head?: string;
   /** </body> の直前に置くスクリプト。 */
   script?: string;
 };
@@ -33,7 +35,7 @@ export function page(opts: PageOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
-    desc + robots + canonical + FONTS +
+    desc + robots + canonical + (opts.head ?? '') + FONTS +
     `<style>${APP_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +

@@ -148,6 +148,11 @@ function between(startRe, endRe) {
 
 const css = between(/<style>\n/, /<\/style>/);
 
+// イントロ・フレーム・設問の素のHTML。ここは埋める値が無いので、そのまま使う。
+const introMarkup = between(/<!-- INTRO -->\n/, /\n\n  <!-- FRAME/);
+const frameMarkup = between(/<!-- FRAME（[^\n]*\n/, /\n\n  <!-- QUIZ/);
+const quizMarkup = between(/<!-- QUIZ -->\n/, /\n\n  <!-- RESULT/);
+
 // 結果画面の素のHTML。サーバ側の描画が、同じクラス名・同じ入れ子で組めているかを
 // tools/markup-check.mjs が突き合わせるための参照。
 const resultSection = between(/<!-- RESULT -->\n/, /\n  <!-- GUIDE/);
@@ -158,6 +163,19 @@ writeFileSync(
 `
 /** prototype.html の <style> の中身。1文字も変えない。 */
 export const APP_CSS = ${JSON.stringify(css)};
+`);
+
+writeFileSync(
+  resolve(OUT, 'screens.ts'),
+  banner('イントロ・フレーム・設問の素のHTML') +
+`
+/**
+ * prototype.html の該当節をそのまま写したもの。埋める値が無いので、このまま出す。
+ * 文面を変えるときは prototype.html を直して \`npm run content\` で再生成する。
+ */
+export const INTRO_MARKUP = ${JSON.stringify(introMarkup)};
+export const FRAME_MARKUP = ${JSON.stringify(frameMarkup)};
+export const QUIZ_MARKUP = ${JSON.stringify(quizMarkup)};
 `);
 
 writeFileSync(
@@ -201,6 +219,7 @@ export const PROTO_CLASSES: readonly string[] = ${j([...protoClasses].sort())};
 console.log('生成しました:');
 console.log(`  APP_CSS          ${css.length} 文字`);
 console.log(`  PROTO_CLASSES    ${protoClasses.size} 種`);
+console.log(`  INTRO/FRAME/QUIZ ${introMarkup.length} / ${frameMarkup.length} / ${quizMarkup.length} 文字`);
 console.log(`  RESULT_MARKUP    ${resultSection.length} 文字`);
 for (const [k, val] of Object.entries(v)) {
   const n = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 1);

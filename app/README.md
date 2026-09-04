@@ -123,7 +123,18 @@ npm run test:markup   # 結果カードのクラス名・id が prototype.html �
 npm run check         # 上の4つ ＋ 型チェック
 
 npm run dev           # 別ターミナルで起動してから
-npm run test:e2e      # 回答送信とワンタイム結果表示の疎通試験
+npm run test:e2e      # 回答送信とワンタイム結果表示の疎通試験（HTTP）
+npm run test:flow     # 診断を最初から最後まで実ブラウザで通す試験
+```
+
+`test:flow` は初回だけブラウザ本体が要る。
+
+```
+npx playwright install chromium
+```
+
+**別タブでは結果が開けないこと（F4-2）は、この試験でしか確かめられない。**
+sessionStorage はタブごとなので、curl では再現できない。
 ```
 
 - `src/content/*.ts` は**自動生成なので直接編集しない**。文面を変えるときは `prototype.html` を直してから `npm run content`

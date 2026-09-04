@@ -15,6 +15,7 @@ import {
 import { renderResultCard } from './views/result.ts';
 import { resultShell } from './views/result-page.ts';
 import { closedPage } from './views/layout.ts';
+import { topPage } from './views/quiz-page.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import type { TypeCode } from './content/types.ts';
 
@@ -49,8 +50,20 @@ app.use('*', async (c, next) => {
 });
 
 // ───────── 公開ページ（SSR・index対象。F6-2） ─────────
-app.get('/', (c) => c.text('TODO: トップ（診断の説明・開始）'));
-app.get('/quiz', (c) => c.text('TODO: 設問24問'));
+
+/** そのリクエストのオリジン。canonical と OGP に使う。 */
+function originOf(c: { req: { url: string } }): string {
+  return new URL(c.req.url).origin;
+}
+
+/**
+ * トップ。イントロ・フレーム・設問24問を1枚に入れて、表示を切り替える（F3-1）。
+ * 診断中もURLは / のままなので、canonical の重複が起きない。
+ */
+app.get('/', (c) => c.html(topPage(originOf(c))));
+
+/** 設問は / の中で進むので、/quiz は入口へ寄せる（F6-4：重複インデックスを作らない）。 */
+app.get('/quiz', (c) => c.redirect('/', 301));
 app.get('/types', (c) => c.text('TODO: 全8タイプ一覧'));
 app.get('/types/:code', (c) => c.text(`TODO: タイプ個別 ${c.req.param('code')}`));
 app.get('/about', (c) => c.text('TODO: 診断について'));
