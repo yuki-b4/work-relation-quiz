@@ -119,10 +119,11 @@ npm run dev
 npm run content       # prototype.html → src/content/*.ts を再生成
 npm run parity        # 採点ロジックが prototype.html と一致するか検証
 npm run test:session  # 結果セッションの判定（F4）
-npm run check         # 上の3つ ＋ 型チェック
+npm run test:markup   # 結果カードのクラス名・id が prototype.html と一致するか
+npm run check         # 上の4つ ＋ 型チェック
 
 npm run dev           # 別ターミナルで起動してから
-npm run test:e2e      # 回答送信の疎通試験（POST /api/responses）
+npm run test:e2e      # 回答送信とワンタイム結果表示の疎通試験
 ```
 
 - `src/content/*.ts` は**自動生成なので直接編集しない**。文面を変えるときは `prototype.html` を直してから `npm run content`

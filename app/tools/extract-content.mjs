@@ -135,7 +135,73 @@ writeFileSync(
 export const GUIDE_BODY = ${j(v.GUIDE_BODY)} as const;
 `);
 
+// ── CSS と、結果画面の素のHTML ──
+// 見た目は prototype.html の <style> をそのまま使う。書き写すと F3-1 が崩れるため。
+function between(startRe, endRe) {
+  const a = startRe.exec(html);
+  if (!a) throw new Error(`開始が見つかりません: ${startRe}`);
+  const from = a.index + a[0].length;
+  const b = endRe.exec(html.slice(from));
+  if (!b) throw new Error(`終了が見つかりません: ${endRe}`);
+  return html.slice(from, from + b.index);
+}
+
+const css = between(/<style>\n/, /<\/style>/);
+
+// 結果画面の素のHTML。サーバ側の描画が、同じクラス名・同じ入れ子で組めているかを
+// tools/markup-check.mjs が突き合わせるための参照。
+const resultSection = between(/<!-- RESULT -->\n/, /\n  <!-- GUIDE/);
+
+writeFileSync(
+  resolve(OUT, 'styles.ts'),
+  banner('prototype.html の <style> をそのまま写したもの') +
+`
+/** prototype.html の <style> の中身。1文字も変えない。 */
+export const APP_CSS = ${JSON.stringify(css)};
+`);
+
+writeFileSync(
+  resolve(OUT, 'result-markup.ts'),
+  banner('結果画面の素のHTML（照合用）') +
+`
+/**
+ * prototype.html の <!-- RESULT --> 節の素のHTML。
+ * アプリはこれを直接使わず、サーバ側で同じ構造を組み立てる。
+ * tools/markup-check.mjs が、組み立てた結果とこれのクラス名・id を突き合わせる。
+ */
+export const RESULT_MARKUP = ${JSON.stringify(resultSection)};
+`);
+
+// prototype.html が使っているクラス名の全集合。静的な markup と、JSが組み立てる文字列の両方から集める。
+// サーバ側の描画に、ここに無いクラスが出てきたら打ち間違い（tools/markup-check.mjs が見る）。
+const protoClasses = new Set();
+for (const m of html.matchAll(/class="([^"]*)"/g)) {
+  for (const c of m[1].split(/\s+/)) if (c) protoClasses.add(c);
+}
+for (const m of html.matchAll(/className\s*=\s*['"]([^'"]*)['"]/g)) {
+  for (const c of m[1].split(/\s+/)) if (c) protoClasses.add(c);
+}
+// `'axis-row'+(cond?' is-on':'')` のような組み立ても拾う
+for (const m of html.matchAll(/className\s*=\s*'([^']*)'\s*\+/g)) {
+  for (const c of m[1].split(/\s+/)) if (c) protoClasses.add(c);
+}
+// JSの文字列結合で作られるクラス（'<span class="ray '+rayPos[i]+'">' や (leftOn?'on':'')）は
+// 上のどのパターンにも現れない。CSSのセレクタ側から拾って補う。
+// CSSに定義があるということは、prototype.html が使う正当なクラス名である。
+for (const m of css.matchAll(/\.([a-zA-Z][\w-]*)/g)) protoClasses.add(m[1]);
+
+writeFileSync(
+  resolve(OUT, 'proto-classes.ts'),
+  banner('prototype.html が使っているクラス名の全集合（照合用）') +
+`
+/** サーバ側の描画がこの集合の外のクラスを使っていたら、打ち間違いを疑う。 */
+export const PROTO_CLASSES: readonly string[] = ${j([...protoClasses].sort())};
+`);
+
 console.log('生成しました:');
+console.log(`  APP_CSS          ${css.length} 文字`);
+console.log(`  PROTO_CLASSES    ${protoClasses.size} 種`);
+console.log(`  RESULT_MARKUP    ${resultSection.length} 文字`);
 for (const [k, val] of Object.entries(v)) {
   const n = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 1);
   console.log(`  ${k.padEnd(16)} ${n}`);

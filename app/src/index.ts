@@ -8,6 +8,15 @@ import { Hono } from 'hono';
 import { submitResponse } from './lib/responses.ts';
 import { buildResultCookie, type Limits } from './lib/result-session.ts';
 import { sha256Hex } from './lib/hash.ts';
+import {
+  closeResultSession, closeSessionsForResponse, evaluate, isoNow,
+  loadResultSession, readResultCookie, touchResultSession, clearResultCookie,
+} from './lib/result-session.ts';
+import { renderResultCard } from './views/result.ts';
+import { resultShell } from './views/result-page.ts';
+import { closedPage } from './views/layout.ts';
+import { RADAR_AXES } from './content/quiz.ts';
+import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
 type RateLimiter = { limit(options: { key: string }): Promise<{ success: boolean }> };
@@ -51,7 +60,22 @@ app.get('/terms', (c) => c.text('TODO: 利用規約'));
 app.get('/contact', (c) => c.text('TODO: お問い合わせ'));
 
 // ───────── ワンタイム（結果セッションで認可。F4） ─────────
-app.get('/result', (c) => c.text('TODO: 結果（Cookie＋sessionStorageの3点一致で認可）'));
+/**
+ * 結果画面。Cookie だけを先に見て、駄目ならその場で 410（F4-4）。
+ * 通ればシェルを返し、タブ照合値の突き合わせは /api/result/view で行う。
+ */
+app.get('/result', async (c) => {
+  const id = readResultCookie(c.req.header('Cookie'));
+  if (!id) return c.html(closedPage(), 410);
+  const row = await loadResultSession(c.env.DB, id);
+  // ここではタブ照合値を見ない（サーバに届かないため）。閉じた・失効だけを弾く。
+  const v = evaluate(row, row?.tab_token ?? null, isoNow(), limitsOf(c));
+  if (!v.ok) return c.html(closedPage(), 410);
+  return c.html(resultShell());
+});
+
+/** 失効後の案内画面。シェルからここへ飛ばす。 */
+app.get('/result/closed', (c) => c.html(closedPage(), 410));
 app.get('/guide', (c) => c.text('TODO: 読み解きガイド全4章'));
 
 // ───────── 申込（タイプ別の共通ページ。認可なし。F4-5） ─────────
@@ -113,7 +137,73 @@ app.post('/api/responses', async (c) => {
   return c.json({ ok: true, tabToken: result.tabToken, duplicate: result.duplicate });
 });
 app.post('/api/responses/:id/hearing', (c) => c.json({ todo: 'hearing' }, 501));
-app.post('/api/result/close', (c) => c.json({ todo: 'close result session' }, 501));
+/**
+ * 3つの鍵を突き合わせ、通れば結果カードのHTMLを返す（F4-2）。
+ * 返すのはその人の結果だけ。他タイプの文面はブラウザへ配らない。
+ */
+app.post('/api/result/view', async (c) => {
+  const id = readResultCookie(c.req.header('Cookie'));
+  if (!id) return c.json({ ok: false, reason: 'not_found' }, 410);
+
+  let body: { tabToken?: unknown } = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ ok: false, reason: 'invalid_json' }, 400);
+  }
+  const tabToken = typeof body.tabToken === 'string' ? body.tabToken : null;
+
+  const now = isoNow();
+  const row = await loadResultSession(c.env.DB, id);
+  const v = evaluate(row, tabToken, now, limitsOf(c));
+  if (!v.ok) return c.json({ ok: false, reason: v.reason }, 410);
+
+  const r = await c.env.DB.prepare(
+    `select type_code, axis_counts,
+            radar_safety, radar_trust, radar_bound, radar_conflict, radar_connect
+       from responses where id = ? and deleted_at is null`
+  )
+    .bind(v.responseId)
+    .first<Record<string, string | number | null>>();
+  if (!r) return c.json({ ok: false, reason: 'not_found' }, 410);
+
+  await touchResultSession(c.env.DB, id, now);
+
+  const radar = Object.fromEntries(
+    RADAR_AXES.map((a) => [a, Number(r[`radar_${a}`] ?? 0)])
+  ) as Record<(typeof RADAR_AXES)[number], number>;
+
+  const html = renderResultCard({
+    code: r.type_code as TypeCode,
+    counts: JSON.parse(String(r.axis_counts ?? '{}')),
+    radar,
+  });
+  return c.json({ ok: true, html });
+});
+
+/** 「結果を閉じる」「もう一度診断する」。以後この結果は開けなくなる（F4-1）。 */
+app.post('/api/result/close', async (c) => {
+  const id = readResultCookie(c.req.header('Cookie'));
+  if (!id) return c.json({ ok: true });
+
+  let reason: 'user_close' | 'retake' = 'user_close';
+  try {
+    const body = (await c.req.json()) as { reason?: unknown };
+    if (body.reason === 'retake') reason = 'retake';
+  } catch {
+    // 本文が無くても閉じる
+  }
+
+  const row = await loadResultSession(c.env.DB, id);
+  if (row) {
+    // 同じ回答に紐づくセッションはまとめて閉じる（別タブで開いていた分も残さない）
+    await closeSessionsForResponse(c.env.DB, row.response_id, reason);
+  } else {
+    await closeResultSession(c.env.DB, id, reason);
+  }
+  c.header('Set-Cookie', clearResultCookie());
+  return c.json({ ok: true });
+});
 app.post('/api/guide/progress', (c) => c.json({ todo: 'guide progress' }, 501));
 app.post('/api/apply-visits', (c) => c.json({ todo: 'record apply visit' }, 501));
 app.post('/api/session-applications', (c) => c.json({ todo: 'session application' }, 501));
