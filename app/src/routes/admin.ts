@@ -86,6 +86,25 @@ admin.use('*', async (c, next) => {
 });
 
 /**
+ * Origin が自分自身かどうか（6.1）。
+ *
+ * **比べるのはホストだけにする。** scheme まで含めて比べると、前段やローカル開発の都合で
+ * http のまま渡ってきたときに落ちる（`originOf` は canonical 用に https を強制するため、
+ * そこと突き合わせると必ずずれる）。CSRF で効くのは「別のサイトから送られていないか」なので、
+ * ホストの一致で足りる。通信そのものは HSTS と Secure Cookie が守る。
+ *
+ * Origin ヘッダを送ってこないクライアントは、ここでは通してCSRFトークンで見る。
+ */
+export function sameOrigin(originHeader: string | undefined, host: string | undefined): boolean {
+  if (!originHeader) return true;
+  try {
+    return !!host && new URL(originHeader).host === host;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * 状態を変えるPOSTの検証（6.1）。
  * Origin が自分と一致すること、CSRFトークンがセッションのものと一致することの両方を見る。
  * どちらか片方だと、Originを送らない古いクライアントや、トークンの漏れで抜けられる。
@@ -94,8 +113,8 @@ async function readForm(c: {
   req: { raw: Request; header(name: string): string | undefined; url: string; formData(): Promise<FormData> };
   var: Vars;
 }): Promise<{ ok: true; form: FormData } | { ok: false; message: string }> {
-  const origin = c.req.header('Origin');
-  if (origin && origin !== originOf(c.req.url)) return { ok: false, message: 'Origin が一致しません。' };
+  const host = c.req.header('Host') ?? new URL(c.req.url).host;
+  if (!sameOrigin(c.req.header('Origin'), host)) return { ok: false, message: 'Origin が一致しません。' };
   let form: FormData;
   try {
     form = await c.req.formData();

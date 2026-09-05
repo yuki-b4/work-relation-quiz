@@ -11,16 +11,21 @@
     "test:session": "node --experimental-strip-types tools/result-session-test.mjs",
     "test:markup": "node --experimental-strip-types tools/markup-check.mjs",
     "test:e2e": "bash tools/e2e-submit.sh && bash tools/e2e-result.sh",
-    "test:browser": "npm run test:seo && npm run test:flow && npm run test:guide && npm run test:apply",
+    "test:browser": "npm run test:seo && npm run test:flow && npm run test:guide && npm run test:apply && npm run test:admin",
     "test:flow": "node tools/e2e-flow.mjs",
     "test:guide": "node tools/e2e-guide.mjs",
     "test:apply": "node tools/e2e-apply.mjs",
     "test:seo": "node --experimental-strip-types tools/seo-check.mjs",
-    "check": "npm run content && npm run parity && npm run test:session && npm run test:markup && npm run typecheck",
+    "check": "npm run content && npm run parity && npm run test:session && npm run test:markup && npm run test:auth && npm run test:migrate && npm run typecheck",
     "db:create": "wrangler d1 create nature-shindan",
     "db:migrate:local": "wrangler d1 migrations apply nature-shindan --local",
     "db:migrate:remote": "wrangler d1 migrations apply nature-shindan --remote",
-    "db:console:local": "wrangler d1 execute nature-shindan --local --command"
+    "db:console:local": "wrangler d1 execute nature-shindan --local --command",
+    "test:admin": "node tools/e2e-admin.mjs",
+    "test:auth": "node --experimental-strip-types tools/admin-auth-test.mjs",
+    "test:migrate": "node tools/migrate-test.mjs",
+    "migrate": "node tools/migrate-sheets.mjs",
+    "admin:password": "node --experimental-strip-types tools/admin-password.mjs"
   },
   "dependencies": {
     "hono": "^4.6.0"
