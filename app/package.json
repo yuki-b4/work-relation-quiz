@@ -15,7 +15,7 @@
     "test:flow": "node tools/e2e-flow.mjs",
     "test:guide": "node tools/e2e-guide.mjs",
     "test:apply": "node tools/e2e-apply.mjs",
-    "test:seo": "node tools/seo-check.mjs",
+    "test:seo": "node --experimental-strip-types tools/seo-check.mjs",
     "check": "npm run content && npm run parity && npm run test:session && npm run test:markup && npm run typecheck",
     "db:create": "wrangler d1 create nature-shindan",
     "db:migrate:local": "wrangler d1 migrations apply nature-shindan --local",

@@ -5,18 +5,15 @@
  * 面で取る。ただし**結果画面と同一にすると独自性が薄れるので、読み物として編集し直す**）。
  *
  * 何を出して、何を出さないか：
- *   ・出す：あるある／強み／ワンポイント（hitotsu）／相性（aishou）／トリセツ
+ *   ・出す：あるある／強み／ワンポイント（hitotsu）／相性（aishou）
  *     hitotsu と aishou は**結果画面では使っていない長文**で、ここの独自コンテンツになる
- *   ・出さない：深層（HONSHITSU）と5つの傾向
- *     深層は「あなたの深層」として結果画面の核であり、5軸はそもそも個人差なので、
- *     公開ページに置くと診断を受ける理由が薄くなる
+ *   ・出さない：トリセツ／深層（HONSHITSU）／5つの傾向
+ *     いずれも結果画面の中身。公開ページに置くと診断を受ける理由が薄くなる
  */
 import { AX } from '../content/quiz.ts';
-import { TORISET, TORI_LABEL, TYPES, TYPE_CODES, TYPE_ICON, type TypeCode } from '../content/types.ts';
+import { TYPES, TYPE_CODES, TYPE_ICON, type TypeCode } from '../content/types.ts';
 import { page } from './layout.ts';
 import { esc } from './result.ts';
-
-const NUMS = ['①', '②', '③', '④'];
 
 /** そのタイプが3軸のどちら側かを言葉にする。 */
 function poles(code: TypeCode): string[] {
@@ -164,16 +161,6 @@ export function typeDetailPage(code: TypeCode, origin: string): string {
     },
   ]);
 
-  const toriset = ((TORISET as Record<string, readonly { l: string; t: string }[]>)[code] ?? [])
-    .map(
-      (it, i) =>
-        '<div class="ts-card">' +
-          `<span class="ts-l"><span class="num">${NUMS[i] ?? ''}</span>${esc(it.l)}</span>` +
-          `<span class="ts-t">${esc(it.t)}</span>` +
-        '</div>'
-    )
-    .join('');
-
   return page(
     {
       title,
@@ -233,16 +220,9 @@ export function typeDetailPage(code: TypeCode, origin: string): string {
               `<p>${esc(t.aishou)}</p>` +
             '</div>' +
 
-            '<div class="toriset-band">' +
-              '<div class="ts-label">TORISETSU</div>' +
-              `<p class="ts-title">${esc(t.name)}のトリセツ</p>` +
-              '<p class="ts-lead">「この人はこういう人」<br>身近にいる方はこちらを</p>' +
-              `<div>${toriset}</div>` +
-            '</div>' +
-
             '<div class="row-block" style="margin-top:28px">' +
               '<p class="sectlabel">あなたのタイプを知る</p>' +
-              `<p style="margin-bottom:14px">ここまで読んで「これは自分かもしれない」と思った方は、24の質問で確かめられます。診断では、このページには載せていない「あなたの深層」と「5つの関わり方傾向」も出ます。登録は不要、約2分です。</p>` +
+              `<p style="margin-bottom:14px">ここまで読んで「これは自分かもしれない」と思った方は、24の質問で確かめられます。診断では、このページには載せていない「わたしのトリセツ」「あなたの深層」「5つの関わり方傾向」も出ます。登録は不要、約2分です。</p>` +
               '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">診断を受ける</a>' +
             '</div>' +
 

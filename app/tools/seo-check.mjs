@@ -6,6 +6,8 @@
  *
  * アプリ化要件定義.md F6（インデックス設計）／F7-3（オンサイトの必須項目）／F8-2（robots.txt）。
  */
+import { HONSHITSU, TORISET, TYPES, TYPE_CODES } from '../src/content/types.ts';
+
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8787';
 let fail = 0;
 const t = (label, actual, expected) => {
@@ -13,7 +15,16 @@ const t = (label, actual, expected) => {
 };
 const get = async (p) => {
   const r = await fetch(BASE + p, { redirect: 'manual' });
-  return { status: r.status, location: r.headers.get('location'), robots: r.headers.get('x-robots-tag'), body: await r.text() };
+  const body = await r.text();
+  return {
+    status: r.status,
+    location: r.headers.get('location'),
+    robots: r.headers.get('x-robots-tag'),
+    body,
+    // CSSは全ページに埋め込まれていて、そこに全画面のクラス名が並んでいる。
+    // 「この画面にこのブロックが出ていないか」を見るときは、必ずこちらを使う。
+    markup: body.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, ''),
+  };
 };
 const pick = (s, re) => (s.match(re) ?? [])[1] ?? null;
 
@@ -31,6 +42,27 @@ for (const path of ['/', '/types', '/types/OBL', '/types/OBS', '/types/OKL', '/t
   t(`${path} に構造化データ`, r.body.includes('application/ld+json'), true);
   // JSがなくても本文が読めること（F6-1）
   t(`${path} の本文がHTMLに入っている`, r.body.replace(/<[^>]*>/g, '').replace(/\s+/g, '').length > 400, true);
+}
+
+// 結果画面の中身を公開ページへ出していないこと。
+// トリセツ・深層・5つの傾向は、診断を受けた人だけのものにする。
+//
+// 文言の部分一致で見ると、CTAの「わたしのトリセツも出ます」という案内に反応してしまう。
+// 構造（そのブロック固有のクラス）と、実データの本文そのもので見る。
+for (const path of ['/types', ...TYPE_CODES.map((c) => `/types/${c}`)]) {
+  const r = await get(path);
+  for (const marker of ['toriset-band', 'ts-card', 'class="honshitsu"', 'hs-core',
+                        'r-spectrums', 'pv-kicker', 'focus-tag']) {
+    t(`${path} に ${marker} が無い`, r.markup.includes(marker), false);
+  }
+}
+for (const code of TYPE_CODES) {
+  const r = await get(`/types/${code}`);
+  t(`/types/${code} に深層の本文が無い`, r.markup.includes(HONSHITSU[code].core.slice(0, 24)), false);
+  t(`/types/${code} にトリセツの本文が無い`, r.markup.includes(TORISET[code][0].t.slice(0, 16)), false);
+  // 逆に、載せると決めたものは入っていること
+  t(`/types/${code} にワンポイントがある`, r.markup.includes(TYPES[code].hitotsu.slice(0, 24)), true);
+  t(`/types/${code} に相性がある`, r.markup.includes(TYPES[code].aishou.slice(0, 16)), true);
 }
 
 // ── index させないページ ──
