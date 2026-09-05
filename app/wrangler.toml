@@ -57,3 +57,11 @@ simple = { limit = 10, period = 60 }
 name = "APPLY_LIMIT"
 namespace_id = "1002"
 simple = { limit = 5, period = 60 }
+
+# Admin のログイン（アプリ化要件定義.md 6.1）。
+# アカウント側の「5回失敗でロック」（F2-1）とは別に、IP単位でも絞る。
+# 総当たりは1アカウントに集中するので、ロックだけだと正規の利用者が締め出される。
+[[ratelimits]]
+name = "LOGIN_LIMIT"
+namespace_id = "1003"
+simple = { limit = 10, period = 60 }

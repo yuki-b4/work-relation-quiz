@@ -23,6 +23,7 @@ import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
+import { admin } from './routes/admin.ts';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -37,6 +38,14 @@ type Bindings = {
   RESULT_IDLE_MINUTES: string;
   RESULT_MAX_HOURS: string;
   IP_HASH_SALT: string;
+  /** Admin（F2）。初期アカウントの作成とログイン通知に使う。無くても動く。 */
+  ADMIN_BOOTSTRAP_EMAIL?: string;
+  ADMIN_BOOTSTRAP_PASSWORD?: string;
+  LOGIN_NOTIFY_WEBHOOK?: string;
+  RESEND_API_KEY?: string;
+  LOGIN_NOTIFY_TO?: string;
+  LOGIN_NOTIFY_FROM?: string;
+  LOGIN_LIMIT?: RateLimiter;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -139,7 +148,8 @@ app.get('/apply/:typeCode', (c) => {
 });
 
 // ───────── Admin（認証必須。F2） ─────────
-app.all('/admin/*', (c) => c.text('TODO: Admin（認証必須）', 501));
+// 経路の中身は routes/admin.ts。全レスポンスの noindex と no-store は上の共通処理が付ける。
+app.route('/admin', admin);
 
 // ───────── API（F1-3） ─────────
 
