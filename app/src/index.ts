@@ -19,8 +19,9 @@ import { closedPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
 import { applyPage, SLOTS } from './views/apply-page.ts';
+import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
-import { TYPES } from './content/types.ts';
+import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import type { TypeCode } from './content/types.ts';
 
@@ -56,9 +57,17 @@ app.use('*', async (c, next) => {
 
 // ───────── 公開ページ（SSR・index対象。F6-2） ─────────
 
-/** そのリクエストのオリジン。canonical と OGP に使う。 */
+/**
+ * そのリクエストのオリジン。canonical・OGP・sitemap・共有URLに使う。
+ *
+ * scheme は自分で決める。前段のCloudflareやローカル開発の都合で http のまま
+ * 渡ってくることがあり、そのまま canonical に載せると誤ったURLを正規化してしまう。
+ * ローカル以外は必ず https にする。
+ */
 function originOf(c: { req: { url: string } }): string {
-  return new URL(c.req.url).origin;
+  const u = new URL(c.req.url);
+  const local = u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname.endsWith('.local');
+  return `${local ? u.protocol.replace(':', '') : 'https'}://${u.host}`;
 }
 
 /**
@@ -69,8 +78,21 @@ app.get('/', (c) => c.html(topPage(originOf(c))));
 
 /** 設問は / の中で進むので、/quiz は入口へ寄せる（F6-4：重複インデックスを作らない）。 */
 app.get('/quiz', (c) => c.redirect('/', 301));
-app.get('/types', (c) => c.text('TODO: 全8タイプ一覧'));
-app.get('/types/:code', (c) => c.text(`TODO: タイプ個別 ${c.req.param('code')}`));
+
+/**
+ * GitHub Pages 時代のURLからの引き継ぎ（F6-4）。
+ * 拡散済みのリンクを切らさず、評価も新URLへ渡す。
+ */
+app.get('/prototype.html', (c) => c.redirect('/', 301));
+app.get('/index.html', (c) => c.redirect('/', 301));
+app.get('/all-types.html', (c) => c.redirect('/types', 301));
+app.get('/types', (c) => c.html(typesIndexPage(originOf(c))));
+
+app.get('/types/:code', (c) => {
+  const code = c.req.param('code');
+  if (!(code in TYPES)) return c.notFound();
+  return c.html(typeDetailPage(code as keyof typeof TYPES, originOf(c)));
+});
 app.get('/about', (c) => c.text('TODO: 診断について'));
 app.get('/faq', (c) => c.text('TODO: よくある質問'));
 app.get('/privacy', (c) => c.text('TODO: プライバシーポリシー'));
@@ -398,6 +420,46 @@ app.post('/api/share', async (c) => {
   return c.json({ ok: true });
 });
 app.post('/api/corp-leads', (c) => c.json({ todo: 'corp lead' }, 501));
+
+/**
+ * robots.txt（F6-4）。
+ * Adminは Disallow に書かない。書くとパスを晒すうえ、クロールを止めると noindex を
+ * 読ませることすらできない。認証と X-Robots-Tag で守る（F6-3）。
+ */
+app.get('/robots.txt', (c) => {
+  const origin = originOf(c);
+  return c.text(
+    [
+      'User-agent: *',
+      'Disallow: /api/',
+      'Disallow: /result',
+      'Disallow: /guide',
+      'Disallow: /apply/',
+      '',
+      // AI学習クローラは弾く。AI検索・エージェントは通す（確認事項11＝a・F8-1）。
+      // 実際の遮断はエッジ側で行う。ここは宣言（F8-2）。
+      ...['GPTBot', 'ClaudeBot', 'CCBot', 'Google-Extended', 'Bytespider',
+          'Meta-ExternalAgent', 'Amazonbot', 'Applebot-Extended', 'cohere-ai',
+          'Diffbot', 'Omgilibot', 'PanguBot', 'Timpibot'].flatMap((ua) => [`User-agent: ${ua}`, 'Disallow: /', '']),
+      `Sitemap: ${origin}/sitemap.xml`,
+      '',
+    ].join('\n'),
+    200,
+    { 'Content-Type': 'text/plain; charset=utf-8' }
+  );
+});
+
+/** sitemap.xml（F6-4）。index対象だけを載せる。 */
+app.get('/sitemap.xml', (c) => {
+  const origin = originOf(c);
+  const urls = ['/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`)];
+  const body =
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
+    urls.map((u) => `<url><loc>${origin}${u}</loc></url>`).join('') +
+    '</urlset>';
+  return c.body(body, 200, { 'Content-Type': 'application/xml; charset=utf-8' });
+});
 
 /** DBに繋がっているかの確認用。Phase 0 のセットアップ確認に使う。 */
 app.get('/api/health', async (c) => {

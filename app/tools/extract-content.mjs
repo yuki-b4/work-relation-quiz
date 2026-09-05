@@ -199,6 +199,16 @@ function between(startRe, endRe) {
 
 const css = between(/<style>\n/, /<\/style>/);
 
+// 全8タイプ一覧の索引リンク（.ix）だけ、all-types.html から持ってくる。
+// 残りのカードのスタイルは prototype.html と同じものを使っている。
+const allTypesHtml = readFileSync(resolve(here, '../../all-types.html'), 'utf8');
+const ixCss = (() => {
+  const from = allTypesHtml.indexOf('  .ix{');
+  const to = allTypesHtml.indexOf('\n', allTypesHtml.indexOf('.ix.guard .c{'));
+  if (from < 0 || to < 0) throw new Error('all-types.html の .ix が見つかりません');
+  return allTypesHtml.slice(from, to);
+})();
+
 // イントロ・フレーム・設問の素のHTML。ここは埋める値が無いので、そのまま使う。
 const introMarkup = between(/<!-- INTRO -->\n/, /\n\n  <!-- FRAME/);
 const frameMarkup = between(/<!-- FRAME（[^\n]*\n/, /\n\n  <!-- QUIZ/);
@@ -216,6 +226,9 @@ writeFileSync(
 `
 /** prototype.html の <style> の中身。1文字も変えない。 */
 export const APP_CSS = ${JSON.stringify(css)};
+
+/** 全8タイプ一覧の索引リンク。all-types.html から。 */
+export const INDEX_CSS = ${JSON.stringify(ixCss)};
 `);
 
 writeFileSync(
@@ -272,6 +285,7 @@ export const PROTO_CLASSES: readonly string[] = ${j([...protoClasses].sort())};
 
 console.log('生成しました:');
 console.log(`  APP_CSS          ${css.length} 文字`);
+console.log(`  INDEX_CSS        ${ixCss.length} 文字`);
 console.log(`  PROTO_CLASSES    ${protoClasses.size} 種`);
 console.log(`  INTRO/FRAME/QUIZ ${introMarkup.length} / ${frameMarkup.length} / ${quizMarkup.length} 文字`);
 console.log(`  GUIDE_CHAPTERS   ${Object.keys(guideChapters).length}タイプ × ${guideChapters.OBL.length}章`);

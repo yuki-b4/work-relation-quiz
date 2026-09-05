@@ -4,7 +4,7 @@
  * CSS は prototype.html の <style> をそのまま埋め込む（F3-1）。
  * 外部CSSにせず inline にしているのは、1リクエストで描き切って LCP を稼ぐため（F7-4）。
  */
-import { APP_CSS } from '../content/styles.ts';
+import { APP_CSS, INDEX_CSS } from '../content/styles.ts';
 import { esc } from './result.ts';
 
 const FONTS =
@@ -36,7 +36,7 @@ export function page(opts: PageOptions, body: string): string {
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
     desc + robots + canonical + (opts.head ?? '') + FONTS +
-    `<style>${APP_CSS}</style></head>` +
+    `<style>${APP_CSS}\n${INDEX_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +
     (opts.script ? `<script>${opts.script}</script>` : '') +

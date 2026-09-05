@@ -127,6 +127,7 @@ npm run test:e2e      # 回答送信とワンタイム結果表示の疎通試�
 npm run test:flow     # 診断を最初から最後まで実ブラウザで通す試験
 npm run test:guide    # 読み解きガイド全4章を実ブラウザで通す試験
 npm run test:apply    # 申込フォームとX共有を実ブラウザで通す試験
+npm run test:seo      # 公開ページのindex/noindex・canonical・sitemap・robots
 npm run test:browser  # 上の3つをまとめて
 ```
 
