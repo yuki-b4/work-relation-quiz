@@ -54,11 +54,35 @@ async function valueOf(name) {
   return (await import(mod)).default;
 }
 
+/** `function NAME(...){...}` を丸ごと切り出す。 */
+function fnSource(name) {
+  const m = new RegExp(`^function\\s+${name}\\s*\\(`, 'm').exec(html);
+  if (!m) throw new Error(`関数が見つかりません: ${name}`);
+  const start = m.index;
+  let i = html.indexOf('{', start);
+  let depth = 0, inStr = null, esc = false;
+  for (let j = i; j < html.length; j++) {
+    const ch = html[j];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === inStr) inStr = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') { inStr = ch; continue; }
+    if (ch === '{') depth++;
+    else if (ch === '}') { depth--; if (depth === 0) return html.slice(start, j + 1); }
+  }
+  throw new Error(`括弧が閉じていません: ${name}`);
+}
+
 const NAMES = [
   'QUESTIONS', 'RADAR_Q', 'RADAR_AXES', 'RADAR_META', 'AX', 'LIKERT',
   'TYPES', 'TORISET', 'TORI_LABEL', 'HONSHITSU', 'HONSHITSU_LOOP', 'TYPE_ICON',
   'GUIDE_BODY',
 ];
+
+async function valueOf2(name) { return valueOf(name); }
 
 const v = {};
 for (const n of NAMES) v[n] = await valueOf(n);
@@ -135,6 +159,33 @@ writeFileSync(
 export const GUIDE_BODY = ${j(v.GUIDE_BODY)} as const;
 `);
 
+// ── 読み解きガイドの章を、prototype.html の関数をそのまま実行して作る ──
+// bkPrologue / bkChapter1 / bkChapter2 / bkEpilogue / bkChapters はDOMに触らない純関数なので、
+// ここで動かして全8タイプ×4章のHTMLを先に作ってしまう。書き写しが一切入らない。
+const guideAuthor = (await valueOf2('GUIDE_AUTHOR'));
+const bkDiv = (await valueOf2('BK_DIV'));
+const GUIDE_FNS = ['bkOpen', 'bkCards', 'bkRows', 'bkQ', 'bkKt', 'bkFigStep',
+                   'bkPrologue', 'bkChapter1', 'bkChapter2', 'bkEpilogue', 'bkChapters'];
+const buildChapters = new Function(
+  'TYPES', 'GUIDE_BODY', 'TORI_LABEL', 'GUIDE_AUTHOR', 'BK_DIV',
+  `${GUIDE_FNS.map(fnSource).join('\n')}\nreturn bkChapters;`
+)(v.TYPES, v.GUIDE_BODY, v.TORI_LABEL, guideAuthor, bkDiv);
+
+const guideChapters = {};
+for (const code of Object.keys(v.TYPES)) guideChapters[code] = buildChapters(code);
+
+writeFileSync(
+  resolve(OUT, 'guide-chapters.ts'),
+  banner('読み解きガイド 全8タイプ×4章') +
+`
+/**
+ * prototype.html の bkChapters() を実行して作った、章ごとのHTML。
+ * 文面の正は ガイド文面24本.md と prototype.html。ここは生成物なので直接編集しない。
+ */
+export type GuideChapter = { num: string; label: string; head: string; open: string; html: string };
+export const GUIDE_CHAPTERS: Record<string, GuideChapter[]> = ${j(guideChapters)};
+`);
+
 // ── CSS と、結果画面の素のHTML ──
 // 見た目は prototype.html の <style> をそのまま使う。書き写すと F3-1 が崩れるため。
 function between(startRe, endRe) {
@@ -152,6 +203,8 @@ const css = between(/<style>\n/, /<\/style>/);
 const introMarkup = between(/<!-- INTRO -->\n/, /\n\n  <!-- FRAME/);
 const frameMarkup = between(/<!-- FRAME（[^\n]*\n/, /\n\n  <!-- QUIZ/);
 const quizMarkup = between(/<!-- QUIZ -->\n/, /\n\n  <!-- RESULT/);
+// 読み解きガイドの器（章送りの土台・終章の申込ブロック・自己紹介）。
+const guideMarkup = between(/<!-- GUIDE（[^]*?-->\n/, /\n<\/div>\n\n<script>/);
 
 // 結果画面の素のHTML。サーバ側の描画が、同じクラス名・同じ入れ子で組めているかを
 // tools/markup-check.mjs が突き合わせるための参照。
@@ -176,6 +229,7 @@ writeFileSync(
 export const INTRO_MARKUP = ${JSON.stringify(introMarkup)};
 export const FRAME_MARKUP = ${JSON.stringify(frameMarkup)};
 export const QUIZ_MARKUP = ${JSON.stringify(quizMarkup)};
+export const GUIDE_MARKUP = ${JSON.stringify(guideMarkup)};
 `);
 
 writeFileSync(
@@ -220,6 +274,8 @@ console.log('生成しました:');
 console.log(`  APP_CSS          ${css.length} 文字`);
 console.log(`  PROTO_CLASSES    ${protoClasses.size} 種`);
 console.log(`  INTRO/FRAME/QUIZ ${introMarkup.length} / ${frameMarkup.length} / ${quizMarkup.length} 文字`);
+console.log(`  GUIDE_CHAPTERS   ${Object.keys(guideChapters).length}タイプ × ${guideChapters.OBL.length}章`);
+console.log(`  GUIDE_MARKUP     ${guideMarkup.length} 文字`);
 console.log(`  RESULT_MARKUP    ${resultSection.length} 文字`);
 for (const [k, val] of Object.entries(v)) {
   const n = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 1);

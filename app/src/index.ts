@@ -13,9 +13,13 @@ import {
   loadResultSession, readResultCookie, touchResultSession, clearResultCookie,
 } from './lib/result-session.ts';
 import { renderResultCard } from './views/result.ts';
+import { randomToken } from './lib/result-session.ts';
 import { resultShell } from './views/result-page.ts';
 import { closedPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
+import { guideShell } from './views/guide-page.ts';
+import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
+import { TYPES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import type { TypeCode } from './content/types.ts';
 
@@ -89,7 +93,15 @@ app.get('/result', async (c) => {
 
 /** 失効後の案内画面。シェルからここへ飛ばす。 */
 app.get('/result/closed', (c) => c.html(closedPage(), 410));
-app.get('/guide', (c) => c.text('TODO: 読み解きガイド全4章'));
+/** 読み解きガイド。結果画面と同じくCookieを先に見て、タブ照合値は /api/guide/view で見る。 */
+app.get('/guide', async (c) => {
+  const id = readResultCookie(c.req.header('Cookie'));
+  if (!id) return c.html(closedPage(), 410);
+  const row = await loadResultSession(c.env.DB, id);
+  const v = evaluate(row, row?.tab_token ?? null, isoNow(), limitsOf(c));
+  if (!v.ok) return c.html(closedPage(), 410);
+  return c.html(guideShell());
+});
 
 // ───────── 申込（タイプ別の共通ページ。認可なし。F4-5） ─────────
 app.get('/apply/:typeCode', (c) => c.text(`TODO: 申込フォーム ${c.req.param('typeCode')}`));
@@ -109,6 +121,36 @@ function limitsOf(c: { env: Bindings }): Limits {
 
 function clientIp(req: Request): string | null {
   return req.headers.get('CF-Connecting-IP') ?? null;
+}
+
+type AuthOk = { ok: true; sessionId: string; responseId: string; body: Record<string, unknown> };
+type AuthNg = { ok: false; status: 400 | 410; reason: string };
+
+/**
+ * 3点一致の共通処理。Cookie とタブ照合値を突き合わせ、通れば responseId を返す。
+ * /result・/guide・ヒアリング・到達記録が、すべてこれを通る（F4-2）。
+ *
+ * リクエスト本文は**ここで一度だけ読み**、呼び出し側へ渡す。
+ * 本文は一度しか読めないので、呼び出し側で読み直すと必ず失敗する。
+ */
+async function authorize(
+  c: { env: Bindings; req: { header(name: string): string | undefined; json(): Promise<unknown> } }
+): Promise<AuthOk | AuthNg> {
+  const sessionId = readResultCookie(c.req.header('Cookie'));
+  if (!sessionId) return { ok: false, status: 410, reason: 'not_found' };
+  let body: Record<string, unknown> = {};
+  try {
+    body = ((await c.req.json()) ?? {}) as Record<string, unknown>;
+  } catch {
+    return { ok: false, status: 400, reason: 'invalid_json' };
+  }
+  const tabToken = typeof body.tabToken === 'string' ? body.tabToken : null;
+  const now = isoNow();
+  const row = await loadResultSession(c.env.DB, sessionId);
+  const v = evaluate(row, tabToken, now, limitsOf(c));
+  if (!v.ok) return { ok: false, status: 410, reason: v.reason };
+  await touchResultSession(c.env.DB, sessionId, now);
+  return { ok: true, sessionId, responseId: v.responseId, body };
 }
 
 /**
@@ -149,38 +191,57 @@ app.post('/api/responses', async (c) => {
   c.header('Set-Cookie', buildResultCookie(result.sessionId));
   return c.json({ ok: true, tabToken: result.tabToken, duplicate: result.duplicate });
 });
-app.post('/api/responses/:id/hearing', (c) => c.json({ todo: 'hearing' }, 501));
+/**
+ * 商談前ヒアリング（すべて任意）。回答IDはクライアントに渡していないので、
+ * 要件の /api/responses/:id/hearing ではなく、結果セッションで本人を特定する。
+ */
+app.post('/api/hearing', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const nowText = typeof a.body.now === 'string' ? a.body.now.slice(0, 4000) : '';
+  const futureText = typeof a.body.future === 'string' ? a.body.future.slice(0, 4000) : '';
+  const at = isoNow();
+  await c.env.DB.prepare(
+    `insert into hearings (response_id, now_text, future_text, created_at, updated_at)
+     values (?,?,?,?,?)
+     on conflict(response_id) do update set now_text=excluded.now_text,
+       future_text=excluded.future_text, updated_at=excluded.updated_at`
+  ).bind(a.responseId, nowText, futureText, at, at).run();
+  return c.json({ ok: true });
+});
+
+/** ガイド本文。その人のタイプの4章だけを返す。 */
+app.post('/api/guide/view', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const r = await c.env.DB.prepare(
+    `select type_code from responses where id = ? and deleted_at is null`
+  ).bind(a.responseId).first<{ type_code: string }>();
+  if (!r) return c.json({ ok: false, reason: 'not_found' }, 410);
+  const chapters = GUIDE_CHAPTERS[r.type_code];
+  if (!chapters) return c.json({ ok: false, reason: 'not_found' }, 410);
+  const t = TYPES[r.type_code as keyof typeof TYPES];
+  await c.env.DB.prepare(
+    `update responses set guide_opened_at = coalesce(guide_opened_at, ?) where id = ?`
+  ).bind(isoNow(), a.responseId).run();
+  return c.json({ ok: true, typeCode: r.type_code, guard: t.pole === 'guard', chapters });
+});
 /**
  * 3つの鍵を突き合わせ、通れば結果カードのHTMLを返す（F4-2）。
  * 返すのはその人の結果だけ。他タイプの文面はブラウザへ配らない。
  */
 app.post('/api/result/view', async (c) => {
-  const id = readResultCookie(c.req.header('Cookie'));
-  if (!id) return c.json({ ok: false, reason: 'not_found' }, 410);
-
-  let body: { tabToken?: unknown } = {};
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json({ ok: false, reason: 'invalid_json' }, 400);
-  }
-  const tabToken = typeof body.tabToken === 'string' ? body.tabToken : null;
-
-  const now = isoNow();
-  const row = await loadResultSession(c.env.DB, id);
-  const v = evaluate(row, tabToken, now, limitsOf(c));
-  if (!v.ok) return c.json({ ok: false, reason: v.reason }, 410);
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
 
   const r = await c.env.DB.prepare(
     `select type_code, axis_counts,
             radar_safety, radar_trust, radar_bound, radar_conflict, radar_connect
        from responses where id = ? and deleted_at is null`
   )
-    .bind(v.responseId)
+    .bind(a.responseId)
     .first<Record<string, string | number | null>>();
   if (!r) return c.json({ ok: false, reason: 'not_found' }, 410);
-
-  await touchResultSession(c.env.DB, id, now);
 
   const radar = Object.fromEntries(
     RADAR_AXES.map((a) => [a, Number(r[`radar_${a}`] ?? 0)])
@@ -217,8 +278,43 @@ app.post('/api/result/close', async (c) => {
   c.header('Set-Cookie', clearResultCookie());
   return c.json({ ok: true });
 });
-app.post('/api/guide/progress', (c) => c.json({ todo: 'guide progress' }, 501));
-app.post('/api/apply-visits', (c) => c.json({ todo: 'record apply visit' }, 501));
+/** どの章まで進んだか。終章（3）に着いた時刻も残す。 */
+app.post('/api/guide/progress', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const chapter = Number(a.body.chapter);
+  if (!Number.isInteger(chapter) || chapter < 0 || chapter > 3) {
+    return c.json({ ok: false, reason: 'invalid_chapter' }, 400);
+  }
+  await c.env.DB.prepare(
+    `update responses
+        set guide_max_chapter = max(coalesce(guide_max_chapter, -1), ?),
+            guide_completed_at = case when ? = 3 then coalesce(guide_completed_at, ?) else guide_completed_at end
+      where id = ?`
+  ).bind(chapter, chapter, isoNow(), a.responseId).run();
+  return c.json({ ok: true });
+});
+/**
+ * 申込フォームへの到達を記録し、開くURLを返す（F4-5）。
+ * 到達IDは推測不能なランダム値。連番だと他人の回答に自分の申込を紐づけられる。
+ */
+app.post('/api/apply-visits', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const cta = a.body.cta === 'epilogue-2' ? 'epilogue-2' : 'epilogue-1';
+  const r = await c.env.DB.prepare(
+    `select type_code from responses where id = ? and deleted_at is null`
+  ).bind(a.responseId).first<{ type_code: string }>();
+  if (!r) return c.json({ ok: false, reason: 'not_found' }, 410);
+
+  const visitId = randomToken();
+  await c.env.DB.prepare(
+    `insert into apply_visits (id, response_id, visited_at, cta) values (?,?,?,?)`
+  ).bind(visitId, a.responseId, isoNow(), cta).run();
+
+  // フォームはタイプ別の共通ページ。?v= は紐づけのためだけの印で、権限は何も与えない。
+  return c.json({ ok: true, url: `/apply/${r.type_code}?v=${visitId}` });
+});
 app.post('/api/session-applications', (c) => c.json({ todo: 'session application' }, 501));
 app.post('/api/corp-leads', (c) => c.json({ todo: 'corp lead' }, 501));
 

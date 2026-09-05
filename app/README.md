@@ -125,6 +125,7 @@ npm run check         # 上の4つ ＋ 型チェック
 npm run dev           # 別ターミナルで起動してから
 npm run test:e2e      # 回答送信とワンタイム結果表示の疎通試験（HTTP）
 npm run test:flow     # 診断を最初から最後まで実ブラウザで通す試験
+npm run test:guide    # 読み解きガイド全4章を実ブラウザで通す試験
 ```
 
 `test:flow` は初回だけブラウザ本体が要る。
