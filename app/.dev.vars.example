@@ -1,0 +1,9 @@
+# ローカル開発用の秘密値。このファイルを .dev.vars にコピーして使う（.dev.vars はコミットしない）
+# 本番へは `wrangler secret put <名前>` で入れる。
+
+# IPアドレスのハッシュ化に使うソルト（アプリ化要件定義.md 6.2：生IPは保存しない）
+IP_HASH_SALT=change-me-to-a-long-random-string
+
+# Admin の初期アカウント作成に使う。作成後は削除してよい（F2-1：1名運用）
+ADMIN_BOOTSTRAP_EMAIL=
+ADMIN_BOOTSTRAP_PASSWORD=

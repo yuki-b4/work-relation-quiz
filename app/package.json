@@ -1,0 +1,34 @@
+{
+  "name": "nature-shindan",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "content": "node tools/extract-content.mjs",
+    "parity": "node --experimental-strip-types tools/parity-check.mjs",
+    "test:session": "node --experimental-strip-types tools/result-session-test.mjs",
+    "test:markup": "node --experimental-strip-types tools/markup-check.mjs",
+    "test:e2e": "bash tools/e2e-submit.sh && bash tools/e2e-result.sh",
+    "test:browser": "npm run test:seo && npm run test:flow && npm run test:guide && npm run test:apply",
+    "test:flow": "node tools/e2e-flow.mjs",
+    "test:guide": "node tools/e2e-guide.mjs",
+    "test:apply": "node tools/e2e-apply.mjs",
+    "test:seo": "node --experimental-strip-types tools/seo-check.mjs",
+    "check": "npm run content && npm run parity && npm run test:session && npm run test:markup && npm run typecheck",
+    "db:create": "wrangler d1 create nature-shindan",
+    "db:migrate:local": "wrangler d1 migrations apply nature-shindan --local",
+    "db:migrate:remote": "wrangler d1 migrations apply nature-shindan --remote",
+    "db:console:local": "wrangler d1 execute nature-shindan --local --command"
+  },
+  "dependencies": {
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260903.1",
+    "playwright-core": "^1.62.1",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.128.0"
+  }
+}
