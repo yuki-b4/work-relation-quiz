@@ -124,11 +124,15 @@ const head = await p.evaluate(() => document.querySelector('meta[name="robots"]'
 t('meta robots が noindex', head, 'noindex, nofollow');
 const hdr = await p.evaluate(async () => {
   const r = await fetch('/admin/responses', { credentials: 'same-origin' });
-  return { status: r.status, robots: r.headers.get('x-robots-tag'), cache: r.headers.get('cache-control') };
+  return {
+    status: r.status, robots: r.headers.get('x-robots-tag'), cache: r.headers.get('cache-control'),
+    frames: r.headers.get('content-security-policy'),
+  };
 });
 t('ログイン済みで開ける', hdr.status, 200);
 t('X-Robots-Tag が付く', hdr.robots, 'noindex, nofollow');
 t('キャッシュさせない', (hdr.cache ?? '').includes('no-store'), true);
+t('iframe に入れさせない（クリックジャッキング）', hdr.frames, "frame-ancestors 'none'");
 
 // ── 3. 回答一覧（F2-2） ──
 const headers = await p.$$eval('thead th', (els) => els.map((e) => e.textContent.trim()));

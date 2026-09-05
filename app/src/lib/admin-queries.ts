@@ -95,15 +95,12 @@ function whereOf(f: ResponseFilters): { sql: string; binds: unknown[] } {
 }
 
 /**
- * 一覧の1行。表示列（F2-2）に、詳細へ行かなくても判断できるだけの情報を載せる。
+ * 一覧の1行（F2-2）と、CSVの1行（F2-7）。
  *
- * `?1` を使う条件（フリーワード）があるので、**バインドの順番は
- * 「where のバインド → limit/offset」で固定**する。番号指定と ? の混在は順序が狂いやすい。
+ * 取る列だけが違って、**結合と集計と絞り込みは同じ**にする。別々に書くと、片方だけ条件が
+ * ずれていても気づけない。バインドの順番は「where のバインド → limit/offset」で固定する。
  */
-const LIST_SELECT = `
-  select r.id, r.created_at, r.type_code, r.type_name, r.ref_code, r.src,
-         r.guide_opened_at, r.guide_max_chapter, r.guide_completed_at,
-         r.admin_status, r.question_set_version, r.shared_at,
+const LIST_AGGREGATES = `
          ref.name as referrer_name,
          (select count(*) from apply_visits av where av.response_id = r.id) as visit_count,
          (select min(av.visited_at) from apply_visits av where av.response_id = r.id) as first_visit_at,
@@ -114,6 +111,16 @@ const LIST_SELECT = `
     from responses r
     left join referrers ref on ref.code = r.referrer_code
     left join hearings h on h.response_id = r.id`;
+
+const selectWith = (columns: string) => `select ${columns},${LIST_AGGREGATES}`;
+
+/** 画面の一覧。出す列だけを取る。 */
+const LIST_SELECT = selectWith(`r.id, r.created_at, r.type_code, r.type_name, r.ref_code, r.src,
+         r.guide_opened_at, r.guide_max_chapter, r.guide_completed_at,
+         r.admin_status, r.question_set_version, r.shared_at`);
+
+/** CSV。5軸や端末まで要るので、回答の全列を取る。 */
+const CSV_SELECT = selectWith('r.*');
 
 export type ResponseListRow = {
   id: string;
@@ -158,13 +165,20 @@ export async function listResponses(
   return { rows: results ?? [], total, page, pages: Math.max(1, Math.ceil(total / perPage)) };
 }
 
-/** CSV用。ページングなしで全件返す（F2-7：絞り込み条件を反映する）。 */
-export async function listResponsesForCsv(db: D1Database, f: ResponseFilters, limit = 50_000): Promise<ResponseListRow[]> {
+/**
+ * CSV用（F2-7）。ページングなしで、**回答の全列**と集計を返す。
+ * 一覧用の列だけ引いて足りないぶんを別に引くと、絞り込みの外まで読むことになる。
+ */
+export async function listResponsesForCsv(
+  db: D1Database,
+  f: ResponseFilters,
+  limit = 50_000
+): Promise<(ResponseListRow & Record<string, string | number | null>)[]> {
   const w = whereOf(f);
   const { results } = await db
-    .prepare(`${LIST_SELECT} where ${w.sql} order by r.created_at desc limit ?`)
+    .prepare(`${CSV_SELECT} where ${w.sql} order by r.created_at desc limit ?`)
     .bind(...w.binds, limit)
-    .all<ResponseListRow>();
+    .all<ResponseListRow & Record<string, string | number | null>>();
   return results ?? [];
 }
 

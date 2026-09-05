@@ -62,6 +62,13 @@ app.use('*', async (c, next) => {
     c.header('X-Robots-Tag', 'noindex, nofollow');
     c.header('Cache-Control', 'no-store, private');
   }
+  // Admin は他サイトの iframe に入れさせない。Cookie が SameSite=Strict でも、
+  // 埋め込まれた画面を透明にして押させる手口（クリックジャッキング）は防げない（6.1）。
+  if (c.req.path === '/admin' || c.req.path.startsWith('/admin/')) {
+    c.header('X-Frame-Options', 'DENY');
+    c.header('Content-Security-Policy', "frame-ancestors 'none'");
+    c.header('Referrer-Policy', 'same-origin');
+  }
 });
 
 // ───────── 公開ページ（SSR・index対象。F6-2） ─────────

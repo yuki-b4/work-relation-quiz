@@ -411,8 +411,7 @@ admin.post('/sessions/:id', async (c) => {
     actorId: c.var.userId, action: 'update', targetType: 'session_application', targetId: id,
     ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT), detail: { status: value },
   });
-  const back = String(check.form.get('back') ?? '/admin/sessions');
-  return c.redirect(`${safeBack(back)}${back.includes('?') ? '&' : '?'}done=saved`, 303);
+  return c.redirect(withFlash(safeBack(String(check.form.get('back') ?? '')), 'saved'), 303);
 });
 
 /** 手動での紐づけ（F2-4）。response_id を空で送ると外す。 */
@@ -436,9 +435,19 @@ admin.post('/sessions/:id/link', async (c) => {
   return c.redirect(`/admin/sessions/${id}?done=${responseId ? 'linked' : 'unlinked'}`, 303);
 });
 
-/** 戻り先は自分のサイトの中だけ許す（オープンリダイレクトを作らない）。 */
+/**
+ * 戻り先は自分のサイトの中だけ許す（オープンリダイレクトを作らない）。
+ * `//evil.example` は「スキーム相対URL」として外へ出るので、必ず弾く。
+ * 末尾が `/` で終わる（＝IDが空の）パスも、行き先が無いので既定へ寄せる。
+ */
 function safeBack(path: string): string {
-  return path.startsWith('/admin/') && !path.startsWith('//') ? path : '/admin/sessions';
+  const ok = path.startsWith('/admin/') && !path.startsWith('//') && !path.endsWith('/');
+  return ok ? path : '/admin/sessions';
+}
+
+/** 保存できたことを次の画面へ渡す。**sanitize 済みのパス**にだけ付ける。 */
+function withFlash(path: string, key: string): string {
+  return `${path}${path.includes('?') ? '&' : '?'}done=${key}`;
 }
 
 // ───────── 法人リード（F2-5） ─────────
