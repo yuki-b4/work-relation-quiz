@@ -18,6 +18,7 @@ import { resultShell } from './views/result-page.ts';
 import { closedPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
+import { applyPage, SLOTS } from './views/apply-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
@@ -104,7 +105,16 @@ app.get('/guide', async (c) => {
 });
 
 // ───────── 申込（タイプ別の共通ページ。認可なし。F4-5） ─────────
-app.get('/apply/:typeCode', (c) => c.text(`TODO: 申込フォーム ${c.req.param('typeCode')}`));
+/**
+ * 申込フォーム。タイプ別の共通ページで、認可は無い（F4-5）。
+ * ?v= は到達IDで、これ自体は何の権限も与えない（付いていても結果は見えない）。
+ */
+app.get('/apply/:typeCode', (c) => {
+  const code = c.req.param('typeCode');
+  if (!(code in TYPES)) return c.notFound();
+  const v = c.req.query('v');
+  return c.html(applyPage(code as keyof typeof TYPES, /^[0-9a-f]{64}$/.test(v ?? '') ? v! : null));
+});
 
 // ───────── Admin（認証必須。F2） ─────────
 app.all('/admin/*', (c) => c.text('TODO: Admin（認証必須）', 501));
@@ -251,6 +261,7 @@ app.post('/api/result/view', async (c) => {
     code: r.type_code as TypeCode,
     counts: JSON.parse(String(r.axis_counts ?? '{}')),
     radar,
+    origin: originOf(c),
   });
   return c.json({ ok: true, html });
 });
@@ -315,7 +326,77 @@ app.post('/api/apply-visits', async (c) => {
   // フォームはタイプ別の共通ページ。?v= は紐づけのためだけの印で、権限は何も与えない。
   return c.json({ ok: true, url: `/apply/${r.type_code}?v=${visitId}` });
 });
-app.post('/api/session-applications', (c) => c.json({ todo: 'session application' }, 501));
+/**
+ * 体験セッションの申込。
+ * response_id はクライアントから受け取らず、**到達ID からサーバ側で解決する**（F4-5）。
+ */
+app.post('/api/session-applications', async (c) => {
+  const ip = clientIp(c.req.raw);
+  if (c.env.APPLY_LIMIT && ip) {
+    const { success } = await c.env.APPLY_LIMIT.limit({ key: await sha256Hex(ip) });
+    if (!success) return c.json({ ok: false, error: 'rate_limited' }, 429);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = ((await c.req.json()) ?? {}) as Record<string, unknown>;
+  } catch {
+    return c.json({ ok: false, message: '送信内容を読み取れませんでした。' }, 400);
+  }
+
+  // honeypot。人には見えない欄が埋まっていたらボット。成功したように見せて捨てる。
+  if (typeof body.website === 'string' && body.website.trim()) return c.json({ ok: true });
+
+  const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+  const name = str(body.name, 100);
+  const email = str(body.email, 200);
+  if (!name) return c.json({ ok: false, message: 'お名前を入力してください。' }, 400);
+  // 厳密な検証はしない。届かないアドレスは弾けないので、明らかな形だけ見る。
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return c.json({ ok: false, message: 'メールアドレスの形式をご確認ください。' }, 400);
+  }
+
+  const typeCode = str(body.typeCode, 8);
+  if (!(typeCode in TYPES)) return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
+
+  const slots = Array.isArray(body.slots)
+    ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
+    : [];
+
+  // 到達IDから回答を引く。無ければ未紐づけで登録し、Adminで手動紐づけする（F2-4）。
+  const visitId = /^[0-9a-f]{64}$/.test(str(body.v, 64)) ? str(body.v, 64) : null;
+  let responseId: string | null = null;
+  if (visitId) {
+    const hit = await c.env.DB.prepare(`select response_id from apply_visits where id = ?`)
+      .bind(visitId)
+      .first<{ response_id: string }>();
+    responseId = hit?.response_id ?? null;
+  }
+
+  await c.env.DB.prepare(
+    `insert into session_applications
+       (id, created_at, apply_visit_id, response_id, type_code, name, email,
+        concern, preferred_slots, question, source, status)
+     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
+  )
+    .bind(
+      crypto.randomUUID(), isoNow(), visitId, responseId, typeCode, name, email,
+      str(body.concern, 4000) || null, JSON.stringify(slots), str(body.question, 4000) || null
+    )
+    .run();
+
+  return c.json({ ok: true });
+});
+
+/** X共有ボタンのクリック（F5-5）。回数と初回時刻だけ残す。 */
+app.post('/api/share', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  await c.env.DB.prepare(
+    `update responses set shared_at = coalesce(shared_at, ?), share_count = share_count + 1 where id = ?`
+  ).bind(isoNow(), a.responseId).run();
+  return c.json({ ok: true });
+});
 app.post('/api/corp-leads', (c) => c.json({ todo: 'corp lead' }, 501));
 
 /** DBに繋がっているかの確認用。Phase 0 のセットアップ確認に使う。 */

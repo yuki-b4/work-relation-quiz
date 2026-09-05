@@ -42,6 +42,19 @@ const SHELL_SCRIPT = `
       for (var i = 0; i < dots.length; i++) dots[i].style.left = dots[i].dataset.pos + '%';
     });
     document.body.dataset.ready = '1';
+    // X共有のクリックを記録する（F5-5）。リンクの動作は妨げない。
+    var share = document.getElementById('shareX');
+    if (share) share.addEventListener('click', function () {
+      fetch('/api/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tabToken: token })
+      }).catch(function () {});
+    });
+    // 読み解きガイドへ
+    var openGuide = document.getElementById('openGuide');
+    if (openGuide) openGuide.addEventListener('click', function () { location.href = '/guide'; });
+
     var restart = document.getElementById('restartBtn');
     if (restart) restart.addEventListener('click', function () {
       // もう一度診断する：古い結果セッションを閉じてから最初に戻る（F4-1）

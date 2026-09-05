@@ -53,7 +53,39 @@ export type ResultData = {
   code: TypeCode;
   counts: Record<'h' | 'c' | 'w', Tally>;
   radar: RadarScores;
+  /** 共有リンクに載せるURLの基点。省略すると共有ブロックを出さない。 */
+  origin?: string;
 };
+
+/**
+ * X共有リンク（F5）。
+ *
+ * 文面（確認事項1＝a で確定）：
+ *   私は「{タイプ名}」でした！ナチュール診断を受ける
+ *   {URL} #ナチュール診断
+ *
+ * ・本文・改行・URL・ハッシュタグを**すべて text にまとめる**。url= を使うと
+ *   Xが末尾にURLを足して、URLの後にハッシュタグという並びが崩れる（F5-4）
+ * ・共有するURLは**トップページ**。結果はワンタイムなので共有しても他人は開けない
+ * ・計測は ?src=x。?ref= は紹介者コードなので使わない（F5-3）
+ */
+export function shareUrl(origin: string, typeName: string): string {
+  const text = `私は「${typeName}」でした！ナチュール診断を受ける\n${origin}/?src=x #ナチュール診断`;
+  return 'https://x.com/intent/post?text=' + encodeURIComponent(text);
+}
+
+/** 結果カードの共有ブロック。既存のクラスだけで組む。 */
+function shareBlock(origin: string, typeName: string): string {
+  return (
+    '<div class="row-block" style="margin-top:28px">' +
+      '<p class="sectlabel">結果をシェアする</p>' +
+      '<p style="margin-bottom:14px">あなたのタイプを X に投稿できます。診断結果そのものは共有されません。</p>' +
+      `<a class="btn btn-sm btn-ghost" id="shareX" href="${esc(shareUrl(origin, typeName))}"` +
+      ' target="_blank" rel="noopener" style="display:inline-block; text-decoration:none">' +
+      'X に投稿する →</a>' +
+    '</div>'
+  );
+}
 
 /** エンブレムから放射する3語＝出ている側の極の名前。 */
 function rays(code: TypeCode): string {
@@ -227,6 +259,8 @@ export function renderResultCard(data: ResultData): string {
             '</div>' +
           '</div>' +
         '</div>' +
+
+        (data.origin ? shareBlock(data.origin, t.name) : '') +
 
         '<div class="row-block" style="margin-top:28px">' +
           '<p class="sectlabel">ほかのタイプを知る</p>' +
