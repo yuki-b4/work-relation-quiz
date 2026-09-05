@@ -42,15 +42,19 @@ export function maskName(name: string | null | undefined): string {
   return s.length <= 1 ? `${s}◯` : `${s[0]}${'◯'.repeat(Math.min(s.length - 1, 3))}`;
 }
 
-/** メールのマスク。ローカル部の先頭2文字とドメインだけ残す（一覧用。6.2）。 */
+/**
+ * メールのマスク。ローカル部の先頭2文字とドメインだけ残す（一覧用。6.2）。
+ * 伏せ字は4つまで。長さぶんだけ並べると、ローカル部の文字数が読めてしまううえ、
+ * 一覧が伏せ字で埋まって読みにくい。
+ */
 export function maskEmail(email: string | null | undefined): string {
   const s = String(email ?? '').trim();
   const at = s.lastIndexOf('@');
   if (at <= 0) return s ? '***' : '—';
   const local = s.slice(0, at);
-  const domain = s.slice(at);
   const head = local.slice(0, 2);
-  return `${head}${'*'.repeat(Math.max(local.length - head.length, 1))}${domain}`;
+  const hidden = Math.min(Math.max(local.length - head.length, 1), 4);
+  return `${head}${'*'.repeat(hidden)}${s.slice(at)}`;
 }
 
 /** 所要時間（回答開始→完了）。分秒で読む。 */

@@ -109,7 +109,7 @@ export function responsesListPage(
         `<th>${sortLink(f, 'created_at', '日時')}</th>` +
         `<th>${sortLink(f, 'type_code', 'タイプ')}</th>` +
         '<th>紹介元コード</th><th>紹介者名</th><th>流入元</th><th>ガイド到達</th>' +
-        `<th>申込フォーム到達${(f.sort === 'applied_at') ? '' : ''}／${sortLink(f, 'applied_at', '申込日時')}</th>` +
+        `<th>申込フォーム到達／${sortLink(f, 'applied_at', '申込日時')}</th>` +
         '<th>対応状況</th>' +
       '</tr></thead><tbody>' +
       (rows || '<tr><td colspan="8" class="muted">該当する回答がありません。</td></tr>') +

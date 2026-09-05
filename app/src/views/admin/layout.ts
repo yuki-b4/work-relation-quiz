@@ -103,7 +103,14 @@ dl.kv dd{word-break:break-all}
 .note{font-size:12px; color:var(--muted); margin-top:10px}
 .right{text-align:right}
 .nowrap{white-space:nowrap}
-@media (max-width:640px){ .wrap{padding:12px} .ad-bar{padding:8px 12px} }
+@media (max-width:640px){
+  .wrap{padding:12px}
+  /* 幅が足りないとタイトルとナビが同じ行で折り返して、見出しが列の途中に落ちる。
+     タイトルだけ1行に落として、その下にナビを並べる。 */
+  .ad-bar{padding:8px 12px; gap:8px}
+  .ad-bar b{flex-basis:100%}
+  .ad-nav{flex-basis:100%}
+}
 `;
 
 export type Nav = 'responses' | 'sessions' | 'corp-leads' | 'referrers' | 'export' | 'none';

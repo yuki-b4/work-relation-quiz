@@ -120,6 +120,7 @@ const eq = (label, a, b) =>
   eq('空の氏名', maskName(''), '—');
   eq('メールはローカル部の頭2文字だけ', maskEmail('taro@example.com'), 'ta**@example.com');
   eq('短いローカル部', maskEmail('a@example.com'), 'a*@example.com');
+  eq('長いローカル部でも伏せ字は4つまで', maskEmail('orphan-123456@example.com'), 'or****@example.com');
   eq('@が無ければ全部伏せる', maskEmail('broken'), '***');
 
   eq('所要時間', duration('2026-09-05T10:00:00.000Z', '2026-09-05T10:02:07.000Z'), '2分07秒');
