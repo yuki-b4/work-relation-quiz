@@ -12,7 +12,7 @@
  *   3. 復旧手段（tools/admin-password.mjs でハッシュを作って直接DBを更新。README に手順）
  */
 import { sha256Hex } from './hash.ts';
-import { hashPassword, needsRehash, verifyPassword } from './password.ts';
+import { hashPassword, needsRehash, verifyPassword, PBKDF2_ITERATIONS } from './password.ts';
 
 /** Admin セッションCookie。結果セッションの 'rs' とは別名にする。 */
 export const ADMIN_COOKIE = 'as';
@@ -213,7 +213,7 @@ export async function login(
 
 /** 存在しないアドレスのときに時間を合わせるためのハッシュ。実在のパスワードではない。 */
 const DUMMY_HASH =
-  'pbkdf2-sha256$600000$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
+  `pbkdf2-sha256$${PBKDF2_ITERATIONS}$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`;
 
 export async function loadAdminSession(db: D1Database, id: string): Promise<AdminSessionRow | null> {
   return await db

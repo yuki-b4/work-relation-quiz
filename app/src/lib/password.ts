@@ -8,18 +8,36 @@
  *     純JS の bcrypt はエッジのCPU時間を素で数百ms食う上、依存も増える
  *   ・PBKDF2 は WebCrypto にネイティブで入っていて、依存ゼロで動く
  *   ・OWASP の Password Storage Cheat Sheet も、bcrypt/argon2 が使えない環境の選択肢として
- *     PBKDF2-HMAC-SHA256・600,000回を挙げている
- * 600,000回で1回あたり約0.3秒のCPU。ログインは1名・年に数十回なので、
- * Workers Paid（月3,000万CPU-ms）の枠に対して無視できる（8.2）。
+ *     PBKDF2-HMAC-SHA256 を挙げている
  *
- * 保存形式は自己記述にする。あとから回数を上げたくなったら、ログイン成功時に
+ * **反復回数は100,000。Workers の WebCrypto がそれ以上を受け付けない。**
+ * OWASP の推奨は600,000だが、その値で作ると本番で次の例外になって落ちる。
+ *
+ *   NotSupportedError: Pbkdf2 failed: iteration counts above 100000 are not supported
+ *
+ * **ローカルの `wrangler dev` はこの上限を課さない。** 手元では600,000でも通ってしまい、
+ * デプロイして初めて出る。だから試験で定数そのものを固定している
+ * （tools/admin-auth-test.mjs）。上げるときは PBKDF2_MAX_ITERATIONS を超えないこと。
+ *
+ * 推奨値に足りないぶんは、**パスワードの長さで埋める**。`tools/admin-password.mjs` が
+ * 24文字（約140ビット）を作り、README もパスワードマネージャの使用を求めている。
+ * この強度なら反復回数は総当たりの成否をもう左右しない。回数が効いてくるのは、
+ * 人が考えた短いパスワードを使ったときだけ。
+ *
+ * 保存形式は自己記述にする。あとから回数を変えたくなったら、ログイン成功時に
  * 新しい回数で入れ直せる（needsRehash）。
  *
- *   pbkdf2-sha256$600000$<salt(base64)>$<hash(base64)>
+ *   pbkdf2-sha256$100000$<salt(base64)>$<hash(base64)>
  */
 
-/** いま新しく作るときの反復回数（OWASP 2023年以降の推奨値）。 */
-export const PBKDF2_ITERATIONS = 600_000;
+/**
+ * Workers の WebCrypto が受け付ける PBKDF2 の反復回数の上限。
+ * これを超えて deriveBits を呼ぶと NotSupportedError になる（本番のみ。dev では通る）。
+ */
+export const PBKDF2_MAX_ITERATIONS = 100_000;
+
+/** いま新しく作るときの反復回数。上限いっぱいを使う。 */
+export const PBKDF2_ITERATIONS = PBKDF2_MAX_ITERATIONS;
 
 const SALT_BYTES = 16;
 const KEY_BITS = 256;
@@ -51,8 +69,20 @@ async function derive(password: string, salt: Uint8Array, iterations: number): P
   return new Uint8Array(bits);
 }
 
-/** 新しいパスワードのハッシュを作る。保存するのはこの文字列だけ。 */
+/**
+ * 新しいパスワードのハッシュを作る。保存するのはこの文字列だけ。
+ *
+ * **上限を超える回数は受け付けない。** 作れてしまうと、そのハッシュは本番で照合できない。
+ * `tools/admin-password.mjs` は Node で動き、Node には上限が無いので、ここで止めないと
+ * 「作れたのにログインできない」ハッシュができてしまう。
+ */
 export async function hashPassword(password: string, iterations = PBKDF2_ITERATIONS): Promise<string> {
+  if (iterations > PBKDF2_MAX_ITERATIONS) {
+    throw new Error(
+      `PBKDF2 の反復回数は ${PBKDF2_MAX_ITERATIONS} までです（指定 ${iterations}）。` +
+      'Workers の WebCrypto がこれを超える値を受け付けません。'
+    );
+  }
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const hash = await derive(password, salt, iterations);
   return `${PREFIX}$${iterations}$${toBase64(salt)}$${toBase64(hash)}`;
@@ -67,7 +97,11 @@ export async function verifyPassword(password: string, stored: string): Promise<
   const parts = String(stored ?? '').split('$');
   if (parts.length !== 4 || parts[0] !== PREFIX) return false;
   const iterations = Number(parts[1]);
-  if (!Number.isInteger(iterations) || iterations < 1000 || iterations > 5_000_000) return false;
+  // 上限を超えた保存値は、この環境では計算し直せない（deriveBits が例外を投げる）。
+  // ログインの入口で500にすると原因が分からなくなるので、false を返して弾く。
+  // 該当するのは、上限を知らずに作られた古いハッシュだけ。作り直しの手順は
+  // README の「パスワードを忘れた・変えたいとき」。
+  if (!Number.isInteger(iterations) || iterations < 1000 || iterations > PBKDF2_MAX_ITERATIONS) return false;
   let expected: Uint8Array;
   let salt: Uint8Array;
   try {
@@ -77,7 +111,13 @@ export async function verifyPassword(password: string, stored: string): Promise<
     return false;
   }
   if (salt.length === 0 || expected.length === 0) return false;
-  const actual = await derive(password, salt, iterations);
+  let actual: Uint8Array;
+  try {
+    actual = await derive(password, salt, iterations);
+  } catch {
+    // 実行環境が受け付けない条件（上のチェックをすり抜けた場合）。落とさず不一致にする。
+    return false;
+  }
   return timingSafeEqual(actual, expected);
 }
 

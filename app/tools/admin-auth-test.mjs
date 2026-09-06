@@ -7,7 +7,8 @@
  * ここが崩れると、ログインが素通りする／個人情報が一覧に出る／CSVがExcelで化ける、が静かに起きる。
  */
 import {
-  hashPassword, verifyPassword, needsRehash, timingSafeEqual, timingSafeEqualStr, PBKDF2_ITERATIONS,
+  hashPassword, verifyPassword, needsRehash, timingSafeEqual, timingSafeEqualStr,
+  PBKDF2_ITERATIONS, PBKDF2_MAX_ITERATIONS,
 } from '../src/lib/password.ts';
 import {
   evaluateAdminSession, isLocked, nextFailureState, buildAdminCookie, clearAdminCookie,
@@ -46,7 +47,21 @@ const eq = (label, a, b) =>
 
   check('回数が低いハッシュは入れ直しの対象', needsRehash(stored));
   check('いまの回数なら入れ直さない', !needsRehash(await hashPassword('pw', PBKDF2_ITERATIONS)));
-  check('推奨回数はOWASPの60万回', PBKDF2_ITERATIONS === 600_000);
+
+  // ここが今回の事故の再発防止。**Workers の WebCrypto は10万回までしか受け付けない**のに、
+  // ローカルの wrangler dev も Node も上限を課さないので、手元では最後まで気づけなかった。
+  // 定数そのものを固定して、上げたらここで止まるようにする。
+  eq('反復回数は Workers の上限（10万回）', PBKDF2_ITERATIONS, PBKDF2_MAX_ITERATIONS);
+  check('上限は10万回', PBKDF2_MAX_ITERATIONS === 100_000);
+
+  // 上限を超えるハッシュは**作らせない**（作れると本番で照合できないものができる）
+  let threw = false;
+  try { await hashPassword('pw', PBKDF2_MAX_ITERATIONS + 1); } catch { threw = true; }
+  check('上限を超える回数を指定すると作れない', threw);
+
+  // 上限を超えた保存値は、例外ではなく不一致として弾く（ログインが500にならないように）
+  check('上限超えの保存値は false を返す',
+    !(await verifyPassword('pw', 'pbkdf2-sha256$600000$AAAAAAAAAAAAAAAAAAAAAA==$AAAA')));
 
   const enc = new TextEncoder();
   check('定数時間比較：同じ', timingSafeEqual(enc.encode('abc'), enc.encode('abc')));

@@ -323,7 +323,7 @@ app/
 | noindex | `/result` `/guide` `/apply` `/admin` `/api` に `X-Robots-Tag` と `no-store`。Admin は robots.txt に頼らない | F6-3 |
 | ボット | 弾くのは学習クローラだけ。検索エンジンとSNSのOGP取得（Twitterbot 等）は必ず通す | F8 |
 | 設問の改訂 | 変えたら `QUESTION_SET_VERSION` を上げる。過去データの解釈を壊さない | 6.5 |
-| Admin の認証 | パスワードは PBKDF2-HMAC-SHA256・600,000回。Cookie は SameSite=Strict。状態を変えるPOSTは Originチェック＋CSRFトークン | F2-1・6.1 |
+| Admin の認証 | パスワードは PBKDF2-HMAC-SHA256・**100,000回**（Workers の WebCrypto の上限。超えると本番でだけ落ちる）。Cookie は SameSite=Strict。状態を変えるPOSTは Originチェック＋CSRFトークン | F2-1・6.1 |
 | Admin の個人情報 | 氏名・メールは**一覧では伏せる**。全表示は詳細か明示的な操作だけ。閲覧・出力・削除は監査ログに残す | 6.2 |
 | リクエスト本文 | **一度しか読めない。** 認可で読んだ本文を各処理へ渡す（読み直すと必ず失敗する） | 実装メモ |
 | フォームの見た目 | `.vq-opt` を `.field` の中に置かない。`.field label{display:block}` に負けて縦積みになる | 実装メモ |
