@@ -79,7 +79,7 @@ function websiteLd(origin: string) {
 function organizationLd(origin: string) {
   return {
     '@type': 'Organization',
-    name: 'MIkata',
+    name: 'Mikata',
     url: `${origin}/about`,
     founder: { '@type': 'Person', name: '齋藤祐希' },
     email: 'capou0872@gmail.com',

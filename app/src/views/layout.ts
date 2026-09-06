@@ -60,7 +60,7 @@ export function siteFooter(): string {
       '<nav>' +
         FOOT_LINKS.map(([href, label]) => `<a href="${href}">${esc(label)}</a>`).join('') +
       '</nav>' +
-      '<p class="foot-name">ナチュール診断　運営：MIkata</p>' +
+      '<p class="foot-name">ナチュール診断　運営：Mikata</p>' +
     '</footer>'
   );
 }

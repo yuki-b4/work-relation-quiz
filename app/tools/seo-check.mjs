@@ -92,7 +92,7 @@ for (const [key, data] of Object.entries(INFO_PAGES)) {
 // 事業者情報が出ていること（プライバシーポリシー第9条・お問い合わせ）
 for (const path of ['/privacy', '/contact']) {
   const r = await get(path);
-  for (const v of ['MIkata', '齋藤祐希', 'capou0872@gmail.com']) {
+  for (const v of ['Mikata', '齋藤祐希', 'capou0872@gmail.com']) {
     t(`${path} に ${v} がある`, r.markup.includes(v), true);
   }
 }
