@@ -20,9 +20,11 @@ import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
 import { applyPage, SLOTS } from './views/apply-page.ts';
 import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
+import { INFO_PATHS, infoPage } from './views/info-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
+import { admin } from './routes/admin.ts';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -37,6 +39,14 @@ type Bindings = {
   RESULT_IDLE_MINUTES: string;
   RESULT_MAX_HOURS: string;
   IP_HASH_SALT: string;
+  /** Admin（F2）。初期アカウントの作成とログイン通知に使う。無くても動く。 */
+  ADMIN_BOOTSTRAP_EMAIL?: string;
+  ADMIN_BOOTSTRAP_PASSWORD?: string;
+  LOGIN_NOTIFY_WEBHOOK?: string;
+  RESEND_API_KEY?: string;
+  LOGIN_NOTIFY_TO?: string;
+  LOGIN_NOTIFY_FROM?: string;
+  LOGIN_LIMIT?: RateLimiter;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -52,6 +62,13 @@ app.use('*', async (c, next) => {
   if (NOINDEX_PREFIXES.some((p) => c.req.path === p || c.req.path.startsWith(p + '/'))) {
     c.header('X-Robots-Tag', 'noindex, nofollow');
     c.header('Cache-Control', 'no-store, private');
+  }
+  // Admin は他サイトの iframe に入れさせない。Cookie が SameSite=Strict でも、
+  // 埋め込まれた画面を透明にして押させる手口（クリックジャッキング）は防げない（6.1）。
+  if (c.req.path === '/admin' || c.req.path.startsWith('/admin/')) {
+    c.header('X-Frame-Options', 'DENY');
+    c.header('Content-Security-Policy', "frame-ancestors 'none'");
+    c.header('Referrer-Policy', 'same-origin');
   }
 });
 
@@ -93,11 +110,13 @@ app.get('/types/:code', (c) => {
   if (!(code in TYPES)) return c.notFound();
   return c.html(typeDetailPage(code as keyof typeof TYPES, originOf(c)));
 });
-app.get('/about', (c) => c.text('TODO: 診断について'));
-app.get('/faq', (c) => c.text('TODO: よくある質問'));
-app.get('/privacy', (c) => c.text('TODO: プライバシーポリシー'));
-app.get('/terms', (c) => c.text('TODO: 利用規約'));
-app.get('/contact', (c) => c.text('TODO: お問い合わせ'));
+/**
+ * 情報ページ（F6-2）。中身は文面の正から機械的に写したもので、この経路は器を返すだけ。
+ * `/privacy` は申込フォームの同意リンク先でもあるので、欠かすと同意が成立しない。
+ */
+for (const [path, key] of Object.entries(INFO_PATHS)) {
+  app.get(path, (c) => c.html(infoPage(key, originOf(c))));
+}
 
 // ───────── ワンタイム（結果セッションで認可。F4） ─────────
 /**
@@ -139,7 +158,8 @@ app.get('/apply/:typeCode', (c) => {
 });
 
 // ───────── Admin（認証必須。F2） ─────────
-app.all('/admin/*', (c) => c.text('TODO: Admin（認証必須）', 501));
+// 経路の中身は routes/admin.ts。全レスポンスの noindex と no-store は上の共通処理が付ける。
+app.route('/admin', admin);
 
 // ───────── API（F1-3） ─────────
 
@@ -452,7 +472,10 @@ app.get('/robots.txt', (c) => {
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {
   const origin = originOf(c);
-  const urls = ['/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`)];
+  const urls = [
+    '/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`),
+    ...Object.keys(INFO_PATHS),
+  ];
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
