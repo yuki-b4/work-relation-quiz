@@ -239,18 +239,43 @@ npx wrangler secret put LOGIN_NOTIFY_FROM
 **これが唯一の復旧手段**（F2-1 の3）。DBを直接書き換える。
 
 ```
-npm run admin:password                    # パスワードも自動で作る
-npm run admin:password -- '自分で決めた長いパスワード'
+npm run admin:password -- --email you@example.com
+npm run admin:password -- --email you@example.com --password '自分で決めた長いパスワード'
 ```
 
-出てくるパスワードを**先にパスワードマネージャへ保存してから**、同じ出力にある `UPDATE` 文の
-メールアドレスを自分のものに直して流す。
+新しいパスワードと、`admin-password.sql` が書き出される。
+**パスワードを先にパスワードマネージャへ保存してから**、ファイルを流す。
 
 ```
-npx wrangler d1 execute nature-shindan --remote --command "UPDATE admin_users SET password_hash = '…' , failed_count = 0, locked_until = NULL WHERE lower(email) = lower('you@example.com');"
+npx wrangler d1 execute nature-shindan --remote --file=admin-password.sql
 ```
 
-5回続けて失敗するとロックがかかる（15分）。上のSQLはロックも同時に解除する。
+> **`--command` に貼ってはいけない。** ハッシュは `$` を3つ含む形
+> （`pbkdf2-sha256$100000$ソルト$ハッシュ`）で、`--command "…"` のダブルクォートに入れると
+> **シェルが `$` を変数として展開して値が壊れる**（`$100000` が `00000` になる、など）。
+> 壊れたまま保存されてもエラーは出ず、ログイン画面には「パスワードが違います」としか出ない。
+> ファイル経由か、クォート付きのヒアドキュメント（`<<'SQL'`）なら展開されない。
+
+入ったかどうかを確かめる。この文には `$` が無いので `--command` でよい。
+
+```
+npx wrangler d1 execute nature-shindan --remote \
+  --command "select substr(password_hash,1,21) as head from admin_users"
+```
+
+`pbkdf2-sha256$100000$` と出れば正しく入っている。確認できたら `rm admin-password.sql`。
+
+5回続けて失敗するとロックがかかる（15分）。書き出されるSQLはロックも同時に解除する。
+
+**ログインできないときは監査ログを見る。** 保存値そのものが壊れている場合、その理由が残る。
+
+```
+npx wrangler d1 execute nature-shindan --remote \
+  --command "select at, action, detail from admin_audit_logs order by at desc limit 5"
+```
+
+`detail` に `"storedHash":"format"` などが入っていたら、パスワードではなく**DBの値が壊れている**。
+`"storedHash":"ok"` なら、単にパスワードが違う。
 
 ## データ移行（第7章）
 

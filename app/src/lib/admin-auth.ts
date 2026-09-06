@@ -12,7 +12,7 @@
  *   3. 復旧手段（tools/admin-password.mjs でハッシュを作って直接DBを更新。README に手順）
  */
 import { sha256Hex } from './hash.ts';
-import { hashPassword, needsRehash, verifyPassword, PBKDF2_ITERATIONS } from './password.ts';
+import { hashPassword, needsRehash, parseStoredHash, verifyPassword, PBKDF2_ITERATIONS } from './password.ts';
 
 /** Admin セッションCookie。結果セッションの 'rs' とは別名にする。 */
 export const ADMIN_COOKIE = 'as';
@@ -152,7 +152,16 @@ export async function createAdmin(db: D1Database, email: string, password: strin
 
 export type LoginResult =
   | { ok: true; sessionId: string; csrf: string; userId: string }
-  | { ok: false; reason: 'invalid' | 'locked' | 'disabled'; retryAt?: string };
+  | {
+      ok: false;
+      reason: 'invalid' | 'locked' | 'disabled';
+      retryAt?: string;
+      /**
+       * 保存されているハッシュ自体が壊れていた場合の理由（監査ログ用）。
+       * 利用者への表示は変えない（「パスワードが違います」のまま）。
+       */
+      storedHash?: string;
+    };
 
 /**
  * ログイン。
@@ -167,6 +176,7 @@ export async function login(
   meta: { ipHash?: string | null; uaHash?: string | null; now?: string } = {}
 ): Promise<LoginResult> {
   const now = meta.now ?? isoNow();
+  let storedHashProblem: string | undefined;
   const user = await findAdminByEmail(db, email);
 
   if (!user) {
@@ -179,14 +189,19 @@ export async function login(
 
   const ok = await verifyPassword(password, user.password_hash);
   if (!ok) {
+    // **保存値そのものが壊れていないかを見る。** 壊れていても照合は不一致にしかならず、
+    // 画面には「パスワードが違います」としか出ないので、ここで残さないと原因に辿りつけない。
+    // 監査ログに `stored: 'format'` などが並んでいたら、パスワードではなくDBの値が壊れている。
+    const parsed = parseStoredHash(user.password_hash);
+    if (!parsed.ok) storedHashProblem = parsed.reason;
     const next = nextFailureState(user.failed_count, now);
     await db
       .prepare(`update admin_users set failed_count = ?, locked_until = ? where id = ?`)
       .bind(next.failedCount, next.lockedUntil, user.id)
       .run();
     return next.lockedUntil
-      ? { ok: false, reason: 'locked', retryAt: next.lockedUntil }
-      : { ok: false, reason: 'invalid' };
+      ? { ok: false, reason: 'locked', retryAt: next.lockedUntil, storedHash: storedHashProblem }
+      : { ok: false, reason: 'invalid', storedHash: storedHashProblem };
   }
 
   // 成功したらカウンタとロックを落とす。

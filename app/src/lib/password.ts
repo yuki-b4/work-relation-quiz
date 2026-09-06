@@ -88,29 +88,53 @@ export async function hashPassword(password: string, iterations = PBKDF2_ITERATI
   return `${PREFIX}$${iterations}$${toBase64(salt)}$${toBase64(hash)}`;
 }
 
+/** 保存値を読んだ結果。壊れているときは、なぜ壊れているかを返す。 */
+export type StoredHash =
+  | { ok: true; iterations: number; salt: Uint8Array; expected: Uint8Array }
+  | { ok: false; reason: 'empty' | 'format' | 'algo' | 'iterations' | 'base64' };
+
+/**
+ * 保存値を読む。
+ *
+ * **壊れている理由を返すのが肝。** ここが壊れていても照合は「不一致」にしかならず、
+ * 画面には「パスワードが違います」としか出ないので、原因に辿りつけない。
+ * 呼び出し側（login）が監査ログにこの理由を残す。
+ *
+ * 実際に踏んだ壊れ方：ハッシュに `$` が3つ入っているのに、
+ * `wrangler d1 execute --command "…"` のダブルクォートへ貼ったせいでシェルが変数展開し、
+ * `$` ごと消えた値が保存されていた。形式は 'format' として出る。
+ */
+export function parseStoredHash(stored: string | null | undefined): StoredHash {
+  const raw = String(stored ?? '');
+  if (!raw) return { ok: false, reason: 'empty' };
+  const parts = raw.split('$');
+  if (parts.length !== 4) return { ok: false, reason: 'format' };
+  if (parts[0] !== PREFIX) return { ok: false, reason: 'algo' };
+  const iterations = Number(parts[1]);
+  // 上限を超えた保存値は、この環境では計算し直せない（deriveBits が例外を投げる）。
+  // 該当するのは、上限を知らずに作られた古いハッシュだけ。
+  if (!Number.isInteger(iterations) || iterations < 1000 || iterations > PBKDF2_MAX_ITERATIONS) {
+    return { ok: false, reason: 'iterations' };
+  }
+  try {
+    const salt = fromBase64(parts[2]!);
+    const expected = fromBase64(parts[3]!);
+    if (salt.length === 0 || expected.length === 0) return { ok: false, reason: 'base64' };
+    return { ok: true, iterations, salt, expected };
+  } catch {
+    return { ok: false, reason: 'base64' };
+  }
+}
+
 /**
  * 照合。**必ず定数時間で比べる**（早期returnにすると、一致した先頭バイト数が時間に出る）。
  * 形式が壊れている・アルゴリズムが違う場合は false を返す（例外にしない。
  * ログインの入口で落ちると、攻撃者に「その口だけ挙動が違う」を教えることになる）。
  */
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const parts = String(stored ?? '').split('$');
-  if (parts.length !== 4 || parts[0] !== PREFIX) return false;
-  const iterations = Number(parts[1]);
-  // 上限を超えた保存値は、この環境では計算し直せない（deriveBits が例外を投げる）。
-  // ログインの入口で500にすると原因が分からなくなるので、false を返して弾く。
-  // 該当するのは、上限を知らずに作られた古いハッシュだけ。作り直しの手順は
-  // README の「パスワードを忘れた・変えたいとき」。
-  if (!Number.isInteger(iterations) || iterations < 1000 || iterations > PBKDF2_MAX_ITERATIONS) return false;
-  let expected: Uint8Array;
-  let salt: Uint8Array;
-  try {
-    salt = fromBase64(parts[2]!);
-    expected = fromBase64(parts[3]!);
-  } catch {
-    return false;
-  }
-  if (salt.length === 0 || expected.length === 0) return false;
+  const parsed = parseStoredHash(stored);
+  if (!parsed.ok) return false;
+  const { iterations, salt, expected } = parsed;
   let actual: Uint8Array;
   try {
     actual = await derive(password, salt, iterations);

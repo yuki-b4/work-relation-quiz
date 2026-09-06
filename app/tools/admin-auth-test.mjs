@@ -7,8 +7,8 @@
  * ここが崩れると、ログインが素通りする／個人情報が一覧に出る／CSVがExcelで化ける、が静かに起きる。
  */
 import {
-  hashPassword, verifyPassword, needsRehash, timingSafeEqual, timingSafeEqualStr,
-  PBKDF2_ITERATIONS, PBKDF2_MAX_ITERATIONS,
+  hashPassword, verifyPassword, needsRehash, parseStoredHash,
+  timingSafeEqual, timingSafeEqualStr, PBKDF2_ITERATIONS, PBKDF2_MAX_ITERATIONS,
 } from '../src/lib/password.ts';
 import {
   evaluateAdminSession, isLocked, nextFailureState, buildAdminCookie, clearAdminCookie,
@@ -62,6 +62,17 @@ const eq = (label, a, b) =>
   // 上限を超えた保存値は、例外ではなく不一致として弾く（ログインが500にならないように）
   check('上限超えの保存値は false を返す',
     !(await verifyPassword('pw', 'pbkdf2-sha256$600000$AAAAAAAAAAAAAAAAAAAAAA==$AAAA')));
+
+  // 保存値が壊れている理由を分けて返す（監査ログに残して原因に辿りつくため）。
+  // 下から2つめが今回踏んだ壊れ方：`wrangler d1 execute --command "…"` のダブルクォートに
+  // 貼ったせいで、シェルが $ を変数展開してしまい、区切りごと消えた値が保存されていた。
+  eq('正しい保存値', parseStoredHash(stored).ok, true);
+  eq('空', parseStoredHash('').reason, 'empty');
+  eq('別アルゴリズム', parseStoredHash('bcrypt$1$2$3').reason, 'algo');
+  eq('回数が上限超え', parseStoredHash('pbkdf2-sha256$600000$AA==$AA==').reason, 'iterations');
+  eq('base64 が壊れている', parseStoredHash('pbkdf2-sha256$100000$$').reason, 'base64');
+  eq('シェルに $ を食われた値', parseStoredHash('pbkdf2-sha25600000oWNSEdqwUN6+S4hGw==/j3CK452SGKrOGeWA=').reason, 'format');
+  eq('区切りが多すぎる', parseStoredHash('a$b$c$d$e').reason, 'format');
 
   const enc = new TextEncoder();
   check('定数時間比較：同じ', timingSafeEqual(enc.encode('abc'), enc.encode('abc')));

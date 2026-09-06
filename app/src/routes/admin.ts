@@ -224,7 +224,7 @@ admin.post('/login', async (c) => {
   if (!result.ok) {
     await audit(c.env.DB, {
       actorId: null, action: 'login_failed', targetType: 'admin_user', targetId: email,
-      ipHash, detail: { reason: result.reason },
+      ipHash, detail: { reason: result.reason, storedHash: result.storedHash ?? 'ok' },
     });
     if (result.reason === 'locked') {
       // ロックにかかった時点で通知する。総当たりを受けているかもしれない。
