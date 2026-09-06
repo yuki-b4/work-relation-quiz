@@ -20,7 +20,16 @@ Cloudflare の認証が要る操作は**ブラウザが必要**なので、手�
 
 ## セットアップ（手元のPCで1回だけ）
 
-前提：Node.js 20 以上、Cloudflare アカウント。ドメインを Cloudflare Registrar で取得済みなら、そのアカウントをそのまま使う。
+前提：**Node.js 22 以上**、Cloudflare アカウント。ドメインを Cloudflare Registrar で取得済みなら、そのアカウントをそのまま使う。
+
+> **Node は 22 以上でないと wrangler が動かない。** wrangler 4 系が `node >=22.0.0` を要求していて、
+> 20 系だと `Wrangler requires at least Node.js v22.0.0` で止まる。まず確認する。
+>
+> ```
+> node -v
+> ```
+>
+> `v22`（または `v24`）で始まっていなければ、先に Node を入れ替える。手順は下の「Node を入れ替える」。
 
 ### 1. Cloudflare にログインして D1 を作る（リポジトリは不要）
 
@@ -103,6 +112,48 @@ npm run dev
 ```
 
 `http://localhost:8787/api/health` が `{"ok":true,"tables":15,...}` を返せばセットアップ完了。
+
+## Node を入れ替える
+
+`Wrangler requires at least Node.js v22.0.0` が出たときの手当て。
+**Node 20 のサポートは2026年4月で終わっている**ので、下げるのではなく上げる。
+
+### macOS / Linux（nvm を使う。おすすめ）
+
+複数のバージョンを行き来できるので、ほかの作業への影響が出ない。
+
+```
+# nvm が未導入なら1回だけ
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# ターミナルを開き直してから
+nvm install 22
+nvm use 22
+nvm alias default 22      # 次から開くターミナルでも 22 になる
+```
+
+### Windows
+
+```
+winget install OpenJS.NodeJS.LTS
+```
+
+または https://nodejs.org/ から LTS 版のインストーラーを落として実行する。
+バージョンを行き来したい場合は [nvm-windows](https://github.com/coreybutler/nvm-windows) を使う。
+
+### 入れ替えたあと
+
+```
+node -v            # v22 以上になっていること
+cd app
+npm install        # 入れ直す。バージョンが変わったら一度やっておくと確実
+npm run check
+```
+
+`npm install` でおかしくなったら、`node_modules` を消してから入れ直す。
+
+```
+rm -rf node_modules && npm install
+```
 
 ## 診断の文面と採点ロジック
 
