@@ -25,6 +25,46 @@ export type PageOptions = {
   script?: string;
 };
 
+/**
+ * 公開ページの共通フッター（F6-2 の内部リンク）。
+ * `/privacy` と `/terms` はここからしか辿れないので、置き場所を削らない。
+ *
+ * **`.app` の内側に置くこと。** body は中央寄せの flex で、`.app` が唯一の子である前提。
+ * 外に出すと横に並んでしまう。
+ * index させる公開ページにだけ付ける。結果やガイドの途中に外へ出る導線は増やさない。
+ */
+const FOOT_LINKS: [string, string][] = [
+  ['/', '診断を受ける'],
+  ['/types', '全8タイプ'],
+  ['/about', 'ナチュール診断とは'],
+  ['/faq', 'よくある質問'],
+  ['/contact', 'お問い合わせ'],
+  ['/privacy', 'プライバシーポリシー'],
+  ['/terms', '利用規約'],
+];
+
+const FOOT_CSS =
+  '.site-foot{margin-top:56px; padding-top:22px; border-top:1px solid var(--line);' +
+  ' font-size:13px; color:var(--muted)}' +
+  '.site-foot nav{display:flex; flex-wrap:wrap; gap:10px 18px; margin-bottom:16px}' +
+  '.site-foot a{color:var(--muted); text-decoration:none}' +
+  '.site-foot a:hover{color:var(--ink); text-decoration:underline}' +
+  '.site-foot .foot-name{font-size:12px; color:var(--faint); letter-spacing:.04em}' +
+  // 設問に進んだら消す。答えている最中に、外へ出るリンクを足元に残さない。
+  // #intro があるのはトップだけなので、ほかのページには効かない。
+  '.app:has(#intro:not(.active)) .site-foot{display:none}';
+
+export function siteFooter(): string {
+  return (
+    '<footer class="site-foot">' +
+      '<nav>' +
+        FOOT_LINKS.map(([href, label]) => `<a href="${href}">${esc(label)}</a>`).join('') +
+      '</nav>' +
+      '<p class="foot-name">ナチュール診断　運営：MIkata</p>' +
+    '</footer>'
+  );
+}
+
 export function page(opts: PageOptions, body: string): string {
   const robots = opts.noindex
     ? '<meta name="robots" content="noindex, nofollow">'
@@ -36,7 +76,7 @@ export function page(opts: PageOptions, body: string): string {
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
     desc + robots + canonical + (opts.head ?? '') + FONTS +
-    `<style>${APP_CSS}\n${INDEX_CSS}</style></head>` +
+    `<style>${APP_CSS}\n${INDEX_CSS}\n${FOOT_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +
     (opts.script ? `<script>${opts.script}</script>` : '') +

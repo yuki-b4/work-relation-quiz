@@ -6,7 +6,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "content": "node tools/extract-content.mjs",
+    "content": "node tools/extract-content.mjs && node tools/extract-pages.mjs",
     "parity": "node --experimental-strip-types tools/parity-check.mjs",
     "test:session": "node --experimental-strip-types tools/result-session-test.mjs",
     "test:markup": "node --experimental-strip-types tools/markup-check.mjs",
@@ -25,7 +25,8 @@
     "test:auth": "node --experimental-strip-types tools/admin-auth-test.mjs",
     "test:migrate": "node tools/migrate-test.mjs",
     "migrate": "node tools/migrate-sheets.mjs",
-    "admin:password": "node --experimental-strip-types tools/admin-password.mjs"
+    "admin:password": "node --experimental-strip-types tools/admin-password.mjs",
+    "pages": "node tools/extract-pages.mjs"
   },
   "dependencies": {
     "hono": "^4.6.0"

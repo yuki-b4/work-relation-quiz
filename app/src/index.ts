@@ -20,6 +20,7 @@ import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
 import { applyPage, SLOTS } from './views/apply-page.ts';
 import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
+import { INFO_PATHS, infoPage } from './views/info-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
@@ -109,11 +110,13 @@ app.get('/types/:code', (c) => {
   if (!(code in TYPES)) return c.notFound();
   return c.html(typeDetailPage(code as keyof typeof TYPES, originOf(c)));
 });
-app.get('/about', (c) => c.text('TODO: 診断について'));
-app.get('/faq', (c) => c.text('TODO: よくある質問'));
-app.get('/privacy', (c) => c.text('TODO: プライバシーポリシー'));
-app.get('/terms', (c) => c.text('TODO: 利用規約'));
-app.get('/contact', (c) => c.text('TODO: お問い合わせ'));
+/**
+ * 情報ページ（F6-2）。中身は文面の正から機械的に写したもので、この経路は器を返すだけ。
+ * `/privacy` は申込フォームの同意リンク先でもあるので、欠かすと同意が成立しない。
+ */
+for (const [path, key] of Object.entries(INFO_PATHS)) {
+  app.get(path, (c) => c.html(infoPage(key, originOf(c))));
+}
 
 // ───────── ワンタイム（結果セッションで認可。F4） ─────────
 /**
@@ -469,7 +472,10 @@ app.get('/robots.txt', (c) => {
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {
   const origin = originOf(c);
-  const urls = ['/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`)];
+  const urls = [
+    '/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`),
+    ...Object.keys(INFO_PATHS),
+  ];
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +

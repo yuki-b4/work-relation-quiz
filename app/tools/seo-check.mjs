@@ -7,6 +7,7 @@
  * アプリ化要件定義.md F6（インデックス設計）／F7-3（オンサイトの必須項目）／F8-2（robots.txt）。
  */
 import { HONSHITSU, TORISET, TYPES, TYPE_CODES } from '../src/content/types.ts';
+import { FAQ_ITEMS, INFO_PAGES } from '../src/content/pages.ts';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8787';
 let fail = 0;
@@ -26,11 +27,14 @@ const get = async (p) => {
     markup: body.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, ''),
   };
 };
+/** タグを落とした素のテキスト。本文が写っているかを見るときはこちらで比べる。 */
+const textOf = (markup) => markup.replace(/<[^>]+>/g, '').replace(/\s+/g, '');
 const pick = (s, re) => (s.match(re) ?? [])[1] ?? null;
 
 // ── index させるページ ──
 for (const path of ['/', '/types', '/types/OBL', '/types/OBS', '/types/OKL', '/types/OKS',
-                    '/types/GBL', '/types/GBS', '/types/GKL', '/types/GKS']) {
+                    '/types/GBL', '/types/GBS', '/types/GKL', '/types/GKS',
+                    '/about', '/faq', '/contact', '/privacy', '/terms']) {
   const r = await get(path);
   t(`${path} が 200`, r.status, 200);
   t(`${path} に noindex が付いていない`, /noindex/.test(r.body) || r.robots?.includes('noindex') || false, false);
@@ -65,6 +69,58 @@ for (const code of TYPE_CODES) {
   t(`/types/${code} に相性がある`, r.markup.includes(TYPES[code].aishou.slice(0, 16)), true);
 }
 
+// ── 情報ページ（F6-2・F7-3） ──
+// 文面の正（公開ページ文面.md ほか）から機械的に写しているので、
+// 「写し損ねていないか」と「メタ情報と構造化データが付いているか」を見る。
+for (const [key, data] of Object.entries(INFO_PAGES)) {
+  const r = await get(`/${key}`);
+  t(`/${key} の h1 が文面の正と一致`, r.markup.includes(data.h1), true);
+  t(`/${key} の description が文面の正と一致`, pick(r.body, /name="description" content="(.*?)"/), data.description);
+  t(`/${key} の title にサイト名が入る`, (pick(r.body, /<title>(.*?)<\/title>/) ?? '').endsWith('| ナチュール診断'), true);
+  t(`/${key} の節がすべて h2 で出ている`, (r.markup.match(/<h2>/g) ?? []).length, data.sections.length);
+  for (const s of data.sections) {
+    t(`/${key} に「${s.heading}」がある`, r.markup.includes(s.heading), true);
+  }
+  // 最後の節の本文が入っていること（途中で切れていないかを見る）。
+  // 本文には <strong> や <a> が混ざるので、**両方からタグを落として**突き合わせる。
+  const last = data.sections[data.sections.length - 1];
+  t(`/${key} の最後の節の本文がある`, textOf(r.markup).includes(textOf(last.html).slice(0, 20)), true);
+  t(`/${key} にフッターの内部リンクがある`, r.markup.includes('class="site-foot"'), true);
+  t(`/${key} から診断へ戻れる`, r.markup.includes('診断を受ける'), true);
+}
+
+// 事業者情報が出ていること（プライバシーポリシー第9条・お問い合わせ）
+for (const path of ['/privacy', '/contact']) {
+  const r = await get(path);
+  for (const v of ['MIkata', '齋藤祐希', 'capou0872@gmail.com']) {
+    t(`${path} に ${v} がある`, r.markup.includes(v), true);
+  }
+}
+t('要記入のまま公開されていない', (await get('/privacy')).body.includes('要記入'), false);
+t('利用規約にも要記入が無い', (await get('/terms')).body.includes('要記入'), false);
+
+// FAQPage の構造化データ（F7-3）
+{
+  const r = await get('/faq');
+  const ld = (r.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) ?? [])[1];
+  const graph = JSON.parse(ld)['@graph'];
+  const faq = graph.find((g) => g['@type'] === 'FAQPage');
+  t('FAQPage がある', !!faq, true);
+  t('質問の数が文面と一致', faq.mainEntity.length, FAQ_ITEMS.length);
+  t('答えが空でない', faq.mainEntity.every((q) => q.acceptedAnswer.text.length > 10), true);
+}
+// 提供元の明示（E-E-A-T）
+{
+  const r = await get('/about');
+  const ld = (r.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) ?? [])[1];
+  const graph = JSON.parse(ld)['@graph'];
+  t('/about に Organization がある', graph.some((g) => g['@type'] === 'Organization'), true);
+  t('全ページに WebSite がある', graph.some((g) => g['@type'] === 'WebSite'), true);
+}
+
+// 申込フォームの同意リンク先が生きていること（F4-5）
+t('/privacy が申込フォームから開ける', (await get('/privacy')).status, 200);
+
 // ── index させないページ ──
 for (const path of ['/result', '/guide', '/apply/OBL']) {
   const r = await get(path);
@@ -81,7 +137,7 @@ for (const [from, to] of [['/quiz', '/'], ['/prototype.html', '/'], ['/index.htm
 
 // ── sitemap と robots ──
 const sm = await get('/sitemap.xml');
-t('sitemap が10件', (sm.body.match(/<loc>/g) ?? []).length, 10);
+t('sitemap が15件', (sm.body.match(/<loc>/g) ?? []).length, 15);
 t('sitemap が https', sm.body.includes('<loc>https://'), true);
 
 const rb = await get('/robots.txt');
