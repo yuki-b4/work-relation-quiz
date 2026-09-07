@@ -10,9 +10,9 @@
 - 設問は職場前提の言い回し（会議・タスク等）をあえて排し、場面に依存しない自然体の傾向を測る方針とする。
 
 - `prototype.html` — 検証用のプロトタイプ（スタンドアロンのHTML/CSS/JS）。`?ref=` から4セグメントを判定して出し分ける（`general`＝refなし／`referral`＝紹介者コード／`leader-lp`＝`corp-lp`・`wedding-lp`・`coffee-lp`／`member`＝`team_` 始まり。`?seg=` で上書き可）。検証アンケート5問は `?mode=feedback` を明示したときだけ表示。②紹介では結果画面から**アプリ内の読み解きガイド（全4章・本の体裁）**へ進み、終章で商談前ヒアリング2項目（すべて任意）と体験セッション申込（外部フォーム・`SESSION_FORM_URL`）に着地する。メールアドレスの登録は取らない（クリックだけで読み進められる）。①一般・③④にはガイドCTAを出さない
-- `index.html` / `.nojekyll` — GitHub Pages 公開用。`index.html` はクエリ（`?ref=` 等）を引き継いで `prototype.html` へリダイレクト
-- `lp-corporate.html` — 法人向けLP（Tier1業種の決裁者向け）。無料診断への導線（別タブ・`?ref=corp-lp&mode=feedback`）と商談フォーム（メール＋課題チェック＋自由記述）を持つ。フォームは Apps Script の `action:corpLead` で「法人リード」シートに記録（要再デプロイ。詳細は `apps-script/README.md`）
-- `lp-wedding.html` / `lp-coffee.html` — 法人LPの業種特化版（結婚式場版・珈琲屋カフェ版。初期フォーカス業種）。`lp-corporate.html` を親版とし、業種の言い当てモジュール（名乗り・悩み・放置コスト・ユースケース・フォーム課題・ref既定値 `wedding-lp`／`coffee-lp`）のみ差し替え。珈琲屋版は創業者の元珈琲屋オーナーというルーツを信頼要素（founder story）として組み込む。構成・コピーを変える際は `法人LP情報設計.json` の `variants` を先に更新して同期する。親版の共通部分を変更したら特化版2枚にも同じ変更を反映する
+- `docs/` — **GitHub Pages の公開元**（2026-09-07に直下から移した）。中身は旧URLから新ドメインへのリダイレクト3枚（`index.html`・`prototype.html` → `https://natur-indicator.com/`、`all-types.html` → `/types`。いずれもクエリとハッシュを引き継ぐ）と、法人LP3枚。**リポジトリ直下の `prototype.html` と `all-types.html` はアプリの文面の正なので、公開元を移すことで触らずに旧URLだけ差し替えている。** プレビューURLは `raw.githubusercontent.com` を見ているので影響しない
+- `docs/lp-corporate.html` — 法人向けLP（Tier1業種の決裁者向け）。無料診断への導線（別タブ・`https://natur-indicator.com/?ref=corp-lp`。**アプリでは検証アンケートを廃止したので `mode=feedback` は付けない**）と商談フォーム（メール＋課題チェック＋自由記述）を持つ。フォームは Apps Script の `action:corpLead` で「法人リード」シートに記録（要再デプロイ。詳細は `apps-script/README.md`）
+- `docs/lp-wedding.html` / `docs/lp-coffee.html` — 法人LPの業種特化版（結婚式場版・珈琲屋カフェ版。初期フォーカス業種）。`docs/lp-corporate.html` を親版とし、業種の言い当てモジュール（名乗り・悩み・放置コスト・ユースケース・フォーム課題・ref既定値 `wedding-lp`／`coffee-lp`）のみ差し替え。珈琲屋版は創業者の元珈琲屋オーナーというルーツを信頼要素（founder story）として組み込む。構成・コピーを変える際は `法人LP情報設計.json` の `variants` を先に更新して同期する。親版の共通部分を変更したら特化版2枚にも同じ変更を反映する
 - `法人LP情報設計.json` — 法人LPの情報設計（構成・コピー・フォーム仕様のソース）。LPの構成やコピーを変える際はここを先に更新して同期する
 - `apps-script/` — 診断結果・検証フィードバック・紹介者リード（メール/自由記述）をGoogleスプレッドシート（回答ログ）に記録する Google Apps Script Web App とセットアップ手順。`CreateSessionForm.gs` は体験セッション申込フォームの生成スクリプト（1回だけ実行する）。`UpdateRoadmapSheets.gs` は事業ロードマップブックの `0_全体サマリー`・`法人_12ヶ月ロードマップ`・`90日WBS_アクション` を書き換えるスクリプト（ロードマップブックにバインドして実行。旧シートは `_旧YYYYMMDD` に退避され消えない）。ロードマップの内容を変えるときはこのスクリプトの `moneyRows`／`rows`／`tasks` を直して再実行する
 - `体験セッション申込フォーム.md` — 読み解きガイド終章から開く申込フォーム（Googleフォーム）の仕様と文言の正。フォームを変えるときはここを先に更新する
