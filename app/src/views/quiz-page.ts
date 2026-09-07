@@ -174,6 +174,7 @@ export function topPage(origin: string): string {
       title: TITLE,
       description: DESCRIPTION,
       canonical,
+      ogImage: `${origin}/ogp.png`,
       head: ogp + `<script type="application/ld+json">${jsonLd}</script>`,
       script: clientScript(),
     },

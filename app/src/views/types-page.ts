@@ -97,6 +97,7 @@ export function typesIndexPage(origin: string): string {
       title: `${LIST_TITLE} | ナチュール診断`,
       description: LIST_DESC,
       canonical,
+      ogImage: `${origin}/ogp.png`,
       head:
         `<meta property="og:type" content="website">` +
         `<meta property="og:site_name" content="ナチュール診断">` +
@@ -167,6 +168,7 @@ export function typeDetailPage(code: TypeCode, origin: string): string {
       title,
       description: desc,
       canonical,
+      ogImage: `${origin}/ogp.png`,
       head:
         `<meta property="og:type" content="article">` +
         `<meta property="og:site_name" content="ナチュール診断">` +

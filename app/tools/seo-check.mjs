@@ -45,6 +45,9 @@ for (const path of ['/', '/types', '/types/OBL', '/types/OBS', '/types/OKL', '/t
   t(`${path} の h1 が1つ`, (r.body.match(/<h1/g) ?? []).length, 1);
   t(`${path} に og:title`, r.body.includes('og:title'), true);
   t(`${path} に構造化データ`, r.body.includes('application/ld+json'), true);
+  // OGP画像（F7-3）。**絶対URLでないとSNS側が拾わない。**
+  t(`${path} に og:image`, (pick(r.body, /property="og:image" content="(.*?)"/) ?? '').startsWith('https://'), true);
+  t(`${path} に twitter:image`, r.body.includes('name="twitter:image"'), true);
   // JSがなくても本文が読めること（F6-1）
   t(`${path} の本文がHTMLに入っている`, r.body.replace(/<[^>]*>/g, '').replace(/\s+/g, '').length > 400, true);
 }
@@ -134,6 +137,18 @@ for (const [from, to] of [['/quiz', '/'], ['/prototype.html', '/'], ['/index.htm
   const r = await get(from);
   t(`${from} が301`, r.status, 301);
   t(`${from} の行き先`, new URL(r.location, BASE).pathname, to);
+}
+
+// OGP画像そのものが返ること（F7-3）
+{
+  const r = await fetch(BASE + '/ogp.png');
+  const buf = new Uint8Array(await r.arrayBuffer());
+  t('/ogp.png が 200', r.status, 200);
+  t('/ogp.png が image/png', r.headers.get('content-type'), 'image/png');
+  // PNG の先頭8バイト。中身が本当に画像かを見る（設定を間違えると空やテキストが返る）
+  t('中身がPNG', [...buf.slice(0, 8)].join(','), '137,80,78,71,13,10,26,10');
+  t('空でない', buf.length > 10000, true);
+  t('キャッシュさせる', (r.headers.get('cache-control') ?? '').includes('max-age'), true);
 }
 
 // ── www を apex へ寄せる（F6-4） ──

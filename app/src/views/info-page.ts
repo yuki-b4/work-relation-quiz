@@ -153,6 +153,7 @@ export function infoPage(key: InfoKey, origin: string): string {
       title: `${data.title} | ${SITE}`,
       description: data.description,
       canonical,
+      ogImage: `${origin}/ogp.png`,
       head:
         `<style>${INFO_CSS}</style>` +
         ogp(data.title, data.description, canonical) +
