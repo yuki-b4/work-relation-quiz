@@ -26,6 +26,7 @@ import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import { admin } from './routes/admin.ts';
 import { apexUrl } from './lib/canonical-host.ts';
+import ogpImage from '../assets/ogp.png';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -480,6 +481,20 @@ app.get('/robots.txt', (c) => {
     { 'Content-Type': 'text/plain; charset=utf-8' }
   );
 });
+
+/**
+ * OGP画像（F7-3）。1200×630。`npm run ogp` で作り直せる（tools/make-ogp.mjs）。
+ *
+ * Worker に同梱しているので、外部のストレージも追加の設定も要らない。
+ * 中身が変わるのは画像を作り直したときだけなので、長めにキャッシュさせる。
+ * 差し替えたら、SNS側のキャッシュを切るために `?v=` を付けて参照する手もある。
+ */
+app.get('/ogp.png', (c) =>
+  c.body(ogpImage, 200, {
+    'Content-Type': 'image/png',
+    'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+  })
+);
 
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {

@@ -17,6 +17,14 @@ routes = [
   { pattern = "www.natur-indicator.com", custom_domain = true }
 ]
 
+# OGP画像（assets/ogp.png）を Worker に同梱する（アプリ化要件定義.md F7-3）。
+# これが無いと import が「そんなモジュールは無い」で落ちる。
+# base64 にして .ts へ埋める手もあるが、それだと画像をリポジトリで見られなくなる。
+[[rules]]
+type = "Data"
+globs = ["**/*.png"]
+fallthrough = true
+
 [observability]
 enabled = true
 

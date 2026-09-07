@@ -19,6 +19,11 @@ export type PageOptions = {
   noindex?: boolean;
   canonical?: string;
   bodyClass?: string;
+  /**
+   * OGP画像の絶対URL（F7-3）。渡すと og:image と twitter:image を出す。
+   * **絶対URLでないとSNS側が拾わない**ので、呼び出し側で origin を付けて渡す。
+   */
+  ogImage?: string;
   /** <head> に足すもの（OGP・構造化データなど）。 */
   head?: string;
   /** </body> の直前に置くスクリプト。 */
@@ -65,6 +70,18 @@ export function siteFooter(): string {
   );
 }
 
+/** og:image と twitter:image（F7-3）。幅と高さも添えると、取得前から場所を確保してもらえる。 */
+function ogImage(url: string | undefined): string {
+  if (!url) return '';
+  return (
+    `<meta property="og:image" content="${esc(url)}">` +
+    '<meta property="og:image:width" content="1200">' +
+    '<meta property="og:image:height" content="630">' +
+    '<meta property="og:image:alt" content="ナチュール診断　あなたの自然体がわかる診断">' +
+    `<meta name="twitter:image" content="${esc(url)}">`
+  );
+}
+
 export function page(opts: PageOptions, body: string): string {
   const robots = opts.noindex
     ? '<meta name="robots" content="noindex, nofollow">'
@@ -75,7 +92,7 @@ export function page(opts: PageOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
-    desc + robots + canonical + (opts.head ?? '') + FONTS +
+    desc + robots + canonical + ogImage(opts.ogImage) + (opts.head ?? '') + FONTS +
     `<style>${APP_CSS}\n${INDEX_CSS}\n${FOOT_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +

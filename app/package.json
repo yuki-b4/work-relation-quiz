@@ -29,7 +29,8 @@
     "test:migrate": "node tools/migrate-test.mjs",
     "migrate": "node tools/migrate-sheets.mjs",
     "admin:password": "node --experimental-strip-types tools/admin-password.mjs",
-    "pages": "node tools/extract-pages.mjs"
+    "pages": "node tools/extract-pages.mjs",
+    "ogp": "node tools/make-ogp.mjs"
   },
   "dependencies": {
     "hono": "^4.6.0"

@@ -303,6 +303,24 @@ npx wrangler d1 execute nature-shindan --remote --file=migrate.sql
 - 移行が済んだら **Googleフォームの受付を締め切り**（確認事項3＝a）、スプレッドシートは
   読み取り専用で残す（7.2）
 
+## OGP画像を作り直す
+
+共有カードの画像（1200×630）。`assets/ogp.png` が本体で、**スクリプトから作る**。
+
+```
+npm run ogp
+```
+
+- 文言を変えたいときは `tools/make-ogp.mjs` の `COPY` を直して再実行する
+- 色は `prototype.html` の CSS（`:root`）から取るので、サイトの色を変えれば追従する
+- フォントは Noto Sans JP を Google Fonts から取ってデータURIで埋め込む。
+  **ネットに繋がらない環境では端末のフォントに落ちる**（警告が出る）。その場合はサイトと
+  少し違う字になるので、繋がる環境で作り直す
+- `assets/ogp-preview-500.png` も一緒に出る。**Xのタイムラインで出る大きさ**（幅500px前後）で、
+  診断名が読めるかを見るためのもの。原寸だけ見ていると小さすぎに気づけない
+- 画像は Worker に同梱していて（`wrangler.toml` の `[[rules]] type = "Data"`）、`/ogp.png` で返る。
+  差し替えたら `npm run deploy` が要る
+
 ## 設問を変えるとき
 
 過去の回答に**いまの設問文**が付くと、記録の意味が変わる（F2-3）。手順を守る。
