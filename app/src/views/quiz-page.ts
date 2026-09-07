@@ -10,7 +10,7 @@
  */
 import { INTRO_MARKUP, FRAME_MARKUP, QUIZ_MARKUP } from '../content/screens.ts';
 import { ITEMS, LIKERT } from '../content/quiz.ts';
-import { page } from './layout.ts';
+import { page, siteFooter } from './layout.ts';
 
 const TITLE = '人間関係タイプ診断（無料・登録不要） | ナチュール診断';
 const DESCRIPTION =
@@ -180,6 +180,7 @@ export function topPage(origin: string): string {
     '<div class="app">' +
       '<header class="app-header">ナチュール診断</header>' +
       INTRO_MARKUP + FRAME_MARKUP + QUIZ_MARKUP +
+      siteFooter() +
     '</div>'
   );
 }

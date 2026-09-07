@@ -12,7 +12,7 @@
  */
 import { AX } from '../content/quiz.ts';
 import { TYPES, TYPE_CODES, TYPE_ICON, type TypeCode } from '../content/types.ts';
-import { page } from './layout.ts';
+import { page, siteFooter } from './layout.ts';
 import { esc } from './result.ts';
 
 /** そのタイプが3軸のどちら側かを言葉にする。 */
@@ -124,6 +124,7 @@ export function typesIndexPage(origin: string): string {
           '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">診断を受ける</a>' +
         '</div>' +
       '</section>' +
+      siteFooter() +
     '</div>'
   );
 }
@@ -233,6 +234,7 @@ export function typeDetailPage(code: TypeCode, origin: string): string {
           '</div>' +
         '</div>' +
       '</section>' +
+      siteFooter() +
     '</div>'
   );
 }

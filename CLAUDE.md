@@ -10,9 +10,9 @@
 - 設問は職場前提の言い回し（会議・タスク等）をあえて排し、場面に依存しない自然体の傾向を測る方針とする。
 
 - `prototype.html` — 検証用のプロトタイプ（スタンドアロンのHTML/CSS/JS）。`?ref=` から4セグメントを判定して出し分ける（`general`＝refなし／`referral`＝紹介者コード／`leader-lp`＝`corp-lp`・`wedding-lp`・`coffee-lp`／`member`＝`team_` 始まり。`?seg=` で上書き可）。検証アンケート5問は `?mode=feedback` を明示したときだけ表示。②紹介では結果画面から**アプリ内の読み解きガイド（全4章・本の体裁）**へ進み、終章で商談前ヒアリング2項目（すべて任意）と体験セッション申込（外部フォーム・`SESSION_FORM_URL`）に着地する。メールアドレスの登録は取らない（クリックだけで読み進められる）。①一般・③④にはガイドCTAを出さない
-- `index.html` / `.nojekyll` — GitHub Pages 公開用。`index.html` はクエリ（`?ref=` 等）を引き継いで `prototype.html` へリダイレクト
-- `lp-corporate.html` — 法人向けLP（Tier1業種の決裁者向け）。無料診断への導線（別タブ・`?ref=corp-lp&mode=feedback`）と商談フォーム（メール＋課題チェック＋自由記述）を持つ。フォームは Apps Script の `action:corpLead` で「法人リード」シートに記録（要再デプロイ。詳細は `apps-script/README.md`）
-- `lp-wedding.html` / `lp-coffee.html` — 法人LPの業種特化版（結婚式場版・珈琲屋カフェ版。初期フォーカス業種）。`lp-corporate.html` を親版とし、業種の言い当てモジュール（名乗り・悩み・放置コスト・ユースケース・フォーム課題・ref既定値 `wedding-lp`／`coffee-lp`）のみ差し替え。珈琲屋版は創業者の元珈琲屋オーナーというルーツを信頼要素（founder story）として組み込む。構成・コピーを変える際は `法人LP情報設計.json` の `variants` を先に更新して同期する。親版の共通部分を変更したら特化版2枚にも同じ変更を反映する
+- `docs/` — **GitHub Pages の公開元**（2026-09-07に直下から移した）。中身は旧URLから新ドメインへのリダイレクト3枚（`index.html`・`prototype.html` → `https://natur-indicator.com/`、`all-types.html` → `/types`。いずれもクエリとハッシュを引き継ぐ）と、法人LP3枚。**リポジトリ直下の `prototype.html` と `all-types.html` はアプリの文面の正なので、公開元を移すことで触らずに旧URLだけ差し替えている。** プレビューURLは `raw.githubusercontent.com` を見ているので影響しない
+- `docs/lp-corporate.html` — 法人向けLP（Tier1業種の決裁者向け）。無料診断への導線（別タブ・`https://natur-indicator.com/?ref=corp-lp`。**アプリでは検証アンケートを廃止したので `mode=feedback` は付けない**）と商談フォーム（メール＋課題チェック＋自由記述）を持つ。フォームは Apps Script の `action:corpLead` で「法人リード」シートに記録（要再デプロイ。詳細は `apps-script/README.md`）
+- `docs/lp-wedding.html` / `docs/lp-coffee.html` — 法人LPの業種特化版（結婚式場版・珈琲屋カフェ版。初期フォーカス業種）。`docs/lp-corporate.html` を親版とし、業種の言い当てモジュール（名乗り・悩み・放置コスト・ユースケース・フォーム課題・ref既定値 `wedding-lp`／`coffee-lp`）のみ差し替え。珈琲屋版は創業者の元珈琲屋オーナーというルーツを信頼要素（founder story）として組み込む。構成・コピーを変える際は `法人LP情報設計.json` の `variants` を先に更新して同期する。親版の共通部分を変更したら特化版2枚にも同じ変更を反映する
 - `法人LP情報設計.json` — 法人LPの情報設計（構成・コピー・フォーム仕様のソース）。LPの構成やコピーを変える際はここを先に更新して同期する
 - `apps-script/` — 診断結果・検証フィードバック・紹介者リード（メール/自由記述）をGoogleスプレッドシート（回答ログ）に記録する Google Apps Script Web App とセットアップ手順。`CreateSessionForm.gs` は体験セッション申込フォームの生成スクリプト（1回だけ実行する）。`UpdateRoadmapSheets.gs` は事業ロードマップブックの `0_全体サマリー`・`法人_12ヶ月ロードマップ`・`90日WBS_アクション` を書き換えるスクリプト（ロードマップブックにバインドして実行。旧シートは `_旧YYYYMMDD` に退避され消えない）。ロードマップの内容を変えるときはこのスクリプトの `moneyRows`／`rows`／`tasks` を直して再実行する
 - `体験セッション申込フォーム.md` — 読み解きガイド終章から開く申込フォーム（Googleフォーム）の仕様と文言の正。フォームを変えるときはここを先に更新する
@@ -24,8 +24,9 @@
 - `文脈出し分け仕様.md` — 個人／法人で出し分ける入口・立場・CTAのコピー素材。結果カードの核は共通のまま。LP制作フェーズ（M2〜M3）で `?ctx=` 実装時に参照。
 - `アプリ化要件定義.md` — GitHub Pages の静的ページからアプリケーション（DB＋Admin画面）へ移行するための要件定義。**アプリ化まわりの要件の正**。データのDB化・Admin画面・結果のワンタイム表示とデバイス束縛・X共有・SEOの7要件（F1〜F7）と、確認事項・リリース計画を持つ。アプリ化の方針を変えるときはここを先に更新する。
 - `アプリ化実装状況.md` — アプリ化の**実装がどこまで進んでいるか**の記録。Phase 1（診断から申込まで）完了、Phase 2（Admin とデータ移行）が次。作業の約束（文面とCSSは機械抽出・書き写さない）、ハマった箇所、次にやることを持つ。セッションをまたぐときは `アプリ化要件定義.md` とこれを最初に読む
-- `app/` — アプリ本体（Cloudflare Workers + D1 + Hono）。`prototype.html` を置き換える。**Phase 0（環境構築）まで**で、`wrangler.toml`・D1スキーマ（`migrations/0001_init.sql`）・ルートの受け口だけがある。セットアップ手順は `app/README.md`。実装は `アプリ化要件定義.md` に従う
-- `プライバシーポリシー.md` / `利用規約.md` — `/privacy`・`/terms` に載せる文面の正（**草案**。事業者情報が未記入で、公開前に専門家の確認が要る）。文言を変えるときはここを先に更新する
+- `app/` — アプリ本体（Cloudflare Workers + D1 + Hono）。`prototype.html` を置き換える。**Phase 2（Admin とデータ移行）まで完了**（本番へは未デプロイ）。診断→結果→ガイド→申込が通しで動き、`/admin` から運用できる。診断の文面とCSSは `prototype.html` から機械抽出しているので、**文面を変えるときは `prototype.html` を直して `npm run content`**（`app/src/content/*.ts` は生成物なので直接編集しない）。セットアップ・Admin・データ移行の手順は `app/README.md`。実装は `アプリ化要件定義.md` に従う。**アプリでは `?ref=` によるセグメント出し分けと検証アンケートを廃止し、ガイドCTAは全員に出す**（確認事項9＝b。`prototype.html` の出し分けとは意図的に違う）
+- `公開ページ文面.md` — `/about`・`/faq`・`/contact` に載せる文面の正。`## /パス` で1ページ、直後の ```meta` に `title` と `description`、`###` が節の見出し（`/faq` では質問そのものになり FAQPage の構造化データに入る）。**文言を変えたら `cd app && npm run content`**
+- `プライバシーポリシー.md` / `利用規約.md` — `/privacy`・`/terms` に載せる文面の正。事業者情報は記入済み（Mikata／齋藤祐希）だが、**公開前に専門家の確認が要る**。文言を変えるときはここを先に更新し、`cd app && npm run content` で反映する
 - `調査_ナチュール同名調査.md` — 「ナチュール」の同名・商標・ドメインの調査記録（Phase 0）。複合語「ナチュール診断」は空いている見込みだが、単体の「ナチュール」はワイン（ヴァン・ナチュール）が支配的なので単体では狙わない。商標（J-PlatPat）とドメインの空き確認は**未実施**
 
 ## プロジェクト開始日

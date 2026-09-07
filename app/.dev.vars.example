@@ -4,6 +4,19 @@
 # IPアドレスのハッシュ化に使うソルト（アプリ化要件定義.md 6.2：生IPは保存しない）
 IP_HASH_SALT=change-me-to-a-long-random-string
 
-# Admin の初期アカウント作成に使う。作成後は削除してよい（F2-1：1名運用）
+# Admin の初期アカウント作成に使う（F2-1）。
+# この2つが入っていて admin_users が空のときだけ /admin/bootstrap が開く。
+# パスワードは12文字以上。作成後は削除してよい。
 ADMIN_BOOTSTRAP_EMAIL=
 ADMIN_BOOTSTRAP_PASSWORD=
+
+# ログイン通知（F2-1）。1アカウント運用なので、身に覚えのないログインに気づける手段を必ず用意する。
+# 下のどちらかを設定する。未設定だと Admin の全ページに警告が出る。
+#
+#  (a) 任意のURLへ JSON を POST する。Slack の Incoming Webhook もこれで届く
+LOGIN_NOTIFY_WEBHOOK=
+#
+#  (b) Resend でメールを送る（3つそろって有効）
+RESEND_API_KEY=
+LOGIN_NOTIFY_TO=
+LOGIN_NOTIFY_FROM=

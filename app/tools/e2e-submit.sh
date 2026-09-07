@@ -12,8 +12,12 @@ C() { curl -s --noproxy '*' --max-time 8 "$@"; }
 ok=0; ng=0
 t() { if [ "$2" = "$3" ]; then ok=$((ok+1)); else ng=$((ng+1)); echo "  NG: $1 → 期待 '$3' / 実際 '$2'"; fi }
 
+# 冪等キーは毎回作る。固定にすると、同じDBへ2回目を流したとき1件目から
+# duplicate:true が返り、まっさらなDBでしか通らない試験になる。
+REQ="req-e2e-$(date +%s)-$$"
+
 # 正常な24問（前9問=極、後15問=1〜4）
-BODY='{"requestId":"req-e2e-001","answers":["O","B","L","O","B","L","O","B","L",4,4,4,4,4,3,3,3,3,3,2,2,2,2,2],"frame":"自然体","ref":"TKtp46k","src":"x","entryUrl":"https://natur-indicator.com/?src=x"}'
+BODY='{"requestId":"'"$REQ"'","answers":["O","B","L","O","B","L","O","B","L",4,4,4,4,4,3,3,3,3,3,2,2,2,2,2],"frame":"自然体","ref":"TKtp46k","src":"x","entryUrl":"https://natur-indicator.com/?src=x"}'
 
 echo "=== 1. 正常な回答を送る ==="
 H=$(C -D- -o /tmp/b1.json -X POST "$B/api/responses" -H 'Content-Type: application/json' -d "$BODY")
