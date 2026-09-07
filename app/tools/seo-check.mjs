@@ -8,6 +8,7 @@
  */
 import { HONSHITSU, TORISET, TYPES, TYPE_CODES } from '../src/content/types.ts';
 import { FAQ_ITEMS, INFO_PAGES } from '../src/content/pages.ts';
+import { apexUrl } from '../src/lib/canonical-host.ts';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8787';
 let fail = 0;
@@ -134,6 +135,17 @@ for (const [from, to] of [['/quiz', '/'], ['/prototype.html', '/'], ['/index.htm
   t(`${from} が301`, r.status, 301);
   t(`${from} の行き先`, new URL(r.location, BASE).pathname, to);
 }
+
+// ── www を apex へ寄せる（F6-4） ──
+// apex と www の両方をカスタムドメインにしているので、寄せないと同じ内容が2つのホストで
+// 配信され、canonical もそれぞれ自分を指す。検索エンジンには別サイトが2つあるように見える。
+// dev サーバーは1ホストしか持てないので、判定そのものをここで固定する。
+t('www は apex へ寄せる', apexUrl('https://www.natur-indicator.com/types/OBL'), 'https://natur-indicator.com/types/OBL');
+t('クエリとハッシュを持っていく', apexUrl('https://www.natur-indicator.com/?ref=TKtp46k#x'), 'https://natur-indicator.com/?ref=TKtp46k#x');
+t('http で来ても https へ', apexUrl('http://www.natur-indicator.com/'), 'https://natur-indicator.com/');
+t('apex はそのまま', apexUrl('https://natur-indicator.com/types'), null);
+t('www で始まらないホストは触らない', apexUrl('https://wwwx.example.com/'), null);
+t('壊れたURLでも落ちない', apexUrl('not a url'), null);
 
 // ── sitemap と robots ──
 const sm = await get('/sitemap.xml');
