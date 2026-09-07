@@ -25,6 +25,7 @@ import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import { admin } from './routes/admin.ts';
+import { apexUrl } from './lib/canonical-host.ts';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -56,6 +57,17 @@ const app = new Hono<{ Bindings: Bindings }>();
  * Admin は robots.txt に頼らず、認証とこのヘッダーで守る。
  */
 const NOINDEX_PREFIXES = ['/result', '/guide', '/apply', '/admin', '/api'];
+
+/**
+ * www は apex へ 301（F6-4）。**ほかのどの処理よりも先に置く。**
+ * 両方をカスタムドメインにしているので、寄せないと同じ内容が2つのホストで配信され、
+ * canonical もそれぞれ自分を指して、検索エンジンからは別サイトが2つあるように見える。
+ */
+app.use('*', async (c, next) => {
+  const to = apexUrl(c.req.url);
+  if (to) return c.redirect(to, 301);
+  return next();
+});
 
 app.use('*', async (c, next) => {
   await next();
