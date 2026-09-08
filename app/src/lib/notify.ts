@@ -50,7 +50,22 @@ export function notifyConfigured(env: NotifyEnv): boolean {
   return !!(c.webhook || (c.apiKey && c.to && c.from));
 }
 
-export type NotifyResult = { sent: boolean; via?: string; error?: string };
+export type NotifyResult = {
+  sent: boolean;
+  via?: string;
+  error?: string;
+  /**
+   * 送り先のホスト名（`hooks.slack.com` など）。**パスは含めない。**
+   * Webhook URL はパスがそのまま鍵なので、ホストだけなら画面に出しても危なくない。
+   * 「送れたのに Slack に出ない」とき、そもそも Slack へ送っていないのかを見分けるために要る。
+   */
+  host?: string;
+  /**
+   * 応答の本文の先頭。Slack の Incoming Webhook は成功すると `ok` だけを返す。
+   * ここが `ok` 以外なら、200 が返っていても**相手は Slack ではない**。
+   */
+  reply?: string;
+};
 
 /**
  * 実際に送る。件名と本文だけを受け取り、送り先の違いはここで吸収する。
@@ -72,9 +87,20 @@ async function send(env: NotifyEnv, subject: string, body: string): Promise<Noti
  */
 function logResult(subject: string, r: NotifyResult): NotifyResult {
   if (!r.sent) {
-    console.warn('notify failed', JSON.stringify({ subject, via: r.via ?? null, error: r.error ?? null }));
+    console.warn('notify failed', JSON.stringify({
+      subject, via: r.via ?? null, host: r.host ?? null, error: r.error ?? null,
+    }));
   }
   return r;
+}
+
+/** URLのホスト名だけを取り出す。**パスは鍵なので触らない。** 壊れたURLでも落ちない。 */
+function hostOf(url: string): string | undefined {
+  try {
+    return new URL(url).host;
+  } catch {
+    return undefined;
+  }
 }
 
 async function trySend(
@@ -82,19 +108,20 @@ async function trySend(
 ): Promise<NotifyResult> {
   try {
     if (c.webhook) {
+      const host = hostOf(c.webhook);
       const res = await fetch(c.webhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Slack も Google Chat も `text` を読む。件名を先頭行にして1つの本文にまとめる。
         body: JSON.stringify({ text: `${subject}\n\n${body}` }),
       });
+      const reply = (await res.text().catch(() => '')).slice(0, 120);
       // Slack は失敗の理由を本文に短い文字列で返す（invalid_payload・channel_not_found など）。
       // 状態コードだけだと原因に辿り着けないので、一緒に残す。
       if (!res.ok) {
-        const detail = await res.text().catch(() => '');
-        return { sent: false, via: 'webhook', error: `HTTP ${res.status}${detail ? ` ${detail.slice(0, 120)}` : ''}` };
+        return { sent: false, via: 'webhook', host, reply, error: `HTTP ${res.status}${reply ? ` ${reply}` : ''}` };
       }
-      return { sent: true, via: 'webhook' };
+      return { sent: true, via: 'webhook', host, reply };
     }
     if (c.apiKey && c.to && c.from) {
       const res = await fetch('https://api.resend.com/emails', {

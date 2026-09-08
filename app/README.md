@@ -281,7 +281,8 @@ curl -X POST -H 'Content-Type: application/json' -d '{"text":"テスト"}' 'http
 
 | 出るもの | 意味 |
 |:--|:--|
-| 送れました | **経路は通っている。** 届かないなら Slack 側（チャンネル違い・アプリの削除・別ワークスペース） |
+| 送れました＋送り先 `hooks.slack.com`／応答 `ok` | **Slack まで届いている。** 見えないならチャンネル違いか別ワークスペース。`api.slack.com/apps` → アプリ → Incoming Webhooks で、そのURLの宛先チャンネルを見る |
+| 送れました＋送り先が `hooks.slack.com` でない | **設定してある URL が Slack のものではない。** 手元で `curl` を通したURLと、`secret` に入れたURLが別物になっている |
 | `not_configured` | 通知先が未設定。`--env=""` を付けて `secret put` する |
 | `HTTP 404 channel_not_found` 等 | URLは生きているが宛先が無い。Webhook を作り直す |
 | `Invalid URL` | URLの前後に改行や空白が混ざっている。貼り直す |

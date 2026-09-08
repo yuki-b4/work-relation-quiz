@@ -394,10 +394,23 @@ const eq = (label, a, b) =>
     check('テストの本文が入る', JSON.parse(init.body).text.includes('通知のテスト'));
     return new Response('ok', { status: 200 });
   };
-  const ok = await notifyTest({ NOTIFY_WEBHOOK: 'https://x' }, 'https://natur-indicator.com');
+  const ok = await notifyTest({ NOTIFY_WEBHOOK: 'https://hooks.slack.com/services/T/B/secret-token' },
+    'https://natur-indicator.com');
   eq('送れた', ok.sent, true);
   eq('経路が分かる', ok.via, 'webhook');
   eq('成功では書かない', warns.length, 0);
+
+  // 「送れたのに Slack に出ない」の切り分けに要る2つ。
+  // **鍵であるパスは持ち出さない。** ホスト名と応答本文だけ。
+  eq('送り先のホストが分かる', ok.host, 'hooks.slack.com');
+  eq('応答が分かる（Slackは ok を返す）', ok.reply, 'ok');
+  check('パス（トークン）は持ち出さない', !JSON.stringify(ok).includes('secret-token'));
+
+  // 壊れたURLでもホスト取得で落ちない
+  globalThis.fetch = async () => { throw new TypeError('Invalid URL'); };
+  const noHost = await notifyTest({ NOTIFY_WEBHOOK: 'not a url' }, 'https://x');
+  eq('ホストが取れなくても落ちない', noHost.host, undefined);
+  eq('送れていない', noHost.sent, false);
 
   globalThis.fetch = realFetch;
   console.warn = realWarn;

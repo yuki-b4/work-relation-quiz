@@ -176,12 +176,29 @@ export function referrersPage(
  * 結果は成否と理由をそのまま出す（Slack は `channel_not_found` のように理由を返す）。
  * **URLは出さない。** 秘密値なので画面にもログにも載せない。
  */
-function notifyTest(shell: ShellOptions, result?: { sent: boolean; via?: string; error?: string }): string {
+type TestResult = { sent: boolean; via?: string; error?: string; host?: string; reply?: string };
+
+function notifyTest(shell: ShellOptions, result?: TestResult): string {
+  // **どこへ送ったか**を必ず出す。「送れたのに Slack に出ない」ときの本命は、
+  // 設定してある URL が、手元で試した URL と別物であることなので。
+  // ホスト名だけにする（パスがそのまま鍵なので、画面に出さない）。
+  const dest = result?.host
+    ? `<p class="sub">送り先：<code>${esc(result.host)}</code>` +
+      (result.reply ? `　応答：<code>${esc(result.reply)}</code>` : '') + '</p>' +
+      (result.host === 'hooks.slack.com' && result.reply === 'ok'
+        ? ''
+        : '<p class="muted" style="font-size:12px">Slack の Incoming Webhook なら、送り先は ' +
+          '<code>hooks.slack.com</code>、応答は <code>ok</code> になります。' +
+          '違っていれば、<b>設定してある URL が Slack のものではありません</b>。</p>')
+    : '';
   const line = !result
     ? '<p class="muted" style="font-size:12px">押すと、いま設定されている通知先へ1通送ります。</p>'
     : result.sent
-      ? `<p class="ok">送れました（経路：${esc(result.via ?? '不明')}）。通知先に届いているか確かめてください。</p>`
-      : `<p class="warn">送れませんでした：<code>${esc(result.error ?? '理由不明')}</code></p>` +
+      ? `<p class="ok">送れました（経路：${esc(result.via ?? '不明')}）。</p>` + dest +
+        '<p class="muted" style="font-size:12px">ここまで通っていて通知先に出ないなら、' +
+        '<b>送り先が思っているところと違います</b>。Slack なら、Webhook はチャンネル1つに紐づくので、' +
+        'api.slack.com/apps → アプリ → Incoming Webhooks で、そのURLがどのチャンネル宛かを見てください。</p>'
+      : `<p class="warn">送れませんでした：<code>${esc(result.error ?? '理由不明')}</code></p>` + dest +
         (result.error === 'not_configured'
           ? '<p class="muted" style="font-size:12px">通知先が未設定です。' +
             '<code>npx wrangler secret put NOTIFY_WEBHOOK --env=""</code> で入れてください。</p>'
@@ -198,8 +215,7 @@ function notifyTest(shell: ShellOptions, result?: { sent: boolean; via?: string;
 }
 
 export function exportPage(
-  shell: ShellOptions, counts: Record<string, number>,
-  notifyResult?: { sent: boolean; via?: string; error?: string }
+  shell: ShellOptions, counts: Record<string, number>, notifyResult?: TestResult
 ): string {
   const card = (href: string, title: string, desc: string, n: number) =>
     '<div class="panel">' +
