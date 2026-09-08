@@ -8,9 +8,11 @@
  *   favicon.ico          16+32px を1つにまとめた古い形式。/favicon.ico を直接見に来る相手向け
  *   apple-touch-icon.png 180×180。iOS のホーム画面用。**透過にしない**（黒地に合成されるため）
  *
- * **意匠は OGP と同じ言葉で作る。** OGP の左端にある縦帯は、上半分がコーラル（オープン）、
- * 下半分がティール（ガード）で、診断の2つの極を表している。favicon はそれを丸に写した。
+ * **意匠は OGP と同じ2色で作る。** コーラル＝オープン、ティール＝ガードで、診断の2つの極。
  * 16px では文字は読めないので、色と形だけで見分けがつくようにする。
+ *
+ * **分け方は左右にする。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
+ * 2つの極に優劣は無い。左右は並置に見えるので、意味を持ち込まずに済む。
  *
  * 色は prototype.html の CSS から取る（OGP と同じやり方）。サイトの色を変えれば追従する。
  * **境目はぼかさない。** 中間色を作るとにじみに見えて、2つの極という意味が消える。
@@ -41,15 +43,15 @@ const C = {
  *   濃いタブバーでも明るいタブバーでも浮かないようにする。
  */
 function svg(opaque) {
-  // 丸を切って上下を塗り分ける。パスで半円2つを描くより、clipPath のほうが
+  // 丸を切って左右を塗り分ける。パスで半円2つを描くより、clipPath のほうが
   // 半径を変えたときにズレない。
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <title>ナチュール診断</title>
   ${opaque ? `<rect width="64" height="64" fill="${C.bg}"/>` : ''}
   <clipPath id="c"><circle cx="32" cy="32" r="${opaque ? 24 : 30}"/></clipPath>
   <g clip-path="url(#c)">
-    <rect x="0" y="0" width="64" height="32" fill="${C.coral}"/>
-    <rect x="0" y="32" width="64" height="32" fill="${C.teal}"/>
+    <rect x="0" y="0" width="32" height="64" fill="${C.coral}"/>
+    <rect x="32" y="0" width="32" height="64" fill="${C.teal}"/>
   </g>
 </svg>`;
 }
