@@ -168,7 +168,55 @@ export function referrersPage(
 
 // ───────── CSV出力（F2-7） ─────────
 
-export function exportPage(shell: ShellOptions, counts: Record<string, number>): string {
+/**
+ * 通知の試し撃ち（D-1の運用）。
+ *
+ * **「通知が来ない」ときに、どこで止まっているかを画面で見るためのもの。**
+ * これが無いと `wrangler tail` を張ったまま本物の申込を出すしかない。
+ * 結果は成否と理由をそのまま出す（Slack は `channel_not_found` のように理由を返す）。
+ * **URLは出さない。** 秘密値なので画面にもログにも載せない。
+ */
+type TestResult = { sent: boolean; via?: string; error?: string; host?: string; reply?: string };
+
+function notifyTest(shell: ShellOptions, result?: TestResult): string {
+  // **どこへ送ったか**を必ず出す。「送れたのに Slack に出ない」ときの本命は、
+  // 設定してある URL が、手元で試した URL と別物であることなので。
+  // ホスト名だけにする（パスがそのまま鍵なので、画面に出さない）。
+  const dest = result?.host
+    ? `<p class="sub">送り先：<code>${esc(result.host)}</code>` +
+      (result.reply ? `　応答：<code>${esc(result.reply)}</code>` : '') + '</p>' +
+      (result.host === 'hooks.slack.com' && result.reply === 'ok'
+        ? ''
+        : '<p class="muted" style="font-size:12px">Slack の Incoming Webhook なら、送り先は ' +
+          '<code>hooks.slack.com</code>、応答は <code>ok</code> になります。' +
+          '違っていれば、<b>設定してある URL が Slack のものではありません</b>。</p>')
+    : '';
+  const line = !result
+    ? '<p class="muted" style="font-size:12px">押すと、いま設定されている通知先へ1通送ります。</p>'
+    : result.sent
+      ? `<p class="ok">送れました（経路：${esc(result.via ?? '不明')}）。</p>` + dest +
+        '<p class="muted" style="font-size:12px">ここまで通っていて通知先に出ないなら、' +
+        '<b>送り先が思っているところと違います</b>。Slack なら、Webhook はチャンネル1つに紐づくので、' +
+        'api.slack.com/apps → アプリ → Incoming Webhooks で、そのURLがどのチャンネル宛かを見てください。</p>'
+      : `<p class="warn">送れませんでした：<code>${esc(result.error ?? '理由不明')}</code></p>` + dest +
+        (result.error === 'not_configured'
+          ? '<p class="muted" style="font-size:12px">通知先が未設定です。' +
+            '<code>npx wrangler secret put NOTIFY_WEBHOOK --env=""</code> で入れてください。</p>'
+          : '<p class="muted" style="font-size:12px">URLの前後に改行や空白が混ざっていると ' +
+            '<code>Invalid URL</code> になります。貼り直すと直ることがあります。</p>');
+  return (
+    '<div class="panel">' +
+      '<h2>通知のテスト</h2>' +
+      line +
+      `<form method="post" action="/admin/notify-test"><input type="hidden" name="csrf" value="${esc(shell.csrf ?? '')}">` +
+      '<button class="btn" type="submit">テスト通知を送る</button></form>' +
+    '</div>'
+  );
+}
+
+export function exportPage(
+  shell: ShellOptions, counts: Record<string, number>, notifyResult?: TestResult
+): string {
   const card = (href: string, title: string, desc: string, n: number) =>
     '<div class="panel">' +
       `<h2>${esc(title)}</h2>` +
@@ -190,7 +238,8 @@ export function exportPage(shell: ShellOptions, counts: Record<string, number>):
       card('/admin/export/answers.csv', '設問別回答', '1行1設問。24問の生の回答。移行データは9問だけ入っています。', counts.answers ?? 0) +
       card('/admin/export/applications.csv', '体験セッション申込', '1行1申込。氏名とメールを含みます。扱いに注意。', counts.applications ?? 0) +
       card('/admin/export/corp-leads.csv', '法人リード', '1行1リード。メールアドレスを含みます。', counts.corpLeads ?? 0) +
-    '</div>';
+    '</div>' +
+    '<div class="grid2" style="margin-top:18px">' + notifyTest(shell, notifyResult) + '</div>';
 
   return adminPage({ ...shell, nav: 'export' }, body);
 }

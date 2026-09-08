@@ -16,7 +16,7 @@ import {
   evaluateAdminSession, isoNow, loadAdminSession, login, readAdminCookie, revokeAdminSession,
   touchAdminSession, uaHashOf,
 } from '../lib/admin-auth.ts';
-import { notifyConfigured, notifyLogin } from '../lib/notify.ts';
+import { notifyConfigured, notifyLogin, notifyTest } from '../lib/notify.ts';
 import { saltedHash } from '../lib/hash.ts';
 import { timingSafeEqualStr } from '../lib/password.ts';
 import {
@@ -543,6 +543,35 @@ admin.get('/export', async (c) => {
     corpLeads: await q(`select count(*) as n from corp_leads where deleted_at is null`),
   };
   return c.html(exportPage(shellOf(c, 'CSV出力'), counts));
+});
+
+/**
+ * 通知の試し撃ち（運用）。
+ *
+ * **待って結果を出す。** ここだけは `waitUntil` にしない。
+ * 「送れたか」を見るための画面なので、送り終わるまで待たないと意味がない。
+ * 監査ログに残すのは、誰がいつ叩いたかを追えるようにするため（送った中身は残さない）。
+ */
+admin.post('/notify-test', async (c) => {
+  const ok = await readForm(c);
+  if (!ok.ok) return c.html(exportPage(shellOf(c, 'CSV出力'), {}, { sent: false, error: ok.message }), 400);
+
+  const result = await notifyTest(c.env, originOf(c.req.url));
+  await audit(c.env.DB, {
+    actorId: c.var.userId, action: 'notify_test', targetType: 'system', targetId: 'notify',
+    ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT),
+    detail: { sent: result.sent, via: result.via ?? null, error: result.error ?? null },
+  });
+
+  const q = async (sql: string) => (await c.env.DB.prepare(sql).first<{ n: number }>())?.n ?? 0;
+  const counts = {
+    responses: await q(`select count(*) as n from responses where deleted_at is null`),
+    answers: await q(`select count(*) as n from response_answers a
+                       join responses r on r.id = a.response_id where r.deleted_at is null`),
+    applications: await q(`select count(*) as n from session_applications where deleted_at is null`),
+    corpLeads: await q(`select count(*) as n from corp_leads where deleted_at is null`),
+  };
+  return c.html(exportPage(shellOf(c, 'CSV出力'), counts, result));
 });
 
 function stamp(): string {
