@@ -15,7 +15,7 @@ import {
 import { renderResultCard } from './views/result.ts';
 import { randomToken } from './lib/result-session.ts';
 import { resultShell } from './views/result-page.ts';
-import { closedPage, errorPage } from './views/layout.ts';
+import { closedPage, errorPage, notFoundPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
 import { applyPage, SLOTS } from './views/apply-page.ts';
@@ -25,9 +25,13 @@ import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import { admin } from './routes/admin.ts';
+import { adminPage } from './views/admin/layout.ts';
 import { apexUrl } from './lib/canonical-host.ts';
 import { errorSignature, notifyApplication, notifyError, shouldNotifyError } from './lib/notify.ts';
 import ogpImage from '../assets/ogp.png';
+import faviconIco from '../assets/favicon.ico';
+import faviconSvg from '../assets/favicon.svg';
+import appleTouchIcon from '../assets/apple-touch-icon.png';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -536,6 +540,28 @@ app.get('/ogp.png', (c) =>
   })
 );
 
+/**
+ * favicon 一式（D-4）。`npm run favicon` で作り直せる（tools/make-favicon.mjs）。
+ *
+ * 3つ置くのは、見に来る相手が違うから。
+ *   ・`/favicon.svg`          対応ブラウザ。どの大きさでも滲まない
+ *   ・`/favicon.ico`          <link> を読まずに直接取りに来る相手（RSSリーダー、古いブラウザ）
+ *   ・`/apple-touch-icon.png` iOS のホーム画面。**透過にしない**（黒地に合成される）
+ *
+ * OGP画像と同じく Worker に同梱している。差し替えの頻度が低いので長めにキャッシュさせる。
+ */
+const ICON_CACHE = 'public, max-age=86400, s-maxage=604800';
+
+app.get('/favicon.ico', (c) =>
+  c.body(faviconIco, 200, { 'Content-Type': 'image/x-icon', 'Cache-Control': ICON_CACHE })
+);
+app.get('/favicon.svg', (c) =>
+  c.body(faviconSvg, 200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': ICON_CACHE })
+);
+app.get('/apple-touch-icon.png', (c) =>
+  c.body(appleTouchIcon, 200, { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE })
+);
+
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {
   const origin = originOf(c);
@@ -561,6 +587,33 @@ app.get('/api/health', async (c) => {
     tables: row?.n ?? 0,
     questionSetVersion: c.env.QUESTION_SET_VERSION,
   });
+});
+
+/**
+ * どのルートにも当たらなかったとき（D-4）。
+ *
+ * Hono の既定は素のテキストなので、打ち間違えた人がそこで行き止まりになる。
+ * API は JSON を返す（404のHTMLを fetch 側に渡しても読めない）。
+ */
+app.notFound((c) => {
+  if (c.req.path.startsWith('/api/')) {
+    return c.json({ ok: false, message: 'そのURLはありません。' }, 404);
+  }
+  // Admin から来た 404（IDの打ち間違い、`/admin/bootstrap` の封鎖）に、
+  // 「診断を受ける」ボタンの付いた公開ページを返しても行き先にならない。
+  // ログイン前でも見えるので、ここには一覧へのリンク以外を置かない。
+  if (c.req.path === '/admin' || c.req.path.startsWith('/admin/')) {
+    return c.html(
+      adminPage(
+        { title: '見つかりません', nav: 'none' },
+        '<h1>見つかりません</h1>' +
+        '<p>そのURLはありません。アドレスを確かめてください。</p>' +
+        '<p><a href="/admin/responses">回答一覧へ</a></p>'
+      ),
+      404
+    );
+  }
+  return c.html(notFoundPage(), 404);
 });
 
 /**

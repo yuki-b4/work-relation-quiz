@@ -180,5 +180,38 @@ for (const ua of ['Googlebot', 'Bingbot', 'OAI-SearchBot', 'Claude-SearchBot', '
 // Admin は robots.txt に書かない（パスを晒さない・noindexを読ませるため。F6-3）
 t('robots に /admin を書いていない', rb.body.includes('/admin'), false);
 
+// ── favicon（D-4） ──
+// タブに何も出ないのは、公開しているサービスとしての体裁の問題（見た目だけでなく、
+// ブックマークや共有のときに何のページか分からなくなる）。
+{
+  const top = await get('/');
+  t('svg の favicon を出す', top.markup.includes('<link rel="icon" href="/favicon.svg"'), true);
+  t('ico の favicon も出す', top.markup.includes('<link rel="icon" href="/favicon.ico"'), true);
+  t('apple-touch-icon を出す', top.markup.includes('rel="apple-touch-icon"'), true);
+  for (const [path, type] of [
+    ['/favicon.ico', 'image/x-icon'],
+    ['/favicon.svg', 'image/svg+xml'],
+    ['/apple-touch-icon.png', 'image/png'],
+  ]) {
+    const r = await fetch(BASE + path);
+    t(`${path} が 200`, r.status, 200);
+    t(`${path} の型が ${type}`, (r.headers.get('content-type') ?? '').startsWith(type), true);
+  }
+}
+
+// ── 404（D-4） ──
+// 既定の素のテキストだと、URLを打ち間違えた人がそこで行き止まりになる。
+{
+  const r = await get('/types/');
+  t('無いページは 404', r.status, 404);
+  t('404 にも戻り道がある', r.markup.includes('href="/"'), true);
+  t('404 は index させない', r.markup.includes('noindex'), true);
+
+  const api = await fetch(BASE + '/api/nope');
+  t('APIの404は JSON', api.status, 404);
+  t('APIの404は HTML を返さない',
+    (api.headers.get('content-type') ?? '').includes('json'), true);
+}
+
 console.log(fail ? `\n失敗 ${fail} 件` : '\n検索まわり：問題なし');
 process.exit(fail ? 1 : 0);

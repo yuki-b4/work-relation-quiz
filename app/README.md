@@ -334,6 +334,24 @@ npx wrangler d1 execute nature-shindan --remote --file=migrate.sql
 - 移行が済んだら **Googleフォームの受付を締め切り**（確認事項3＝a）、スプレッドシートは
   読み取り専用で残す（7.2）
 
+## favicon を作り直す
+
+```
+npm run favicon
+```
+
+`assets/` に3つ書き出す。**意匠は OGP と同じ言葉**（上コーラル／下ティールの丸。診断の
+2つの極）で、色は `prototype.html` の CSS から取っているので、サイトの色を変えれば追従する。
+
+| | 用途 |
+|:--|:--|
+| `favicon.svg` | 対応ブラウザ。どの大きさでも滲まない |
+| `favicon.ico` | `<link>` を読まずに `/favicon.ico` を直接取りに来る相手 |
+| `apple-touch-icon.png` | iOS のホーム画面。**透過にしない**（黒地に合成されるため） |
+
+`favicon-preview.png` も出る。**16px で見分けがつくか**を、明るい地と暗い地の両方で見る
+（原寸だけ見ていると気づけない）。
+
 ## OGP画像を作り直す
 
 共有カードの画像（1200×630）。`assets/ogp.png` が本体で、**スクリプトから作る**。

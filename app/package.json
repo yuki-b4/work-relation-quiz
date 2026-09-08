@@ -36,7 +36,8 @@
     "tail:preview": "wrangler tail --env preview",
     "db:create:preview": "wrangler d1 create nature-shindan-preview",
     "db:migrate:preview": "wrangler d1 migrations apply nature-shindan-preview --remote --env preview",
-    "db:backup": "node tools/db-backup.mjs"
+    "db:backup": "node tools/db-backup.mjs",
+    "favicon": "node --experimental-strip-types tools/make-favicon.mjs"
   },
   "dependencies": {
     "hono": "^4.6.0"

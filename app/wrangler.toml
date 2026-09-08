@@ -27,12 +27,13 @@ workers_dev = false
 # 既定では workers.dev が有効なときに一緒に有効になるので、ここでも既定に頼らず書く。
 preview_urls = false
 
-# OGP画像（assets/ogp.png）を Worker に同梱する（アプリ化要件定義.md F7-3）。
+# assets/ の画像を Worker に同梱する（OGP画像は F7-3、favicon は D-4）。
 # これが無いと import が「そんなモジュールは無い」で落ちる。
 # base64 にして .ts へ埋める手もあるが、それだと画像をリポジトリで見られなくなる。
+# **import したものだけが入る**ので、ここに書いただけで重くなることはない。
 [[rules]]
 type = "Data"
-globs = ["**/*.png"]
+globs = ["**/*.png", "**/*.ico", "**/*.svg"]
 fallthrough = true
 
 [observability]
