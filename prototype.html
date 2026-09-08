@@ -39,24 +39,6 @@
     padding:clamp(16px,4vw,48px) 16px;
   }
   .app{width:100%; max-width:640px}
-  /* 背景の淡い円。共有カード（OGP画像）と同じ意匠で、SNSから開いた人が同じ見た目に迎えられる。
-
-     **要素ではなく背景で描く。** 要素にすると、はみ出した分で横スクロールが出る・重なり順を
-     指定する・クリックを透かす、の3つを毎回考えることになるが、背景ならどれも起きない
-     （box に自動で切り取られる）。
-
-     **本文の外に置ける幅でだけ出す。** 本体は最大640pxなので、その脇に円が収まるのは
-     おおよそ1100px以上から。狭い画面で出すと、ヘッダーの罫線や見出しに重なる。
-     角に寄せればヘッダーに、下げれば本文に被るので、逃げ場が無い。飾りのために読みにくくしない。
-
-     トップ以外では出さない。設問に進んだら、答えることだけが残るようにする。 */
-  @media (min-width:1100px){
-    body:has(#intro.active){
-      background-image:radial-gradient(circle clamp(200px,18vw,300px) at calc(100% - 2vw) 58px,
-        color-mix(in srgb, var(--surface) 75%, transparent) 0 100%, transparent 100%);
-      background-repeat:no-repeat;
-    }
-  }
   .screen{display:none; animation:fade .5s ease both}
   .screen.active{display:block}
   @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
