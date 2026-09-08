@@ -61,12 +61,13 @@ name = "nature-shindan-preview"
 routes = []
 workers_dev = true
 
-# `npx wrangler d1 create nature-shindan-preview` の出力を貼る。
-# 空のままだと deploy が「そんなDBは無い」で落ちる（本番には影響しない）。
+# `npx wrangler d1 create nature-shindan-preview` の出力（2026-09-08に作成）。
+# 本番の database_id とは**別のもの**。ここを本番のIDにすると、
+# プレビューでの操作がそのまま本番のデータに当たる。
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "nature-shindan-preview"
-database_id = ""
+database_id = "ea53cd24-3d92-4e91-a324-e37743c15d22"
 
 [env.preview.vars]
 QUESTION_SET_VERSION = "2026-09"
