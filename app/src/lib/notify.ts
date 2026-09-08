@@ -57,7 +57,29 @@ export type NotifyResult = { sent: boolean; via?: string; error?: string };
  * 失敗しても呼び出し側の処理は止めない（通知のために申込を落とすほうが困る）。
  */
 async function send(env: NotifyEnv, subject: string, body: string): Promise<NotifyResult> {
-  const c = conf(env);
+  return logResult(subject, await trySend(conf(env), subject, body));
+}
+
+/**
+ * **送れなかったことを必ずログに残す。**
+ *
+ * 呼び出し側は `waitUntil` に投げていて、戻り値を見ない（見ても利用者に返す先が無い）。
+ * ここで書き残さないと、**Slack に拒否されても、URLが壊れていても、何も起きないまま**になる。
+ * 「通知が来ない」ときに最初に見るのがこの行。`npx wrangler tail` で拾える。
+ *
+ * **URLもAPIキーも本文も出さない。** 出るのは件名と、どの経路で何が起きたかだけ。
+ * ログはダッシュボードに残るので、そこに秘密や個人情報を置かない。
+ */
+function logResult(subject: string, r: NotifyResult): NotifyResult {
+  if (!r.sent) {
+    console.warn('notify failed', JSON.stringify({ subject, via: r.via ?? null, error: r.error ?? null }));
+  }
+  return r;
+}
+
+async function trySend(
+  c: ReturnType<typeof conf>, subject: string, body: string
+): Promise<NotifyResult> {
   try {
     if (c.webhook) {
       const res = await fetch(c.webhook, {
@@ -66,7 +88,12 @@ async function send(env: NotifyEnv, subject: string, body: string): Promise<Noti
         // Slack も Google Chat も `text` を読む。件名を先頭行にして1つの本文にまとめる。
         body: JSON.stringify({ text: `${subject}\n\n${body}` }),
       });
-      if (!res.ok) return { sent: false, via: 'webhook', error: `HTTP ${res.status}` };
+      // Slack は失敗の理由を本文に短い文字列で返す（invalid_payload・channel_not_found など）。
+      // 状態コードだけだと原因に辿り着けないので、一緒に残す。
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        return { sent: false, via: 'webhook', error: `HTTP ${res.status}${detail ? ` ${detail.slice(0, 120)}` : ''}` };
+      }
       return { sent: true, via: 'webhook' };
     }
     if (c.apiKey && c.to && c.from) {
@@ -75,11 +102,16 @@ async function send(env: NotifyEnv, subject: string, body: string): Promise<Noti
         headers: { Authorization: `Bearer ${c.apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: c.from, to: [c.to], subject, text: body }),
       });
-      if (!res.ok) return { sent: false, via: 'resend', error: `HTTP ${res.status}` };
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        return { sent: false, via: 'resend', error: `HTTP ${res.status}${detail ? ` ${detail.slice(0, 120)}` : ''}` };
+      }
       return { sent: true, via: 'resend' };
     }
     return { sent: false, error: 'not_configured' };
   } catch (err) {
+    // URLの前後に改行や空白が混ざっていると、ここで `TypeError: Invalid URL` になる。
+    // `wrangler secret put` に貼るときに紛れ込みやすい。
     return { sent: false, error: String(err) };
   }
 }
@@ -149,6 +181,23 @@ export async function notifyLogin(env: NotifyEnv, e: LoginEvent): Promise<Notify
     '手順は app/README.md の「パスワードを忘れた・変えたいとき」にあります。',
   ].join('\n');
   return send(env, subject, body);
+}
+
+// ───────── 試し撃ち（運用） ─────────
+
+/**
+ * いま設定されている通知先へ1通送って、結果を返す。
+ *
+ * **「通知が来ない」ときに、どこで止まっているかを切り分けるためのもの。**
+ * 送れたのに届かないならSlack側（チャンネル違い・アプリの削除）、
+ * 送れないならこちら側（未設定・URLが壊れている）と分かる。
+ */
+export async function notifyTest(env: NotifyEnv, origin: string): Promise<NotifyResult> {
+  return send(
+    env,
+    '[ナチュール診断] 通知のテスト',
+    ['Admin から送ったテストです。', '', 'これが読めていれば、通知の経路は通っています。', `サイト：${origin}`].join('\n')
+  );
 }
 
 // ───────── サーバエラー（D-3） ─────────

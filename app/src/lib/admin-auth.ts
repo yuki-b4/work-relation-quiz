@@ -257,7 +257,9 @@ export async function revokeAdminSession(db: D1Database, id: string, now = isoNo
 
 export type AuditAction =
   | 'login' | 'login_failed' | 'logout' | 'bootstrap'
-  | 'view_pii' | 'export' | 'update' | 'delete' | 'purge' | 'create';
+  | 'view_pii' | 'export' | 'update' | 'delete' | 'purge' | 'create'
+  // 通知の試し撃ち（運用）。誰がいつ叩いたかを追えるようにする。送った中身は残さない。
+  | 'notify_test';
 
 /**
  * 監査ログ（F2-1）。1名運用でも、個人情報の閲覧・エクスポート・削除は必ず残す。

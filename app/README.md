@@ -265,6 +265,31 @@ curl -X POST -H 'Content-Type: application/json' -d '{"text":"テスト"}' 'http
 > （「Add New Webhook to Workspace」で申請になる）。
 > **URLは秘密値**。これを知っていれば誰でもそのチャンネルに投稿できるので、チャットや Issue に貼らない。
 
+### 通知が来ないとき
+
+上から順に見る。**上ほど起きやすい。**
+
+| # | 見るところ | 判断 |
+|:--|:--|:--|
+| 1 | `/admin/export` の「通知のテスト」を押す | ここで切り分く。結果がそのまま出る |
+| 2 | `npx wrangler secret list --env=""` | `NOTIFY_WEBHOOK`（または旧名）が無ければ未設定 |
+| 3 | `npx wrangler deployments list --env=""` | 通知のコードを入れたあとにデプロイしているか |
+| 4 | `curl -X POST -H 'Content-Type: application/json' -d '{"text":"テスト"}' '<URL>'` | ここで失敗するなら Slack 側 |
+| 5 | `npm run tail` | 送信に失敗すると `notify failed` が出る |
+
+「通知のテスト」の読み方。
+
+| 出るもの | 意味 |
+|:--|:--|
+| 送れました | **経路は通っている。** 届かないなら Slack 側（チャンネル違い・アプリの削除・別ワークスペース） |
+| `not_configured` | 通知先が未設定。`--env=""` を付けて `secret put` する |
+| `HTTP 404 channel_not_found` 等 | URLは生きているが宛先が無い。Webhook を作り直す |
+| `Invalid URL` | URLの前後に改行や空白が混ざっている。貼り直す |
+
+> **`--env` の付け忘れに注意。** `[env.preview]` があるので、`--env preview` を付けて入れた
+> secret は**プレビュー側にしか入らない**。本番は `--env=""`。
+> `secret list` も同じで、環境ごとに別々に確認する。
+
 ### パスワードを忘れた・変えたいとき
 
 **これが唯一の復旧手段**（F2-1 の3）。DBを直接書き換える。

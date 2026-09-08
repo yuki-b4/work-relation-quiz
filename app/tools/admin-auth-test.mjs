@@ -21,7 +21,7 @@ import { csvCell, csvRow, toCsv } from '../src/lib/csv.ts';
 import { makeReferrerCode } from '../src/lib/admin-queries.ts';
 import { viewAnswers, questionSetOf, CURRENT_SET } from '../src/lib/question-archive.ts';
 import {
-  notifyConfigured, notifyApplication, notifyError,
+  notifyConfigured, notifyApplication, notifyError, notifyTest,
   errorSignature, normalizePath, newErrorThrottle, shouldNotifyError,
 } from '../src/lib/notify.ts';
 
@@ -356,6 +356,51 @@ const eq = (label, a, b) =>
     method: 'GET', path: '/', error: new Error('x'), origin: 'https://x', at: 'now',
   });
   eq('未設定なら送らない', none.sent, false);
+}
+
+// ───────── 通知が失敗したときに、理由が残るか ─────────
+{
+  const warns = [];
+  const realWarn = console.warn;
+  console.warn = (...a) => warns.push(a.join(' '));
+  const realFetch = globalThis.fetch;
+
+  // Slack は理由を本文で返す。状態コードだけだと原因に辿り着けない。
+  globalThis.fetch = async () => new Response('channel_not_found', { status: 404 });
+  const bad = await notifyTest({ NOTIFY_WEBHOOK: 'https://x' }, 'https://natur-indicator.com');
+  eq('拒否されたら送れていない', bad.sent, false);
+  check('状態コードが残る', bad.error.includes('404'));
+  check('Slackの理由も残る', bad.error.includes('channel_not_found'));
+  check('ログに書く', warns.some((w) => w.includes('notify failed') && w.includes('channel_not_found')));
+
+  // URLの前後に空白や改行が混ざると、fetch がその場で投げる
+  warns.length = 0;
+  globalThis.fetch = async () => { throw new TypeError('Invalid URL'); };
+  const broken = await notifyTest({ NOTIFY_WEBHOOK: ' https://x ' }, 'https://natur-indicator.com');
+  eq('投げられても落ちない', broken.sent, false);
+  check('理由が残る', broken.error.includes('Invalid URL'));
+  check('ログにも書く', warns.some((w) => w.includes('notify failed')));
+
+  // 未設定も黙って通さない（設定し忘れに気づけないのがいちばん困る）
+  warns.length = 0;
+  const none = await notifyTest({}, 'https://natur-indicator.com');
+  eq('未設定なら送らない', none.sent, false);
+  eq('理由が分かる', none.error, 'not_configured');
+  check('未設定もログに書く', warns.some((w) => w.includes('not_configured')));
+
+  // 送れたときは静か（成功のたびに書くと、失敗が埋もれる）
+  warns.length = 0;
+  globalThis.fetch = async (url, init) => {
+    check('テストの本文が入る', JSON.parse(init.body).text.includes('通知のテスト'));
+    return new Response('ok', { status: 200 });
+  };
+  const ok = await notifyTest({ NOTIFY_WEBHOOK: 'https://x' }, 'https://natur-indicator.com');
+  eq('送れた', ok.sent, true);
+  eq('経路が分かる', ok.via, 'webhook');
+  eq('成功では書かない', warns.length, 0);
+
+  globalThis.fetch = realFetch;
+  console.warn = realWarn;
 }
 
 if (fails.length) {
