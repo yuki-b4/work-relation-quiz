@@ -390,10 +390,26 @@ npm run db:migrate:preview
 npx wrangler secret put IP_HASH_SALT --env preview
 npx wrangler secret put ADMIN_BOOTSTRAP_EMAIL --env preview
 npx wrangler secret put ADMIN_BOOTSTRAP_PASSWORD --env preview
+
+# 5. 出す
+npm run deploy:preview
 ```
 
-以降は `npm run deploy:preview` で出せる。URLは
-`https://nature-shindan-preview.<自分のサブドメイン>.workers.dev`（初回のデプロイ出力に出る）。
+**入れる値は本番と別にする。** とくに `ADMIN_BOOTSTRAP_PASSWORD` を本番と同じにしない。
+プレビューは推測できるURLに出ていて Access もかけていないので、破られた時点で本番の
+Admin も破られる。`IP_HASH_SALT` は `openssl rand -base64 32` で新しく作る。
+
+`NOTIFY_WEBHOOK` は**入れないほうがよい**。プレビューで試すたびに「申込がありました」が
+飛ぶと、本物の申込に気づけなくなる。通知の見え方を確かめたいときだけ、別チャンネルの
+Webhook を新しく作って入れる。
+
+> 手順4で「そんな Worker は無い。作るか？」と聞かれるのは正しい。
+> まだデプロイしていないので Worker が存在しないだけで、`yes` を選ぶと空の Worker が
+> 先に作られ、手順5で中身が入る。**このとき名前が `nature-shindan-preview` であることを
+> 確かめる。** `nature-shindan` だったら `--env preview` が効いていないので中止する。
+
+URLは `https://nature-shindan-preview.<自分のサブドメイン>.workers.dev`
+（初回のデプロイ出力に出る）。以降は `npm run deploy:preview` だけで出せる。
 
 ステージングは `ENVIRONMENT=preview` が入っているので、**全ページが noindex になり、
 robots.txt も `Disallow: /` を返す**。本番と同じ中身なので、寄せないと検索エンジンから
