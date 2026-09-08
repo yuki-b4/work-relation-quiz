@@ -6,8 +6,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --env=\"\"",
+    "deploy": "wrangler deploy --env=\"\"",
     "typecheck": "tsc --noEmit",
     "content": "node tools/extract-content.mjs && node tools/extract-pages.mjs",
     "parity": "node --experimental-strip-types tools/parity-check.mjs",
@@ -21,16 +21,23 @@
     "test:seo": "node --experimental-strip-types tools/seo-check.mjs",
     "check": "npm run content && npm run parity && npm run test:session && npm run test:markup && npm run test:auth && npm run test:migrate && npm run typecheck",
     "db:create": "wrangler d1 create nature-shindan",
-    "db:migrate:local": "wrangler d1 migrations apply nature-shindan --local",
-    "db:migrate:remote": "wrangler d1 migrations apply nature-shindan --remote",
-    "db:console:local": "wrangler d1 execute nature-shindan --local --command",
+    "db:migrate:local": "wrangler d1 migrations apply nature-shindan --local --env=\"\"",
+    "db:migrate:remote": "wrangler d1 migrations apply nature-shindan --remote --env=\"\"",
+    "db:console:local": "wrangler d1 execute nature-shindan --local --env=\"\" --command",
     "test:admin": "node tools/e2e-admin.mjs",
     "test:auth": "node --experimental-strip-types tools/admin-auth-test.mjs",
     "test:migrate": "node tools/migrate-test.mjs",
     "migrate": "node tools/migrate-sheets.mjs",
     "admin:password": "node --experimental-strip-types tools/admin-password.mjs",
     "pages": "node tools/extract-pages.mjs",
-    "ogp": "node tools/make-ogp.mjs"
+    "ogp": "node tools/make-ogp.mjs",
+    "deploy:preview": "wrangler deploy --env preview",
+    "tail": "wrangler tail --env=\"\"",
+    "tail:preview": "wrangler tail --env preview",
+    "db:create:preview": "wrangler d1 create nature-shindan-preview",
+    "db:migrate:preview": "wrangler d1 migrations apply nature-shindan-preview --remote --env preview",
+    "db:backup": "node tools/db-backup.mjs",
+    "favicon": "node --experimental-strip-types tools/make-favicon.mjs"
   },
   "dependencies": {
     "hono": "^4.6.0"

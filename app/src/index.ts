@@ -15,7 +15,7 @@ import {
 import { renderResultCard } from './views/result.ts';
 import { randomToken } from './lib/result-session.ts';
 import { resultShell } from './views/result-page.ts';
-import { closedPage } from './views/layout.ts';
+import { closedPage, errorPage, notFoundPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
 import { applyPage, SLOTS } from './views/apply-page.ts';
@@ -25,8 +25,13 @@ import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import { admin } from './routes/admin.ts';
+import { adminPage } from './views/admin/layout.ts';
 import { apexUrl } from './lib/canonical-host.ts';
+import { errorSignature, notifyApplication, notifyError, shouldNotifyError } from './lib/notify.ts';
 import ogpImage from '../assets/ogp.png';
+import faviconIco from '../assets/favicon.ico';
+import faviconSvg from '../assets/favicon.svg';
+import appleTouchIcon from '../assets/apple-touch-icon.png';
 import type { TypeCode } from './content/types.ts';
 
 /** Cloudflare のレート制限バインディング（wrangler.toml の [[ratelimits]]）。 */
@@ -44,11 +49,21 @@ type Bindings = {
   /** Admin（F2）。初期アカウントの作成とログイン通知に使う。無くても動く。 */
   ADMIN_BOOTSTRAP_EMAIL?: string;
   ADMIN_BOOTSTRAP_PASSWORD?: string;
-  LOGIN_NOTIFY_WEBHOOK?: string;
+  /** 通知先（申込とログイン）。NOTIFY_* が新しい名前で、LOGIN_NOTIFY_* は旧名。 */
+  NOTIFY_WEBHOOK?: string;
   RESEND_API_KEY?: string;
+  NOTIFY_EMAIL_TO?: string;
+  NOTIFY_EMAIL_FROM?: string;
+  LOGIN_NOTIFY_WEBHOOK?: string;
   LOGIN_NOTIFY_TO?: string;
   LOGIN_NOTIFY_FROM?: string;
   LOGIN_LIMIT?: RateLimiter;
+  /**
+   * 本番かどうか（D-3）。ステージングでは "preview" が入る。
+   * 入っていると全ページを noindex にする。**本番と同じ中身が2箇所で配信されるので、
+   * 寄せないと検索エンジンから見て複製サイトになる**（www を apex へ寄せたのと同じ理由）。
+   */
+  ENVIRONMENT?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -70,8 +85,15 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+/** 本番以外（ステージング）か。ENVIRONMENT が入っているのは本番以外だけ（D-3）。 */
+const isStaging = (env: { ENVIRONMENT?: string }) => !!env.ENVIRONMENT && env.ENVIRONMENT !== 'production';
+
 app.use('*', async (c, next) => {
   await next();
+  // ステージングは中身が本番と同じなので、**1ページ残らず** noindex にする（D-3）。
+  // robots.txt でも Disallow: / を返すが、robots.txt は「読まないで」であって
+  // 「載せないで」ではない。載せない指示はこのヘッダーで出す。
+  if (isStaging(c.env)) c.header('X-Robots-Tag', 'noindex, nofollow');
   if (NOINDEX_PREFIXES.some((p) => c.req.path === p || c.req.path.startsWith(p + '/'))) {
     c.header('X-Robots-Tag', 'noindex, nofollow');
     c.header('Cache-Control', 'no-store, private');
@@ -428,6 +450,8 @@ app.post('/api/session-applications', async (c) => {
     responseId = hit?.response_id ?? null;
   }
 
+  const applicationId = crypto.randomUUID();
+  const concern = str(body.concern, 4000) || null;
   await c.env.DB.prepare(
     `insert into session_applications
        (id, created_at, apply_visit_id, response_id, type_code, name, email,
@@ -435,10 +459,26 @@ app.post('/api/session-applications', async (c) => {
      values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
   )
     .bind(
-      crypto.randomUUID(), isoNow(), visitId, responseId, typeCode, name, email,
-      str(body.concern, 4000) || null, JSON.stringify(slots), str(body.question, 4000) || null
+      applicationId, isoNow(), visitId, responseId, typeCode, name, email,
+      concern, JSON.stringify(slots), str(body.question, 4000) || null
     )
     .run();
+
+  // 申込が来たことを知らせる（D-1）。**待たせない**ので waitUntil に投げる。
+  // 通知が失敗しても申込は成立させる（通知のために申込を落とすほうが困る）。
+  c.executionCtx.waitUntil(
+    notifyApplication(c.env, {
+      id: applicationId,
+      name,
+      email,
+      typeCode,
+      typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
+      slots,
+      concern,
+      linked: !!responseId,
+      origin: originOf(c),
+    })
+  );
 
   return c.json({ ok: true });
 });
@@ -461,6 +501,10 @@ app.post('/api/corp-leads', (c) => c.json({ todo: 'corp lead' }, 501));
  */
 app.get('/robots.txt', (c) => {
   const origin = originOf(c);
+  // ステージングは丸ごと拒否する（D-3）。sitemap も出さない。
+  if (isStaging(c.env)) {
+    return c.text('User-agent: *\nDisallow: /\n', 200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  }
   return c.text(
     [
       'User-agent: *',
@@ -496,6 +540,28 @@ app.get('/ogp.png', (c) =>
   })
 );
 
+/**
+ * favicon 一式（D-4）。`npm run favicon` で作り直せる（tools/make-favicon.mjs）。
+ *
+ * 3つ置くのは、見に来る相手が違うから。
+ *   ・`/favicon.svg`          対応ブラウザ。どの大きさでも滲まない
+ *   ・`/favicon.ico`          <link> を読まずに直接取りに来る相手（RSSリーダー、古いブラウザ）
+ *   ・`/apple-touch-icon.png` iOS のホーム画面。**透過にしない**（黒地に合成される）
+ *
+ * OGP画像と同じく Worker に同梱している。差し替えの頻度が低いので長めにキャッシュさせる。
+ */
+const ICON_CACHE = 'public, max-age=86400, s-maxage=604800';
+
+app.get('/favicon.ico', (c) =>
+  c.body(faviconIco, 200, { 'Content-Type': 'image/x-icon', 'Cache-Control': ICON_CACHE })
+);
+app.get('/favicon.svg', (c) =>
+  c.body(faviconSvg, 200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': ICON_CACHE })
+);
+app.get('/apple-touch-icon.png', (c) =>
+  c.body(appleTouchIcon, 200, { 'Content-Type': 'image/png', 'Cache-Control': ICON_CACHE })
+);
+
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {
   const origin = originOf(c);
@@ -521,6 +587,67 @@ app.get('/api/health', async (c) => {
     tables: row?.n ?? 0,
     questionSetVersion: c.env.QUESTION_SET_VERSION,
   });
+});
+
+/**
+ * どのルートにも当たらなかったとき（D-4）。
+ *
+ * Hono の既定は素のテキストなので、打ち間違えた人がそこで行き止まりになる。
+ * API は JSON を返す（404のHTMLを fetch 側に渡しても読めない）。
+ */
+app.notFound((c) => {
+  if (c.req.path.startsWith('/api/')) {
+    return c.json({ ok: false, message: 'そのURLはありません。' }, 404);
+  }
+  // Admin から来た 404（IDの打ち間違い、`/admin/bootstrap` の封鎖）に、
+  // 「診断を受ける」ボタンの付いた公開ページを返しても行き先にならない。
+  // ログイン前でも見えるので、ここには一覧へのリンク以外を置かない。
+  if (c.req.path === '/admin' || c.req.path.startsWith('/admin/')) {
+    return c.html(
+      adminPage(
+        { title: '見つかりません', nav: 'none' },
+        '<h1>見つかりません</h1>' +
+        '<p>そのURLはありません。アドレスを確かめてください。</p>' +
+        '<p><a href="/admin/responses">回答一覧へ</a></p>'
+      ),
+      404
+    );
+  }
+  return c.html(notFoundPage(), 404);
+});
+
+/**
+ * 落ちたときの受け口（アプリ化要件定義.md 6.3・D-3）。
+ *
+ * これが無いと、500が出続けても誰も気づかないまま日が過ぎる。ログはダッシュボードに
+ * 出ているが、**見に行かないと分からないものは監視ではない**。
+ *
+ * 通知は `waitUntil` に投げる。エラー画面を通知の完了まで待たせない（届かない先を
+ * 設定していると、そのぶん利用者が待たされる）。間引きは shouldNotifyError が持つ。
+ *
+ * API は JSON を返す。エラー画面のHTMLを fetch 側に渡しても読めない。
+ */
+app.onError((err, c) => {
+  // 通知が未設定でも、ログには必ず残す。observability が拾う。
+  console.error('unhandled error', c.req.method, c.req.path, err);
+
+  try {
+    if (shouldNotifyError(errorSignature(c.req.method, c.req.path, err))) {
+      c.executionCtx.waitUntil(
+        notifyError(c.env, {
+          method: c.req.method, path: c.req.path, error: err,
+          origin: originOf(c), at: isoNow(),
+        })
+      );
+    }
+  } catch {
+    // 通知の失敗でエラー画面まで壊さない。ここで投げ直すと 500 すら返せなくなる。
+  }
+
+  if (c.req.path.startsWith('/api/')) {
+    return c.json({ ok: false, message: '一時的な不具合が起きています。時間をおいてお試しください。' }, 500);
+  }
+  return c.html(errorPage(), 500);
 });
 
 export default app;

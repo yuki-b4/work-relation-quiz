@@ -219,20 +219,51 @@ ADMIN_BOOTSTRAP_PASSWORD=（パスワードマネージャで作った12文字�
 **アカウントが1つでもあると、この画面は 404 になる。** 作れたら
 `ADMIN_BOOTSTRAP_PASSWORD` は消してよい。
 
-### ログイン通知を設定する（省略しない）
+### 通知を設定する（省略しない）
 
-1アカウントなので、**身に覚えのないログインに気づける手段が要る**（F2-1）。次のどちらかを入れる。
-どちらも未設定だと、Admin の全ページに警告が出続ける。
+通知は3つある。どれも同じ設定を使う。
+
+| 何が起きたとき | 中身 |
+|:--|:--|
+| Admin にログインした | 日時・IPハッシュの先頭・UA。1アカウント運用なので、**身に覚えのないログインに気づける手段が要る**（F2-1） |
+| 体験セッションの申込があった | タイプ・希望日時・相談したいこと・Admin へのリンク。氏名とメールは伏せ字（6.2）。診断結果に紐づかない申込は警告付き |
+| サーバエラーが出た | 経路・エラー名・スタックの先頭。**同じ壊れ方は15分に1通まで**に間引く。クエリ文字列と本文は載せない（到達IDやメールを通知に流さないため） |
+
+次のどちらかを入れる。どちらも未設定だと、Admin の全ページに警告が出続ける。
 
 ```
-# どこか自分に届くURLへ JSON を POST する（Slack の Incoming Webhook でもよい）
-npx wrangler secret put LOGIN_NOTIFY_WEBHOOK
+# (a) 自分に届くURLへ JSON を POST する。Slack と Google Chat の Incoming Webhook はこれで届く
+npx wrangler secret put NOTIFY_WEBHOOK
 
-# または Resend でメールを送る
+# (b) または Resend でメールを送る（3つそろって有効）
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put LOGIN_NOTIFY_TO
-npx wrangler secret put LOGIN_NOTIFY_FROM
+npx wrangler secret put NOTIFY_EMAIL_TO
+npx wrangler secret put NOTIFY_EMAIL_FROM
 ```
+
+旧名（`LOGIN_NOTIFY_WEBHOOK` / `LOGIN_NOTIFY_TO` / `LOGIN_NOTIFY_FROM`）も当面読む。
+両方入っていれば新しい名前が優先される。
+
+**Slack の Incoming Webhook の作り方**
+
+1. https://api.slack.com/apps → **Create New App** → **From scratch**。名前とワークスペースを選ぶ
+2. 左メニューの **Incoming Webhooks** → 右上のトグルを **On** にする
+   （**Onにするまで下のボタンは出てこない**。ここで詰まりやすい）
+3. 下に出る **Add New Webhook to Workspace** → 通知を受けるチャンネルを選んで **許可する**
+4. `https://hooks.slack.com/services/…` が発行されるのでコピーする
+
+発行できたら、入れる前に届くか確かめる。
+
+```
+curl -X POST -H 'Content-Type: application/json' -d '{"text":"テスト"}' 'https://hooks.slack.com/services/…'
+```
+
+`ok` が返り、チャンネルに「テスト」が出れば成功。そのURLを `NOTIFY_WEBHOOK` に入れる。
+
+> URLは**チャンネル1つにつき1本**。通知先を変えるときは作り直す。
+> ワークスペースの設定によっては、アプリのインストールに管理者の承認が要る
+> （「Add New Webhook to Workspace」で申請になる）。
+> **URLは秘密値**。これを知っていれば誰でもそのチャンネルに投稿できるので、チャットや Issue に貼らない。
 
 ### パスワードを忘れた・変えたいとき
 
@@ -303,6 +334,28 @@ npx wrangler d1 execute nature-shindan --remote --file=migrate.sql
 - 移行が済んだら **Googleフォームの受付を締め切り**（確認事項3＝a）、スプレッドシートは
   読み取り専用で残す（7.2）
 
+## favicon を作り直す
+
+```
+npm run favicon
+```
+
+`assets/` に3つ書き出す。意匠は OGP と同じ2色（コーラル＝オープン／ティール＝ガード。
+診断の2つの極）を丸に写したもの。色は `prototype.html` の CSS から取っているので、
+サイトの色を変えれば追従する。
+
+**分け方は左右にする。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
+2つの極に優劣は無い。左右は並置に見えるので、意味を持ち込まずに済む。
+
+| | 用途 |
+|:--|:--|
+| `favicon.svg` | 対応ブラウザ。どの大きさでも滲まない |
+| `favicon.ico` | `<link>` を読まずに `/favicon.ico` を直接取りに来る相手 |
+| `apple-touch-icon.png` | iOS のホーム画面。**透過にしない**（黒地に合成されるため） |
+
+`favicon-preview.png` も出る。**16px で見分けがつくか**を、明るい地と暗い地の両方で見る
+（原寸だけ見ていると気づけない）。
+
 ## OGP画像を作り直す
 
 共有カードの画像（1200×630）。`assets/ogp.png` が本体で、**スクリプトから作る**。
@@ -320,6 +373,11 @@ npm run ogp
   診断名が読めるかを見るためのもの。原寸だけ見ていると小さすぎに気づけない
 - 画像は Worker に同梱していて（`wrangler.toml` の `[[rules]] type = "Data"`）、`/ogp.png` で返る。
   差し替えたら `npm run deploy` が要る
+- **診断名の隣の丸い印は favicon と同じ意匠**。タブのアイコンと共有カードが同じものに見える
+  ようにしている。片方を変えたらもう片方も変える（`tools/make-favicon.mjs`）
+- **左右に分ける。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
+  2つの極（オープン／ガード）に優劣は無い。幅いっぱいの帯を50%で割る案も試したが、
+  **進捗バーに見えた**ので印にした
 
 ## 設問を変えるとき
 
@@ -334,10 +392,130 @@ npm run ogp
 ## デプロイ
 
 ```
-npm run deploy
+npm run deploy            # 本番（natur-indicator.com）
+npm run deploy:preview    # ステージング（下）
 ```
 
-独自ドメインを取得したら、`wrangler.toml` の `routes` のコメントを外してドメインを書く。
+`npm run deploy` が即本番に出るので、**文面や設問を触ったときは先にステージングへ出す**。
+
+### ステージングで確かめる
+
+本番と同じコードを、**別の Worker・別のD1・別のドメイン**で動かす場所（6.5）。
+最初の1回だけ用意が要る。
+
+```
+# 1. プレビュー用のD1を作る（本番とは別のDB）
+npm run db:create:preview
+
+# 2. 出力の database_id を wrangler.toml の [[env.preview.d1_databases]] に貼る
+#    **本番のIDを貼らないこと。** 貼るとプレビューの操作が本番のデータに当たる
+
+# 3. スキーマを流す
+npm run db:migrate:preview
+
+# 4. 秘密値を入れる（本番とは別に必要。--env preview を忘れない）
+npx wrangler secret put IP_HASH_SALT --env preview
+npx wrangler secret put ADMIN_BOOTSTRAP_EMAIL --env preview
+npx wrangler secret put ADMIN_BOOTSTRAP_PASSWORD --env preview
+
+# 5. 出す
+npm run deploy:preview
+```
+
+**入れる値は本番と別にする。** とくに `ADMIN_BOOTSTRAP_PASSWORD` を本番と同じにしない。
+プレビューは推測できるURLに出ていて Access もかけていないので、破られた時点で本番の
+Admin も破られる。`IP_HASH_SALT` は `openssl rand -base64 32` で新しく作る。
+
+`NOTIFY_WEBHOOK` は**入れないほうがよい**。プレビューで試すたびに「申込がありました」が
+飛ぶと、本物の申込に気づけなくなる。通知の見え方を確かめたいときだけ、別チャンネルの
+Webhook を新しく作って入れる。
+
+> 手順4で「そんな Worker は無い。作るか？」と聞かれるのは正しい。
+> まだデプロイしていないので Worker が存在しないだけで、`yes` を選ぶと空の Worker が
+> 先に作られ、手順5で中身が入る。**このとき名前が `nature-shindan-preview` であることを
+> 確かめる。** `nature-shindan` だったら `--env preview` が効いていないので中止する。
+
+URLは `https://nature-shindan-preview.<自分のサブドメイン>.workers.dev`
+（初回のデプロイ出力に出る）。以降は `npm run deploy:preview` だけで出せる。
+
+初回は workers.dev のサブドメイン登録を求められる。**アカウント全体で1つの名前**で、
+あとから変えると既存の workers.dev URL が全部切れる。本番は独自ドメインで配信していて
+（`workers_dev = false`）ここには出ないので、ステージングだけの話になる。
+
+**出したあと、次の4つを見る。**
+
+```
+# 1. 中身が出るか
+open https://nature-shindan-preview.<サブドメイン>.workers.dev/
+
+# 2. 検索避けが効いているか（noindex, nofollow が返ること）
+curl -sI https://nature-shindan-preview.<サブドメイン>.workers.dev/ | grep -i x-robots
+
+# 3. robots.txt が Disallow: / だけを返すこと
+curl -s https://nature-shindan-preview.<サブドメイン>.workers.dev/robots.txt
+
+# 4. DBが繋がっているか（tables が 0 なら db:migrate:preview が未実行）
+curl -s https://nature-shindan-preview.<サブドメイン>.workers.dev/api/health
+```
+
+2 と 3 が期待どおりでないまま放置すると、**本番と同じ中身が検索に載る**。ここは必ず見る。
+
+ステージングは `ENVIRONMENT=preview` が入っているので、**全ページが noindex になり、
+robots.txt も `Disallow: /` を返す**。本番と同じ中身なので、寄せないと検索エンジンから
+複製サイトに見える。ここは消さない。
+
+> `wrangler.toml` の `[env.preview]` にある `routes = []` も消さない。
+> **空にしないと本番の独自ドメインを引き継いで、プレビューのデプロイがドメインを奪う。**
+
+### 落ちていないか見る
+
+```
+npm run tail              # 本番のログを流しっぱなしで見る
+npm run tail:preview
+```
+
+サーバエラーが出ると、**通知先（NOTIFY_WEBHOOK など）へ自動で飛ぶ**。
+同じ壊れ方は15分に1通までに間引くので、直しているあいだ鳴り続けることはない。
+通知が来たら、経路とエラー名を持って `npm run tail` か Cloudflare のダッシュボードの
+Logs を見る（通知には**クエリ文字列も本文も載せていない**。到達IDやメールを通知に流さないため）。
+
+### 壊したときに戻す
+
+戻す手は2つある。**先に軽いほうから試す。**
+
+**(a) Time Travel（Cloudflare の中で巻き戻す）**
+
+D1 は過去30日ぶんの状態を保持している。誤った更新やDELETEを打ったときはこれが速い。
+
+```
+# いつまで戻れるか
+npx wrangler d1 time-travel info nature-shindan
+
+# 巻き戻す（時刻を指定。**やり直しは効かないので、先に (b) を取ってから**）
+npx wrangler d1 time-travel restore nature-shindan --timestamp=2026-09-08T00:00:00Z
+```
+
+**(b) 手元にファイルとして書き出す**
+
+```
+npm run db:backup                    # スキーマ＋データを1本のSQLに
+npm run db:backup -- --schema-only   # スキーマだけ
+```
+
+`app/backups/` に日時つきで出る。**このファイルはリポジトリに入れない**
+（回答本文・氏名・メールが入る。`.gitignore` 済み）。Cloudflare の外へ置く。
+
+Time Travel は Cloudflare の中の話なので、アカウントごと失う事故には効かない。
+**運用を始めたら、月に1回はこれを取る。** 移行や大きな変更の前は必ず取る。
+
+戻すときは、空のDBに流し込む。
+
+```
+npx wrangler d1 execute nature-shindan --remote --file=backups/nature-shindan-2026-09-08T00-00-00.sql
+```
+
+> 既存の行があるDBにそのまま流すと、`INSERT` が主キーの衝突で止まる。
+> **本番へ流す前に、必ずプレビュー側で1回試す**（`--env preview` で同じことをする）。
 
 ## ディレクトリ
 

@@ -7,6 +7,16 @@
 import { APP_CSS, INDEX_CSS } from '../content/styles.ts';
 import { esc } from './result.ts';
 
+/**
+ * タブとホーム画面のアイコン（D-4）。**全ページに出す。**
+ * `/favicon.ico` は <link> が無くてもブラウザが取りに来るが、書いておくと
+ * ルート以外の階層から見たときも確実に当たる。
+ */
+const ICONS =
+  '<link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
+  '<link rel="icon" href="/favicon.ico" sizes="32x32">' +
+  '<link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+
 const FONTS =
   '<link rel="preconnect" href="https://fonts.googleapis.com">' +
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
@@ -92,12 +102,58 @@ export function page(opts: PageOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
-    desc + robots + canonical + ogImage(opts.ogImage) + (opts.head ?? '') + FONTS +
+    desc + robots + canonical + ICONS + ogImage(opts.ogImage) + (opts.head ?? '') + FONTS +
     `<style>${APP_CSS}\n${INDEX_CSS}\n${FOOT_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +
     (opts.script ? `<script>${opts.script}</script>` : '') +
     '</body></html>'
+  );
+}
+
+/**
+ * 見つからなかったときの画面（D-4）。404 で返す。
+ *
+ * 既定の素のテキストだと、**URLを打ち間違えた人がそこで行き止まりになる**。
+ * `/types/` や `/type/OBL` のような惜しい間違いが多いので、診断への導線とフッターを出して
+ * 戻れるようにする。行き先はフッターが全部持っているので、本文では並べ直さない。
+ */
+export function notFoundPage(): string {
+  return page(
+    { title: 'ページが見つかりません | ナチュール診断', noindex: true },
+    '<div class="app">' +
+      '<header class="app-header">ナチュール診断</header>' +
+      '<section class="screen active">' +
+        '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">ページが見つかりません</h1>' +
+        '<p class="lead">お探しのページは、移動したか無くなっています。' +
+        'アドレスの打ち間違いも考えられます。</p>' +
+        '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">診断を受ける</a>' +
+        // 行き先はフッターが全部持っているので、ここで並べ直さない
+        siteFooter() +
+      '</section>' +
+    '</div>'
+  );
+}
+
+/**
+ * 落ちたときに出す画面（D-3）。500 で返す。
+ *
+ * **理由は書かない。** 中で何が起きたかは利用者には手がかりにならず、
+ * 出し方によっては内部の作りを晒す。気づく役目は通知（notifyError）が持つ。
+ */
+export function errorPage(): string {
+  return page(
+    { title: 'うまく表示できませんでした | ナチュール診断', noindex: true },
+    '<div class="app">' +
+      '<header class="app-header">ナチュール診断</header>' +
+      '<section class="screen active">' +
+        '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">うまく表示できませんでした</h1>' +
+        '<p class="lead">一時的な不具合が起きています。少し時間をおいて、もう一度お試しください。</p>' +
+        '<p class="lead">診断の途中だった場合は、お手数ですがはじめからやり直しをお願いします。' +
+        '何度も同じ画面になるときは、<a href="/contact" style="color:var(--trust)">お問い合わせ</a>からお知らせください。</p>' +
+        '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">トップへ戻る</a>' +
+      '</section>' +
+    '</div>'
   );
 }
 

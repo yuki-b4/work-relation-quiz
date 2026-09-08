@@ -17,12 +17,23 @@ routes = [
   { pattern = "www.natur-indicator.com", custom_domain = true }
 ]
 
-# OGP画像（assets/ogp.png）を Worker に同梱する（アプリ化要件定義.md F7-3）。
+# 本番は独自ドメインだけで配信する。`routes` があれば既定で false になるが、
+# **既定に頼らず書く。** ここが true になると本番の中身が
+# `nature-shindan.<サブドメイン>.workers.dev` でも見えてしまい、
+# apex へ寄せた意味が無くなる（同じ中身が2つのホストで配信される）。
+workers_dev = false
+
+# バージョンごとの公開URL（`<版>-nature-shindan.<サブドメイン>.workers.dev`）も作らない。
+# 既定では workers.dev が有効なときに一緒に有効になるので、ここでも既定に頼らず書く。
+preview_urls = false
+
+# assets/ の画像を Worker に同梱する（OGP画像は F7-3、favicon は D-4）。
 # これが無いと import が「そんなモジュールは無い」で落ちる。
 # base64 にして .ts へ埋める手もあるが、それだと画像をリポジトリで見られなくなる。
+# **import したものだけが入る**ので、ここに書いただけで重くなることはない。
 [[rules]]
 type = "Data"
-globs = ["**/*.png"]
+globs = ["**/*.png", "**/*.ico", "**/*.svg"]
 fallthrough = true
 
 [observability]
@@ -43,15 +54,61 @@ SITE_NAME = "ナチュール診断"
 RESULT_IDLE_MINUTES = "30"
 RESULT_MAX_HOURS = "2"
 
-# プレビュー環境。使うときは `npx wrangler d1 create nature-shindan-preview` を実行し、
-# 出力の database_id を貼ってコメントを外す。作る前に有効にすると設定検証で落ちる。
-# [env.preview]
-# name = "nature-shindan-preview"
+# ───────── ステージング環境（アプリ化要件定義.md 6.5・D-3） ─────────
 #
-# [[env.preview.d1_databases]]
-# binding = "DB"
-# database_name = "nature-shindan-preview"
-# database_id = ""
+# 本番と同じコードを、**別の Worker・別のD1・別のドメイン**で動かす。
+# `npm run deploy:preview` で出す。手順は app/README.md の「ステージングで確かめる」。
+#
+# 注意が3つある。どれも黙って壊れるので、消さない。
+#
+#  1. `routes = []` は必須。**空にしないと top-level の routes を引き継いで、
+#     プレビューのデプロイが本番の独自ドメインを奪う**（wrangler が警告で教えてくれる）。
+#  2. `vars`・`d1_databases`・`ratelimits` は環境に引き継がれない。ここに書き直す。
+#     書き忘れると、その binding だけ undefined で動く（レート制限が黙って無効になる）。
+#  3. `database_id` は本番と**別のもの**を貼る。ここに本番のIDを書くと、
+#     プレビューでの操作がそのまま本番のデータに当たる。
+[env.preview]
+name = "nature-shindan-preview"
+routes = []
+workers_dev = true
+# バージョンごとのURLは作らない。**確認先を1つに保つ。**
+# 増えると「いま見ているのはどの版か」が分からなくなり、確認の意味が薄れる。
+#
+# これを false にすると、deploy のたびに wrangler が「Preview URLs を有効にできる」と
+# 知らせてくる。**意図して切っているので、この警告は無視してよい。**
+preview_urls = false
+
+# `npx wrangler d1 create nature-shindan-preview` の出力（2026-09-08に作成）。
+# 本番の database_id とは**別のもの**。ここを本番のIDにすると、
+# プレビューでの操作がそのまま本番のデータに当たる。
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "nature-shindan-preview"
+database_id = "ea53cd24-3d92-4e91-a324-e37743c15d22"
+
+[env.preview.vars]
+QUESTION_SET_VERSION = "2026-09"
+SITE_NAME = "ナチュール診断"
+RESULT_IDLE_MINUTES = "30"
+RESULT_MAX_HOURS = "2"
+# これが入っていると全ページが noindex になり、robots.txt も Disallow: / を返す（D-3）。
+# **本番には置かない。** 中身が同じものを2箇所で配信するので、寄せないと複製サイトになる。
+ENVIRONMENT = "preview"
+
+[[env.preview.ratelimits]]
+name = "SUBMIT_LIMIT"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[[env.preview.ratelimits]]
+name = "APPLY_LIMIT"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
+[[env.preview.ratelimits]]
+name = "LOGIN_LIMIT"
+namespace_id = "1003"
+simple = { limit = 10, period = 60 }
 
 # 回答送信のレート制限（アプリ化要件定義.md F1-3）。Cloudflare のネイティブ機能。
 # エッジのWAFルール（8.5）とは別に、Worker 側でも1本張っておく。

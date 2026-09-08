@@ -108,13 +108,22 @@ body{width:1200px;height:630px;overflow:hidden;
   background:${C.bg}; color:${C.ink}; -webkit-font-smoothing:antialiased}
 .card{position:relative;width:1200px;height:630px;display:flex;flex-direction:column;
   justify-content:center; padding:0 96px}
-/* 左端のアクセント。タイプの2つの極（オープン＝コーラル／ガード＝ティール）の色。
-   **境目はぼかさない。** 中間色を作るとにじみに見えて、2つの極という意味が消える。 */
-.bar{position:absolute;left:0;top:0;bottom:0;width:18px;
-  background:linear-gradient(180deg, ${C.coral} 0%, ${C.coral} 50%, ${C.teal} 50%, ${C.teal} 100%)}
+/* 診断名の隣に置く印。**favicon と同じ意匠**（tools/make-favicon.mjs）にして、
+   タブのアイコンと共有カードが同じものに見えるようにする。
+   色はタイプの2つの極（オープン＝コーラル／ガード＝ティール）。
+
+   **左右に分ける。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
+   2つの極に優劣は無い。左右は並置に見えるので、意味を持ち込まずに済む。
+   **境目はぼかさない。** 中間色を作るとにじみに見えて、2つの極という意味が消える。
+
+   帯にして端に置く案も試したが、幅いっぱいの帯を50%で割ると進捗バーに見えた。
+   印にすると、その読み違いが起きないうえ、favicon と揃う。 */
+.lockup{display:flex;align-items:center;gap:22px;margin-bottom:30px}
+.mark{width:54px;height:54px;border-radius:50%;flex:none;
+  background:linear-gradient(90deg, ${C.coral} 0%, ${C.coral} 50%, ${C.teal} 50%, ${C.teal} 100%)}
 /* 診断名。F7-3 が「**診断名が読める大きさ**で入っていること」を求めているので、
    共有カードが小さく出る場面（Xのタイムラインは幅500px前後）でも読める大きさにする。 */
-.site{font-size:40px;font-weight:900;letter-spacing:.16em;color:${C.trust};margin-bottom:30px}
+.site{font-size:40px;font-weight:900;letter-spacing:.16em;color:${C.trust}}
 .head{font-size:88px;font-weight:900;line-height:1.32;letter-spacing:.01em}
 .sub{margin-top:34px;font-size:31px;font-weight:500;color:${C.muted};letter-spacing:.06em}
 .foot{position:absolute;right:96px;bottom:54px;font-size:24px;font-weight:500;
@@ -125,8 +134,7 @@ body{width:1200px;height:630px;overflow:hidden;
 </style></head><body>
 <div class="card">
   <div class="blob"></div>
-  <div class="bar"></div>
-  <div class="site">${COPY.site}</div>
+  <div class="lockup"><div class="mark"></div><div class="site">${COPY.site}</div></div>
   <div class="head">${COPY.head.join('<br>')}</div>
   <div class="sub">${COPY.sub}</div>
   <div class="foot">${COPY.url}</div>

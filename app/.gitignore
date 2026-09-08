@@ -3,3 +3,6 @@ node_modules/
 .dev.vars
 dist/
 admin-password.sql
+
+# バックアップ（回答本文・氏名・メールが入る。リポジトリに入れない）
+backups/

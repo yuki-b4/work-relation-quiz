@@ -39,8 +39,11 @@ export type AdminBindings = {
   QUESTION_SET_VERSION: string;
   ADMIN_BOOTSTRAP_EMAIL?: string;
   ADMIN_BOOTSTRAP_PASSWORD?: string;
-  LOGIN_NOTIFY_WEBHOOK?: string;
+  NOTIFY_WEBHOOK?: string;
   RESEND_API_KEY?: string;
+  NOTIFY_EMAIL_TO?: string;
+  NOTIFY_EMAIL_FROM?: string;
+  LOGIN_NOTIFY_WEBHOOK?: string;
   LOGIN_NOTIFY_TO?: string;
   LOGIN_NOTIFY_FROM?: string;
   LOGIN_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
@@ -133,8 +136,10 @@ function shellOf(c: { env: AdminBindings; var: Vars; req: { query(k: string): st
   const warnings: string[] = [];
   if (!notifyConfigured(c.env)) {
     warnings.push(
-      'ログイン通知が未設定です。<code>LOGIN_NOTIFY_WEBHOOK</code>（または Resend の3点）を設定すると、' +
-      '身に覚えのないログインに気づけます。1アカウント運用なので、ここは省略しないでください。'
+      '通知が未設定です。<code>NOTIFY_WEBHOOK</code>（Slack や Google Chat の Incoming Webhook）' +
+      'または Resend の3点を設定してください。設定すると、' +
+      '<b>体験セッションの申込が来たとき</b>と、身に覚えのないログインがあったときに気づけます。' +
+      '申込は「2営業日以内にご連絡します」と約束しているので、ここは省略しないでください。'
     );
   }
   return { title, email: c.var.email, csrf: c.var.csrf, warnings, flash: c.req.query('done') ? flashOf(c.req.query('done')!) : undefined };

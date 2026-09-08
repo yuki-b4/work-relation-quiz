@@ -20,7 +20,10 @@ import {
 import { csvCell, csvRow, toCsv } from '../src/lib/csv.ts';
 import { makeReferrerCode } from '../src/lib/admin-queries.ts';
 import { viewAnswers, questionSetOf, CURRENT_SET } from '../src/lib/question-archive.ts';
-import { notifyConfigured } from '../src/lib/notify.ts';
+import {
+  notifyConfigured, notifyApplication, notifyError,
+  errorSignature, normalizePath, newErrorThrottle, shouldNotifyError,
+} from '../src/lib/notify.ts';
 
 let pass = 0;
 const fails = [];
@@ -219,13 +222,140 @@ const eq = (label, a, b) =>
   eq('識別子と値は残る', [noText[0].key, noText[0].value], ['bin-1', 'O']);
 }
 
-// ───────── ログイン通知（F2-1） ─────────
+// ───────── 通知（F2-1・D-1） ─────────
 {
   check('未設定なら通知は無効', !notifyConfigured({}));
-  check('Webhookだけで有効', notifyConfigured({ LOGIN_NOTIFY_WEBHOOK: 'https://example.com/hook' }));
+  check('Webhookだけで有効', notifyConfigured({ NOTIFY_WEBHOOK: 'https://example.com/hook' }));
   check('Resendは3点そろって有効',
+    notifyConfigured({ RESEND_API_KEY: 'k', NOTIFY_EMAIL_TO: 'a@b.c', NOTIFY_EMAIL_FROM: 'x@y.z' }));
+  check('Resendが欠けていれば無効', !notifyConfigured({ RESEND_API_KEY: 'k', NOTIFY_EMAIL_TO: 'a@b.c' }));
+  // 旧名でも動くこと（設定済みの環境を壊さない）
+  check('旧名 LOGIN_NOTIFY_WEBHOOK でも有効', notifyConfigured({ LOGIN_NOTIFY_WEBHOOK: 'https://example.com/hook' }));
+  check('旧名の Resend 3点でも有効',
     notifyConfigured({ RESEND_API_KEY: 'k', LOGIN_NOTIFY_TO: 'a@b.c', LOGIN_NOTIFY_FROM: 'x@y.z' }));
-  check('Resendが欠けていれば無効', !notifyConfigured({ RESEND_API_KEY: 'k', LOGIN_NOTIFY_TO: 'a@b.c' }));
+}
+
+// ───────── 申込通知の中身（D-1） ─────────
+{
+  // 送り先を差し替えて、実際に投げられる本文を取り出す
+  const posted = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    posted.push({ url: String(url), body: JSON.parse(init.body) });
+    return new Response('ok', { status: 200 });
+  };
+  const r = await notifyApplication(
+    { NOTIFY_WEBHOOK: 'https://hooks.slack.com/services/T/B/x' },
+    {
+      id: 'app-1', name: '山田太郎', email: 'taro@example.com',
+      typeCode: 'OBL', typeName: '突撃隊長', slots: ['平日の夜（19時以降）'],
+      concern: '任せ方に悩んでいる', linked: true, origin: 'https://natur-indicator.com',
+    }
+  );
+  globalThis.fetch = realFetch;
+
+  eq('送れた', r.sent, true);
+  eq('Webhookへ投げる', posted[0].url, 'https://hooks.slack.com/services/T/B/x');
+  const text = posted[0].body.text;
+  check('Slack と Google Chat が読む text で送る', typeof text === 'string');
+  check('件名が先頭', text.startsWith('[ナチュール診断] 体験セッションの申込がありました'));
+  // 通知の役目は「気づいてAdminを開く」こと。Slackは検索できて残るので個人情報は撒かない（6.2）
+  check('氏名は伏せる', text.includes('山◯◯◯') && !text.includes('山田太郎'));
+  check('メールは伏せる', text.includes('ta**@example.com') && !text.includes('taro@example.com'));
+  check('タイプは出す', text.includes('突撃隊長（OBL）'));
+  check('希望の時間帯は出す', text.includes('平日の夜（19時以降）'));
+  check('気になっていることは出す', text.includes('任せ方に悩んでいる'));
+  check('詳細への直リンクがある', text.includes('https://natur-indicator.com/admin/sessions/app-1'));
+  check('紐づいていれば警告を出さない', !text.includes('紐づいていません'));
+
+  // 未紐づけは Admin で手当てが要るので、通知で目立たせる（F2-4）
+  const posted2 = [];
+  globalThis.fetch = async (url, init) => { posted2.push(JSON.parse(init.body)); return new Response('ok'); };
+  await notifyApplication({ NOTIFY_WEBHOOK: 'https://x' }, {
+    id: 'app-2', name: 'A', email: 'a@b.c', typeCode: 'GKS', typeName: null,
+    slots: [], concern: null, linked: false, origin: 'https://natur-indicator.com',
+  });
+  globalThis.fetch = realFetch;
+  check('未紐づけは警告を出す', posted2[0].text.includes('回答に紐づいていません'));
+  check('希望が無ければ「指定なし」', posted2[0].text.includes('指定なし'));
+
+  // 未設定なら投げない（設定し忘れで例外にはしない）
+  const before = posted.length;
+  const none = await notifyApplication({}, {
+    id: 'x', name: 'A', email: 'a@b.c', typeCode: null, typeName: null,
+    slots: [], concern: null, linked: true, origin: 'https://x',
+  });
+  eq('未設定なら送らない', none.sent, false);
+  eq('理由が分かる', none.error, 'not_configured');
+  eq('投げてもいない', posted.length, before);
+}
+
+// ───────── エラー通知（D-3） ─────────
+{
+  // 署名：同じ壊れ方は同じ文字列になり、IDの違いでは分かれない
+  const e = new TypeError('Cannot read properties of null');
+  eq('IDは種類だけ残す', normalizePath('/admin/sessions/8b1d0c9e-1111-4222-8333-444455556666'),
+    '/admin/sessions/:id');
+  eq('64桁の到達IDも落とす', normalizePath('/apply/' + 'a'.repeat(64)), '/apply/:id');
+  eq('数字も落とす', normalizePath('/admin/responses/12'), '/admin/responses/:n');
+  eq('タイプコードは残す', normalizePath('/types/OBL'), '/types/OBL');
+  eq('同じ壊れ方は同じ署名',
+    errorSignature('GET', '/admin/sessions/8b1d0c9e-1111-4222-8333-444455556666', e),
+    errorSignature('GET', '/admin/sessions/00000000-2222-4333-8444-555566667777', e));
+  check('経路が違えば別の署名',
+    errorSignature('GET', '/types/OBL', e) !== errorSignature('GET', '/types/HRM', e));
+  check('署名にメッセージが入る', errorSignature('GET', '/', e).includes('TypeError'));
+  // Error でないものを投げられても落ちない
+  check('文字列を投げられても署名は作れる',
+    errorSignature('GET', '/', 'boom').includes('boom'));
+
+  // 間引き：同じ壊れ方は窓の中で1回、別の壊れ方でも上限まで
+  const t = newErrorThrottle();
+  const t0 = 1_000_000;
+  check('1通目は送る', shouldNotifyError('A', t0, t));
+  check('同じ壊れ方の2通目は送らない', !shouldNotifyError('A', t0 + 1000, t));
+  check('別の壊れ方は送る', shouldNotifyError('B', t0 + 2000, t));
+  for (const sig of ['C', 'D', 'E']) check(`上限まではまだ送る（${sig}）`, shouldNotifyError(sig, t0, t));
+  check('上限を超えたら送らない', !shouldNotifyError('F', t0 + 3000, t));
+  check('窓が明けたらまた送る', shouldNotifyError('F', t0 + 15 * 60 * 1000, t));
+  check('窓が明ければ同じ壊れ方も送り直す', shouldNotifyError('A', t0 + 15 * 60 * 1000 + 1, t));
+
+  // 本文
+  const posted = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    posted.push(JSON.parse(init.body));
+    return new Response('ok', { status: 200 });
+  };
+  const err = new Error('D1_ERROR: no such table: responses');
+  err.stack = 'Error: D1_ERROR: no such table: responses\n  at q (src/lib/responses.ts:12:5)';
+  const r = await notifyError({ NOTIFY_WEBHOOK: 'https://x' }, {
+    method: 'POST', path: '/api/responses', error: err,
+    origin: 'https://natur-indicator.com', at: '2026-09-08T10:00:00.000Z',
+  });
+  eq('送れた', r.sent, true);
+  const text = posted[0].text;
+  check('件名でエラーと分かる', text.includes('サーバエラーが出ました'));
+  check('経路が出る', text.includes('POST /api/responses'));
+  check('エラーの中身が出る', text.includes('no such table: responses'));
+  check('スタックの先頭が出る', text.includes('src/lib/responses.ts'));
+  check('間引きの説明が出る', text.includes('15分に1回'));
+
+  // クエリを渡されても、パスだけを載せる（到達IDやメールを通知に流さない）
+  posted.length = 0;
+  await notifyError({ NOTIFY_WEBHOOK: 'https://x' }, {
+    method: 'GET', path: '/apply/' + 'b'.repeat(64), error: new Error('x'),
+    origin: 'https://natur-indicator.com', at: '2026-09-08T10:00:00.000Z',
+  });
+  check('到達IDは載せない', !posted[0].text.includes('b'.repeat(64)));
+  check('伏せた形で載る', posted[0].text.includes('/apply/:id'));
+
+  globalThis.fetch = realFetch;
+
+  const none = await notifyError({}, {
+    method: 'GET', path: '/', error: new Error('x'), origin: 'https://x', at: 'now',
+  });
+  eq('未設定なら送らない', none.sent, false);
 }
 
 if (fails.length) {

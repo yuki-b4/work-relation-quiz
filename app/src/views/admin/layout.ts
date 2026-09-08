@@ -155,6 +155,9 @@ export function adminPage(opts: ShellOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     '<meta name="robots" content="noindex, nofollow">' +
+    // Admin も同じアイコンにする。タブを何枚も開いたときに、これが目印になる（D-4）
+    '<link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
+    '<link rel="icon" href="/favicon.ico" sizes="32x32">' +
     `<title>${esc(opts.title)} | ナチュール診断 Admin</title>` +
     `<style>${ADMIN_CSS}</style></head><body>` +
     `<header class="ad-bar"><b>ナチュール診断 Admin</b>${nav}</header>` +

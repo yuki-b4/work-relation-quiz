@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>ナチュール診断</title>
+  
+  <clipPath id="c"><circle cx="32" cy="32" r="30"/></clipPath>
+  <g clip-path="url(#c)">
+    <rect x="0" y="0" width="32" height="64" fill="#C0492B"/>
+    <rect x="32" y="0" width="32" height="64" fill="#0F6E56"/>
+  </g>
+</svg>

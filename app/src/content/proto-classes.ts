@@ -177,6 +177,7 @@ export const PROTO_CLASSES: readonly string[] = [
   "is-read",
   "is-turn",
   "lead",
+  "lead-br",
   "lead-cta",
   "lead-in",
   "link-note",
