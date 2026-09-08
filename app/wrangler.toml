@@ -23,6 +23,10 @@ routes = [
 # apex へ寄せた意味が無くなる（同じ中身が2つのホストで配信される）。
 workers_dev = false
 
+# バージョンごとの公開URL（`<版>-nature-shindan.<サブドメイン>.workers.dev`）も作らない。
+# 既定では workers.dev が有効なときに一緒に有効になるので、ここでも既定に頼らず書く。
+preview_urls = false
+
 # OGP画像（assets/ogp.png）を Worker に同梱する（アプリ化要件定義.md F7-3）。
 # これが無いと import が「そんなモジュールは無い」で落ちる。
 # base64 にして .ts へ埋める手もあるが、それだと画像をリポジトリで見られなくなる。
@@ -66,6 +70,9 @@ RESULT_MAX_HOURS = "2"
 name = "nature-shindan-preview"
 routes = []
 workers_dev = true
+# バージョンごとのURLは作らない。**確認先を1つに保つ。**
+# 増えると「いま見ているのはどの版か」が分からなくなり、確認の意味が薄れる。
+preview_urls = false
 
 # `npx wrangler d1 create nature-shindan-preview` の出力（2026-09-08に作成）。
 # 本番の database_id とは**別のもの**。ここを本番のIDにすると、

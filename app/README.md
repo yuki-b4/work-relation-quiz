@@ -411,6 +411,28 @@ Webhook を新しく作って入れる。
 URLは `https://nature-shindan-preview.<自分のサブドメイン>.workers.dev`
 （初回のデプロイ出力に出る）。以降は `npm run deploy:preview` だけで出せる。
 
+初回は workers.dev のサブドメイン登録を求められる。**アカウント全体で1つの名前**で、
+あとから変えると既存の workers.dev URL が全部切れる。本番は独自ドメインで配信していて
+（`workers_dev = false`）ここには出ないので、ステージングだけの話になる。
+
+**出したあと、次の4つを見る。**
+
+```
+# 1. 中身が出るか
+open https://nature-shindan-preview.<サブドメイン>.workers.dev/
+
+# 2. 検索避けが効いているか（noindex, nofollow が返ること）
+curl -sI https://nature-shindan-preview.<サブドメイン>.workers.dev/ | grep -i x-robots
+
+# 3. robots.txt が Disallow: / だけを返すこと
+curl -s https://nature-shindan-preview.<サブドメイン>.workers.dev/robots.txt
+
+# 4. DBが繋がっているか（tables が 0 なら db:migrate:preview が未実行）
+curl -s https://nature-shindan-preview.<サブドメイン>.workers.dev/api/health
+```
+
+2 と 3 が期待どおりでないまま放置すると、**本番と同じ中身が検索に載る**。ここは必ず見る。
+
 ステージングは `ENVIRONMENT=preview` が入っているので、**全ページが noindex になり、
 robots.txt も `Disallow: /` を返す**。本番と同じ中身なので、寄せないと検索エンジンから
 複製サイトに見える。ここは消さない。
