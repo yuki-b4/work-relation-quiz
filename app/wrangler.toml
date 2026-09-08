@@ -43,15 +43,54 @@ SITE_NAME = "ナチュール診断"
 RESULT_IDLE_MINUTES = "30"
 RESULT_MAX_HOURS = "2"
 
-# プレビュー環境。使うときは `npx wrangler d1 create nature-shindan-preview` を実行し、
-# 出力の database_id を貼ってコメントを外す。作る前に有効にすると設定検証で落ちる。
-# [env.preview]
-# name = "nature-shindan-preview"
+# ───────── ステージング環境（アプリ化要件定義.md 6.5・D-3） ─────────
 #
-# [[env.preview.d1_databases]]
-# binding = "DB"
-# database_name = "nature-shindan-preview"
-# database_id = ""
+# 本番と同じコードを、**別の Worker・別のD1・別のドメイン**で動かす。
+# `npm run deploy:preview` で出す。手順は app/README.md の「ステージングで確かめる」。
+#
+# 注意が3つある。どれも黙って壊れるので、消さない。
+#
+#  1. `routes = []` は必須。**空にしないと top-level の routes を引き継いで、
+#     プレビューのデプロイが本番の独自ドメインを奪う**（wrangler が警告で教えてくれる）。
+#  2. `vars`・`d1_databases`・`ratelimits` は環境に引き継がれない。ここに書き直す。
+#     書き忘れると、その binding だけ undefined で動く（レート制限が黙って無効になる）。
+#  3. `database_id` は本番と**別のもの**を貼る。ここに本番のIDを書くと、
+#     プレビューでの操作がそのまま本番のデータに当たる。
+[env.preview]
+name = "nature-shindan-preview"
+routes = []
+workers_dev = true
+
+# `npx wrangler d1 create nature-shindan-preview` の出力を貼る。
+# 空のままだと deploy が「そんなDBは無い」で落ちる（本番には影響しない）。
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "nature-shindan-preview"
+database_id = ""
+
+[env.preview.vars]
+QUESTION_SET_VERSION = "2026-09"
+SITE_NAME = "ナチュール診断"
+RESULT_IDLE_MINUTES = "30"
+RESULT_MAX_HOURS = "2"
+# これが入っていると全ページが noindex になり、robots.txt も Disallow: / を返す（D-3）。
+# **本番には置かない。** 中身が同じものを2箇所で配信するので、寄せないと複製サイトになる。
+ENVIRONMENT = "preview"
+
+[[env.preview.ratelimits]]
+name = "SUBMIT_LIMIT"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[[env.preview.ratelimits]]
+name = "APPLY_LIMIT"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
+[[env.preview.ratelimits]]
+name = "LOGIN_LIMIT"
+namespace_id = "1003"
+simple = { limit = 10, period = 60 }
 
 # 回答送信のレート制限（アプリ化要件定義.md F1-3）。Cloudflare のネイティブ機能。
 # エッジのWAFルール（8.5）とは別に、Worker 側でも1本張っておく。

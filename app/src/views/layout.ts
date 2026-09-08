@@ -101,6 +101,28 @@ export function page(opts: PageOptions, body: string): string {
   );
 }
 
+/**
+ * 落ちたときに出す画面（D-3）。500 で返す。
+ *
+ * **理由は書かない。** 中で何が起きたかは利用者には手がかりにならず、
+ * 出し方によっては内部の作りを晒す。気づく役目は通知（notifyError）が持つ。
+ */
+export function errorPage(): string {
+  return page(
+    { title: 'うまく表示できませんでした | ナチュール診断', noindex: true },
+    '<div class="app">' +
+      '<header class="app-header">ナチュール診断</header>' +
+      '<section class="screen active">' +
+        '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">うまく表示できませんでした</h1>' +
+        '<p class="lead">一時的な不具合が起きています。少し時間をおいて、もう一度お試しください。</p>' +
+        '<p class="lead">診断の途中だった場合は、お手数ですがはじめからやり直しをお願いします。' +
+        '何度も同じ画面になるときは、<a href="/contact" style="color:var(--trust)">お問い合わせ</a>からお知らせください。</p>' +
+        '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">トップへ戻る</a>' +
+      '</section>' +
+    '</div>'
+  );
+}
+
 /** 結果が見られなくなったときの案内（F4-4）。410 で返す。 */
 export function closedPage(): string {
   return page(

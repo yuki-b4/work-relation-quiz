@@ -221,12 +221,13 @@ ADMIN_BOOTSTRAP_PASSWORD=（パスワードマネージャで作った12文字�
 
 ### 通知を設定する（省略しない）
 
-通知は2つある。どちらも同じ設定を使う。
+通知は3つある。どれも同じ設定を使う。
 
 | 何が起きたとき | 中身 |
 |:--|:--|
 | Admin にログインした | 日時・IPハッシュの先頭・UA。1アカウント運用なので、**身に覚えのないログインに気づける手段が要る**（F2-1） |
 | 体験セッションの申込があった | タイプ・希望日時・相談したいこと・Admin へのリンク。氏名とメールは伏せ字（6.2）。診断結果に紐づかない申込は警告付き |
+| サーバエラーが出た | 経路・エラー名・スタックの先頭。**同じ壊れ方は15分に1通まで**に間引く。クエリ文字列と本文は載せない（到達IDやメールを通知に流さないため） |
 
 次のどちらかを入れる。どちらも未設定だと、Admin の全ページに警告が出続ける。
 
@@ -364,10 +365,92 @@ npm run ogp
 ## デプロイ
 
 ```
-npm run deploy
+npm run deploy            # 本番（natur-indicator.com）
+npm run deploy:preview    # ステージング（下）
 ```
 
-独自ドメインを取得したら、`wrangler.toml` の `routes` のコメントを外してドメインを書く。
+`npm run deploy` が即本番に出るので、**文面や設問を触ったときは先にステージングへ出す**。
+
+### ステージングで確かめる
+
+本番と同じコードを、**別の Worker・別のD1・別のドメイン**で動かす場所（6.5）。
+最初の1回だけ用意が要る。
+
+```
+# 1. プレビュー用のD1を作る（本番とは別のDB）
+npm run db:create:preview
+
+# 2. 出力の database_id を wrangler.toml の [[env.preview.d1_databases]] に貼る
+#    **本番のIDを貼らないこと。** 貼るとプレビューの操作が本番のデータに当たる
+
+# 3. スキーマを流す
+npm run db:migrate:preview
+
+# 4. 秘密値を入れる（本番とは別に必要。--env preview を忘れない）
+npx wrangler secret put IP_HASH_SALT --env preview
+npx wrangler secret put ADMIN_BOOTSTRAP_EMAIL --env preview
+npx wrangler secret put ADMIN_BOOTSTRAP_PASSWORD --env preview
+```
+
+以降は `npm run deploy:preview` で出せる。URLは
+`https://nature-shindan-preview.<自分のサブドメイン>.workers.dev`（初回のデプロイ出力に出る）。
+
+ステージングは `ENVIRONMENT=preview` が入っているので、**全ページが noindex になり、
+robots.txt も `Disallow: /` を返す**。本番と同じ中身なので、寄せないと検索エンジンから
+複製サイトに見える。ここは消さない。
+
+> `wrangler.toml` の `[env.preview]` にある `routes = []` も消さない。
+> **空にしないと本番の独自ドメインを引き継いで、プレビューのデプロイがドメインを奪う。**
+
+### 落ちていないか見る
+
+```
+npm run tail              # 本番のログを流しっぱなしで見る
+npm run tail:preview
+```
+
+サーバエラーが出ると、**通知先（NOTIFY_WEBHOOK など）へ自動で飛ぶ**。
+同じ壊れ方は15分に1通までに間引くので、直しているあいだ鳴り続けることはない。
+通知が来たら、経路とエラー名を持って `npm run tail` か Cloudflare のダッシュボードの
+Logs を見る（通知には**クエリ文字列も本文も載せていない**。到達IDやメールを通知に流さないため）。
+
+### 壊したときに戻す
+
+戻す手は2つある。**先に軽いほうから試す。**
+
+**(a) Time Travel（Cloudflare の中で巻き戻す）**
+
+D1 は過去30日ぶんの状態を保持している。誤った更新やDELETEを打ったときはこれが速い。
+
+```
+# いつまで戻れるか
+npx wrangler d1 time-travel info nature-shindan
+
+# 巻き戻す（時刻を指定。**やり直しは効かないので、先に (b) を取ってから**）
+npx wrangler d1 time-travel restore nature-shindan --timestamp=2026-09-08T00:00:00Z
+```
+
+**(b) 手元にファイルとして書き出す**
+
+```
+npm run db:backup                    # スキーマ＋データを1本のSQLに
+npm run db:backup -- --schema-only   # スキーマだけ
+```
+
+`app/backups/` に日時つきで出る。**このファイルはリポジトリに入れない**
+（回答本文・氏名・メールが入る。`.gitignore` 済み）。Cloudflare の外へ置く。
+
+Time Travel は Cloudflare の中の話なので、アカウントごと失う事故には効かない。
+**運用を始めたら、月に1回はこれを取る。** 移行や大きな変更の前は必ず取る。
+
+戻すときは、空のDBに流し込む。
+
+```
+npx wrangler d1 execute nature-shindan --remote --file=backups/nature-shindan-2026-09-08T00-00-00.sql
+```
+
+> 既存の行があるDBにそのまま流すと、`INSERT` が主キーの衝突で止まる。
+> **本番へ流す前に、必ずプレビュー側で1回試す**（`--env preview` で同じことをする）。
 
 ## ディレクトリ
 

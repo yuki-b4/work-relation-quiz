@@ -150,3 +150,103 @@ export async function notifyLogin(env: NotifyEnv, e: LoginEvent): Promise<Notify
   ].join('\n');
   return send(env, subject, body);
 }
+
+// ───────── サーバエラー（D-3） ─────────
+
+/**
+ * エラー通知の間引き。
+ *
+ * **壊れたときは同じ壊れ方が連続で起きる。** 素直に毎回送ると、通知先が同じ文面で埋まって
+ * かえって気づけなくなる（そして直すあいだじゅう鳴り続ける）。
+ * 「同じ壊れ方は窓の中で1回」「別の壊れ方でも窓あたり上限まで」の2段で抑える。
+ *
+ * 状態は isolate のメモリに置く。**Workers の isolate は入れ替わるので、これは厳密な保証では
+ * ない**（入れ替わった直後に同じエラーがもう1通来ることがある）。D1 に持たせる手もあるが、
+ * D1 が落ちているときこそエラーが出るので、その経路に依存させたくない。
+ * 「鳴り続けないこと」が目的で、重複を完全に消すことではない。
+ */
+const ERROR_WINDOW_MS = 15 * 60 * 1000;
+const ERROR_MAX_PER_WINDOW = 5;
+
+export type ErrorThrottle = { windowStart: number; sent: number; seen: Set<string> };
+
+export function newErrorThrottle(): ErrorThrottle {
+  return { windowStart: 0, sent: 0, seen: new Set() };
+}
+
+const errorThrottle = newErrorThrottle();
+
+/** 送ってよいか。送ると決めたら、その場で数えて次を抑える。 */
+export function shouldNotifyError(
+  signature: string,
+  now: number = Date.now(),
+  state: ErrorThrottle = errorThrottle
+): boolean {
+  if (now - state.windowStart >= ERROR_WINDOW_MS) {
+    state.windowStart = now;
+    state.sent = 0;
+    state.seen.clear();
+  }
+  if (state.seen.has(signature)) return false;
+  if (state.sent >= ERROR_MAX_PER_WINDOW) return false;
+  state.seen.add(signature);
+  state.sent += 1;
+  return true;
+}
+
+/**
+ * パスから可変部分を落とす。
+ *
+ * `/admin/sessions/<uuid>` をそのまま署名に使うと、**同じ壊れ方が件数分だけ別物に見えて**
+ * 間引きが効かない。IDらしい部分は種類だけ残す。
+ */
+export function normalizePath(path: string): string {
+  return path
+    .split('/')
+    .map((seg) => {
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(seg)) return ':id';
+      if (/^[0-9a-f]{32,}$/i.test(seg)) return ':id';
+      if (/^\d+$/.test(seg)) return ':n';
+      return seg;
+    })
+    .join('/');
+}
+
+/** エラーの見出し。これが同じものを「同じ壊れ方」とみなす。 */
+export function errorSignature(method: string, path: string, error: unknown): string {
+  const e = error as { name?: string; message?: string };
+  const name = e?.name ?? typeof error;
+  const message = ((e?.message ?? String(error)).split('\n')[0] ?? '').slice(0, 120);
+  return `${method} ${normalizePath(path)} ${name}: ${message}`;
+}
+
+export type ErrorEvent = {
+  method: string;
+  path: string;
+  error: unknown;
+  origin: string;
+  at: string;
+};
+
+/**
+ * 落ちたことを知らせる（アプリ化要件定義.md 6.3）。
+ *
+ * **クエリ文字列と本文は載せない。** 到達IDやメールが混ざりうるので、経路はパスだけにする。
+ * 詳しく見るのはダッシュボードのログ（`[observability] enabled = true`）か `wrangler tail`。
+ */
+export async function notifyError(env: NotifyEnv, e: ErrorEvent): Promise<NotifyResult> {
+  const err = e.error as { name?: string; message?: string; stack?: string };
+  const stack = typeof err?.stack === 'string' ? err.stack.split('\n').slice(0, 4).join('\n') : null;
+  const body = [
+    `日時：${e.at}`,
+    `経路：${e.method} ${normalizePath(e.path)}`,
+    `エラー：${err?.name ?? typeof e.error}: ${(err?.message ?? String(e.error)).slice(0, 300)}`,
+    ...(stack ? ['', stack] : []),
+    '',
+    `サイト：${e.origin}`,
+    '',
+    `同じ壊れ方は${ERROR_WINDOW_MS / 60000}分に1回だけ通知します。`,
+    '全部を見るには `npx wrangler tail`、または Cloudflare のダッシュボードの Logs を開いてください。',
+  ].join('\n');
+  return send(env, '[ナチュール診断] サーバエラーが出ました', body);
+}
