@@ -219,20 +219,50 @@ ADMIN_BOOTSTRAP_PASSWORD=（パスワードマネージャで作った12文字�
 **アカウントが1つでもあると、この画面は 404 になる。** 作れたら
 `ADMIN_BOOTSTRAP_PASSWORD` は消してよい。
 
-### ログイン通知を設定する（省略しない）
+### 通知を設定する（省略しない）
 
-1アカウントなので、**身に覚えのないログインに気づける手段が要る**（F2-1）。次のどちらかを入れる。
-どちらも未設定だと、Admin の全ページに警告が出続ける。
+通知は2つある。どちらも同じ設定を使う。
+
+| 何が起きたとき | 中身 |
+|:--|:--|
+| Admin にログインした | 日時・IPハッシュの先頭・UA。1アカウント運用なので、**身に覚えのないログインに気づける手段が要る**（F2-1） |
+| 体験セッションの申込があった | タイプ・希望日時・相談したいこと・Admin へのリンク。氏名とメールは伏せ字（6.2）。診断結果に紐づかない申込は警告付き |
+
+次のどちらかを入れる。どちらも未設定だと、Admin の全ページに警告が出続ける。
 
 ```
-# どこか自分に届くURLへ JSON を POST する（Slack の Incoming Webhook でもよい）
-npx wrangler secret put LOGIN_NOTIFY_WEBHOOK
+# (a) 自分に届くURLへ JSON を POST する。Slack と Google Chat の Incoming Webhook はこれで届く
+npx wrangler secret put NOTIFY_WEBHOOK
 
-# または Resend でメールを送る
+# (b) または Resend でメールを送る（3つそろって有効）
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put LOGIN_NOTIFY_TO
-npx wrangler secret put LOGIN_NOTIFY_FROM
+npx wrangler secret put NOTIFY_EMAIL_TO
+npx wrangler secret put NOTIFY_EMAIL_FROM
 ```
+
+旧名（`LOGIN_NOTIFY_WEBHOOK` / `LOGIN_NOTIFY_TO` / `LOGIN_NOTIFY_FROM`）も当面読む。
+両方入っていれば新しい名前が優先される。
+
+**Slack の Incoming Webhook の作り方**
+
+1. https://api.slack.com/apps → **Create New App** → **From scratch**。名前とワークスペースを選ぶ
+2. 左メニューの **Incoming Webhooks** → 右上のトグルを **On** にする
+   （**Onにするまで下のボタンは出てこない**。ここで詰まりやすい）
+3. 下に出る **Add New Webhook to Workspace** → 通知を受けるチャンネルを選んで **許可する**
+4. `https://hooks.slack.com/services/…` が発行されるのでコピーする
+
+発行できたら、入れる前に届くか確かめる。
+
+```
+curl -X POST -H 'Content-Type: application/json' -d '{"text":"テスト"}' 'https://hooks.slack.com/services/…'
+```
+
+`ok` が返り、チャンネルに「テスト」が出れば成功。そのURLを `NOTIFY_WEBHOOK` に入れる。
+
+> URLは**チャンネル1つにつき1本**。通知先を変えるときは作り直す。
+> ワークスペースの設定によっては、アプリのインストールに管理者の承認が要る
+> （「Add New Webhook to Workspace」で申請になる）。
+> **URLは秘密値**。これを知っていれば誰でもそのチャンネルに投稿できるので、チャットや Issue に貼らない。
 
 ### パスワードを忘れた・変えたいとき
 

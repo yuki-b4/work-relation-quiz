@@ -20,7 +20,7 @@ import {
 import { csvCell, csvRow, toCsv } from '../src/lib/csv.ts';
 import { makeReferrerCode } from '../src/lib/admin-queries.ts';
 import { viewAnswers, questionSetOf, CURRENT_SET } from '../src/lib/question-archive.ts';
-import { notifyConfigured } from '../src/lib/notify.ts';
+import { notifyConfigured, notifyApplication } from '../src/lib/notify.ts';
 
 let pass = 0;
 const fails = [];
@@ -219,13 +219,72 @@ const eq = (label, a, b) =>
   eq('識別子と値は残る', [noText[0].key, noText[0].value], ['bin-1', 'O']);
 }
 
-// ───────── ログイン通知（F2-1） ─────────
+// ───────── 通知（F2-1・D-1） ─────────
 {
   check('未設定なら通知は無効', !notifyConfigured({}));
-  check('Webhookだけで有効', notifyConfigured({ LOGIN_NOTIFY_WEBHOOK: 'https://example.com/hook' }));
+  check('Webhookだけで有効', notifyConfigured({ NOTIFY_WEBHOOK: 'https://example.com/hook' }));
   check('Resendは3点そろって有効',
+    notifyConfigured({ RESEND_API_KEY: 'k', NOTIFY_EMAIL_TO: 'a@b.c', NOTIFY_EMAIL_FROM: 'x@y.z' }));
+  check('Resendが欠けていれば無効', !notifyConfigured({ RESEND_API_KEY: 'k', NOTIFY_EMAIL_TO: 'a@b.c' }));
+  // 旧名でも動くこと（設定済みの環境を壊さない）
+  check('旧名 LOGIN_NOTIFY_WEBHOOK でも有効', notifyConfigured({ LOGIN_NOTIFY_WEBHOOK: 'https://example.com/hook' }));
+  check('旧名の Resend 3点でも有効',
     notifyConfigured({ RESEND_API_KEY: 'k', LOGIN_NOTIFY_TO: 'a@b.c', LOGIN_NOTIFY_FROM: 'x@y.z' }));
-  check('Resendが欠けていれば無効', !notifyConfigured({ RESEND_API_KEY: 'k', LOGIN_NOTIFY_TO: 'a@b.c' }));
+}
+
+// ───────── 申込通知の中身（D-1） ─────────
+{
+  // 送り先を差し替えて、実際に投げられる本文を取り出す
+  const posted = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    posted.push({ url: String(url), body: JSON.parse(init.body) });
+    return new Response('ok', { status: 200 });
+  };
+  const r = await notifyApplication(
+    { NOTIFY_WEBHOOK: 'https://hooks.slack.com/services/T/B/x' },
+    {
+      id: 'app-1', name: '山田太郎', email: 'taro@example.com',
+      typeCode: 'OBL', typeName: '突撃隊長', slots: ['平日の夜（19時以降）'],
+      concern: '任せ方に悩んでいる', linked: true, origin: 'https://natur-indicator.com',
+    }
+  );
+  globalThis.fetch = realFetch;
+
+  eq('送れた', r.sent, true);
+  eq('Webhookへ投げる', posted[0].url, 'https://hooks.slack.com/services/T/B/x');
+  const text = posted[0].body.text;
+  check('Slack と Google Chat が読む text で送る', typeof text === 'string');
+  check('件名が先頭', text.startsWith('[ナチュール診断] 体験セッションの申込がありました'));
+  // 通知の役目は「気づいてAdminを開く」こと。Slackは検索できて残るので個人情報は撒かない（6.2）
+  check('氏名は伏せる', text.includes('山◯◯◯') && !text.includes('山田太郎'));
+  check('メールは伏せる', text.includes('ta**@example.com') && !text.includes('taro@example.com'));
+  check('タイプは出す', text.includes('突撃隊長（OBL）'));
+  check('希望の時間帯は出す', text.includes('平日の夜（19時以降）'));
+  check('気になっていることは出す', text.includes('任せ方に悩んでいる'));
+  check('詳細への直リンクがある', text.includes('https://natur-indicator.com/admin/sessions/app-1'));
+  check('紐づいていれば警告を出さない', !text.includes('紐づいていません'));
+
+  // 未紐づけは Admin で手当てが要るので、通知で目立たせる（F2-4）
+  const posted2 = [];
+  globalThis.fetch = async (url, init) => { posted2.push(JSON.parse(init.body)); return new Response('ok'); };
+  await notifyApplication({ NOTIFY_WEBHOOK: 'https://x' }, {
+    id: 'app-2', name: 'A', email: 'a@b.c', typeCode: 'GKS', typeName: null,
+    slots: [], concern: null, linked: false, origin: 'https://natur-indicator.com',
+  });
+  globalThis.fetch = realFetch;
+  check('未紐づけは警告を出す', posted2[0].text.includes('回答に紐づいていません'));
+  check('希望が無ければ「指定なし」', posted2[0].text.includes('指定なし'));
+
+  // 未設定なら投げない（設定し忘れで例外にはしない）
+  const before = posted.length;
+  const none = await notifyApplication({}, {
+    id: 'x', name: 'A', email: 'a@b.c', typeCode: null, typeName: null,
+    slots: [], concern: null, linked: true, origin: 'https://x',
+  });
+  eq('未設定なら送らない', none.sent, false);
+  eq('理由が分かる', none.error, 'not_configured');
+  eq('投げてもいない', posted.length, before);
 }
 
 if (fails.length) {

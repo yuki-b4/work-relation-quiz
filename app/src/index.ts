@@ -26,6 +26,7 @@ import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
 import { admin } from './routes/admin.ts';
 import { apexUrl } from './lib/canonical-host.ts';
+import { notifyApplication } from './lib/notify.ts';
 import ogpImage from '../assets/ogp.png';
 import type { TypeCode } from './content/types.ts';
 
@@ -44,8 +45,12 @@ type Bindings = {
   /** Admin（F2）。初期アカウントの作成とログイン通知に使う。無くても動く。 */
   ADMIN_BOOTSTRAP_EMAIL?: string;
   ADMIN_BOOTSTRAP_PASSWORD?: string;
-  LOGIN_NOTIFY_WEBHOOK?: string;
+  /** 通知先（申込とログイン）。NOTIFY_* が新しい名前で、LOGIN_NOTIFY_* は旧名。 */
+  NOTIFY_WEBHOOK?: string;
   RESEND_API_KEY?: string;
+  NOTIFY_EMAIL_TO?: string;
+  NOTIFY_EMAIL_FROM?: string;
+  LOGIN_NOTIFY_WEBHOOK?: string;
   LOGIN_NOTIFY_TO?: string;
   LOGIN_NOTIFY_FROM?: string;
   LOGIN_LIMIT?: RateLimiter;
@@ -428,6 +433,8 @@ app.post('/api/session-applications', async (c) => {
     responseId = hit?.response_id ?? null;
   }
 
+  const applicationId = crypto.randomUUID();
+  const concern = str(body.concern, 4000) || null;
   await c.env.DB.prepare(
     `insert into session_applications
        (id, created_at, apply_visit_id, response_id, type_code, name, email,
@@ -435,10 +442,26 @@ app.post('/api/session-applications', async (c) => {
      values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
   )
     .bind(
-      crypto.randomUUID(), isoNow(), visitId, responseId, typeCode, name, email,
-      str(body.concern, 4000) || null, JSON.stringify(slots), str(body.question, 4000) || null
+      applicationId, isoNow(), visitId, responseId, typeCode, name, email,
+      concern, JSON.stringify(slots), str(body.question, 4000) || null
     )
     .run();
+
+  // 申込が来たことを知らせる（D-1）。**待たせない**ので waitUntil に投げる。
+  // 通知が失敗しても申込は成立させる（通知のために申込を落とすほうが困る）。
+  c.executionCtx.waitUntil(
+    notifyApplication(c.env, {
+      id: applicationId,
+      name,
+      email,
+      typeCode,
+      typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
+      slots,
+      concern,
+      linked: !!responseId,
+      origin: originOf(c),
+    })
+  );
 
   return c.json({ ok: true });
 });
