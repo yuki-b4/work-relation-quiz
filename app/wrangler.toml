@@ -72,6 +72,9 @@ routes = []
 workers_dev = true
 # バージョンごとのURLは作らない。**確認先を1つに保つ。**
 # 増えると「いま見ているのはどの版か」が分からなくなり、確認の意味が薄れる。
+#
+# これを false にすると、deploy のたびに wrangler が「Preview URLs を有効にできる」と
+# 知らせてくる。**意図して切っているので、この警告は無視してよい。**
 preview_urls = false
 
 # `npx wrangler d1 create nature-shindan-preview` の出力（2026-09-08に作成）。
