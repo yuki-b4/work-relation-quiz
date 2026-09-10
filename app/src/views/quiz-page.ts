@@ -14,7 +14,7 @@ import { page, siteFooter } from './layout.ts';
 
 const TITLE = '人間関係タイプ診断（無料・登録不要） | ナチュール診断';
 const DESCRIPTION =
-  'ナチュール診断は、24の質問から「自然体のあなた」の人間関係の関わり方を8タイプで映し出す無料の診断です。登録は不要で、約2分。自分の強みとつい出るクセがわかります。';
+  'ナチュール診断は、24の質問から「自然体のあなた」の特性が人間関係にどう出るかを8タイプで映し出す無料の診断です。登録は不要で、約2分。自分の強みとつい出るクセがわかります。';
 
 /** 設問の駆動。prototype.html の renderQ / pick / toTop / show を移したもの。 */
 function clientScript(): string {
