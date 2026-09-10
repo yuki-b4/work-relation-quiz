@@ -13,6 +13,9 @@ import {
   APPLICATION_STATUSES, PER_PAGE, RESPONSE_STATUSES,
   type ApplicationRow, type ResponseDetail, type ResponseFilters, type ResponseListRow,
 } from '../../lib/admin-queries.ts';
+import {
+  deadlineLabel, domainLabel, targetLabel,
+} from '../../lib/declaration.ts';
 import { AX, RADAR_AXES, RADAR_META } from '../../content/quiz.ts';
 import { TYPES, TYPE_CODES } from '../../content/types.ts';
 import type { QuestionView } from '../../lib/question-archive.ts';
@@ -202,6 +205,24 @@ const SURVEY_LABELS: [string, string][] = [
   ['dig', '深掘りしたい'], ['miss', '滑った部分'],
 ];
 
+/**
+ * 宣言（施策a 段1）。回答側はフォーク（A-1）、申込側は申込フォーム（A-4）で取ったもの。
+ * 当日はここの読み上げから始める（集客戦略マップ.md §4.2 の1）。
+ */
+function declarationRows(d: {
+  concern_domain?: unknown; concern_target?: unknown; concern_deadline?: unknown;
+}): string {
+  const s = (v: unknown) => (typeof v === 'string' ? v : null);
+  const cell = (v: string | null, raw: string | null) =>
+    v ? esc(v) : (raw ? `<span class="mono faint">${esc(raw)}</span>` : '<span class="faint">—</span>');
+  const domain = s(d.concern_domain);
+  return (
+    `<dt>場面</dt><dd>${cell(domainLabel(domain), domain)}</dd>` +
+    `<dt>相手</dt><dd>${cell(targetLabel(domain, s(d.concern_target)), s(d.concern_target))}</dd>` +
+    `<dt>いつまでに</dt><dd>${cell(deadlineLabel(s(d.concern_deadline)), s(d.concern_deadline))}</dd>`
+  );
+}
+
 function applicationBlock(a: ApplicationRow, csrf: string): string {
   const slots = jsonArray(a.preferred_slots);
   return (
@@ -211,6 +232,7 @@ function applicationBlock(a: ApplicationRow, csrf: string): string {
         `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
         `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
         `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
+        declarationRows(a) +
         `<dt>気になっていること</dt><dd>${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
         `<dt>質問</dt><dd>${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
         `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
@@ -292,15 +314,23 @@ export function responseDetailPage(
         : '<p class="muted">なし。検証アンケートは新規収集を廃止しているので、移行データにだけ入っています。</p>') +
     '</div>';
 
+  // 5. 宣言（施策a 段1・A-1）と商談前ヒアリング。どちらも「本人が何を問題だと言ったか」なので、
+  // ブロックは増やさず（F2-3 は8ブロック）同じ枠に入れる。宣言は申込フォーム（A-4）でも取るが、
+  // そちらは申込の行に持つので 7 に出る。ここに出るのはフォークで宣言した人だけ。
   const hearing =
-    '<div class="panel"><h2>5. 商談前ヒアリング</h2>' +
+    '<div class="panel"><h2>5. 宣言・商談前ヒアリング</h2>' +
+      '<dl class="kv">' +
+        `<dt>宣言日時</dt><dd>${r.declared_at ? esc(jst(String(r.declared_at))) : '<span class="faint">未宣言</span>'}</dd>` +
+        declarationRows(r) +
+        `<dt>相手のタイプ</dt><dd>${r.partner_type_code ? esc(String(r.partner_type_code)) : '<span class="faint">未（段2で埋まる）</span>'}</dd>` +
+      '</dl>' +
       (extra.hearing
-        ? '<dl class="kv">' +
+        ? '<p class="sub">商談前ヒアリング（ガイド終章・すべて任意）</p><dl class="kv">' +
           `<dt>いま悩んでいること</dt><dd class="wrap-cell">${extra.hearing.now_text ? esc(String(extra.hearing.now_text)) : '<span class="faint">—</span>'}</dd>` +
           `<dt>解消後の毎日</dt><dd class="wrap-cell">${extra.hearing.future_text ? esc(String(extra.hearing.future_text)) : '<span class="faint">—</span>'}</dd>` +
           `<dt>更新日時</dt><dd>${esc(jst(String(extra.hearing.updated_at ?? '')))}</dd>` +
           '</dl>'
-        : '<p class="muted">入力なし。</p>') +
+        : '<p class="muted">商談前ヒアリングの入力はありません。</p>') +
     '</div>';
 
   const guide =

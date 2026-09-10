@@ -228,6 +228,10 @@ export type ApplicationRow = {
   name: string;
   email: string;
   concern: string | null;
+  /** 申込フォームの構造化宣言（施策a 段1・A-4）。回答側の列とは別に持つ（0004 の注記）。 */
+  concern_domain: string | null;
+  concern_target: string | null;
+  concern_deadline: string | null;
   preferred_slots: string | null;
   question: string | null;
   source: string;

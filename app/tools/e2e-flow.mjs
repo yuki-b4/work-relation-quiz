@@ -92,6 +92,34 @@ await p.reload();
 await p.waitForSelector('body[data-ready="1"]', { timeout: 10000 });
 t('リロードしても見られる', new URL(p.url()).pathname, '/result');
 
+// ── 宣言のフォーク（施策a 段1・A-1）。結果画面の直後・3クリック以内 ──
+await p.click('#openGuide');
+t('結果画面が引っ込む', await p.isHidden('#result'), true);
+t('フォークが出る', await p.isVisible('#declare [data-step="domain"]'), true);
+t('1問目は場面', (await p.textContent('#declare [data-step="domain"] .qtext')).includes('この結果を、どこで使いますか'), true);
+
+await p.click('#declare [data-step="domain"] .choice >> nth=0');   // ①職場
+t('2問目は相手（職場の選択肢）', await p.isVisible('#declare [data-step="target-work"]'), true);
+t('恋愛の選択肢は出ない', await p.isHidden('#declare [data-step="target-love"]'), true);
+
+await p.click('#dcBack');
+t('ひとつ戻れる', await p.isVisible('#declare [data-step="domain"]'), true);
+
+await p.click('#declare [data-step="domain"] .choice >> nth=0');   // ①職場
+await p.click('#declare [data-step="target-work"] .choice >> nth=0'); // 上司
+t('3問目は期限', await p.isVisible('#declare [data-step="deadline"]'), true);
+await p.click('#declare [data-step="deadline"] .choice >> nth=0');  // 今すぐ
+
+await p.waitForURL('**/guide', { timeout: 15000, waitUntil: 'domcontentloaded' });
+t('宣言のあとはガイドへ', new URL(p.url()).pathname, '/guide');
+
+// 記録できていれば、戻ってきても二度は聞かれない（declared がサーバから返る）
+await p.goto(`${BASE}/result`);
+await p.waitForSelector('body[data-ready="1"]', { timeout: 10000 });
+await p.click('#openGuide');
+await p.waitForURL('**/guide', { timeout: 15000, waitUntil: 'domcontentloaded' });
+t('宣言済みならフォークを出さない', new URL(p.url()).pathname, '/guide');
+
 await browser.close();
 console.log(fail ? `\n失敗 ${fail} 件` : '\n診断の通し動作：問題なし');
 process.exit(fail ? 1 : 0);

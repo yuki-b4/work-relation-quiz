@@ -5,6 +5,7 @@
  * 中身の実装は Phase 1（アプリ化要件定義.md 第9章）。
  */
 import { Hono } from 'hono';
+import { declarationText, parseDeclaration } from './lib/declaration.ts';
 import { submitResponse } from './lib/responses.ts';
 import { buildResultCookie, type Limits } from './lib/result-session.ts';
 import { sha256Hex } from './lib/hash.ts';
@@ -322,7 +323,7 @@ app.post('/api/result/view', async (c) => {
   if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
 
   const r = await c.env.DB.prepare(
-    `select type_code, axis_counts,
+    `select type_code, axis_counts, declared_at,
             radar_safety, radar_trust, radar_bound, radar_conflict, radar_connect
        from responses where id = ? and deleted_at is null`
   )
@@ -340,7 +341,35 @@ app.post('/api/result/view', async (c) => {
     radar,
     origin: originOf(c),
   });
-  return c.json({ ok: true, html });
+  // declared は宣言のフォーク（施策a 段1・A-1）を出すかどうかの判断だけに使う。
+  // 一度宣言した人に、戻ってくるたび同じ設問を出さない。
+  return c.json({ ok: true, html, declared: !!r.declared_at });
+});
+
+/**
+ * 宣言（施策a 段1・A-1）。結果画面の直後のフォークから届く。
+ *
+ * 正：集客戦略マップ.md §3.6・§3.8
+ * 回答IDはクライアントに渡していないので、ヒアリングと同じく結果セッションで本人を特定する。
+ *
+ * `declared_at` は**最初の宣言の時刻を残す**（宣言率の分母・分子はこの時刻で数える）。
+ * 選び直された場合は、中身だけを新しいほうへ更新する。
+ */
+app.post('/api/declaration', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const parsed = parseDeclaration({
+    domain: a.body.domain, target: a.body.target, deadline: a.body.deadline,
+  });
+  if (!parsed.ok) return c.json({ ok: false, message: parsed.message }, 400);
+  const d = parsed.value;
+  await c.env.DB.prepare(
+    `update responses
+        set concern_domain = ?, concern_target = ?, concern_deadline = ?,
+            declared_at = coalesce(declared_at, ?)
+      where id = ? and deleted_at is null`
+  ).bind(d.domain, d.target, d.deadline, isoNow(), a.responseId).run();
+  return c.json({ ok: true });
 });
 
 /** 「結果を閉じる」「もう一度診断する」。以後この結果は開けなくなる（F4-1）。 */
@@ -436,6 +465,14 @@ app.post('/api/session-applications', async (c) => {
   const typeCode = str(body.typeCode, 8);
   if (!(typeCode in TYPES)) return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
 
+  // 構造化宣言（施策a 段1・A-4）。**任意でなく必須**にする。
+  // フォークを飛ばした人・ガイド経由の人の宣言をここで拾う（§4.1 の装置1）。
+  // 選択式なので書く負担は増えないが、宣言は必ず立つ。
+  const declared = parseDeclaration({
+    domain: body.concernDomain, target: body.concernTarget, deadline: body.concernDeadline,
+  });
+  if (!declared.ok) return c.json({ ok: false, message: declared.message }, 400);
+
   const slots = Array.isArray(body.slots)
     ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
     : [];
@@ -455,12 +492,14 @@ app.post('/api/session-applications', async (c) => {
   await c.env.DB.prepare(
     `insert into session_applications
        (id, created_at, apply_visit_id, response_id, type_code, name, email,
-        concern, preferred_slots, question, source, status)
-     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
+        concern, preferred_slots, question, source, status,
+        concern_domain, concern_target, concern_deadline)
+     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応', ?,?,?)`
   )
     .bind(
       applicationId, isoNow(), visitId, responseId, typeCode, name, email,
-      concern, JSON.stringify(slots), str(body.question, 4000) || null
+      concern, JSON.stringify(slots), str(body.question, 4000) || null,
+      declared.value.domain, declared.value.target, declared.value.deadline
     )
     .run();
 
@@ -475,6 +514,12 @@ app.post('/api/session-applications', async (c) => {
       typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
       slots,
       concern,
+      // 申込時の宣言（A-4）。当日はここの読み上げから始める（§4.2 の1）
+      declaration: declarationText({
+        concern_domain: declared.value.domain,
+        concern_target: declared.value.target,
+        concern_deadline: declared.value.deadline,
+      }),
       linked: !!responseId,
       origin: originOf(c),
     })

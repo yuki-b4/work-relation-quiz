@@ -62,6 +62,8 @@ const applyUrl = await p.evaluate(async (marker) => {
   await post('/api/guide/view', {});
   await post('/api/guide/progress', { chapter: 3 });
   await post('/api/hearing', { now: `${marker}のヒアリング本文`, future: '落ち着いて過ごしたい' });
+  // 結果画面直後のフォークでの宣言（施策a 段1・A-1）
+  await post('/api/declaration', { domain: 'work', target: 'boss', deadline: 'now' });
   const v = await (await post('/api/apply-visits', { cta: 'epilogue-2' })).json();
   return v.url;
 }, marker);
@@ -71,6 +73,10 @@ t('到達IDつきの申込URLが返る', /^\/apply\/OBL\?v=[0-9a-f]{64}$/.test(a
 await p.goto(`${BASE}${applyUrl}`);
 await p.fill('#name', `紐づき ${marker}`);
 await p.fill('#email', `linked-${marker}@example.com`);
+// 構造化宣言は必須（施策a 段1・A-4）
+await p.check('input[name="concernDomain"][value="work"]');
+await p.check('input[name="concernTarget"][value="boss"]');
+await p.check('input[name="concernDeadline"][value="now"]');
 await p.check('input[name="agree"]');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
@@ -95,6 +101,8 @@ await p.evaluate(async () => {
 await p.goto(`${BASE}/apply/OBL`);
 await p.fill('#name', `未紐づけ ${marker}`);
 await p.fill('#email', `orphan-${marker}@example.com`);
+// 場面が「まだ分からない」なら、相手と期限は聞かれない（1クリックで宣言が立つ）
+await p.check('input[name="concernDomain"][value="unknown"]');
 await p.check('input[name="agree"]');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
@@ -150,7 +158,7 @@ await p.click('tbody tr:first-child a');
 await p.waitForSelector('h1', { timeout: 8000 });
 const detail = await p.textContent('body');
 for (const block of ['1. 基本情報', '2. 診断結果', '3. 設問別回答（24問）', '4. 検証アンケート',
-                     '5. 商談前ヒアリング', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
+                     '5. 宣言・商談前ヒアリング', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
   t(`ブロックがある（${block}）`, detail.includes(block), true);
 }
 t('設問が24行ある', await p.$$eval('table.q tbody tr', (els) => els.length), 24);
@@ -158,6 +166,11 @@ t('設問文が出る', detail.includes('誰かと話していて違和感を覚
 t('リッカートの選んだ選択肢が出る', detail.includes('とてもそう思う（4）'), true);
 t('5軸の帯が5本', await p.$$eval('.bar', (els) => els.length), 5);
 t('ヒアリング本文が出る', detail.includes(`${marker}のヒアリング本文`), true);
+// 宣言（施策a 段1）。コードでなく画面の言葉で出す
+t('宣言の場面が出る', detail.includes('職場の、あの人との関係'), true);
+t('宣言の相手が出る', detail.includes('上司'), true);
+t('宣言の期限が出る', detail.includes('今すぐ'), true);
+t('相手のタイプは段2待ちと分かる', detail.includes('段2で埋まる'), true);
 t('ガイドの終章到達が出る', detail.includes('終章'), true);
 t('申込者の氏名は詳細で全表示', detail.includes(`紐づき ${marker}`), true);
 t('到達したCTAが出る', detail.includes('epilogue-2'), true);

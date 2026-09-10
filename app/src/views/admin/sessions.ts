@@ -13,6 +13,7 @@
 import { esc } from '../result.ts';
 import { adminPage, type ShellOptions } from './layout.ts';
 import { jsonArray, jst, maskEmail, maskName } from '../../lib/admin-format.ts';
+import { deadlineLabel, domainLabel, targetLabel } from '../../lib/declaration.ts';
 import { APPLICATION_STATUSES, PER_PAGE, type SessionListRow } from '../../lib/admin-queries.ts';
 
 function option(value: string, label: string, current: string | undefined): string {
@@ -150,6 +151,10 @@ export function sessionDetailPage(
       `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
       `<dt>タイプ</dt><dd>${esc(a.type_code ?? '—')}</dd>` +
       `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
+      // 申込時の構造化宣言（施策a 段1・A-4）。当日はここの読み上げから始める（§4.2 の1）。
+      `<dt>場面</dt><dd>${esc(domainLabel(a.concern_domain) ?? '—')}</dd>` +
+      `<dt>相手</dt><dd>${esc(targetLabel(a.concern_domain, a.concern_target) ?? '—')}</dd>` +
+      `<dt>いつまでに</dt><dd>${esc(deadlineLabel(a.concern_deadline) ?? '—')}</dd>` +
       `<dt>気になっていること</dt><dd class="wrap-cell">${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
       `<dt>質問</dt><dd class="wrap-cell">${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
       `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +

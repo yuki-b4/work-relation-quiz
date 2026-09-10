@@ -13,6 +13,7 @@
  *        3点一致で結果のHTMLを受け取って描く
  *   /result は noindex なので、SSRしないことによるSEOの損はない（F6-3）。
  */
+import { declareSection } from './declare.ts';
 import { page } from './layout.ts';
 
 const SHELL_SCRIPT = `
@@ -51,9 +52,9 @@ const SHELL_SCRIPT = `
         body: JSON.stringify({ tabToken: token })
       }).catch(function () {});
     });
-    // 読み解きガイドへ
-    var openGuide = document.getElementById('openGuide');
-    if (openGuide) openGuide.addEventListener('click', function () { location.href = '/guide'; });
+    // 読み解きガイドへ。その手前に宣言のフォークを1枚だけ挟む（施策a 段1・A-1）。
+    // 一度宣言した人には二度目は出さない（data.declared）。
+    wireDeclare(token, !!data.declared);
 
     var restart = document.getElementById('restartBtn');
     if (restart) restart.addEventListener('click', function () {
@@ -68,6 +69,79 @@ const SHELL_SCRIPT = `
       });
     });
   }).catch(function () { closed(); });
+
+  /**
+   * 宣言のフォーク（施策a 段1・A-1）。結果画面の直後に1枚だけ挟む。
+   * 記録に失敗しても読み解きガイドへは進ませる（宣言のために足止めしない）。
+   */
+  function wireDeclare(token, declared) {
+    var openGuide = document.getElementById('openGuide');
+    var panel = document.getElementById('declare');
+    var result = document.getElementById('result');
+    if (!openGuide) return;
+
+    function toGuide() { location.href = '/guide'; }
+    if (!panel || declared) {
+      openGuide.addEventListener('click', toGuide);
+      return;
+    }
+
+    var picked = { domain: null, target: null, deadline: null };
+    var sending = false;
+
+    function show(step) {
+      var steps = panel.querySelectorAll('[data-step]');
+      for (var i = 0; i < steps.length; i++) steps[i].hidden = steps[i].dataset.step !== step;
+      document.getElementById('dcBack').hidden = step === 'domain';
+      window.scrollTo(0, 0);
+    }
+
+    function send() {
+      if (sending) return;
+      sending = true;
+      fetch('/api/declaration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tabToken: token,
+          domain: picked.domain,
+          target: picked.target,
+          deadline: picked.deadline
+        })
+      }).catch(function () {}).finally(toGuide);
+    }
+
+    openGuide.addEventListener('click', function () {
+      result.classList.remove('active');
+      panel.classList.add('active');
+      show('domain');
+    });
+
+    panel.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-k]');
+      if (!b) return;
+      var kind = b.dataset.k, value = b.dataset.v;
+      if (kind === 'domain') {
+        picked.domain = value; picked.target = null; picked.deadline = null;
+        // ③まだ分からない：相手を特定できないので、ここで記録してガイドへ（A-3）
+        if (value === 'unknown') { send(); return; }
+        show('target-' + value);
+      } else if (kind === 'target') {
+        picked.target = value;
+        show('deadline');
+      } else if (kind === 'deadline') {
+        picked.deadline = value;
+        send();
+      }
+    });
+
+    document.getElementById('dcBack').addEventListener('click', function () {
+      if (picked.target) { picked.target = null; show('target-' + picked.domain); }
+      else { picked.domain = null; show('domain'); }
+    });
+    // 飛ばせるようにしておく。全員が宣言済みになると、宣言の有無で申込率を比べられない。
+    document.getElementById('dcSkip').addEventListener('click', toGuide);
+  }
 })();
 `;
 
@@ -77,6 +151,8 @@ export function resultShell(): string {
     '<div class="app">' +
       '<header class="app-header">ナチュール診断</header>' +
       '<section class="screen active" id="result"><div id="resultMount"></div></section>' +
+      // 宣言のフォーク（A-1）。結果カードの「読み解きガイドを開く」から、この節へ切り替わる。
+      declareSection() +
     '</div>'
   );
 }
