@@ -262,6 +262,14 @@ export type SessionListRow = ApplicationRow & {
   response_created_at: string | null;
   response_type_code: string | null;
   response_type_name: string | null;
+  /**
+   * 紐づく回答でのフォークの宣言（施策a 段1・A-1）。**申込フォームでは聞かない**ので、
+   * 当日の材料はここにしか無い（無ければセッションの場で聞く。§4.2 の1段目）。
+   */
+  response_concern_domain: string | null;
+  response_concern_target: string | null;
+  response_concern_deadline: string | null;
+  response_declared_at: string | null;
   /** 同じ到達IDに2件以上の申込があるか（F4-5・F2-4の警告）。 */
   visit_application_count: number | null;
 };
@@ -294,6 +302,10 @@ export async function listApplications(
     .prepare(
       `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
+              r.concern_domain as response_concern_domain,
+              r.concern_target as response_concern_target,
+              r.concern_deadline as response_concern_deadline,
+              r.declared_at as response_declared_at,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count
@@ -311,6 +323,10 @@ export async function loadApplication(db: D1Database, id: string): Promise<Sessi
     .prepare(
       `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
+              r.concern_domain as response_concern_domain,
+              r.concern_target as response_concern_target,
+              r.concern_deadline as response_concern_deadline,
+              r.declared_at as response_declared_at,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count

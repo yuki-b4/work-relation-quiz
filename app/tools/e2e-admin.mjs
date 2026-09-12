@@ -62,6 +62,8 @@ const applyUrl = await p.evaluate(async (marker) => {
   await post('/api/guide/view', {});
   await post('/api/guide/progress', { chapter: 3 });
   await post('/api/hearing', { now: `${marker}のヒアリング本文`, future: '落ち着いて過ごしたい' });
+  // 結果画面直後のフォークでの宣言（施策a 段1・A-1）
+  await post('/api/declaration', { domain: 'work', target: 'boss', deadline: 'now' });
   const v = await (await post('/api/apply-visits', { cta: 'epilogue-2' })).json();
   return v.url;
 }, marker);
@@ -150,7 +152,7 @@ await p.click('tbody tr:first-child a');
 await p.waitForSelector('h1', { timeout: 8000 });
 const detail = await p.textContent('body');
 for (const block of ['1. 基本情報', '2. 診断結果', '3. 設問別回答（24問）', '4. 検証アンケート',
-                     '5. 商談前ヒアリング', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
+                     '5. 宣言・商談前ヒアリング', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
   t(`ブロックがある（${block}）`, detail.includes(block), true);
 }
 t('設問が24行ある', await p.$$eval('table.q tbody tr', (els) => els.length), 24);
@@ -158,6 +160,11 @@ t('設問文が出る', detail.includes('誰かと話していて違和感を覚
 t('リッカートの選んだ選択肢が出る', detail.includes('とてもそう思う（4）'), true);
 t('5軸の帯が5本', await p.$$eval('.bar', (els) => els.length), 5);
 t('ヒアリング本文が出る', detail.includes(`${marker}のヒアリング本文`), true);
+// 宣言（施策a 段1）。コードでなく画面の言葉で出す
+t('宣言の場面が出る', detail.includes('職場の特定の人との関係'), true);
+t('宣言の相手が出る', detail.includes('上司'), true);
+t('宣言の期限が出る', detail.includes('今すぐ'), true);
+t('相手のタイプは段2待ちと分かる', detail.includes('段2で埋まる'), true);
 t('ガイドの終章到達が出る', detail.includes('終章'), true);
 t('申込者の氏名は詳細で全表示', detail.includes(`紐づき ${marker}`), true);
 t('到達したCTAが出る', detail.includes('epilogue-2'), true);
@@ -179,9 +186,19 @@ t('一覧ではメールを伏せる', list.includes(`linked-${marker}@example.c
 t('伏せた形で出る', /紐◯/.test(list), true);
 t('未紐づけが目立つ', list.includes('未紐づけ'), true);
 
+// 紐づいている申込：宣言はフォークで取るので、申込詳細には**回答側の宣言**が出る
+await p.click(`tbody tr:has-text("紐◯") td:first-child a`);
+await p.waitForSelector('h1', { timeout: 8000 });
+const appDetail = await p.textContent('body');
+t('申込詳細に紐づく回答の宣言が出る', appDetail.includes('職場の特定の人との関係'), true);
+t('申込フォームでは宣言を聞いていない', appDetail.includes('未宣言（当日に聞く）'), false);
+
+await p.goto(`${BASE}/admin/sessions?q=${encodeURIComponent(marker)}`);
 await p.click(`tbody tr:has-text("未◯") td:first-child a`);
 await p.waitForSelector('h1', { timeout: 8000 });
 t('詳細では氏名を全表示', (await p.textContent('body')).includes(`未紐づけ ${marker}`), true);
+t('宣言が無ければ当日に聞くと分かる',
+  (await p.textContent('body')).includes('未宣言（当日に聞く）'), true);
 t('紐づけ候補が出る', await p.isVisible('input[name="response_id"]'), true);
 await p.locator('input[name="response_id"]').first().check();
 await p.click('button:has-text("選んだ回答に紐づける")');

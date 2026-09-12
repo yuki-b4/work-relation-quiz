@@ -92,6 +92,85 @@ await p.reload();
 await p.waitForSelector('body[data-ready="1"]', { timeout: 10000 });
 t('リロードしても見られる', new URL(p.url()).pathname, '/result');
 
+// ── 宣言のフォーク（施策a 段1・A-1）。結果に重ねるモーダル・3クリック以内 ──
+await p.click('#openGuide');
+t('モーダルで開く', await p.$eval('#dcModal', (d) => d.open), true);
+t('結果は裏に残る（取り上げない）', await p.isVisible('#result'), true);
+t('どちらの出し方かが残る', await p.getAttribute('body', 'data-fork'), 'cta');
+t('フォークが出る', await p.isVisible('#dcModal [data-step="domain"]'), true);
+t('1問目は場面', (await p.textContent('#dcModal [data-step="domain"] .qtext')).includes('あなたが悩んでいる人間関係は？'), true);
+
+await p.click('#dcModal [data-step="domain"] .choice >> nth=0');   // ①職場
+t('2問目は相手（職場の選択肢）', await p.isVisible('#dcModal [data-step="target-work"]'), true);
+t('恋愛の選択肢は出ない', await p.isHidden('#dcModal [data-step="target-love"]'), true);
+
+await p.click('#dcBack');
+t('ひとつ戻れる', await p.isVisible('#dcModal [data-step="domain"]'), true);
+
+await p.click('#dcModal [data-step="domain"] .choice >> nth=0');   // ①職場
+await p.click('#dcModal [data-step="target-work"] .choice >> nth=0'); // 上司
+t('3問目は期限', await p.isVisible('#dcModal [data-step="deadline"]'), true);
+await p.click('#dcModal [data-step="deadline"] .choice >> nth=0');  // 今すぐ
+
+// ブリッジ：お礼 → 悩みの理由（宣言を差し込む）→ トリセツ1枚 → 強みと落とし穴 → ガイドの意味
+await p.waitForSelector('#dcModal [data-step="bridge"]:not([hidden])', { timeout: 10000 });
+t('お礼から入る', (await p.textContent('#dcModal [data-step="bridge"] .eyebrow')), '回答ありがとうございました。');
+// 悩みの理由には**選んだ場面と相手**が入る
+t('理由に場面と相手が入る', await p.textContent('#dcModal [data-cause="work:boss"]'),
+  '職場において上司との関係で悩む理由の一つが、あなたのうまくいくパターンを活かせていないことです。');
+t('ほかの相手の理由は出ない', await p.isHidden('#dcModal [data-cause="work:peer"]'), true);
+t('恋愛の理由も出ない', await p.isHidden('#dcModal [data-cause="love:partner"]'), true);
+// 証拠：結果カードのトリセツ1枚とタイプ名をそのまま借りる
+t('トリセツが1枚だけ持ってこられる', (await p.$$('#dcCard .ts-card')).length, 1);
+t('結果カードと同じ1枚目', (await p.textContent('#dcCard .ts-card')).includes('こう接すると、うまくいく'), true);
+t('一般化にタイプ名が入る', await p.textContent('#dcTypeNote'),
+  '突撃隊長のあなたは、このような人間関係の中で生かせる強みがあります。一方で、悩みの原因となりやすい落とし穴もあるのです。');
+// ガイドの意味づけ → CTA
+t('ガイドの意味づけが出る',
+  (await p.textContent('#dcModal .link-note')).includes('あなたが陥りやすい罠を、読み解きガイドとしてまとめました'), true);
+t('もう一人の自分につなぐ',
+  (await p.textContent('#dcModal .link-note')).includes('もう一人の自分'), true);
+t('ブリッジでは戻るを出さない', await p.isHidden('#dcBack'), true);
+t('ブリッジでは飛ばすを出さない', await p.isHidden('#dcSkipWrap'), true);
+
+await p.click('#dcGo');
+await p.waitForURL('**/guide', { timeout: 15000, waitUntil: 'domcontentloaded' });
+t('宣言のあとはガイドへ', new URL(p.url()).pathname, '/guide');
+
+
+// 記録できていれば、戻ってきても二度は聞かれない（declared がサーバから返る）
+await p.goto(`${BASE}/result`);
+await p.waitForSelector('body[data-ready="1"]', { timeout: 10000 });
+await p.click('#openGuide');
+await p.waitForURL('**/guide', { timeout: 15000, waitUntil: 'domcontentloaded' });
+t('宣言済みならフォークを出さない', new URL(p.url()).pathname, '/guide');
+
+// ── ボタンを押さない人にも出す（auto）。結果を読み終えたところで1回だけ ──
+// **ここが今回の肝。** ガイドへ進ませるのが目的なので、押す気配のない人にこそ出す。
+const p3 = await ctx.newPage();
+await p3.goto(`${BASE}/`);
+await p3.evaluate(async () => {
+  const r = await fetch('/api/responses', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers: ['O','B','L','O','B','L','O','B','L',4,4,4,3,4,3,3,2,3,3,2,2,1,2,2] }),
+  });
+  sessionStorage.setItem('natur.tab', (await r.json()).tabToken);
+});
+await p3.goto(`${BASE}/result`);
+await p3.waitForSelector('body[data-ready="1"]', { timeout: 15000 });
+t('開いた直後には出ない', await p3.$eval('#dcModal', (d) => d.open), false);
+
+// 深層（カードの終盤）まで読んだ人に出す。最低滞在を満たすまでは出ない
+await p3.locator('.deep-section').scrollIntoViewIfNeeded();
+await p3.waitForSelector('#dcModal[open]', { timeout: 40000 });
+t('押していない人にも出る', await p3.getAttribute('body', 'data-fork'), 'auto');
+t('中身は同じフォーク', await p3.isVisible('#dcModal [data-step="domain"]'), true);
+
+await p3.click('#dcClose');
+t('閉じれば結果に戻れる', await p3.$eval('#dcModal', (d) => d.open), false);
+await p3.click('#openGuide');
+t('閉じたあともボタンからは開き直せる', await p3.$eval('#dcModal', (d) => d.open), true);
+
 await browser.close();
 console.log(fail ? `\n失敗 ${fail} 件` : '\n診断の通し動作：問題なし');
 process.exit(fail ? 1 : 0);

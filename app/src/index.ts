@@ -5,6 +5,7 @@
  * 中身の実装は Phase 1（アプリ化要件定義.md 第9章）。
  */
 import { Hono } from 'hono';
+import { declarationText, parseDeclaration } from './lib/declaration.ts';
 import { submitResponse } from './lib/responses.ts';
 import { buildResultCookie, type Limits } from './lib/result-session.ts';
 import { sha256Hex } from './lib/hash.ts';
@@ -322,7 +323,7 @@ app.post('/api/result/view', async (c) => {
   if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
 
   const r = await c.env.DB.prepare(
-    `select type_code, axis_counts,
+    `select type_code, axis_counts, declared_at,
             radar_safety, radar_trust, radar_bound, radar_conflict, radar_connect
        from responses where id = ? and deleted_at is null`
   )
@@ -340,7 +341,61 @@ app.post('/api/result/view', async (c) => {
     radar,
     origin: originOf(c),
   });
-  return c.json({ ok: true, html });
+  // declared は宣言のフォーク（施策a 段1・A-1）を出すかどうかの判断だけに使う。
+  // 一度宣言した人に、戻ってくるたび同じ設問を出さない。
+  // guard はフォークの色。結果カードの外にある画面なので、渡さないと既定色のままになる。
+  return c.json({
+    ok: true, html, declared: !!r.declared_at,
+    guard: TYPES[r.type_code as keyof typeof TYPES]?.pole === 'guard',
+  });
+});
+
+/**
+ * 宣言（施策a 段1・A-1）。結果画面の直後のフォークから届く。
+ *
+ * 正：集客戦略マップ.md §3.6・§3.8
+ * 回答IDはクライアントに渡していないので、ヒアリングと同じく結果セッションで本人を特定する。
+ *
+ * `declared_at` は**最初の宣言の時刻を残す**（宣言率の分母・分子はこの時刻で数える）。
+ * 選び直された場合は、中身だけを新しいほうへ更新する。
+ */
+app.post('/api/declaration', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const parsed = parseDeclaration({
+    domain: a.body.domain, target: a.body.target, deadline: a.body.deadline,
+  });
+  if (!parsed.ok) return c.json({ ok: false, message: parsed.message }, 400);
+  const d = parsed.value;
+  await c.env.DB.prepare(
+    `update responses
+        set concern_domain = ?, concern_target = ?, concern_deadline = ?,
+            declared_at = coalesce(declared_at, ?)
+      where id = ? and deleted_at is null`
+  ).bind(d.domain, d.target, d.deadline, isoNow(), a.responseId).run();
+  return c.json({ ok: true });
+});
+
+/**
+ * フォークを**出した**ことの記録（施策a 段1・A-1）。
+ *
+ * 宣言そのもの（`/api/declaration`）とは別に取る。
+ * **宣言率だけでは、フォークを出していないのか、出して無視されたのかが分からない。**
+ * 直す先が「出し方」なのか「中身」なのかを分けるために、出した時刻と出し方を残す。
+ *
+ * 最初の1回だけを残す（coalesce）。閉じてから押し直しても、出し方は最初のものを正とする。
+ */
+app.post('/api/declaration/prompt', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const via = a.body.via === 'auto' ? 'auto' : 'cta';
+  await c.env.DB.prepare(
+    `update responses
+        set declare_prompted_at = coalesce(declare_prompted_at, ?),
+            declare_prompt_via  = coalesce(declare_prompt_via, ?)
+      where id = ? and deleted_at is null`
+  ).bind(isoNow(), via, a.responseId).run();
+  return c.json({ ok: true });
 });
 
 /** 「結果を閉じる」「もう一度診断する」。以後この結果は開けなくなる（F4-1）。 */
@@ -436,6 +491,10 @@ app.post('/api/session-applications', async (c) => {
   const typeCode = str(body.typeCode, 8);
   if (!(typeCode in TYPES)) return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
 
+  // **申込フォームでは宣言を聞かない**（2026-09-12）。宣言はフォーク（A-1）で取る1か所だけ。
+  // フォークで宣言していればその値を当日に使い、していなければ体験セッションの場で聞く
+  // （§4.2 の1段目）。同じことを2回聞かないぶん、フォームの摩擦も増やさない。
+
   const slots = Array.isArray(body.slots)
     ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
     : [];
@@ -449,6 +508,15 @@ app.post('/api/session-applications', async (c) => {
       .first<{ response_id: string }>();
     responseId = hit?.response_id ?? null;
   }
+
+  // 紐づいた回答の宣言を1回だけ引く。**申込フォームでは聞かない**ので、
+  // 当日の材料になるのはフォークで宣言した値だけ（無ければセッションで聞く）。
+  const declaration = responseId
+    ? await c.env.DB.prepare(
+        `select concern_domain, concern_target, concern_deadline
+           from responses where id = ? and deleted_at is null`
+      ).bind(responseId).first<Record<string, string | null>>()
+    : null;
 
   const applicationId = crypto.randomUUID();
   const concern = str(body.concern, 4000) || null;
@@ -475,6 +543,9 @@ app.post('/api/session-applications', async (c) => {
       typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
       slots,
       concern,
+      // フォークでの宣言（A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
+      // 無ければセッションの場で聞くので、通知では「未宣言」と分かればよい。
+      declaration: declarationText(declaration ?? {}),
       linked: !!responseId,
       origin: originOf(c),
     })

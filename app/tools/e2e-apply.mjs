@@ -110,13 +110,22 @@ t('チェックボックスの高さが16px', box.h, '16px');
 t('ラベルが横並び（flex）', box.display, 'flex');
 t('中央揃え', box.align, 'center');
 
+// ── 宣言はここでは聞かない（施策a 段1・2026-09-12）。フォークで取り、無ければ当日に聞く ──
+t('場面を聞かない', (await apply.$$('input[name="concernDomain"]')).length, 0);
+t('相手を聞かない', (await apply.$$('input[name="concernTarget"]')).length, 0);
+t('期限を聞かない', (await apply.$$('input[name="concernDeadline"]')).length, 0);
+
 // ── 送信 ──
 await apply.fill('#name', 'テスト太郎');
 await apply.fill('#email', 'test@example.com');
 await apply.fill('#concern', '任せたいのに抱え込んでしまう');
 await apply.check('input[name="slots"][value="平日の夜（19時以降）"]');
 await apply.check('input[name="slots"][value="土日の午前"]');
+// 同意は必須。チェックせずに出すと、その場で止まる（サーバまで行かない）
+await apply.click('#applySubmit');
+t('同意なしでは止まる', (await apply.textContent('#applyNote')).includes('同意が必要'), true);
 await apply.check('input[name="agree"]');
+
 await apply.click('#applySubmit');
 await apply.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 t('完了画面が出る', (await apply.textContent('#applyDone')).includes('2営業日以内'), true);

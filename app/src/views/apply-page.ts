@@ -25,11 +25,18 @@ const SCRIPT = `
   var f = document.getElementById('applyForm');
   var note = document.getElementById('applyNote');
   var btn = document.getElementById('applySubmit');
+
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     if (btn.disabled) return;
     var fd = new FormData(f);
     var slots = fd.getAll('slots');
+    // 同意（必須）は送る前にこちらで見る。
+    // フォームは novalidate なので、required だけではブラウザが止めてくれない。
+    if (!f.querySelector('input[name="agree"]').checked) {
+      note.textContent = 'プライバシーポリシーへの同意が必要です。';
+      return;
+    }
     btn.disabled = true;
     btn.classList.add('is-loading');
     note.textContent = '';
@@ -97,6 +104,9 @@ export function applyPage(code: TypeCode, visitId: string | null): string {
             '<input id="name" name="name" type="text" required maxlength="100" autocomplete="name">') +
           field('email', 'メールアドレス（必須）', '日程のご連絡に使います。',
             '<input id="email" name="email" type="email" required maxlength="200" autocomplete="email">') +
+          // **場面・相手・期限はここでは聞かない**（2026-09-12）。宣言はフォーク（A-1）の1か所で取り、
+          // 宣言が無い人には体験セッションの場で聞く（集客戦略マップ.md §4.2 の1段目）。
+          // 同じことを2回聞かないぶん、フォームの摩擦も増やさない。
           field('concern', 'いま、人間関係で気になっていること（任意）',
             'ひと言でも大丈夫です。書いていただけると、当日の読み解きが早く、深くなります。',
             '<textarea id="concern" name="concern" maxlength="4000"></textarea>') +

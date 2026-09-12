@@ -25,6 +25,7 @@ import {
   listResponsesForCsv, loadAnswers, loadApplication, loadRelated, loadResponse, normalizeFilters,
 } from '../lib/admin-queries.ts';
 import { csvHeaders, toCsv } from '../lib/csv.ts';
+import { deadlineLabel, domainLabel, targetLabel } from '../lib/declaration.ts';
 import { jsonArray, jstDayEnd, jstDayStart, jstFull } from '../lib/admin-format.ts';
 import { questionSetOf, viewAnswers } from '../lib/question-archive.ts';
 import { loginPage, bootstrapPage, lockedMessage } from '../views/admin/login.ts';
@@ -596,7 +597,8 @@ admin.get('/export/responses.csv', async (c) => {
   const detail = await c.env.DB.prepare(
     `select id, radar_safety, radar_trust, radar_bound, radar_conflict, radar_connect,
             axis_h, axis_c, axis_w, entry_url, utm_source, utm_medium, utm_campaign,
-            device_type, os, browser, mode, segment, frame, admin_note, completed_at
+            device_type, os, browser, mode, segment, frame, admin_note, completed_at,
+            declared_at, concern_domain, concern_target, concern_deadline, partner_type_code
        from responses where deleted_at is null`
   ).all<Record<string, string | number | null>>();
   const byId = new Map((detail.results ?? []).map((r) => [String(r.id), r]));
@@ -608,6 +610,7 @@ admin.get('/export/responses.csv', async (c) => {
      '紹介元コード', '紹介者名', '流入元', 'UTMソース', 'UTMメディア', 'UTMキャンペーン', '流入URL',
      '端末', 'OS', 'ブラウザ', 'モード', 'セグメント', '回答アンカー',
      'X共有日時(JST)', 'ガイド開封(JST)', 'ガイド最終章', 'ガイド終章到達(JST)',
+     '宣言日時(JST)', '宣言_場面', '宣言_相手', '宣言_いつまでに', '相手のタイプ',
      '申込フォーム到達数', '初回到達(JST)', '申込数', '最終申込(JST)', '対応状況', 'メモ'],
     rows.map((r) => {
       const d = byId.get(r.id) ?? {};
@@ -618,6 +621,12 @@ admin.get('/export/responses.csv', async (c) => {
         r.ref_code, r.referrer_name, r.src, d.utm_source, d.utm_medium, d.utm_campaign, d.entry_url,
         d.device_type, d.os, d.browser, d.mode, d.segment, d.frame,
         jstFull(r.shared_at), jstFull(r.guide_opened_at), r.guide_max_chapter, jstFull(r.guide_completed_at),
+        // 宣言（施策a 段1）。CSVには**画面の言葉**で出す（コードのままだと集計で読み解けない）
+        jstFull(d.declared_at as string | null),
+        domainLabel(d.concern_domain as string | null),
+        targetLabel(d.concern_domain as string | null, d.concern_target as string | null),
+        deadlineLabel(d.concern_deadline as string | null),
+        d.partner_type_code,
         r.visit_count, jstFull(r.first_visit_at), r.application_count, jstFull(r.applied_at),
         r.admin_status ?? '未対応', d.admin_note,
       ];
@@ -666,7 +675,8 @@ admin.get('/export/answers.csv', async (c) => {
 admin.get('/export/applications.csv', async (c) => {
   const p = period(c);
   const { results } = await c.env.DB.prepare(
-    `select sa.*, r.type_code as response_type_code, r.created_at as response_created_at
+    `select sa.*, r.type_code as response_type_code, r.created_at as response_created_at,
+            r.concern_domain, r.concern_target, r.concern_deadline
        from session_applications sa left join responses r on r.id = sa.response_id
       where sa.deleted_at is null
         and (? is null or sa.created_at >= ?) and (? is null or sa.created_at < ?)
@@ -674,10 +684,14 @@ admin.get('/export/applications.csv', async (c) => {
   ).bind(p.from, p.from, p.to, p.to).all<Record<string, string | null>>();
 
   const csv = toCsv(
-    ['申込ID', '申込日時(JST)', '氏名', 'メール', 'タイプ', '気になっていること', '希望の時間帯', '質問',
+    ['申込ID', '申込日時(JST)', '氏名', 'メール', 'タイプ',
+     '宣言_場面', '宣言_相手', '宣言_いつまでに', '気になっていること', '希望の時間帯', '質問',
      '取り込み元', 'ステータス', '実施日(JST)', 'メモ', '紐づく回答ID', '回答日時(JST)', '到達ID'],
     (results ?? []).map((a) => [
-      a.id, jstFull(a.created_at), a.name, a.email, a.type_code, a.concern,
+      a.id, jstFull(a.created_at), a.name, a.email, a.type_code,
+      // 宣言は**紐づく回答**（フォーク）から引く。申込フォームでは聞かない
+      domainLabel(a.concern_domain), targetLabel(a.concern_domain, a.concern_target),
+      deadlineLabel(a.concern_deadline), a.concern,
       jsonArray(a.preferred_slots).join('／'), a.question, a.source, a.status,
       jstFull(a.held_at), a.admin_note, a.response_id, jstFull(a.response_created_at), a.apply_visit_id,
     ])
