@@ -14,8 +14,20 @@
  *   /result は noindex なので、SSRしないことによるSEOの損はない（F6-3）。
  */
 import { BRIDGE_HEADLINE_UNKNOWN } from '../lib/declaration.ts';
-import { declareSection } from './declare.ts';
+import { declareSection, DECLARE_CSS } from './declare.ts';
 import { page } from './layout.ts';
+
+/**
+ * 押していない人にフォークを出すきっかけ（2026-09-12）。**ここだけ見れば調整できる**ようにまとめる。
+ *
+ * ・`MIN_MS`    結果が出てから最低これだけは黙って読ませる。開いた直後に被せない
+ * ・`READ_MS`   深層（カードの終盤）まで到達した人に出すまでの猶予
+ * ・`IDLE_MS`   スクロールが止まったままの人に出すまで。迷って手が止まっている人を拾う
+ *
+ * 長すぎると誰にも届かず、短すぎると読書の邪魔になる。**実数が出るまでは動かさない**
+ * （11月にガイド開封率で判定する。集客戦略マップ.md §8.3）。
+ */
+const AUTO = { MIN_MS: 20000, READ_MS: 1200, IDLE_MS: 45000 };
 
 const SHELL_SCRIPT = `
 (function () {
@@ -54,7 +66,8 @@ const SHELL_SCRIPT = `
       }).catch(function () {});
     });
     // 読み解きガイドへ。その手前に宣言のフォークを挟む（施策a 段1・A-1）。
-    // 一度宣言した人には二度目は出さない（data.declared）。
+    // ボタンを押さない人には、読み終わり・手が止まったところで自分から出す。
+    // 一度宣言した人には二度と出さない（data.declared）。
     wireDeclare(token, !!data.declared, !!data.guard);
 
     var restart = document.getElementById('restartBtn');
@@ -77,15 +90,17 @@ const SHELL_SCRIPT = `
    * 3クリックの最後にブリッジ（宣言の読み上げ → 約束 → 一手 → 限界 → ガイドの中身）を
    * 出してから読み解きガイドへ送る。
    * **記録に失敗してもブリッジは出す**（宣言のために足止めしない）。
+   *
+   * 出し方は2つ（cta／auto）。**auto は1回だけ**で、閉じられたら二度と出さない。
    */
   function wireDeclare(token, declared, guard) {
     var openGuide = document.getElementById('openGuide');
-    var panel = document.getElementById('declare');
-    var result = document.getElementById('result');
+    var panel = document.getElementById('dcModal');
     if (!openGuide) return;
 
     function toGuide() { location.href = '/guide'; }
-    if (!panel || declared) {
+    if (!panel || declared || !panel.showModal) {
+      // 宣言済み、または <dialog> が使えない環境。ボタンはそのままガイドへ通す
       openGuide.addEventListener('click', toGuide);
       return;
     }
@@ -99,6 +114,9 @@ const SHELL_SCRIPT = `
     var picked = { domain: null, target: null, deadline: null };
     var labels = { domain: '', target: '', deadline: '' };
     var sending = false;
+    var autoDone = false;    // auto はもう出さない（一度出した／閉じられた）
+    var prompted = false;    // 「出した」の記録は1回だけ送る
+    var declaredNow = false; // この画面で宣言を終えたか（終えていればボタンは直接ガイドへ）
 
     function show(step) {
       var steps = panel.querySelectorAll('[data-step]');
@@ -106,7 +124,7 @@ const SHELL_SCRIPT = `
       // ブリッジは宣言のあとの画面なので、戻るも飛ばすも出さない
       document.getElementById('dcBack').hidden = step === 'domain' || step === 'bridge';
       document.getElementById('dcSkipWrap').hidden = step === 'bridge';
-      window.scrollTo(0, 0);
+      panel.scrollTop = 0;   // 背面（結果）は動かさない
     }
 
     /** 選んだものをそのまま返す（自分ごと化は、こちらの言葉でなく本人の選択で起こす）。 */
@@ -144,15 +162,72 @@ const SHELL_SCRIPT = `
           target: picked.target,
           deadline: picked.deadline
         })
-      }).catch(function () {}).finally(showBridge);
+      }).catch(function () {}).finally(function () { declaredNow = true; showBridge(); });
     }
 
-    openGuide.addEventListener('click', function () {
-      result.classList.remove('active');
-      panel.classList.add('active');
+    /**
+     * フォークを開く。via は 'cta'（ボタン）か 'auto'（滞在で自動）。
+     *
+     * **閉じられても、ボタンからは開き直せる。** auto だけが一度きり。
+     * 宣言まで終えた人は、ボタンを押したらそのままガイドへ通す。
+     */
+    function openFork(via) {
+      autoDone = true;
+      if (declaredNow) { toGuide(); return; }
       show('domain');
-    });
+      panel.showModal();
+      // 背面が動くと、モーダルの下で結果が流れていく。閉じるまで止める
+      document.body.style.overflow = 'hidden';
+      document.body.dataset.fork = via;
+      if (prompted) return;
+      prompted = true;
+      // 「出した」ことを記録する。**宣言率だけでは、出していないのか無視されたのかが分からない**
+      fetch('/api/declaration/prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tabToken: token, via: via })
+      }).catch(function () {});
+    }
 
+    panel.addEventListener('close', function () { document.body.style.overflow = ''; });
+    document.getElementById('dcClose').addEventListener('click', function () { panel.close(); });
+    openGuide.addEventListener('click', function () { openFork('cta'); });
+
+    // ── ボタンを押さない人に出す（auto） ──
+    // ①深層（カードの終盤）まで読んだ ②スクロールが止まったまま、のどちらか。
+    // **どちらも最低滞在を満たしてから**で、開いた直後に被せることはしない。
+    // 早すぎるときは捨てずに、足りない分だけ待ち直す。
+    var born = Date.now();
+    var lastMove = born;
+    var idleTimer = setInterval(function () {
+      if (autoDone) { clearInterval(idleTimer); return; }
+      if (Date.now() - lastMove >= ${AUTO.IDLE_MS}) auto();
+    }, 5000);
+    window.addEventListener('scroll', function () { lastMove = Date.now(); }, { passive: true });
+
+    function auto() {
+      if (autoDone) return;
+      // 裏に回っているタブに出しても意味がない。戻ってきたときに改めて出す
+      if (document.hidden) return;
+      var left = ${AUTO.MIN_MS} - (Date.now() - born);
+      if (left > 0) { setTimeout(auto, left); return; }
+      openFork('auto');
+    }
+
+    var deep = mount.querySelector('.deep-section');
+    if (deep && window.IntersectionObserver) {
+      var io = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (!entries[i].isIntersecting) continue;
+          io.disconnect();
+          // 読み終えた直後に被せない。ひと呼吸おいてから
+          setTimeout(auto, ${AUTO.READ_MS});
+        }
+      }, { threshold: 0.4 });
+      io.observe(deep);
+    }
+
+    // 設問の選択。ボタンは3枚の設問に散っているので、器側で1つだけ受ける
     panel.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-k]');
       if (!b) return;
@@ -185,11 +260,11 @@ const SHELL_SCRIPT = `
 
 export function resultShell(): string {
   return page(
-    { title: '診断結果 | ナチュール診断', noindex: true, script: SHELL_SCRIPT },
+    { title: '診断結果 | ナチュール診断', noindex: true, script: SHELL_SCRIPT, head: DECLARE_CSS },
     '<div class="app">' +
       '<header class="app-header">ナチュール診断</header>' +
       '<section class="screen active" id="result"><div id="resultMount"></div></section>' +
-      // 宣言のフォーク（A-1）。結果カードの「読み解きガイドを開く」から、この節へ切り替わる。
+      // 宣言のフォーク（A-1）。結果に重ねて出す。CTAを押した人にも、押さない人にも
       declareSection() +
     '</div>'
   );

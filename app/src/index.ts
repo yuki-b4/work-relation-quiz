@@ -376,6 +376,28 @@ app.post('/api/declaration', async (c) => {
   return c.json({ ok: true });
 });
 
+/**
+ * フォークを**出した**ことの記録（施策a 段1・A-1）。
+ *
+ * 宣言そのもの（`/api/declaration`）とは別に取る。
+ * **宣言率だけでは、フォークを出していないのか、出して無視されたのかが分からない。**
+ * 直す先が「出し方」なのか「中身」なのかを分けるために、出した時刻と出し方を残す。
+ *
+ * 最初の1回だけを残す（coalesce）。閉じてから押し直しても、出し方は最初のものを正とする。
+ */
+app.post('/api/declaration/prompt', async (c) => {
+  const a = await authorize(c);
+  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
+  const via = a.body.via === 'auto' ? 'auto' : 'cta';
+  await c.env.DB.prepare(
+    `update responses
+        set declare_prompted_at = coalesce(declare_prompted_at, ?),
+            declare_prompt_via  = coalesce(declare_prompt_via, ?)
+      where id = ? and deleted_at is null`
+  ).bind(isoNow(), via, a.responseId).run();
+  return c.json({ ok: true });
+});
+
 /** 「結果を閉じる」「もう一度診断する」。以後この結果は開けなくなる（F4-1）。 */
 app.post('/api/result/close', async (c) => {
   const id = readResultCookie(c.req.header('Cookie'));

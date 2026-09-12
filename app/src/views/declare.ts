@@ -3,8 +3,16 @@
  *
  * 正：集客戦略マップ.md §3.5（約束の確定文言）・§3.6・§3.8
  *
- * 結果画面の直後に置く。結果カードの「読み解きガイドを開く」を押した直後に、
- * 同じページの中で画面だけを差し替える（遷移しないので、3クリックが速い）。
+ * 結果画面の上に**モーダル**で出す（2026-09-12に画面差し替えから変更）。出し方は2つ。
+ *
+ *   ・`cta`  …… 結果カードの「読み解きガイドを開く」を押した
+ *   ・`auto` …… **押していない人**にも出す。結果を読み終えた（深層まで到達した）か、
+ *                しばらく手が止まった人に、滞在の途中で1回だけ
+ *
+ * **押した人だけに出していては、いちばん届けたい人に届かない。** ガイドへ進ませることが
+ * 目的なので、進む気配のない人にこそ「この結果をどう使うか」を差し出す。
+ * 差し替えでなくモーダルにしたのは、**読んでいる最中に結果を取り上げないため**。
+ * 閉じれば結果に戻れるし、閉じたら二度目は出さない。
  *
  *   ①職場の、あの人との関係 → 誰と → いつまでに → 記録 → ブリッジ → 読み解きガイド
  *   ②恋愛・結婚の関係       → 同上
@@ -27,9 +35,10 @@
  * **飛ばせるようにしてある。** 必ず通る関門にすると全員が宣言済みになり、
  * §3.8 が段1で測れるとした「宣言した人としない人の申込率の差」が測れなくなる。
  *
- * クラス名は prototype.html のものをそのまま使う（.choices / .choice / .mk / .qtext /
+ * 中身のクラス名は prototype.html のものをそのまま使う（.choices / .choice / .mk / .qtext /
  * .qback / .eyebrow / .lead-cta / .link-note / .btn / .optout-note）。
- * **新しいクラスを作らない**ので、CSSは1行も足していない。
+ * **器（モーダル）だけは prototype.html に無いので、ここで最小限のCSSを書く**
+ * （Admin と同じ扱いの例外。色は必ず `:root` のトークンを使い、診断側の色に追従させる）。
  */
 import {
   allActions, allPromises, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DEMO_LEAD, DOMAINS,
@@ -102,20 +111,45 @@ function bridge(): string {
 }
 
 /**
- * 結果画面の器の中に並べる節。`.screen` は `active` が付くまで出ない
- * （付け外しは result-page.ts のスクリプトが行う）。
+ * モーダルの器のCSS。**prototype.html に無い画面なので、ここだけ手で書く。**
+ *
+ * `<dialog>` を使うのは、背景を触れなくする・Escで閉じる・フォーカスを閉じ込めるを
+ * ブラウザに任せるため（自前で作ると必ずどれかが抜ける）。
+ * 色はすべて `:root` のトークン。診断側の色を変えればここも追従する。
+ */
+export const DECLARE_CSS =
+  '<style>' +
+  '#dcModal{position:fixed; inset:0; width:100%; max-width:none; height:100%; max-height:none;' +
+  ' margin:0; padding:0; border:0; background:transparent; overflow-y:auto; overscroll-behavior:contain}' +
+  '#dcModal[open]{display:flex; align-items:center; justify-content:center}' +
+  '#dcModal::backdrop{background:rgba(24,24,22,.5)}' +
+  '.dc-sheet{position:relative; width:100%; max-width:470px; margin:auto; padding:26px 22px 30px;' +
+  ' background:var(--bg); border-radius:20px; box-shadow:var(--shadow)}' +
+  // 閉じるは**必ず見える位置に置く**。逃げ場の無いモーダルは、結果ごと嫌われる。
+  '.dc-close{position:absolute; top:10px; right:12px; width:34px; height:34px; padding:0;' +
+  ' background:none; border:none; cursor:pointer; color:var(--faint); font-size:20px; line-height:1}' +
+  '.dc-close:hover{color:var(--muted)}' +
+  '@media (max-width:520px){.dc-sheet{max-width:none; margin:auto 0 0; border-radius:20px 20px 0 0}}' +
+  '</style>';
+
+/**
+ * 結果画面に重ねるモーダル。開け閉めは result-page.ts のスクリプトが行う。
+ * `<dialog>` は `open` が付くまで出ないので、`.screen`/`active` の仕組みは使わない。
  */
 export function declareSection(): string {
   return (
-    '<section class="screen" id="declare">' +
-      step('domain', DECLARE_QUESTIONS.domain, 'domain', DOMAINS) +
-      step('target-work', DECLARE_QUESTIONS.target, 'target', TARGETS.work) +
-      step('target-love', DECLARE_QUESTIONS.target, 'target', TARGETS.love) +
-      step('deadline', DECLARE_QUESTIONS.deadline, 'deadline', DEADLINES) +
-      bridge() +
-      '<button class="qback" id="dcBack" type="button" hidden>← ひとつ戻る</button>' +
-      '<p class="qhint" id="dcSkipWrap"><button class="qback" id="dcSkip" type="button">' +
-      '答えずに読み解きガイドへ進む</button></p>' +
-    '</section>'
+    '<dialog id="dcModal" aria-label="この結果の使いみち">' +
+      '<div class="dc-sheet">' +
+        '<button class="dc-close" id="dcClose" type="button" aria-label="閉じる">×</button>' +
+        step('domain', DECLARE_QUESTIONS.domain, 'domain', DOMAINS) +
+        step('target-work', DECLARE_QUESTIONS.target, 'target', TARGETS.work) +
+        step('target-love', DECLARE_QUESTIONS.target, 'target', TARGETS.love) +
+        step('deadline', DECLARE_QUESTIONS.deadline, 'deadline', DEADLINES) +
+        bridge() +
+        '<button class="qback" id="dcBack" type="button" hidden>← ひとつ戻る</button>' +
+        '<p class="qhint" id="dcSkipWrap"><button class="qback" id="dcSkip" type="button">' +
+        '答えずに読み解きガイドへ進む</button></p>' +
+      '</div>' +
+    '</dialog>'
   );
 }
