@@ -13,7 +13,7 @@
  *        3点一致で結果のHTMLを受け取って描く
  *   /result は noindex なので、SSRしないことによるSEOの損はない（F6-3）。
  */
-import { BRIDGE_HEADLINE_UNKNOWN } from '../lib/declaration.ts';
+import { TYPE_NOTE } from '../lib/declaration.ts';
 import { declareSection, DECLARE_CSS } from './declare.ts';
 import { page } from './layout.ts';
 
@@ -112,7 +112,6 @@ const SHELL_SCRIPT = `
     panel.style.setProperty('--accent-ink', guard ? 'var(--teal-ink)' : 'var(--coral-ink)');
 
     var picked = { domain: null, target: null, deadline: null };
-    var labels = { domain: '', target: '', deadline: '' };
     var sending = false;
     var autoDone = false;    // auto はもう出さない（一度出した／閉じられた）
     var prompted = false;    // 「出した」の記録は1回だけ送る
@@ -127,26 +126,26 @@ const SHELL_SCRIPT = `
       panel.scrollTop = 0;   // 背面（結果）は動かさない
     }
 
-    /** 選んだものをそのまま返す（自分ごと化は、こちらの言葉でなく本人の選択で起こす）。 */
+    /** 宣言をそのまま文に入れて返す（自分ごと化は、こちらの言葉でなく本人の選択で起こす）。 */
     function showBridge() {
-      document.getElementById('dcHead').textContent =
-        picked.domain === 'unknown' ? ${JSON.stringify(BRIDGE_HEADLINE_UNKNOWN)} : labels.target + 'との関係';
-      document.getElementById('dcSub').textContent =
-        picked.domain === 'unknown' ? '' : labels.domain + '　／　' + labels.deadline;
-      // 約束と一手は「場面：相手」の組で選ぶ（相手の名前が入った1本だけを見せる）。
-      // 鍵の作り方は lib/declaration.ts の promiseKey と揃えること
+      // 悩みの理由は「場面：相手」の組で選ぶ（相手の名前が入った1本だけを見せる）。
+      // 鍵の作り方は lib/declaration.ts の slotKey と揃えること
       var key = picked.domain === 'unknown' || !picked.target ? 'unknown' : picked.domain + ':' + picked.target;
-      var ps = panel.querySelectorAll('[data-promise], [data-action]');
-      for (var i = 0; i < ps.length; i++) {
-        ps[i].hidden = (ps[i].dataset.promise || ps[i].dataset.action) !== key;
-      }
-      // 一手（実演）：**結果カードのトリセツ1枚をそのまま持ってくる。**
-      // 文面を二重に持たず、いま見たばかりのカードが道具として渡される形にする。
+      var cs = panel.querySelectorAll('[data-cause]');
+      for (var i = 0; i < cs.length; i++) cs[i].hidden = cs[i].dataset.cause !== key;
+
+      // 証拠：**結果カードのトリセツ1枚とタイプ名をそのまま借りる。**
+      // 文面を二重に持たず、いま見たばかりの自分の結果で話を進める。
       var slot = document.getElementById('dcCard');
       var card = mount.querySelector('.ts-card');
       if (card && !slot.firstChild) slot.appendChild(card.cloneNode(true));
-      // カードが取れなければ、見出しだけが浮くので実演ごと畳む
-      document.getElementById('dcDemo').hidden = !slot.firstChild;
+      var tname = mount.querySelector('.tname');
+      if (tname) {
+        document.getElementById('dcTypeNote').textContent =
+          ${JSON.stringify(TYPE_NOTE)}.replace('{type}', tname.textContent);
+      }
+      // どちらか欠けたら、文だけが浮くのでまとめて畳む
+      document.getElementById('dcDemo').hidden = !(slot.firstChild && tname);
       show('bridge');
     }
 
@@ -232,7 +231,6 @@ const SHELL_SCRIPT = `
       var b = e.target.closest('button[data-k]');
       if (!b) return;
       var kind = b.dataset.k, value = b.dataset.v;
-      labels[kind] = b.dataset.l;
       if (kind === 'domain') {
         picked.domain = value; picked.target = null; picked.deadline = null;
         // ③まだ分からない：相手を特定できないので、ここで記録してブリッジへ（A-3）

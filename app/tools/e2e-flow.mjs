@@ -98,7 +98,7 @@ t('モーダルで開く', await p.$eval('#dcModal', (d) => d.open), true);
 t('結果は裏に残る（取り上げない）', await p.isVisible('#result'), true);
 t('どちらの出し方かが残る', await p.getAttribute('body', 'data-fork'), 'cta');
 t('フォークが出る', await p.isVisible('#dcModal [data-step="domain"]'), true);
-t('1問目は場面', (await p.textContent('#dcModal [data-step="domain"] .qtext')).includes('この結果を、どこで使いますか'), true);
+t('1問目は場面', (await p.textContent('#dcModal [data-step="domain"] .qtext')).includes('あなたが悩んでいる人間関係は？'), true);
 
 await p.click('#dcModal [data-step="domain"] .choice >> nth=0');   // ①職場
 t('2問目は相手（職場の選択肢）', await p.isVisible('#dcModal [data-step="target-work"]'), true);
@@ -112,26 +112,24 @@ await p.click('#dcModal [data-step="target-work"] .choice >> nth=0'); // 上司
 t('3問目は期限', await p.isVisible('#dcModal [data-step="deadline"]'), true);
 await p.click('#dcModal [data-step="deadline"] .choice >> nth=0');  // 今すぐ
 
-// ブリッジ：宣言をそのまま読み上げ、場面に合った約束と、ガイドで何を読み解くかを返す
+// ブリッジ：お礼 → 悩みの理由（宣言を差し込む）→ トリセツ1枚 → 強みと落とし穴 → ガイドの意味
 await p.waitForSelector('#dcModal [data-step="bridge"]:not([hidden])', { timeout: 10000 });
-t('選んだ相手が返ってくる', await p.textContent('#dcHead'), '上司との関係');
-t('選んだ場面と期限も返る', await p.textContent('#dcSub'), '職場　／　今すぐ');
-// 約束には**選んだ相手の名前**が入る（§3.5：核は変えず、相手と場面だけ差し替える）
-t('約束に相手の名前が入る',
-  await p.textContent('#dcModal [data-promise="work:boss"]'), '上司と話した日に、どっと疲れて帰るのをやめる。');
-t('ほかの相手の約束は出ない', await p.isHidden('#dcModal [data-promise="work:peer"]'), true);
-t('恋愛の約束も出ない', await p.isHidden('#dcModal [data-promise="love:partner"]'), true);
-// 一手（実演）：結果カードのトリセツ1枚がそのまま持ってこられる
+t('お礼から入る', (await p.textContent('#dcModal [data-step="bridge"] .eyebrow')), '回答ありがとうございました。');
+// 悩みの理由には**選んだ場面と相手**が入る
+t('理由に場面と相手が入る', await p.textContent('#dcModal [data-cause="work:boss"]'),
+  '職場において上司との関係で悩む理由の一つが、あなたのうまくいくパターンを活かせていないことです。');
+t('ほかの相手の理由は出ない', await p.isHidden('#dcModal [data-cause="work:peer"]'), true);
+t('恋愛の理由も出ない', await p.isHidden('#dcModal [data-cause="love:partner"]'), true);
+// 証拠：結果カードのトリセツ1枚とタイプ名をそのまま借りる
 t('トリセツが1枚だけ持ってこられる', (await p.$$('#dcCard .ts-card')).length, 1);
 t('結果カードと同じ1枚目', (await p.textContent('#dcCard .ts-card')).includes('こう接すると、うまくいく'), true);
-t('一手に相手の名前が入る',
-  await p.textContent('#dcModal [data-action="work:boss"]'), 'この1枚だけ、上司に伝えてみてください。');
-t('ほかの相手の一手は出ない', await p.isHidden('#dcModal [data-action="love:partner"]'), true);
-// 限界（ガイド終章の断ち切りの先出し）→ ガイドの中身 → CTA
-t('一人では気づけないと置く',
-  (await p.textContent('#dcModal .link-note')).includes('自分だけでは気づくことができません'), true);
-t('ガイドで何を読み解くかが出る',
-  (await p.textContent('#dcModal .link-note')).includes('なぜ、相手ではなく自分から始めるのか'), true);
+t('一般化にタイプ名が入る', await p.textContent('#dcTypeNote'),
+  'こんなふうに、突撃隊長のあなたは、人間関係の中で強みがある一方で、悩みの原因となりやすい落とし穴もあるんです。');
+// ガイドの意味づけ → CTA
+t('ガイドの意味づけが出る',
+  (await p.textContent('#dcModal .link-note')).includes('あなたが陥りやすい罠を、読み解きガイドとしてまとめました'), true);
+t('もう一人の自分につなぐ',
+  (await p.textContent('#dcModal .link-note')).includes('もう一人の自分'), true);
 t('ブリッジでは戻るを出さない', await p.isHidden('#dcBack'), true);
 t('ブリッジでは飛ばすを出さない', await p.isHidden('#dcSkipWrap'), true);
 

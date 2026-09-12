@@ -161,7 +161,7 @@ t('リッカートの選んだ選択肢が出る', detail.includes('とてもそ
 t('5軸の帯が5本', await p.$$eval('.bar', (els) => els.length), 5);
 t('ヒアリング本文が出る', detail.includes(`${marker}のヒアリング本文`), true);
 // 宣言（施策a 段1）。コードでなく画面の言葉で出す
-t('宣言の場面が出る', detail.includes('職場の、あの人との関係'), true);
+t('宣言の場面が出る', detail.includes('職場の特定の人との関係'), true);
 t('宣言の相手が出る', detail.includes('上司'), true);
 t('宣言の期限が出る', detail.includes('今すぐ'), true);
 t('相手のタイプは段2待ちと分かる', detail.includes('段2で埋まる'), true);
@@ -190,7 +190,7 @@ t('未紐づけが目立つ', list.includes('未紐づけ'), true);
 await p.click(`tbody tr:has-text("紐◯") td:first-child a`);
 await p.waitForSelector('h1', { timeout: 8000 });
 const appDetail = await p.textContent('body');
-t('申込詳細に紐づく回答の宣言が出る', appDetail.includes('職場の、あの人との関係'), true);
+t('申込詳細に紐づく回答の宣言が出る', appDetail.includes('職場の特定の人との関係'), true);
 t('申込フォームでは宣言を聞いていない', appDetail.includes('未宣言（当日に聞く）'), false);
 
 await p.goto(`${BASE}/admin/sessions?q=${encodeURIComponent(marker)}`);

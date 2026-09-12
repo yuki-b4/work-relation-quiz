@@ -23,14 +23,14 @@
  * （`0to1マーケティング戦略.md` §3.6）ので、まず選んだ相手と期限をそのまま読み上げる。
  *
  * 並びは「興味 → 教育 → 必要」を1枚に畳んだもの。
- *   1. 宣言の読み上げ          …… あなたが選んだこと
- *   2. 約束（相手の名前入り）   …… §3.5 の確定文言
- *   3. **一手（実演）**        …… トリセツ1枚を取り出して「この1枚だけ伝えてみて」
- *   4. **限界**               …… 「自分のクセは自分だけでは気づけない」（終章の先出し）
- *   5. ガイドが何を読み解くか → CTA
+ *   1. お礼                    …… 回答ありがとうございました。
+ *   2. **悩みの理由の名指し**   …… 宣言した場面と相手を差し込む（分岐するのはここだけ）
+ *   3. **証拠**               …… その人のトリセツ1枚を結果カードから複製して見せる
+ *   4. **一般化**             …… 強みがある一方で落とし穴もある（タイプ名を差し込む）
+ *   5. ガイドの意味づけ → CTA
  *
- * **コンテンツは増やさない。** 3の中身は結果カードのトリセツの複製、4はガイド終章の一文。
- * 分岐するのは2と3の1行ずつだけで、見立て（段3）はここに書かない。
+ * **コンテンツは増やさない。** 3はトリセツの複製、4はタイプ名の差し込みだけで、
+ * タイプ別の文面はここに1本も持たない。見立て（段3）も書かない。
  *
  * **飛ばせるようにしてある。** 必ず通る関門にすると全員が宣言済みになり、
  * §3.8 が段1で測れるとした「宣言した人としない人の申込率の差」が測れなくなる。
@@ -41,7 +41,7 @@
  * （Admin と同じ扱いの例外。色は必ず `:root` のトークンを使い、診断側の色に追従させる）。
  */
 import {
-  allActions, allPromises, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DEMO_LEAD, DOMAINS,
+  allCauses, BRIDGE_EYEBROW, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DOMAINS,
   TARGETS, type Option,
 } from '../lib/declaration.ts';
 import { esc } from './result.ts';
@@ -50,18 +50,13 @@ const NUMS = ['①', '②', '③', '④', '⑤', '⑥'];
 
 /**
  * 設問1枚。選ぶと次へ進むので、送信ボタンは持たせない。
- * `data-l` は**ブリッジの文の中で使う語**。場面は短い呼び方（職場／恋愛・結婚）、
- * 相手は総称に直したもの（その他 → あの人／大切な人。「その他との関係」は日本語が壊れる）。
+ * ブリッジの文はサーバ側で全パターン描いてあるので、ここは値だけ持たせればよい。
  */
-function step(
-  name: string, question: string, kind: string,
-  options: readonly (Option & { short?: string; subject?: string })[]
-): string {
+function step(name: string, question: string, kind: string, options: readonly Option[]): string {
   const choices = options
     .map(
       (o, i) =>
-        `<button class="choice" type="button" data-k="${esc(kind)}" data-v="${esc(o.value)}"` +
-        ` data-l="${esc(o.short ?? o.subject ?? o.label)}">` +
+        `<button class="choice" type="button" data-k="${esc(kind)}" data-v="${esc(o.value)}">` +
         `<span class="mk">${NUMS[i] ?? ''}</span><span>${esc(o.label)}</span></button>`
     )
     .join('');
@@ -76,31 +71,24 @@ function step(
 /**
  * ブリッジ（宣言 → 読み解きガイド）。
  *
- * 見出しと副題はJSが宣言から組み立てる。約束は「場面×相手」で出し分けるので、
- * 出しうる全パターンを置いて選ばれたものだけを表示する（**サーバから追加で取りに
- * 行かせない**。宣言の直後に通信を挟むと、ここで止まって見える）。
+ * 悩みの理由は「場面×相手」で出し分けるので、出しうる全パターンを置いて選ばれたものだけを
+ * 表示する（**サーバから追加で取りに行かせない**。宣言の直後に通信を挟むと、ここで止まって見える）。
  */
 function bridge(): string {
-  // 約束は「場面 × 相手」の組ごとに文が変わる（相手の名前が入る）。**その場で文字列を
+  // 悩みの理由は「場面 × 相手」の組ごとに文が変わる（相手の名前が入る）。**その場で文字列を
   // 組み立てさせない**で、出しうる全パターンを描いておき、選ばれた1本だけを見せる。
-  const promises = allPromises()
-    .map((p) => `<p class="lead-cta" data-promise="${esc(p.key)}" hidden>${esc(p.text)}</p>`)
-    .join('');
-  const actions = allActions()
-    .map((a) => `<p data-action="${esc(a.key)}" hidden>${esc(a.text)}</p>`)
+  const causes = allCauses()
+    .map((c) => `<p class="lead-cta" data-cause="${esc(c.key)}" hidden>${esc(c.text)}</p>`)
     .join('');
   return (
     '<div data-step="bridge" hidden>' +
-      '<div class="eyebrow">あなたが選んだこと</div>' +
-      '<p class="qtext" id="dcHead" style="text-align:left; margin-bottom:10px"></p>' +
-      '<p class="qhint" id="dcSub" style="text-align:left; margin-top:0"></p>' +
-      promises +
-      // 一手（実演）。結果カードのトリセツ1枚をここへ持ってくる（中身は result-page.ts が複製する）。
-      // 説明でなく実演にするのは、how-toの読み物を足さないため（集客戦略マップ.md §3.1）。
-      '<div class="row-block" id="dcDemo" style="margin-top:26px" hidden>' +
-        `<p class="sectlabel" style="margin-top:0">${esc(DEMO_LEAD)}</p>` +
+      `<div class="eyebrow">${esc(BRIDGE_EYEBROW)}</div>` +
+      causes +
+      // 証拠と一般化。トリセツ1枚とタイプ名は結果カードから借りる（result-page.ts が複製する）。
+      // 読み物を足さず、**いま見たばかりの自分の結果**でそのまま話を進める。
+      '<div class="row-block" id="dcDemo" style="margin-top:20px" hidden>' +
         '<div id="dcCard"></div>' +
-        actions +
+        '<p id="dcTypeNote" style="margin-top:14px"></p>' +
       '</div>' +
       `<p class="link-note">${BRIDGE_NOTE}</p>` +
       '<button class="btn btn-wide btn-accent" id="dcGo" type="button" style="margin-top:22px">' +
