@@ -84,12 +84,44 @@ export const promiseKey = (domain: string, target: string | null): string =>
 
 /** 出しうる約束の全パターン（ブリッジがまとめて描いて、選ばれた1本だけ見せる）。 */
 export function allPromises(): { key: string; text: string }[] {
-  const out = [{ key: 'unknown', text: PROMISE_TEMPLATES.unknown('') }];
+  return byKey((d, subject) => PROMISE_TEMPLATES[d](subject), PROMISE_TEMPLATES.unknown(''));
+}
+
+/**
+ * ブリッジで渡す**一手**（2026-09-12に追加）。
+ *
+ * 結果カードのトリセツ4枚のうち**1枚だけ**を取り出して、宣言した相手に伝えてもらう。
+ * 狙いは「診断は索引でなく道具だ」を説明でなく**実演**で分からせること
+ * （`個人商品定義.md` §5.2.1 の論点5＝タイプが入口の索引で終わっている、への手当て）。
+ *
+ * **1回に1つしか渡さない**（同 §2.3 ガード4）。段4で申込直後の「事前の一手」（§4.1 の装置2）を
+ * 作るときは、**そこで2つ目を渡さず「この結果を持ってきてください」に変える**こと。
+ * 2つ渡すと、やらなかったときに何が原因か分からなくなって判定が壊れる。
+ *
+ * 無料と有料の線（§4.3）の内側にある。渡すのは**一回きりの測定**まで。
+ */
+const ACTION_SUFFIX = 'に伝えてみてください。';
+const ACTION_UNKNOWN = 'この1枚だけ、身近な人に伝えてみてください。';
+
+/** 出しうる一手の全パターン。約束と同じ鍵で出し分ける。 */
+export function allActions(): { key: string; text: string }[] {
+  return byKey((_d, subject) => `この1枚だけ、${subject}${ACTION_SUFFIX}`, ACTION_UNKNOWN);
+}
+
+/** 「場面×相手」の全組み合わせに文を当てる（約束と一手で同じ鍵をつくる）。 */
+function byKey(
+  make: (domain: 'work' | 'love', subject: string) => string,
+  unknownText: string
+): { key: string; text: string }[] {
+  const out = [{ key: 'unknown', text: unknownText }];
   for (const d of ['work', 'love'] as const) {
-    for (const t of TARGETS[d]) out.push({ key: promiseKey(d, t.value), text: PROMISE_TEMPLATES[d](t.subject) });
+    for (const t of TARGETS[d]) out.push({ key: promiseKey(d, t.value), text: make(d, t.subject) });
   }
   return out;
 }
+
+/** 一手の見出し。渡せるものが**いま**手元にある、と分かる言い方にする。 */
+export const DEMO_LEAD = 'いま、渡せるものがひとつあります';
 
 /**
  * ブリッジ画面で、約束のあとに置く一文。
@@ -103,8 +135,10 @@ export function allPromises(): { key: string; text: string }[] {
  * 書き換えるときはタグの対応を崩さないこと。
  */
 export const BRIDGE_NOTE =
-  // 「その関係で」と書かないのは、③まだ分からないの人には名指しした関係がまだ無いため
-  'いま何が起きているかは、まず自分の側から見えてきます。<br>' +
+  // 1文目はガイド終章の断ち切り（「クセは自分だけでは気づくことができません」）の先出し。
+  // **一手を渡した直後に置く**ので、「やってみよう」と「でも一人では見えない」が続く。
+  // ここが無いと、トリセツを1枚渡した時点で読んだ気になって終わる。
+  '<b>ただし、自分のクセは自分だけでは気づくことができません。</b><br>' +
   '読み解きガイドは序章「なぜ、相手ではなく自分から始めるのか」から始まり、' +
   '第一章で<b>あなたが自然体でいられる環境</b>を、' +
   '第二章で<b>あなたの中の「もう一人のあなた」</b>を読み解きます。';

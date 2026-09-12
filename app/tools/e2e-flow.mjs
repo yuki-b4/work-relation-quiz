@@ -119,6 +119,15 @@ t('約束に相手の名前が入る',
   await p.textContent('#declare [data-promise="work:boss"]'), '上司と話した日に、どっと疲れて帰るのをやめる。');
 t('ほかの相手の約束は出ない', await p.isHidden('#declare [data-promise="work:peer"]'), true);
 t('恋愛の約束も出ない', await p.isHidden('#declare [data-promise="love:partner"]'), true);
+// 一手（実演）：結果カードのトリセツ1枚がそのまま持ってこられる
+t('トリセツが1枚だけ持ってこられる', (await p.$$('#dcCard .ts-card')).length, 1);
+t('結果カードと同じ1枚目', (await p.textContent('#dcCard .ts-card')).includes('こう接すると、うまくいく'), true);
+t('一手に相手の名前が入る',
+  await p.textContent('#declare [data-action="work:boss"]'), 'この1枚だけ、上司に伝えてみてください。');
+t('ほかの相手の一手は出ない', await p.isHidden('#declare [data-action="love:partner"]'), true);
+// 限界（ガイド終章の断ち切りの先出し）→ ガイドの中身 → CTA
+t('一人では気づけないと置く',
+  (await p.textContent('#declare .link-note')).includes('自分だけでは気づくことができません'), true);
 t('ガイドで何を読み解くかが出る',
   (await p.textContent('#declare .link-note')).includes('なぜ、相手ではなく自分から始めるのか'), true);
 t('ブリッジでは戻るを出さない', await p.isHidden('#dcBack'), true);

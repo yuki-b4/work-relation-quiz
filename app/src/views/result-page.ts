@@ -74,8 +74,9 @@ const SHELL_SCRIPT = `
   /**
    * 宣言のフォーク（施策a 段1・A-1）と、そのあとのブリッジ。
    *
-   * 3クリックの最後にブリッジ（宣言の読み上げ＋約束＋ガイドで何を読み解くか）を出してから
-   * 読み解きガイドへ送る。**記録に失敗してもブリッジは出す**（宣言のために足止めしない）。
+   * 3クリックの最後にブリッジ（宣言の読み上げ → 約束 → 一手 → 限界 → ガイドの中身）を
+   * 出してから読み解きガイドへ送る。
+   * **記録に失敗してもブリッジは出す**（宣言のために足止めしない）。
    */
   function wireDeclare(token, declared, guard) {
     var openGuide = document.getElementById('openGuide');
@@ -114,11 +115,20 @@ const SHELL_SCRIPT = `
         picked.domain === 'unknown' ? ${JSON.stringify(BRIDGE_HEADLINE_UNKNOWN)} : labels.target + 'との関係';
       document.getElementById('dcSub').textContent =
         picked.domain === 'unknown' ? '' : labels.domain + '　／　' + labels.deadline;
-      // 約束は「場面：相手」の組で選ぶ（相手の名前が入った1本だけを見せる）。
+      // 約束と一手は「場面：相手」の組で選ぶ（相手の名前が入った1本だけを見せる）。
       // 鍵の作り方は lib/declaration.ts の promiseKey と揃えること
       var key = picked.domain === 'unknown' || !picked.target ? 'unknown' : picked.domain + ':' + picked.target;
-      var ps = panel.querySelectorAll('[data-promise]');
-      for (var i = 0; i < ps.length; i++) ps[i].hidden = ps[i].dataset.promise !== key;
+      var ps = panel.querySelectorAll('[data-promise], [data-action]');
+      for (var i = 0; i < ps.length; i++) {
+        ps[i].hidden = (ps[i].dataset.promise || ps[i].dataset.action) !== key;
+      }
+      // 一手（実演）：**結果カードのトリセツ1枚をそのまま持ってくる。**
+      // 文面を二重に持たず、いま見たばかりのカードが道具として渡される形にする。
+      var slot = document.getElementById('dcCard');
+      var card = mount.querySelector('.ts-card');
+      if (card && !slot.firstChild) slot.appendChild(card.cloneNode(true));
+      // カードが取れなければ、見出しだけが浮くので実演ごと畳む
+      document.getElementById('dcDemo').hidden = !slot.firstChild;
       show('bridge');
     }
 
