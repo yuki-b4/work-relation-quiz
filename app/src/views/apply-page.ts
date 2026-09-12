@@ -11,9 +11,6 @@
  * 設問3（タイプ）と設問7（診断ID）は置かない。タイプはURLから確定し、
  * 診断IDの役割は ?v=（到達ID）の hidden が引き継ぐ。
  */
-import {
-  DEADLINES, DECLARE_QUESTIONS, DOMAINS, TARGETS, type Option,
-} from '../lib/declaration.ts';
 import { TYPES, type TypeCode } from '../content/types.ts';
 import { page } from './layout.ts';
 import { esc } from './result.ts';
@@ -23,55 +20,22 @@ export const SLOTS = [
   '土日の午前', '土日の午後', '土日の夜', 'その他',
 ] as const;
 
-/**
- * 未選択のときにフォームの下へ出す一文。**JSの文字列へ埋めるので JSON.stringify で括る**
- * （HTMLのエスケープ関数を使うと、引用符が `&#39;` のまま画面に出る）。
- */
-const ask = (question: string) => JSON.stringify(`${question}。ひとつ選んでください。`);
-
 const SCRIPT = `
 (function () {
   var f = document.getElementById('applyForm');
   var note = document.getElementById('applyNote');
   var btn = document.getElementById('applySubmit');
 
-  // 構造化宣言（施策a 段1・A-4）。相手の選択肢は場面で変わるので、選ばれた場面のものだけ出す。
-  // 「まだ分からない」を選んだときは、相手と期限は聞かない（特定できないため）。
-  function domainValue() {
-    var el = f.querySelector('input[name="concernDomain"]:checked');
-    return el ? el.value : '';
-  }
-  function syncDeclare() {
-    var d = domainValue();
-    document.getElementById('dcTargetWork').hidden = d !== 'work';
-    document.getElementById('dcTargetLove').hidden = d !== 'love';
-    document.getElementById('dcDeadline').hidden = !d || d === 'unknown';
-  }
-  f.addEventListener('change', function (e) {
-    if (e.target.name !== 'concernDomain') return;
-    // 場面を選び直したら相手は選び直し。職場のまま「パートナー」が残ると、宣言が矛盾する。
-    var picked = f.querySelectorAll('input[name="concernTarget"]');
-    for (var i = 0; i < picked.length; i++) picked[i].checked = false;
-    syncDeclare();
-  });
-  syncDeclare();
-
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     if (btn.disabled) return;
     var fd = new FormData(f);
     var slots = fd.getAll('slots');
-    // 同意（必須）と宣言（必須）は、送る前にこちらで見る。
+    // 同意（必須）は送る前にこちらで見る。
     // フォームは novalidate なので、required だけではブラウザが止めてくれない。
     if (!f.querySelector('input[name="agree"]').checked) {
       note.textContent = 'プライバシーポリシーへの同意が必要です。';
       return;
-    }
-    var domain = domainValue();
-    if (!domain) { note.textContent = ${ask(DECLARE_QUESTIONS.domain)}; return; }
-    if (domain !== 'unknown') {
-      if (!fd.get('concernTarget')) { note.textContent = ${ask(DECLARE_QUESTIONS.target)}; return; }
-      if (!fd.get('concernDeadline')) { note.textContent = ${ask(DECLARE_QUESTIONS.deadline)}; return; }
     }
     btn.disabled = true;
     btn.classList.add('is-loading');
@@ -84,9 +48,6 @@ const SCRIPT = `
         v: fd.get('v') || null,
         name: fd.get('name'),
         email: fd.get('email'),
-        concernDomain: fd.get('concernDomain'),
-        concernTarget: fd.get('concernTarget'),
-        concernDeadline: fd.get('concernDeadline'),
         concern: fd.get('concern'),
         slots: slots,
         question: fd.get('question'),
@@ -108,28 +69,6 @@ const SCRIPT = `
   });
 })();
 `;
-
-/**
- * 構造化宣言の1問（施策a 段1・A-4）。
- *
- * **`.vq-opt` は `.field` の中に置かない。** `.field label{display:block}` と
- * `.field input{width:100%}` が勝って、丸が全幅になりラベルと縦積みになる。
- */
-function radioBlock(
-  id: string, name: string, question: string, options: readonly Option[], hidden: boolean
-): string {
-  return (
-    `<div class="vq" id="${esc(id)}"${hidden ? ' hidden' : ''}>` +
-      `<p class="vq-q">${esc(question)}（必須）</p>` +
-      '<div class="vq-opts" role="radiogroup">' +
-        options.map((o) =>
-          `<label class="vq-opt"><input type="radio" name="${esc(name)}" value="${esc(o.value)}">` +
-          `<span>${esc(o.label)}</span></label>`
-        ).join('') +
-      '</div>' +
-    '</div>'
-  );
-}
 
 export function applyPage(code: TypeCode, visitId: string | null): string {
   const t = TYPES[code];
@@ -165,14 +104,9 @@ export function applyPage(code: TypeCode, visitId: string | null): string {
             '<input id="name" name="name" type="text" required maxlength="100" autocomplete="name">') +
           field('email', 'メールアドレス（必須）', '日程のご連絡に使います。',
             '<input id="email" name="email" type="email" required maxlength="200" autocomplete="email">') +
-          // 構造化宣言（施策a 段1・A-4）。任意の自由記述だけだった欄を、
-          // **必須の選択式＋任意の自由記述**に組み替えたもの（集客戦略マップ.md §4.1 の装置1）。
-          // 選択式なので書く負担は増えないが、宣言は必ず立つ。当日はここの読み上げから始める。
-          radioBlock('dcDomain', 'concernDomain', DECLARE_QUESTIONS.domain, DOMAINS, false) +
-          radioBlock('dcTargetWork', 'concernTarget', DECLARE_QUESTIONS.target, TARGETS.work, true) +
-          radioBlock('dcTargetLove', 'concernTarget', DECLARE_QUESTIONS.target, TARGETS.love, true) +
-          radioBlock('dcDeadline', 'concernDeadline', DECLARE_QUESTIONS.deadline, DEADLINES, true) +
-
+          // **場面・相手・期限はここでは聞かない**（2026-09-12）。宣言はフォーク（A-1）の1か所で取り、
+          // 宣言が無い人には体験セッションの場で聞く（集客戦略マップ.md §4.2 の1段目）。
+          // 同じことを2回聞かないぶん、フォームの摩擦も増やさない。
           field('concern', 'いま、人間関係で気になっていること（任意）',
             'ひと言でも大丈夫です。書いていただけると、当日の読み解きが早く、深くなります。',
             '<textarea id="concern" name="concern" maxlength="4000"></textarea>') +

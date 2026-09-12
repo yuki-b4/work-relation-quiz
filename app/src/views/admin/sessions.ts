@@ -151,10 +151,11 @@ export function sessionDetailPage(
       `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
       `<dt>タイプ</dt><dd>${esc(a.type_code ?? '—')}</dd>` +
       `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
-      // 申込時の構造化宣言（施策a 段1・A-4）。当日はここの読み上げから始める（§4.2 の1）。
-      `<dt>場面</dt><dd>${esc(domainLabel(a.concern_domain) ?? '—')}</dd>` +
-      `<dt>相手</dt><dd>${esc(targetLabel(a.concern_domain, a.concern_target) ?? '—')}</dd>` +
-      `<dt>いつまでに</dt><dd>${esc(deadlineLabel(a.concern_deadline) ?? '—')}</dd>` +
+      // 紐づく回答でのフォークの宣言（施策a 段1・A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
+      // 申込フォームでは聞かないので、空なら**セッションの場で聞く**。
+      `<dt>宣言（場面）</dt><dd>${esc(domainLabel(a.response_concern_domain) ?? '未宣言（当日に聞く）')}</dd>` +
+      `<dt>宣言（相手）</dt><dd>${esc(targetLabel(a.response_concern_domain, a.response_concern_target) ?? '—')}</dd>` +
+      `<dt>宣言（いつまでに）</dt><dd>${esc(deadlineLabel(a.response_concern_deadline) ?? '—')}</dd>` +
       `<dt>気になっていること</dt><dd class="wrap-cell">${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
       `<dt>質問</dt><dd class="wrap-cell">${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
       `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +

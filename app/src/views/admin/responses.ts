@@ -206,8 +206,8 @@ const SURVEY_LABELS: [string, string][] = [
 ];
 
 /**
- * 宣言（施策a 段1）。回答側はフォーク（A-1）、申込側は申込フォーム（A-4）で取ったもの。
- * 当日はここの読み上げから始める（集客戦略マップ.md §4.2 の1）。
+ * 宣言（施策a 段1・A-1）。**取るのは結果画面直後のフォーク1か所だけ。**
+ * 当日はここの読み上げから始め、無ければセッションの場で聞く（集客戦略マップ.md §4.2 の1）。
  */
 function declarationRows(d: {
   concern_domain?: unknown; concern_target?: unknown; concern_deadline?: unknown;
@@ -232,7 +232,7 @@ function applicationBlock(a: ApplicationRow, csrf: string): string {
         `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
         `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
         `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
-        declarationRows(a) +
+        // 宣言はこのページのブロック5に出るので、ここでは繰り返さない（申込フォームでは聞かない）
         `<dt>気になっていること</dt><dd>${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
         `<dt>質問</dt><dd>${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
         `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
@@ -315,8 +315,8 @@ export function responseDetailPage(
     '</div>';
 
   // 5. 宣言（施策a 段1・A-1）と商談前ヒアリング。どちらも「本人が何を問題だと言ったか」なので、
-  // ブロックは増やさず（F2-3 は8ブロック）同じ枠に入れる。宣言は申込フォーム（A-4）でも取るが、
-  // そちらは申込の行に持つので 7 に出る。ここに出るのはフォークで宣言した人だけ。
+  // ブロックは増やさず（F2-3 は8ブロック）同じ枠に入れる。
+  // **宣言を取るのはフォーク1か所だけ**なので、申込フォーム側には同じ欄が無い。
   const hearing =
     '<div class="panel"><h2>5. 宣言・商談前ヒアリング</h2>' +
       '<dl class="kv">' +

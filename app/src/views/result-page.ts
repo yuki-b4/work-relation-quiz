@@ -13,6 +13,7 @@
  *        3点一致で結果のHTMLを受け取って描く
  *   /result は noindex なので、SSRしないことによるSEOの損はない（F6-3）。
  */
+import { BRIDGE_HEADLINE_UNKNOWN } from '../lib/declaration.ts';
 import { declareSection } from './declare.ts';
 import { page } from './layout.ts';
 
@@ -52,9 +53,9 @@ const SHELL_SCRIPT = `
         body: JSON.stringify({ tabToken: token })
       }).catch(function () {});
     });
-    // 読み解きガイドへ。その手前に宣言のフォークを1枚だけ挟む（施策a 段1・A-1）。
+    // 読み解きガイドへ。その手前に宣言のフォークを挟む（施策a 段1・A-1）。
     // 一度宣言した人には二度目は出さない（data.declared）。
-    wireDeclare(token, !!data.declared);
+    wireDeclare(token, !!data.declared, !!data.guard);
 
     var restart = document.getElementById('restartBtn');
     if (restart) restart.addEventListener('click', function () {
@@ -71,10 +72,12 @@ const SHELL_SCRIPT = `
   }).catch(function () { closed(); });
 
   /**
-   * 宣言のフォーク（施策a 段1・A-1）。結果画面の直後に1枚だけ挟む。
-   * 記録に失敗しても読み解きガイドへは進ませる（宣言のために足止めしない）。
+   * 宣言のフォーク（施策a 段1・A-1）と、そのあとのブリッジ。
+   *
+   * 3クリックの最後にブリッジ（宣言の読み上げ＋約束＋ガイドで何を読み解くか）を出してから
+   * 読み解きガイドへ送る。**記録に失敗してもブリッジは出す**（宣言のために足止めしない）。
    */
-  function wireDeclare(token, declared) {
+  function wireDeclare(token, declared, guard) {
     var openGuide = document.getElementById('openGuide');
     var panel = document.getElementById('declare');
     var result = document.getElementById('result');
@@ -86,14 +89,37 @@ const SHELL_SCRIPT = `
       return;
     }
 
+    // タイプの極（open／guard）の色を引き継ぐ。結果カードは .card 側で色を決めているので、
+    // ここで渡さないとフォークだけ既定色（coral）のままになる。
+    panel.style.setProperty('--accent', guard ? 'var(--teal)' : 'var(--coral)');
+    panel.style.setProperty('--accent-soft', guard ? 'var(--teal-soft)' : 'var(--coral-soft)');
+    panel.style.setProperty('--accent-ink', guard ? 'var(--teal-ink)' : 'var(--coral-ink)');
+
     var picked = { domain: null, target: null, deadline: null };
+    var labels = { domain: '', target: '', deadline: '' };
     var sending = false;
 
     function show(step) {
       var steps = panel.querySelectorAll('[data-step]');
       for (var i = 0; i < steps.length; i++) steps[i].hidden = steps[i].dataset.step !== step;
-      document.getElementById('dcBack').hidden = step === 'domain';
+      // ブリッジは宣言のあとの画面なので、戻るも飛ばすも出さない
+      document.getElementById('dcBack').hidden = step === 'domain' || step === 'bridge';
+      document.getElementById('dcSkipWrap').hidden = step === 'bridge';
       window.scrollTo(0, 0);
+    }
+
+    /** 選んだものをそのまま返す（自分ごと化は、こちらの言葉でなく本人の選択で起こす）。 */
+    function showBridge() {
+      document.getElementById('dcHead').textContent =
+        picked.domain === 'unknown' ? ${JSON.stringify(BRIDGE_HEADLINE_UNKNOWN)} : labels.target + 'との関係';
+      document.getElementById('dcSub').textContent =
+        picked.domain === 'unknown' ? '' : labels.domain + '　／　' + labels.deadline;
+      // 約束は「場面：相手」の組で選ぶ（相手の名前が入った1本だけを見せる）。
+      // 鍵の作り方は lib/declaration.ts の promiseKey と揃えること
+      var key = picked.domain === 'unknown' || !picked.target ? 'unknown' : picked.domain + ':' + picked.target;
+      var ps = panel.querySelectorAll('[data-promise]');
+      for (var i = 0; i < ps.length; i++) ps[i].hidden = ps[i].dataset.promise !== key;
+      show('bridge');
     }
 
     function send() {
@@ -108,7 +134,7 @@ const SHELL_SCRIPT = `
           target: picked.target,
           deadline: picked.deadline
         })
-      }).catch(function () {}).finally(toGuide);
+      }).catch(function () {}).finally(showBridge);
     }
 
     openGuide.addEventListener('click', function () {
@@ -121,9 +147,10 @@ const SHELL_SCRIPT = `
       var b = e.target.closest('button[data-k]');
       if (!b) return;
       var kind = b.dataset.k, value = b.dataset.v;
+      labels[kind] = b.dataset.l;
       if (kind === 'domain') {
         picked.domain = value; picked.target = null; picked.deadline = null;
-        // ③まだ分からない：相手を特定できないので、ここで記録してガイドへ（A-3）
+        // ③まだ分からない：相手を特定できないので、ここで記録してブリッジへ（A-3）
         if (value === 'unknown') { send(); return; }
         show('target-' + value);
       } else if (kind === 'target') {
@@ -139,6 +166,7 @@ const SHELL_SCRIPT = `
       if (picked.target) { picked.target = null; show('target-' + picked.domain); }
       else { picked.domain = null; show('domain'); }
     });
+    document.getElementById('dcGo').addEventListener('click', toGuide);
     // 飛ばせるようにしておく。全員が宣言済みになると、宣言の有無で申込率を比べられない。
     document.getElementById('dcSkip').addEventListener('click', toGuide);
   }

@@ -343,7 +343,11 @@ app.post('/api/result/view', async (c) => {
   });
   // declared は宣言のフォーク（施策a 段1・A-1）を出すかどうかの判断だけに使う。
   // 一度宣言した人に、戻ってくるたび同じ設問を出さない。
-  return c.json({ ok: true, html, declared: !!r.declared_at });
+  // guard はフォークの色。結果カードの外にある画面なので、渡さないと既定色のままになる。
+  return c.json({
+    ok: true, html, declared: !!r.declared_at,
+    guard: TYPES[r.type_code as keyof typeof TYPES]?.pole === 'guard',
+  });
 });
 
 /**
@@ -465,13 +469,9 @@ app.post('/api/session-applications', async (c) => {
   const typeCode = str(body.typeCode, 8);
   if (!(typeCode in TYPES)) return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
 
-  // 構造化宣言（施策a 段1・A-4）。**任意でなく必須**にする。
-  // フォークを飛ばした人・ガイド経由の人の宣言をここで拾う（§4.1 の装置1）。
-  // 選択式なので書く負担は増えないが、宣言は必ず立つ。
-  const declared = parseDeclaration({
-    domain: body.concernDomain, target: body.concernTarget, deadline: body.concernDeadline,
-  });
-  if (!declared.ok) return c.json({ ok: false, message: declared.message }, 400);
+  // **申込フォームでは宣言を聞かない**（2026-09-12）。宣言はフォーク（A-1）で取る1か所だけ。
+  // フォークで宣言していればその値を当日に使い、していなければ体験セッションの場で聞く
+  // （§4.2 の1段目）。同じことを2回聞かないぶん、フォームの摩擦も増やさない。
 
   const slots = Array.isArray(body.slots)
     ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
@@ -487,19 +487,26 @@ app.post('/api/session-applications', async (c) => {
     responseId = hit?.response_id ?? null;
   }
 
+  // 紐づいた回答の宣言を1回だけ引く。**申込フォームでは聞かない**ので、
+  // 当日の材料になるのはフォークで宣言した値だけ（無ければセッションで聞く）。
+  const declaration = responseId
+    ? await c.env.DB.prepare(
+        `select concern_domain, concern_target, concern_deadline
+           from responses where id = ? and deleted_at is null`
+      ).bind(responseId).first<Record<string, string | null>>()
+    : null;
+
   const applicationId = crypto.randomUUID();
   const concern = str(body.concern, 4000) || null;
   await c.env.DB.prepare(
     `insert into session_applications
        (id, created_at, apply_visit_id, response_id, type_code, name, email,
-        concern, preferred_slots, question, source, status,
-        concern_domain, concern_target, concern_deadline)
-     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応', ?,?,?)`
+        concern, preferred_slots, question, source, status)
+     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
   )
     .bind(
       applicationId, isoNow(), visitId, responseId, typeCode, name, email,
-      concern, JSON.stringify(slots), str(body.question, 4000) || null,
-      declared.value.domain, declared.value.target, declared.value.deadline
+      concern, JSON.stringify(slots), str(body.question, 4000) || null
     )
     .run();
 
@@ -514,12 +521,9 @@ app.post('/api/session-applications', async (c) => {
       typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
       slots,
       concern,
-      // 申込時の宣言（A-4）。当日はここの読み上げから始める（§4.2 の1）
-      declaration: declarationText({
-        concern_domain: declared.value.domain,
-        concern_target: declared.value.target,
-        concern_deadline: declared.value.deadline,
-      }),
+      // フォークでの宣言（A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
+      // 無ければセッションの場で聞くので、通知では「未宣言」と分かればよい。
+      declaration: declarationText(declaration ?? {}),
       linked: !!responseId,
       origin: originOf(c),
     })

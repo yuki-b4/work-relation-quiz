@@ -110,6 +110,21 @@ await p.click('#declare [data-step="target-work"] .choice >> nth=0'); // 上司
 t('3問目は期限', await p.isVisible('#declare [data-step="deadline"]'), true);
 await p.click('#declare [data-step="deadline"] .choice >> nth=0');  // 今すぐ
 
+// ブリッジ：宣言をそのまま読み上げ、場面に合った約束と、ガイドで何を読み解くかを返す
+await p.waitForSelector('#declare [data-step="bridge"]:not([hidden])', { timeout: 10000 });
+t('選んだ相手が返ってくる', await p.textContent('#dcHead'), '上司との関係');
+t('選んだ場面と期限も返る', await p.textContent('#dcSub'), '職場　／　今すぐ');
+// 約束には**選んだ相手の名前**が入る（§3.5：核は変えず、相手と場面だけ差し替える）
+t('約束に相手の名前が入る',
+  await p.textContent('#declare [data-promise="work:boss"]'), '上司と話した日に、どっと疲れて帰るのをやめる。');
+t('ほかの相手の約束は出ない', await p.isHidden('#declare [data-promise="work:peer"]'), true);
+t('恋愛の約束も出ない', await p.isHidden('#declare [data-promise="love:partner"]'), true);
+t('ガイドで何を読み解くかが出る',
+  (await p.textContent('#declare .link-note')).includes('なぜ、相手ではなく自分から始めるのか'), true);
+t('ブリッジでは戻るを出さない', await p.isHidden('#dcBack'), true);
+t('ブリッジでは飛ばすを出さない', await p.isHidden('#dcSkipWrap'), true);
+
+await p.click('#dcGo');
 await p.waitForURL('**/guide', { timeout: 15000, waitUntil: 'domcontentloaded' });
 t('宣言のあとはガイドへ', new URL(p.url()).pathname, '/guide');
 

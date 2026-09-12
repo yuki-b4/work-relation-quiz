@@ -675,7 +675,8 @@ admin.get('/export/answers.csv', async (c) => {
 admin.get('/export/applications.csv', async (c) => {
   const p = period(c);
   const { results } = await c.env.DB.prepare(
-    `select sa.*, r.type_code as response_type_code, r.created_at as response_created_at
+    `select sa.*, r.type_code as response_type_code, r.created_at as response_created_at,
+            r.concern_domain, r.concern_target, r.concern_deadline
        from session_applications sa left join responses r on r.id = sa.response_id
       where sa.deleted_at is null
         and (? is null or sa.created_at >= ?) and (? is null or sa.created_at < ?)
@@ -688,6 +689,7 @@ admin.get('/export/applications.csv', async (c) => {
      '取り込み元', 'ステータス', '実施日(JST)', 'メモ', '紐づく回答ID', '回答日時(JST)', '到達ID'],
     (results ?? []).map((a) => [
       a.id, jstFull(a.created_at), a.name, a.email, a.type_code,
+      // 宣言は**紐づく回答**（フォーク）から引く。申込フォームでは聞かない
       domainLabel(a.concern_domain), targetLabel(a.concern_domain, a.concern_target),
       deadlineLabel(a.concern_deadline), a.concern,
       jsonArray(a.preferred_slots).join('／'), a.question, a.source, a.status,

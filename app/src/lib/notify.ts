@@ -153,7 +153,10 @@ export type ApplicationEvent = {
   typeName: string | null;
   slots: string[];
   concern: string | null;
-  /** 申込フォームの構造化宣言（施策a 段1・A-4）。場面／相手／期限を1行にしたもの。 */
+  /**
+   * 紐づく回答でのフォークの宣言（施策a 段1・A-1）。場面／相手／期限を1行にしたもの。
+   * **申込フォームでは聞かない**ので、無ければ体験セッションの場で聞く（§4.2 の1段目）。
+   */
   declaration: string | null;
   /** 到達IDから回答に紐づいたか。付いていないと Admin で手当てが要る（F2-4）。 */
   linked: boolean;
@@ -173,7 +176,7 @@ export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Pr
     `メール：${maskEmail(a.email)}`,
     `タイプ：${a.typeName ? `${a.typeName}（${a.typeCode}）` : (a.typeCode ?? '不明')}`,
     `希望の時間帯：${a.slots.length ? a.slots.join('／') : '指定なし'}`,
-    `宣言：${a.declaration ?? '未回答'}`,
+    `宣言：${a.declaration ?? '未宣言（当日に聞く）'}`,
     ...(a.concern ? [`気になっていること：${a.concern.slice(0, 120)}${a.concern.length > 120 ? '…' : ''}`] : []),
     a.linked ? '' : '⚠ 回答に紐づいていません。Admin で手当てしてください。',
     '',

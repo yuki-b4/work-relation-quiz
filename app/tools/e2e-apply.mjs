@@ -110,19 +110,10 @@ t('チェックボックスの高さが16px', box.h, '16px');
 t('ラベルが横並び（flex）', box.display, 'flex');
 t('中央揃え', box.align, 'center');
 
-// ── 構造化宣言（施策a 段1・A-4）。必須で、相手の選択肢は場面で変わる ──
-t('相手は最初は出ていない', await apply.isHidden('#dcTargetWork'), true);
-t('期限も最初は出ていない', await apply.isHidden('#dcDeadline'), true);
-
-await apply.check('input[name="concernDomain"][value="love"]');
-t('恋愛を選ぶと恋愛の相手が出る', await apply.isVisible('#dcTargetLove'), true);
-t('職場の相手は出ない', await apply.isHidden('#dcTargetWork'), true);
-await apply.check('input[name="concernTarget"][value="partner"]');
-
-await apply.check('input[name="concernDomain"][value="work"]');
-t('場面を選び直すと職場の相手に変わる', await apply.isVisible('#dcTargetWork'), true);
-t('前に選んだ相手は外れる（宣言が矛盾しない）',
-  await apply.isChecked('input[name="concernTarget"][value="partner"]'), false);
+// ── 宣言はここでは聞かない（施策a 段1・2026-09-12）。フォークで取り、無ければ当日に聞く ──
+t('場面を聞かない', (await apply.$$('input[name="concernDomain"]')).length, 0);
+t('相手を聞かない', (await apply.$$('input[name="concernTarget"]')).length, 0);
+t('期限を聞かない', (await apply.$$('input[name="concernDeadline"]')).length, 0);
 
 // ── 送信 ──
 await apply.fill('#name', 'テスト太郎');
@@ -130,15 +121,10 @@ await apply.fill('#email', 'test@example.com');
 await apply.fill('#concern', '任せたいのに抱え込んでしまう');
 await apply.check('input[name="slots"][value="平日の夜（19時以降）"]');
 await apply.check('input[name="slots"][value="土日の午前"]');
+// 同意は必須。チェックせずに出すと、その場で止まる（サーバまで行かない）
+await apply.click('#applySubmit');
+t('同意なしでは止まる', (await apply.textContent('#applyNote')).includes('同意が必要'), true);
 await apply.check('input[name="agree"]');
-
-// 宣言は必須。相手と期限を選ばずに出すと、その場で止まる（サーバまで行かない）
-await apply.click('#applySubmit');
-t('相手が未選択だと止まる', (await apply.textContent('#applyNote')).includes('誰との関係'), true);
-await apply.check('input[name="concernTarget"][value="boss"]');
-await apply.click('#applySubmit');
-t('期限が未選択だと止まる', (await apply.textContent('#applyNote')).includes('いつまでの話'), true);
-await apply.check('input[name="concernDeadline"][value="now"]');
 
 await apply.click('#applySubmit');
 await apply.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });

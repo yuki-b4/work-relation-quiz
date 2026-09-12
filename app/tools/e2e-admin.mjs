@@ -73,10 +73,6 @@ t('到達IDつきの申込URLが返る', /^\/apply\/OBL\?v=[0-9a-f]{64}$/.test(a
 await p.goto(`${BASE}${applyUrl}`);
 await p.fill('#name', `紐づき ${marker}`);
 await p.fill('#email', `linked-${marker}@example.com`);
-// 構造化宣言は必須（施策a 段1・A-4）
-await p.check('input[name="concernDomain"][value="work"]');
-await p.check('input[name="concernTarget"][value="boss"]');
-await p.check('input[name="concernDeadline"][value="now"]');
 await p.check('input[name="agree"]');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
@@ -101,8 +97,6 @@ await p.evaluate(async () => {
 await p.goto(`${BASE}/apply/OBL`);
 await p.fill('#name', `未紐づけ ${marker}`);
 await p.fill('#email', `orphan-${marker}@example.com`);
-// 場面が「まだ分からない」なら、相手と期限は聞かれない（1クリックで宣言が立つ）
-await p.check('input[name="concernDomain"][value="unknown"]');
 await p.check('input[name="agree"]');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
@@ -192,9 +186,19 @@ t('一覧ではメールを伏せる', list.includes(`linked-${marker}@example.c
 t('伏せた形で出る', /紐◯/.test(list), true);
 t('未紐づけが目立つ', list.includes('未紐づけ'), true);
 
+// 紐づいている申込：宣言はフォークで取るので、申込詳細には**回答側の宣言**が出る
+await p.click(`tbody tr:has-text("紐◯") td:first-child a`);
+await p.waitForSelector('h1', { timeout: 8000 });
+const appDetail = await p.textContent('body');
+t('申込詳細に紐づく回答の宣言が出る', appDetail.includes('職場の、あの人との関係'), true);
+t('申込フォームでは宣言を聞いていない', appDetail.includes('未宣言（当日に聞く）'), false);
+
+await p.goto(`${BASE}/admin/sessions?q=${encodeURIComponent(marker)}`);
 await p.click(`tbody tr:has-text("未◯") td:first-child a`);
 await p.waitForSelector('h1', { timeout: 8000 });
 t('詳細では氏名を全表示', (await p.textContent('body')).includes(`未紐づけ ${marker}`), true);
+t('宣言が無ければ当日に聞くと分かる',
+  (await p.textContent('body')).includes('未宣言（当日に聞く）'), true);
 t('紐づけ候補が出る', await p.isVisible('input[name="response_id"]'), true);
 await p.locator('input[name="response_id"]').first().check();
 await p.click('button:has-text("選んだ回答に紐づける")');
