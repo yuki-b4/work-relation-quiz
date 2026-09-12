@@ -124,7 +124,7 @@ t('恋愛の理由も出ない', await p.isHidden('#dcModal [data-cause="love:pa
 t('トリセツが1枚だけ持ってこられる', (await p.$$('#dcCard .ts-card')).length, 1);
 t('結果カードと同じ1枚目', (await p.textContent('#dcCard .ts-card')).includes('こう接すると、うまくいく'), true);
 t('一般化にタイプ名が入る', await p.textContent('#dcTypeNote'),
-  'こんなふうに、突撃隊長のあなたは、人間関係の中で強みがある一方で、悩みの原因となりやすい落とし穴もあるんです。');
+  '突撃隊長のあなたは、このような人間関係の中で生かせる強みがあります。一方で、悩みの原因となりやすい落とし穴もあるのです。');
 // ガイドの意味づけ → CTA
 t('ガイドの意味づけが出る',
   (await p.textContent('#dcModal .link-note')).includes('あなたが陥りやすい罠を、読み解きガイドとしてまとめました'), true);
