@@ -27,7 +27,7 @@ import { page } from './layout.ts';
  * 長すぎると誰にも届かず、短すぎると読書の邪魔になる。**実数が出るまでは動かさない**
  * （11月にガイド開封率で判定する。集客戦略マップ.md §8.3）。
  */
-const AUTO = { MIN_MS: 20000, READ_MS: 1200, IDLE_MS: 45000 };
+const AUTO = { MIN_MS: 10000, READ_MS: 1200, IDLE_MS: 45000 };
 
 const SHELL_SCRIPT = `
 (function () {
