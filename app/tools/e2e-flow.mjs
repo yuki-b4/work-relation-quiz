@@ -121,10 +121,11 @@ t('理由に場面と相手が入る', await p.textContent('#dcModal [data-cause
 t('ほかの相手の理由は出ない', await p.isHidden('#dcModal [data-cause="work:peer"]'), true);
 t('恋愛の理由も出ない', await p.isHidden('#dcModal [data-cause="love:partner"]'), true);
 // 証拠：結果カードのトリセツ1枚とタイプ名をそのまま借りる
+t('カードの前に「例えば」でつなぐ', await p.textContent('#dcDemo p:first-child'), '例えば');
 t('トリセツが1枚だけ持ってこられる', (await p.$$('#dcCard .ts-card')).length, 1);
 t('結果カードと同じ1枚目', (await p.textContent('#dcCard .ts-card')).includes('こう接すると、うまくいく'), true);
 t('一般化にタイプ名が入る', await p.textContent('#dcTypeNote'),
-  '突撃隊長のあなたは、このような人間関係の中で生かせる強みがあります。一方で、悩みの原因となりやすい落とし穴もあるのです。');
+  '突撃隊長のあなたは、このような人間関係の中で活かせる強みがあります。一方で、悩みの原因となりやすい落とし穴もあるのです。');
 // ガイドの意味づけ → CTA
 t('ガイドの意味づけが出る',
   (await p.textContent('#dcModal .link-note')).includes('あなたが陥りやすい罠を、読み解きガイドとしてまとめました'), true);

@@ -41,7 +41,7 @@
  * （Admin と同じ扱いの例外。色は必ず `:root` のトークンを使い、診断側の色に追従させる）。
  */
 import {
-  allCauses, BRIDGE_EYEBROW, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DOMAINS,
+  allCauses, BRIDGE_EYEBROW, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DEMO_LEAD, DOMAINS,
   TARGETS, type Option,
 } from '../lib/declaration.ts';
 import { esc } from './result.ts';
@@ -86,8 +86,11 @@ function bridge(): string {
       causes +
       // 証拠と一般化。トリセツ1枚とタイプ名は結果カードから借りる（result-page.ts が複製する）。
       // 読み物を足さず、**いま見たばかりの自分の結果**でそのまま話を進める。
-      '<div class="row-block" id="dcDemo" style="margin-top:20px" hidden>' +
-        '<div id="dcCard"></div>' +
+      '<div class="row-block" id="dcDemo" style="margin-top:14px" hidden>' +
+        // 「例えば」と一般化は同じ見え方にする（`.row-block p` が 14px・var(--ink) を当てる）。
+        // 理由の言い切り（.lead-cta）とは別の声にして、カードを挟む地の文にする
+        `<p>${esc(DEMO_LEAD)}</p>` +
+        '<div id="dcCard" style="margin-top:10px"></div>' +
         '<p id="dcTypeNote" style="margin-top:14px"></p>' +
       '</div>' +
       `<p class="link-note">${BRIDGE_NOTE}</p>` +
