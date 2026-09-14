@@ -61,7 +61,6 @@ const applyUrl = await p.evaluate(async (marker) => {
   });
   await post('/api/guide/view', {});
   await post('/api/guide/progress', { chapter: 3 });
-  await post('/api/hearing', { now: `${marker}のヒアリング本文`, future: '落ち着いて過ごしたい' });
   // 結果画面直後のフォークでの宣言（施策a 段1・A-1）
   await post('/api/declaration', { domain: 'work', target: 'boss', deadline: 'now' });
   const v = await (await post('/api/apply-visits', { cta: 'epilogue-2' })).json();
@@ -144,10 +143,10 @@ for (const col of ['日時', 'タイプ', '紹介元コード', '紹介者名', 
 await p.goto(`${BASE}/admin/responses?visit=yes`);
 const visitedRows = await p.$$eval('tbody tr', (els) => els.length);
 t('申込フォーム到達ありで絞り込める', visitedRows >= 1, true);
-await p.goto(`${BASE}/admin/responses?q=${encodeURIComponent(marker)}`);
-t('ヒアリング本文でフリーワード検索できる', await p.$$eval('tbody tr', (e) => e.length), 1);
-
 // ── 4. 回答詳細（F2-3） ──
+// 申込日時の新しい順に並べると、この試験で作った回答（申込を紐づけた1件）が先頭に来る。
+// **候補づくり用の回答には申込が無い**ので、到達ありで絞るだけでは先頭が入れ替わる。
+await p.goto(`${BASE}/admin/responses?sort=applied_at&dir=desc`);
 await p.click('tbody tr:first-child a');
 await p.waitForSelector('h1', { timeout: 8000 });
 const detail = await p.textContent('body');
@@ -159,7 +158,6 @@ t('設問が24行ある', await p.$$eval('table.q tbody tr', (els) => els.length
 t('設問文が出る', detail.includes('誰かと話していて違和感を覚えたとき'), true);
 t('リッカートの選んだ選択肢が出る', detail.includes('とてもそう思う（4）'), true);
 t('5軸の帯が5本', await p.$$eval('.bar', (els) => els.length), 5);
-t('ヒアリング本文が出る', detail.includes(`${marker}のヒアリング本文`), true);
 // 宣言（施策a 段1）。コードでなく画面の言葉で出す
 t('宣言の場面が出る', detail.includes('職場の特定の人との関係'), true);
 t('宣言の相手が出る', detail.includes('上司'), true);
@@ -177,6 +175,10 @@ await p.waitForSelector('.ok', { timeout: 8000 });
 t('保存できる', (await p.textContent('.ok')).includes('保存しました'), true);
 t('保存した対応状況が残る', await p.inputValue('#admin_status'), '対応中');
 t('保存したメモが残る', await p.inputValue('#admin_note'), `${marker} のメモ`);
+
+// フリーワード検索（メモとヒアリング本文が対象。ヒアリングは新規収集を廃止したのでメモで見る）
+await p.goto(`${BASE}/admin/responses?q=${encodeURIComponent(marker)}`);
+t('メモでフリーワード検索できる', await p.$$eval('tbody tr', (e) => e.length), 1);
 
 // ── 5. 申込一覧と手動紐づけ（F2-4） ──
 await p.goto(`${BASE}/admin/sessions?q=${encodeURIComponent(marker)}`);

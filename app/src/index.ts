@@ -279,25 +279,6 @@ app.post('/api/responses', async (c) => {
   c.header('Set-Cookie', buildResultCookie(result.sessionId));
   return c.json({ ok: true, tabToken: result.tabToken, duplicate: result.duplicate });
 });
-/**
- * 商談前ヒアリング（すべて任意）。回答IDはクライアントに渡していないので、
- * 要件の /api/responses/:id/hearing ではなく、結果セッションで本人を特定する。
- */
-app.post('/api/hearing', async (c) => {
-  const a = await authorize(c);
-  if (!a.ok) return c.json({ ok: false, reason: a.reason }, a.status);
-  const nowText = typeof a.body.now === 'string' ? a.body.now.slice(0, 4000) : '';
-  const futureText = typeof a.body.future === 'string' ? a.body.future.slice(0, 4000) : '';
-  const at = isoNow();
-  await c.env.DB.prepare(
-    `insert into hearings (response_id, now_text, future_text, created_at, updated_at)
-     values (?,?,?,?,?)
-     on conflict(response_id) do update set now_text=excluded.now_text,
-       future_text=excluded.future_text, updated_at=excluded.updated_at`
-  ).bind(a.responseId, nowText, futureText, at, at).run();
-  return c.json({ ok: true });
-});
-
 /** ガイド本文。その人のタイプの4章だけを返す。 */
 app.post('/api/guide/view', async (c) => {
   const a = await authorize(c);

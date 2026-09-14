@@ -317,6 +317,8 @@ export function responseDetailPage(
   // 5. 宣言（施策a 段1・A-1）と商談前ヒアリング。どちらも「本人が何を問題だと言ったか」なので、
   // ブロックは増やさず（F2-3 は8ブロック）同じ枠に入れる。
   // **宣言を取るのはフォーク1か所だけ**なので、申込フォーム側には同じ欄が無い。
+  // **ヒアリングは2026-09-14に新規収集を廃止**した。過去の入力と移行データは読めるまま残す
+  // （実際に人が言った言葉は、見立ての文面を作るときの材料になる。集客戦略マップ.md §3.8）。
   const hearing =
     '<div class="panel"><h2>5. 宣言・商談前ヒアリング</h2>' +
       '<dl class="kv">' +
@@ -325,12 +327,13 @@ export function responseDetailPage(
         `<dt>相手のタイプ</dt><dd>${r.partner_type_code ? esc(String(r.partner_type_code)) : '<span class="faint">未（段2で埋まる）</span>'}</dd>` +
       '</dl>' +
       (extra.hearing
-        ? '<p class="sub">商談前ヒアリング（ガイド終章・すべて任意）</p><dl class="kv">' +
+        ? '<p class="sub">商談前ヒアリング（新規収集は廃止。移行データと過去の入力のみ）</p><dl class="kv">' +
           `<dt>いま悩んでいること</dt><dd class="wrap-cell">${extra.hearing.now_text ? esc(String(extra.hearing.now_text)) : '<span class="faint">—</span>'}</dd>` +
           `<dt>解消後の毎日</dt><dd class="wrap-cell">${extra.hearing.future_text ? esc(String(extra.hearing.future_text)) : '<span class="faint">—</span>'}</dd>` +
           `<dt>更新日時</dt><dd>${esc(jst(String(extra.hearing.updated_at ?? '')))}</dd>` +
           '</dl>'
-        : '<p class="muted">商談前ヒアリングの入力はありません。</p>') +
+        : '<p class="muted">商談前ヒアリングの入力はありません。' +
+          '2026-09-14に新規収集を廃止したので、いまは体験セッションの場で聞きます。</p>') +
     '</div>';
 
   const guide =

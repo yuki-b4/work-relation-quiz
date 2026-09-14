@@ -595,9 +595,6 @@
   .bk-cta .field textarea::placeholder{color:rgba(255,255,255,.42)}
   .bk-cta .field select option{color:var(--ink); background:#fff}
   .bk-cta .field textarea:focus, .bk-cta .field select:focus{border-color:rgba(255,255,255,.7)}
-  .bk-hear-l{font-family:var(--serif); font-weight:600; font-size:14px; color:#fff; margin-bottom:6px}
-  .bk-hear-t{font-size:13px; line-height:1.9; color:rgba(255,255,255,.82); margin-bottom:14px}
-  .bk-hear-note{font-size:12px; color:rgba(255,255,255,.72); min-height:1.3em; margin-top:8px}
   .bk-apply{
     display:block; width:100%; text-align:center; text-decoration:none;
     font-family:var(--body); font-size:15px; font-weight:700; letter-spacing:.04em;
@@ -863,21 +860,8 @@
           <p class="bk-cta-kicker">体験セッション（30〜45分・無料）</p>
           <h3 class="bk-cta-title">あなたの人間関係の悩みに終止符を打つ。</h3>
           <p class="bk-cta-text">実際にどのような悩みが解決できるのか、次に何をしたら良いのかアドバイスさせていただきます。セッションの最後に、継続的なサポートのご案内も用意しております。</p>
-          <!-- ②紹介（seg=referral）の商談前ヒアリング。すべて任意。結果画面から、申込の直前へ移設。
-               入力は change のたびに回答ログへ保存する（送信ボタンを増やさないため）。 -->
-          <div id="hearingBlock" hidden>
-            <p class="bk-hear-l">よろしければ、申込の前に少しだけ教えてください（すべて任意）</p>
-            <p class="bk-hear-t">書いていただくと、当日の読み解きが早く、深くなります。</p>
-            <div class="field">
-              <label for="hearNow">いま、人間関係で悩んでいること</label>
-              <textarea id="hearNow" placeholder="例：部下に任せたいのに、気づいたらつい自分でやってしまっていて..."></textarea>
-            </div>
-            <div class="field">
-              <label for="hearFuture">人間関係の悩みが解消されたら、どんな毎日を送れそうですか</label>
-              <textarea id="hearFuture" placeholder="例：安心して任せられるようになって、現場に立つのが楽しくなっている"></textarea>
-            </div>
-            <p class="bk-hear-note" id="hearNote"></p>
-          </div>
+          <!-- 商談前ヒアリングの入力欄（いま悩んでいること／解消後の毎日）は 2026-09-14 に廃止。
+               申込前に書かせず、聞くのは体験セッションの場にする。 -->
           <a class="bk-apply" id="sessionApply" href="#" target="_blank" rel="noopener">体験セッションに申し込む</a>
           <p class="bk-cta-note" id="sessionNote">オンラインで30〜45分。日程は申込フォームで選べます。</p>
         </div>
@@ -1868,34 +1852,12 @@ $('submitFeedback').onclick=()=>{
   sendSurvey({me,others,othersWho,share,shareWho,dig,miss}, $('submitFeedback'), 'ありがとうございました。ご協力に感謝します。');
 };
 
-// LEAD（紹介者）：商談前ヒアリング（すべて任意）。読み解きガイド終章の、申込ボタンの直前に置く。
-// メール登録を廃止したので送信ボタンは持たせず、入力が変わるたびに回答ログの同じ行へ書き足す。
-let _hearSent='';
-function saveHearing(){
-  const r=window._lastResult; if(!r) return;
-  if($('hearingBlock').hidden) return;
-  const fields={
-    hearNow:    $('hearNow').value.trim(),
-    hearFuture: $('hearFuture').value.trim(),
-  };
-  const sig=JSON.stringify(fields);
-  if(sig===_hearSent) return;                                        // 変化がなければ送らない
-  if(!fields.hearNow && !fields.hearFuture) return;
-  if(!SHEET_ENDPOINT){ $('hearNote').textContent='※ 送信先URL未設定（プロトタイプ）。まだ記録されていません。'; return; }
-  _hearSent=sig;
-  post(Object.assign({action:'update', id:r.id, code:r.code, name:r.name}, fields))
-    .then(()=>{ $('hearNote').textContent='ここまでの内容をお預かりしました。'; })
-    .catch(()=>{ _hearSent=''; $('hearNote').textContent='送信に失敗しました。通信環境を確認してください。'; });
-}
-
 $('restartBtn').onclick=()=>{
   idx=0; answers.fill(null);
   $('submitFeedback').disabled=false;
   $('protoNote').textContent='';
   document.querySelectorAll('.vq-opts input').forEach(el=>{ el.checked=false; });
   $('othersWho').value=''; $('shareWho').value='';
-  ['hearNow','hearFuture'].forEach(id=>{ $(id).value=''; });
-  $('hearNote').textContent=''; _hearSent='';
   bkIdx=0; bkSeen=0; bkList=[];
   _pending=null;
   workplaceFrame=''; $('frameNote').textContent=''; $('qframe').textContent='';
@@ -1916,12 +1878,6 @@ const GUIDE_ON = SEG === 'referral';
 $('deepBlock').hidden = !GUIDE_ON;
 $('r-hs-loop').hidden = !GUIDE_ON;
 
-// ②紹介（seg=referral）：商談前ヒアリング欄を出す。すべて任意。書かれた内容は体験セッションの下準備になる。
-if(GUIDE_ON){
-  $('hearingBlock').hidden = false;
-  ['hearNow','hearFuture'].forEach(id=>{ $(id).addEventListener('change', saveHearing); });
-}
-
 // 体験セッションの申込は外部フォーム。終章に2か所（本文の直後と、自己紹介の後ろ）置く。
 // 未設定なら、押せない状態と理由を出す。
 const SESSION_BTNS=[['sessionApply','sessionNote'], ['sessionApply2','sessionNote2']];
@@ -1934,7 +1890,6 @@ SESSION_BTNS.forEach(function(pair){
     btn.removeAttribute('href');
     $(pair[1]).textContent='※ 申込フォームのURLが未設定です（プロトタイプ）。SESSION_FORM_URL に貼ると有効になります。';
   }
-  btn.addEventListener('click', saveHearing);
 });
 // 申込フォームのURLに、その人の回答IDを事前入力の形で足す（終章を開くたびに更新する）
 function sessionFormUrl(){
