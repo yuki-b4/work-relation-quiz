@@ -133,6 +133,9 @@ export const BRIDGE_NOTE =
   'あなたの中の<b>もう一人の自分</b>を知れば、' +
   'どうして人間関係に悩むのかヒントが見つかるはずです。';
 
+/** CTAの下の但し書き。**短く言い切る**（読む前に払うものが無いことだけを伝える）。 */
+export const CTA_NOTE = '無料・登録不要';
+
 export type Declaration = {
   domain: DomainCode;
   /** 場面が 'unknown' のときは null（相手を特定できないため聞かない）。 */

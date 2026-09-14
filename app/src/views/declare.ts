@@ -41,8 +41,8 @@
  * （Admin と同じ扱いの例外。色は必ず `:root` のトークンを使い、診断側の色に追従させる）。
  */
 import {
-  allCauses, BRIDGE_EYEBROW, BRIDGE_NOTE, DEADLINES, DECLARE_QUESTIONS, DEMO_LEAD, DOMAINS,
-  TARGETS, type Option,
+  allCauses, BRIDGE_EYEBROW, BRIDGE_NOTE, CTA_NOTE, DEADLINES, DECLARE_QUESTIONS, DEMO_LEAD,
+  DOMAINS, TARGETS, type Option,
 } from '../lib/declaration.ts';
 import { esc } from './result.ts';
 
@@ -96,7 +96,7 @@ function bridge(): string {
       `<p class="link-note">${BRIDGE_NOTE}</p>` +
       '<button class="btn btn-wide btn-accent" id="dcGo" type="button" style="margin-top:22px">' +
       '読み解きガイドを開く</button>' +
-      '<p class="optout-note" style="text-align:center">全4章・8分ほど。登録は要りません。</p>' +
+      `<p class="optout-note" style="text-align:center">${esc(CTA_NOTE)}</p>` +
     '</div>'
   );
 }
