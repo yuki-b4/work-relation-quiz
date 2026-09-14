@@ -87,9 +87,10 @@ function whereOf(f: ResponseFilters): { sql: string; binds: unknown[] } {
     // ?1 のような番号付きプレースホルダは使わない。D1 の bind() は 1 から順に割り当てるので、
     // 番号付きと ? を混ぜると、前の条件のバインド値をこちらが拾ってしまう。
     // 同じ値を必要な数だけ push する。
+    // 探せるのはメモだけ（商談前ヒアリングは2026-09-14に廃止した）
     const like = `%${escapeLike(f.q)}%`;
-    parts.push(`(h.now_text like ? escape '\\' or h.future_text like ? escape '\\' or r.admin_note like ? escape '\\')`);
-    binds.push(like, like, like);
+    parts.push(`r.admin_note like ? escape '\\'`);
+    binds.push(like);
   }
   return { sql: parts.join(' and '), binds };
 }
@@ -109,8 +110,7 @@ const LIST_AGGREGATES = `
          (select max(sa.created_at) from session_applications sa
            where sa.response_id = r.id and sa.deleted_at is null) as applied_at
     from responses r
-    left join referrers ref on ref.code = r.referrer_code
-    left join hearings h on h.response_id = r.id`;
+    left join referrers ref on ref.code = r.referrer_code`;
 
 const selectWith = (columns: string) => `select ${columns},${LIST_AGGREGATES}`;
 
@@ -237,9 +237,8 @@ export type ApplicationRow = {
 };
 
 export async function loadRelated(db: D1Database, responseId: string) {
-  const [survey, hearing, visits, applications] = await Promise.all([
+  const [survey, visits, applications] = await Promise.all([
     db.prepare(`select * from feedback_surveys where response_id = ?`).bind(responseId).first<Record<string, string | null>>(),
-    db.prepare(`select * from hearings where response_id = ?`).bind(responseId).first<Record<string, string | null>>(),
     db.prepare(`select id, visited_at, cta,
                        (select count(*) from session_applications sa
                          where sa.apply_visit_id = apply_visits.id and sa.deleted_at is null) as application_count
@@ -250,7 +249,6 @@ export async function loadRelated(db: D1Database, responseId: string) {
   ]);
   return {
     survey: survey ?? null,
-    hearing: hearing ?? null,
     visits: visits.results ?? [],
     applications: applications.results ?? [],
   };

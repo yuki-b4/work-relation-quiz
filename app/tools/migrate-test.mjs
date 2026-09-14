@@ -69,8 +69,7 @@ const eq = (label, a, b) =>
     'タイプコード': 'OBL', 'タイプ名': '突撃隊長',
     '5軸_本音': '0.67', '5軸_任せ方': '0.33', '5軸_境界': '0.5', '5軸_摩擦': '0.75', '5軸_間合い': '0.25',
     'これは私だ': 'とても当てはまる', '深掘りしたい': 'はい',
-    '自由記述': "任せられない。O'Brienさんとの関係",
-    '理想_解消後の毎日': '落ち着いて過ごせる', 'セグメント': 'referral', '備考': '要フォロー',
+    'セグメント': 'referral', '備考': "要フォロー。O'Brienさんの紹介",
   };
   const { sql, report } = buildResponses([row]);
   const all = sql.join('\n');
@@ -87,10 +86,9 @@ const eq = (label, a, b) =>
   check('リッカートは入れない（移行元に無い。7.3）', !all.includes("'lik-"));
   check('3軸のカウントを数え直す', all.includes('"h":{"L":2,"R":1,"total":3}'));
   eq('検証アンケートを1件作る', report.surveys, 1);
-  eq('ヒアリングを1件作る', report.hearings, 1);
   check("シングルクォートを壊さない", all.includes("O''Brien"));
   check('二度流しても増えない', all.includes('INSERT OR IGNORE INTO responses'));
-  check('備考はメモへ移す', all.includes("'要フォロー'"));
+  check('備考はメモへ移す', all.includes('要フォロー'));
 
   const bad = buildResponses([
     { ...row, 'タイムスタンプ': '' },

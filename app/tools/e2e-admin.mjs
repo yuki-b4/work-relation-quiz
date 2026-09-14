@@ -151,7 +151,7 @@ await p.click('tbody tr:first-child a');
 await p.waitForSelector('h1', { timeout: 8000 });
 const detail = await p.textContent('body');
 for (const block of ['1. 基本情報', '2. 診断結果', '3. 設問別回答（24問）', '4. 検証アンケート',
-                     '5. 宣言・商談前ヒアリング', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
+                     '5. 宣言', '6. 読み解きガイド到達', '7. 申込フォームへの到達と申込', '8. 運用']) {
   t(`ブロックがある（${block}）`, detail.includes(block), true);
 }
 t('設問が24行ある', await p.$$eval('table.q tbody tr', (els) => els.length), 24);

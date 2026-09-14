@@ -15,6 +15,25 @@ import { TYPES, type TypeCode } from '../content/types.ts';
 import { page } from './layout.ts';
 import { esc } from './result.ts';
 
+/**
+ * 体験セッションの予約カレンダー（Googleカレンダーの予約スケジュール）。
+ *
+ * **送信が終わってから、同じ画面で出す。** 順番に理由がある。
+ *   ・予約が先だと、予約だけして申込フォームを出さない人が生まれる。**こちらに記録が何も残らない**
+ *   ・送信を先にすれば、到達ID → 回答 → 宣言の紐づけと通知が確実に立つ（F4-5）
+ *   ・遷移はしないので、本人の体感は「送信 → そのまま日程を選ぶ」の一続きになる
+ *
+ * **予約された日時をこちらの画面に取り込むことはできない。** 予約UIは calendar.google.com の
+ * iframe の中で完結し、別オリジンなので中身を読めず、予約完了を知らせる仕組みも公開されていない。
+ * 突き合わせは、申込の氏名・メールとGoogleカレンダーの予約で行う。
+ *
+ * **src は送信が成功するまで入れない**（下のスクリプト）。開いただけで Google に
+ * 通信させないため。プライバシーポリシーへの同意は送信時に取っている。
+ */
+const BOOKING_URL =
+  'https://calendar.google.com/calendar/appointments/schedules/' +
+  'AcZssZ3yRjdmK7tTy3DsAQsNzPIZA8f6vHBB5CBEdIUm3xmM995noeSvd1yG5iZ65P5d1KUOKlud1yJ0?gv=true';
+
 export const SLOTS = [
   '平日の午前', '平日の午後', '平日の夜（19時以降）',
   '土日の午前', '土日の午後', '土日の夜', 'その他',
@@ -59,6 +78,9 @@ const SCRIPT = `
         if (!res.d || !res.d.ok) throw new Error((res.d && res.d.message) || '送信に失敗しました。入力内容をご確認ください。');
         document.getElementById('applyForm').hidden = true;
         document.getElementById('applyDone').hidden = false;
+        // 予約カレンダーは、送信が通ってから読み込む（開いただけで Google へ通信させない）
+        var frame = document.getElementById('bookFrame');
+        if (frame && !frame.src) frame.src = frame.dataset.src;
         window.scrollTo(0, 0);
       })
       .catch(function (err) {
@@ -140,7 +162,15 @@ export function applyPage(code: TypeCode, visitId: string | null): string {
 
         '<div id="applyDone" hidden>' +
           '<div class="bk-band">お申し込みありがとうございます。</div>' +
-          '<p class="lead">2営業日以内に、日程のご連絡を差し上げます。<br>' +
+          '<p class="lead">続けて、ご都合のよい日時をお選びください。</p>' +
+          // 予約UIは Google の中で完結する。こちらでは選ばれた日時を受け取れないので、
+          // 「選べなかった人」の逃げ道（メールでの調整）を必ず残しておく。
+          `<iframe id="bookFrame" data-src="${esc(BOOKING_URL)}" title="体験セッションの日程を選ぶ"` +
+          ' style="border:0; width:100%; max-width:100%; height:620px; background:var(--surface);' +
+          ' border-radius:14px" loading="lazy"></iframe>' +
+          `<p class="qhint" style="text-align:left">カレンダーが開かないときは<a href="${esc(BOOKING_URL)}"` +
+          ' target="_blank" rel="noopener" style="color:var(--trust)">こちらから日程を選べます</a>。</p>' +
+          '<p class="lead" style="margin-top:14px">日程が決まらない場合も、2営業日以内にご連絡を差し上げます。<br>' +
           '迷惑メールフォルダに入ることがあるので、あわせてご確認ください。</p>' +
         '</div>' +
       '</section>' +

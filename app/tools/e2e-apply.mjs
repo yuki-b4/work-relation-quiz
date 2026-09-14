@@ -115,6 +115,8 @@ t('場面を聞かない', (await apply.$$('input[name="concernDomain"]')).lengt
 t('相手を聞かない', (await apply.$$('input[name="concernTarget"]')).length, 0);
 t('期限を聞かない', (await apply.$$('input[name="concernDeadline"]')).length, 0);
 
+t('開いた時点では予約カレンダーを読み込まない', await apply.getAttribute('#bookFrame', 'src'), null);
+
 // ── 送信 ──
 await apply.fill('#name', 'テスト太郎');
 await apply.fill('#email', 'test@example.com');
@@ -130,6 +132,12 @@ await apply.click('#applySubmit');
 await apply.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 t('完了画面が出る', (await apply.textContent('#applyDone')).includes('2営業日以内'), true);
 t('フォームは隠れる', await apply.isHidden('#applyForm'), true);
+
+// 予約カレンダー：**送信が通ってから**読み込む（開いただけで Google へ通信させない）
+t('送信後に予約カレンダーの src が入る',
+  (await apply.getAttribute('#bookFrame', 'src') ?? '').startsWith('https://calendar.google.com/calendar/appointments/'), true);
+t('開かないときの逃げ道がある',
+  (await apply.textContent('#applyDone')).includes('こちらから日程を選べます'), true);
 
 await browser.close();
 console.log(fail ? `\n失敗 ${fail} 件` : '\n申込とX共有：問題なし');

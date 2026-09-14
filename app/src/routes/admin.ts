@@ -305,7 +305,6 @@ admin.get('/responses/:id', async (c) => {
         questions: viewAnswers(answers, set),
         versionKnown: !!set,
         survey: related.survey,
-        hearing: related.hearing,
         visits: related.visits,
         applications: related.applications,
       },
