@@ -34,6 +34,14 @@ const BOOKING_URL =
   'https://calendar.google.com/calendar/appointments/schedules/' +
   'AcZssZ3yRjdmK7tTy3DsAQsNzPIZA8f6vHBB5CBEdIUm3xmM995noeSvd1yG5iZ65P5d1KUOKlud1yJ0?gv=true';
 
+/**
+ * 希望の時間帯の選択肢。**画面にはもう出さない**（2026-09-14）。
+ *
+ * 送信の直後に Google の予約カレンダーを出すので、フォームで候補を聞くと同じことを2回させる。
+ * 残してあるのは2つの理由から。
+ *   ・移行データ（旧Googleフォーム）の `preferred_slots` にこの言葉が入っていて、Adminが表示する
+ *   ・キャッシュに残った古い画面から `slots` が飛んできても、既知の値だけ受ける（index.ts）
+ */
 export const SLOTS = [
   '平日の午前', '平日の午後', '平日の夜（19時以降）',
   '土日の午前', '土日の午後', '土日の夜', 'その他',
@@ -49,7 +57,6 @@ const SCRIPT = `
     e.preventDefault();
     if (btn.disabled) return;
     var fd = new FormData(f);
-    var slots = fd.getAll('slots');
     // 同意（必須）は送る前にこちらで見る。
     // フォームは novalidate なので、required だけではブラウザが止めてくれない。
     if (!f.querySelector('input[name="agree"]').checked) {
@@ -68,7 +75,6 @@ const SCRIPT = `
         name: fd.get('name'),
         email: fd.get('email'),
         concern: fd.get('concern'),
-        slots: slots,
         question: fd.get('question'),
         website: fd.get('website')
       })
@@ -133,28 +139,24 @@ export function applyPage(code: TypeCode, visitId: string | null): string {
             'ひと言でも大丈夫です。書いていただけると、当日の読み解きが早く、深くなります。',
             '<textarea id="concern" name="concern" maxlength="4000"></textarea>') +
 
-          // .vq-opt は .field の中に置かないこと。
-          // .field label{display:block} と .field input{width:100%} が .vq-opt を上書きして、
-          // チェックボックスが全幅になり、ラベルと縦積みになる（prototype.html も .vq の下に置いている）。
-          '<div class="vq">' +
-            '<p class="vq-q">希望の時間帯（任意・複数選べます）</p>' +
-            '<div class="vq-opts" role="group">' +
-              SLOTS.map((s) =>
-                `<label class="vq-opt"><input type="checkbox" name="slots" value="${esc(s)}"><span>${esc(s)}</span></label>`
-              ).join('') +
-            '</div>' +
-            '<p class="qhint" style="text-align:left; margin-top:6px">候補をいくつか選んでいただけると、日程の調整が早く済みます。</p>' +
-          '</div>' +
-
           field('question', 'ご質問・伝えておきたいこと（任意）', '',
             '<textarea id="question" name="question" maxlength="4000"></textarea>') +
 
+          // .vq-opt は .field の中に置かないこと。
+          // .field label{display:block} と .field input{width:100%} が .vq-opt を上書きして、
+          // チェックボックスが全幅になり、ラベルと縦積みになる（prototype.html も .vq の下に置いている）。
           '<div class="vq">' +
             '<label class="vq-opt">' +
               '<input type="checkbox" name="agree" required>' +
               '<span><a href="/privacy" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します（必須）</span>' +
             '</label>' +
           '</div>' +
+
+          // 希望の時間帯は聞かない（2026-09-14）。送信後に Google の予約カレンダーを出すので、
+          // ここで候補を聞くと同じことを2回させることになる。**代わりに、その順番を先に伝える。**
+          // 送信して終わりだと思って離脱されると、日程が埋まらない。
+          '<p class="qhint" style="text-align:left; margin-bottom:10px">' +
+          '申込完了後に日程調整のリンクが表示されますので、希望される日程を選択してください。</p>' +
 
           '<button class="btn btn-wide btn-accent" id="applySubmit" type="submit">この内容で申し込む</button>' +
           '<p class="proto-note" id="applyNote"></p>' +

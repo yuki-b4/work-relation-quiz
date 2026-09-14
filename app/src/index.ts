@@ -476,6 +476,9 @@ app.post('/api/session-applications', async (c) => {
   // フォークで宣言していればその値を当日に使い、していなければ体験セッションの場で聞く
   // （§4.2 の1段目）。同じことを2回聞かないぶん、フォームの摩擦も増やさない。
 
+  // 希望の時間帯は**もう画面で聞かない**（2026-09-14）。送信の直後に予約カレンダーを出すので、
+  // ここで候補を聞くと同じことを2回させることになる。受け口だけ残してあるのは、キャッシュに
+  // 残った古い画面から飛んできたときに既知の値だけ拾うため（新しい申込は必ず空になる）。
   const slots = Array.isArray(body.slots)
     ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
     : [];

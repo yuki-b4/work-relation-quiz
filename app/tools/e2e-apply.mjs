@@ -100,7 +100,7 @@ t('honeypot が画面外にある', hp, 'absolute');
 // .vq-opt を .field の中に置くと .field label{display:block} と .field input{width:100%} に
 // 負けて、チェックボックスが全幅になりラベルと縦積みになる。目視でしか気づけないので固定する。
 const box = await apply.evaluate(() => {
-  const input = document.querySelector('input[name="slots"]');
+  const input = document.querySelector('input[name="agree"]');
   const label = input.closest('label');
   const ci = getComputedStyle(input), cl = getComputedStyle(label);
   return { w: ci.width, h: ci.height, display: cl.display, align: cl.alignItems };
@@ -115,14 +115,18 @@ t('場面を聞かない', (await apply.$$('input[name="concernDomain"]')).lengt
 t('相手を聞かない', (await apply.$$('input[name="concernTarget"]')).length, 0);
 t('期限を聞かない', (await apply.$$('input[name="concernDeadline"]')).length, 0);
 
+// ── 希望の時間帯も聞かない（2026-09-14）。送信の直後に予約カレンダーを出すので、
+// 先に候補を聞くと同じことを2回させる。代わりに、その順番をボタンの直前で伝える ──
+t('希望の時間帯を聞かない', (await apply.$$('input[name="slots"]')).length, 0);
+t('送信後に日程を選ぶと伝えている',
+  (await apply.textContent('#applyForm')).includes('申込完了後に日程調整のリンクが表示されます'), true);
+
 t('開いた時点では予約カレンダーを読み込まない', await apply.getAttribute('#bookFrame', 'src'), null);
 
 // ── 送信 ──
 await apply.fill('#name', 'テスト太郎');
 await apply.fill('#email', 'test@example.com');
 await apply.fill('#concern', '任せたいのに抱え込んでしまう');
-await apply.check('input[name="slots"][value="平日の夜（19時以降）"]');
-await apply.check('input[name="slots"][value="土日の午前"]');
 // 同意は必須。チェックせずに出すと、その場で止まる（サーバまで行かない）
 await apply.click('#applySubmit');
 t('同意なしでは止まる', (await apply.textContent('#applyNote')).includes('同意が必要'), true);

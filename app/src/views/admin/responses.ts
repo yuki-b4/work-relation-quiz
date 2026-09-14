@@ -231,7 +231,8 @@ function applicationBlock(a: ApplicationRow, csrf: string): string {
         `<dt>申込日時</dt><dd>${esc(jst(a.created_at))}</dd>` +
         `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
         `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
-        `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
+        // 希望の時間帯は2026-09-14に聞くのをやめた。**移行分にだけ値が残る**ので、あるときだけ出す
+        (slots.length ? `<dt>希望の時間帯</dt><dd>${esc(slots.join('／'))}</dd>` : '') +
         // 宣言はこのページのブロック5に出るので、ここでは繰り返さない（申込フォームでは聞かない）
         `<dt>気になっていること</dt><dd>${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
         `<dt>質問</dt><dd>${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
