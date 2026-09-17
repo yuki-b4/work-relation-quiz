@@ -263,7 +263,8 @@ const eq = (label, a, b) =>
   check('氏名は伏せる', text.includes('山◯◯◯') && !text.includes('山田太郎'));
   check('メールは伏せる', text.includes('ta**@example.com') && !text.includes('taro@example.com'));
   check('タイプは出す', text.includes('突撃隊長（OBL）'));
-  check('希望の時間帯は出す', text.includes('平日の夜（19時以降）'));
+  // 希望の時間帯は移行分にだけ残る。値があるときは出す
+  check('移行分の希望の時間帯は出す', text.includes('平日の夜（19時以降）'));
   check('気になっていることは出す', text.includes('任せ方に悩んでいる'));
   check('詳細への直リンクがある', text.includes('https://natur-indicator.com/admin/sessions/app-1'));
   check('紐づいていれば警告を出さない', !text.includes('紐づいていません'));
@@ -277,7 +278,10 @@ const eq = (label, a, b) =>
   });
   globalThis.fetch = realFetch;
   check('未紐づけは警告を出す', posted2[0].text.includes('回答に紐づいていません'));
-  check('希望が無ければ「指定なし」', posted2[0].text.includes('指定なし'));
+  // 2026-09-14に画面で聞くのをやめたので、新しい申込では行ごと出さない
+  // （日程は送信の直後に出す予約カレンダーで決まる）
+  check('希望が無ければ行ごと出さない', !posted2[0].text.includes('希望の時間帯'));
+  check('宣言が無ければ当日に聞くと書く', posted2[0].text.includes('未宣言（当日に聞く）'));
 
   // 未設定なら投げない（設定し忘れで例外にはしない）
   const before = posted.length;

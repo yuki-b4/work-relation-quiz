@@ -87,9 +87,10 @@ function whereOf(f: ResponseFilters): { sql: string; binds: unknown[] } {
     // ?1 のような番号付きプレースホルダは使わない。D1 の bind() は 1 から順に割り当てるので、
     // 番号付きと ? を混ぜると、前の条件のバインド値をこちらが拾ってしまう。
     // 同じ値を必要な数だけ push する。
+    // 探せるのはメモだけ（商談前ヒアリングは2026-09-14に廃止した）
     const like = `%${escapeLike(f.q)}%`;
-    parts.push(`(h.now_text like ? escape '\\' or h.future_text like ? escape '\\' or r.admin_note like ? escape '\\')`);
-    binds.push(like, like, like);
+    parts.push(`r.admin_note like ? escape '\\'`);
+    binds.push(like);
   }
   return { sql: parts.join(' and '), binds };
 }
@@ -109,8 +110,7 @@ const LIST_AGGREGATES = `
          (select max(sa.created_at) from session_applications sa
            where sa.response_id = r.id and sa.deleted_at is null) as applied_at
     from responses r
-    left join referrers ref on ref.code = r.referrer_code
-    left join hearings h on h.response_id = r.id`;
+    left join referrers ref on ref.code = r.referrer_code`;
 
 const selectWith = (columns: string) => `select ${columns},${LIST_AGGREGATES}`;
 
@@ -237,9 +237,8 @@ export type ApplicationRow = {
 };
 
 export async function loadRelated(db: D1Database, responseId: string) {
-  const [survey, hearing, visits, applications] = await Promise.all([
+  const [survey, visits, applications] = await Promise.all([
     db.prepare(`select * from feedback_surveys where response_id = ?`).bind(responseId).first<Record<string, string | null>>(),
-    db.prepare(`select * from hearings where response_id = ?`).bind(responseId).first<Record<string, string | null>>(),
     db.prepare(`select id, visited_at, cta,
                        (select count(*) from session_applications sa
                          where sa.apply_visit_id = apply_visits.id and sa.deleted_at is null) as application_count
@@ -250,7 +249,6 @@ export async function loadRelated(db: D1Database, responseId: string) {
   ]);
   return {
     survey: survey ?? null,
-    hearing: hearing ?? null,
     visits: visits.results ?? [],
     applications: applications.results ?? [],
   };
@@ -262,6 +260,14 @@ export type SessionListRow = ApplicationRow & {
   response_created_at: string | null;
   response_type_code: string | null;
   response_type_name: string | null;
+  /**
+   * 紐づく回答でのフォークの宣言（施策a 段1・A-1）。**申込フォームでは聞かない**ので、
+   * 当日の材料はここにしか無い（無ければセッションの場で聞く。§4.2 の1段目）。
+   */
+  response_concern_domain: string | null;
+  response_concern_target: string | null;
+  response_concern_deadline: string | null;
+  response_declared_at: string | null;
   /** 同じ到達IDに2件以上の申込があるか（F4-5・F2-4の警告）。 */
   visit_application_count: number | null;
 };
@@ -294,6 +300,10 @@ export async function listApplications(
     .prepare(
       `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
+              r.concern_domain as response_concern_domain,
+              r.concern_target as response_concern_target,
+              r.concern_deadline as response_concern_deadline,
+              r.declared_at as response_declared_at,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count
@@ -311,6 +321,10 @@ export async function loadApplication(db: D1Database, id: string): Promise<Sessi
     .prepare(
       `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
+              r.concern_domain as response_concern_domain,
+              r.concern_target as response_concern_target,
+              r.concern_deadline as response_concern_deadline,
+              r.declared_at as response_declared_at,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count

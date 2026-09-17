@@ -66,7 +66,6 @@ for (const [n, want] of [[2, '第一章'], [3, '第二章'], [4, '終章']]) {
   t(`${n}章目の見出し`, (await p.textContent('#bkHdR')).includes(want), true);
 }
 t('終章でCTAが出る', await p.isVisible('#guideEnd'), true);
-t('ヒアリング欄が出る', await p.isVisible('#hearingBlock'), true);
 t('次の章ボタンは消える', await p.isHidden('#bkNext'), true);
 
 // 章立ての点から直接飛べる
@@ -76,12 +75,8 @@ t('点から第一章へ飛べる', await p.textContent('#bkFolio'), '2 / 4');
 await p.click('.bk-dot >> nth=3');
 await p.waitForTimeout(250);
 
-// ヒアリングは送信ボタンなしで保存される
-await p.fill('#hearNow', '部下に任せたいのに、つい自分でやってしまう');
-await p.fill('#hearFuture', '安心して任せられるようになりたい');
-await p.locator('#hearFuture').blur();
-await p.waitForTimeout(700);
-t('保存された旨が出る', (await p.textContent('#hearNote')).includes('お預かり'), true);
+// 終章のヒアリング欄は廃止（2026-09-14）。申込の前に書かせない
+t('ヒアリング欄は無い', (await p.$$('#hearNow, #hearFuture, #hearingBlock')).length, 0);
 
 // 申込ボタン：到達が記録され、?v= 付きのURLが別タブで開く
 const [popup] = await Promise.all([

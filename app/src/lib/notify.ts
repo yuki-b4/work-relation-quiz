@@ -151,8 +151,17 @@ export type ApplicationEvent = {
   email: string;
   typeCode: string | null;
   typeName: string | null;
+  /**
+   * 希望の時間帯。**2026-09-14に画面で聞くのをやめた**ので、新しい申込では必ず空になる。
+   * 値が入るのは移行分だけなので、通知には出さない（日程は予約カレンダーで決まる）。
+   */
   slots: string[];
   concern: string | null;
+  /**
+   * 紐づく回答でのフォークの宣言（施策a 段1・A-1）。場面／相手／期限を1行にしたもの。
+   * **申込フォームでは聞かない**ので、無ければ体験セッションの場で聞く（§4.2 の1段目）。
+   */
+  declaration: string | null;
   /** 到達IDから回答に紐づいたか。付いていないと Admin で手当てが要る（F2-4）。 */
   linked: boolean;
   origin: string;
@@ -163,14 +172,19 @@ export type ApplicationEvent = {
  *
  * **氏名とメールは伏せる。** 通知の役目は「気づいてAdminを開く」ことで、対応は Admin でする。
  * Slack は検索できて残るので、そこへ個人情報を撒かない（6.2 の「一覧では伏せ、詳細で全表示」と
- * 同じ考え方）。判断に要る情報（タイプ・希望時間帯・紐づいたか）は伏せずに出す。
+ * 同じ考え方）。判断に要る情報（タイプ・宣言・紐づいたか）は伏せずに出す。
+ *
+ * **日程は通知に出ない。** 予約は送信の直後に Google の予約カレンダーで取るので、
+ * こちらでは受け取れない（`apply-page.ts` の `BOOKING_URL`）。突き合わせは氏名・メールで行う。
  */
 export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Promise<NotifyResult> {
   const body = [
     `お名前：${maskName(a.name)}`,
     `メール：${maskEmail(a.email)}`,
     `タイプ：${a.typeName ? `${a.typeName}（${a.typeCode}）` : (a.typeCode ?? '不明')}`,
-    `希望の時間帯：${a.slots.length ? a.slots.join('／') : '指定なし'}`,
+    // 移行分にだけ値が残る。新しい申込では出ない（日程は予約カレンダーで決まる）
+    ...(a.slots.length ? [`希望の時間帯：${a.slots.join('／')}`] : []),
+    `宣言：${a.declaration ?? '未宣言（当日に聞く）'}`,
     ...(a.concern ? [`気になっていること：${a.concern.slice(0, 120)}${a.concern.length > 120 ? '…' : ''}`] : []),
     a.linked ? '' : '⚠ 回答に紐づいていません。Admin で手当てしてください。',
     '',

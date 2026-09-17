@@ -13,6 +13,7 @@
 import { esc } from '../result.ts';
 import { adminPage, type ShellOptions } from './layout.ts';
 import { jsonArray, jst, maskEmail, maskName } from '../../lib/admin-format.ts';
+import { deadlineLabel, declarationText, domainLabel, targetLabel } from '../../lib/declaration.ts';
 import { APPLICATION_STATUSES, PER_PAGE, type SessionListRow } from '../../lib/admin-queries.ts';
 
 function option(value: string, label: string, current: string | undefined): string {
@@ -48,7 +49,13 @@ export function sessionsListPage(
             ? `<a href="/admin/responses/${esc(a.response_id)}">${esc(a.response_type_code ?? '')}／${esc(jst(a.response_created_at))}</a>`
             : '<span class="tag alert">未紐づけ</span>'}` +
             `${dup ? ' <span class="tag alert">到達ID重複</span>' : ''}</td>` +
-          `<td>${esc(jsonArray(a.preferred_slots).join('／') || '—')}</td>` +
+          // 希望の時間帯は聞かなくなった（2026-09-14）ので、一覧には**宣言**を出す。
+          // 新しい申込では必ず空になる列を並べても、拾えるものが無い（移行分は詳細に出る）。
+          `<td>${esc(declarationText({
+            concern_domain: a.response_concern_domain,
+            concern_target: a.response_concern_target,
+            concern_deadline: a.response_concern_deadline,
+          }) ?? '—')}</td>` +
           '<td>' +
             `<form method="post" action="/admin/sessions/${esc(a.id)}" style="display:flex; gap:6px">` +
               `<input type="hidden" name="csrf" value="${esc(csrf)}">` +
@@ -79,7 +86,7 @@ export function sessionsListPage(
     '</div></form>' +
     '<div class="panel">' +
       '<div class="scroll"><table><thead><tr>' +
-        '<th>申込日時</th><th>氏名</th><th>メール</th><th>紐づく回答</th><th>希望の時間帯</th><th>ステータス</th><th>実施日</th>' +
+        '<th>申込日時</th><th>氏名</th><th>メール</th><th>紐づく回答</th><th>宣言</th><th>ステータス</th><th>実施日</th>' +
       '</tr></thead><tbody>' +
       (rows || '<tr><td colspan="7" class="muted">該当する申込がありません。</td></tr>') +
       '</tbody></table></div>' +
@@ -149,7 +156,14 @@ export function sessionDetailPage(
       `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
       `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
       `<dt>タイプ</dt><dd>${esc(a.type_code ?? '—')}</dd>` +
-      `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
+      // 希望の時間帯は2026-09-14に聞くのをやめた（送信の直後に予約カレンダーを出すため）。
+      // **移行分にだけ値が残る**ので、あるときだけ行を出す
+      (slots.length ? `<dt>希望の時間帯</dt><dd>${esc(slots.join('／'))}</dd>` : '') +
+      // 紐づく回答でのフォークの宣言（施策a 段1・A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
+      // 申込フォームでは聞かないので、空なら**セッションの場で聞く**。
+      `<dt>宣言（場面）</dt><dd>${esc(domainLabel(a.response_concern_domain) ?? '未宣言（当日に聞く）')}</dd>` +
+      `<dt>宣言（相手）</dt><dd>${esc(targetLabel(a.response_concern_domain, a.response_concern_target) ?? '—')}</dd>` +
+      `<dt>宣言（いつまでに）</dt><dd>${esc(deadlineLabel(a.response_concern_deadline) ?? '—')}</dd>` +
       `<dt>気になっていること</dt><dd class="wrap-cell">${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
       `<dt>質問</dt><dd class="wrap-cell">${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
       `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +

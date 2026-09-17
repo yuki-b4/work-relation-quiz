@@ -5,7 +5,7 @@
  *   node tools/migrate-sheets.mjs --dir ./export --check      # 投入せず照合レポートだけ出す
  *
  * 期待するファイル（Googleスプレッドシートから「CSV でダウンロード」したもの。文字コードはUTF-8）：
- *   指標v2.csv        → responses ＋ response_answers ＋ feedback_surveys ＋ hearings
+ *   指標v2.csv        → responses ＋ response_answers ＋ feedback_surveys
  *   法人リード.csv     → corp_leads
  *   紹介者マスタ.csv   → referrers
  *   申込フォーム.csv   → session_applications
@@ -179,7 +179,7 @@ function axisCounts(row) {
 
 export function buildResponses(rows) {
   const sql = [];
-  const report = { total: rows.length, imported: 0, skipped: [], types: {}, dates: [], surveys: 0, hearings: 0, answers: 0 };
+  const report = { total: rows.length, imported: 0, skipped: [], types: {}, dates: [], surveys: 0, answers: 0 };
 
   for (const [i, row] of rows.entries()) {
     const createdAt = toUtc(row['タイムスタンプ']);
@@ -231,17 +231,6 @@ export function buildResponses(rows) {
         ` ${q(survey.share_who)}, ${q(survey.dig)}, ${q(survey.miss)}, ${q(createdAt)});`
       );
       report.surveys++;
-    }
-
-    // 商談前ヒアリング。「自由記述」＝いま悩んでいること、「理想_解消後の毎日」＝解消後。
-    const now = row['自由記述'] || '';
-    const future = row['理想_解消後の毎日'] || '';
-    if (now || future) {
-      sql.push(
-        `INSERT OR IGNORE INTO hearings (response_id, now_text, future_text, created_at, updated_at)` +
-        ` VALUES (${q(id)}, ${q(now)}, ${q(future)}, ${q(createdAt)}, ${q(createdAt)});`
-      );
-      report.hearings++;
     }
 
     report.imported++;
@@ -399,11 +388,10 @@ function main() {
       const id = (row['回答ID'] ?? '').trim();
       if (id) typeByResponseId.set(id, (row['タイプコード'] ?? '').trim());
     }
-    out.push('-- ───── 指標v2 → responses / response_answers / feedback_surveys / hearings ─────', ...sql, '');
+    out.push('-- ───── 指標v2 → responses / response_answers / feedback_surveys ─────', ...sql, '');
     reportBlock('指標v2', report, (r) => {
       line('設問別回答（9問×件数）', r.answers);
       line('検証アンケート', r.surveys);
-      line('商談前ヒアリング', r.hearings);
       const dates = r.dates.slice().sort();
       line('日付の範囲（UTC）', dates.length ? `${dates[0]} 〜 ${dates[dates.length - 1]}` : '—');
       console.log('  タイプ別の分布：');
