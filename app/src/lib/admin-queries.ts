@@ -230,6 +230,8 @@ export type ApplicationRow = {
   concern: string | null;
   preferred_slots: string | null;
   question: string | null;
+  custom_answers: string | null;
+  entry_id: string;
   source: string;
   status: string;
   held_at: string | null;
@@ -259,6 +261,10 @@ export async function loadRelated(db: D1Database, responseId: string) {
 // ───────── 体験セッション申込（F2-4） ─────────
 
 export type SessionListRow = ApplicationRow & {
+  /** 入口（F4-5）。entry_id は NOT NULL なので、この3つは必ず入る。 */
+  entry_slug: string;
+  entry_name: string;
+  entry_kind: string;
   response_created_at: string | null;
   response_type_code: string | null;
   response_type_name: string | null;
@@ -268,7 +274,7 @@ export type SessionListRow = ApplicationRow & {
 
 export async function listApplications(
   db: D1Database,
-  opts: { status?: string; linked?: string; q?: string; page?: number } = {},
+  opts: { status?: string; linked?: string; entry?: string; q?: string; page?: number } = {},
   perPage = PER_PAGE
 ): Promise<{ rows: SessionListRow[]; total: number; page: number; pages: number }> {
   const parts = ['sa.deleted_at is null'];
@@ -276,6 +282,7 @@ export async function listApplications(
   if (opts.status) { parts.push('sa.status = ?'); binds.push(opts.status); }
   if (opts.linked === 'no') parts.push('sa.response_id is null');
   if (opts.linked === 'yes') parts.push('sa.response_id is not null');
+  if (opts.entry) { parts.push('e.slug = ?'); binds.push(opts.entry); }
   if (opts.q) {
     const like = `%${escapeLike(opts.q)}%`;
     parts.push(`(sa.name like ? escape '\\' or sa.email like ? escape '\\')`);
@@ -286,13 +293,15 @@ export async function listApplications(
 
   const base = `
     from session_applications sa
+    join entries e on e.id = sa.entry_id
     left join responses r on r.id = sa.response_id
    where ${where}`;
 
   const totalRow = await db.prepare(`select count(*) as n ${base}`).bind(...binds).first<{ n: number }>();
   const { results } = await db
     .prepare(
-      `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
+      `select sa.*, e.slug as entry_slug, e.name as entry_name, e.kind as entry_kind,
+              r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
@@ -309,12 +318,14 @@ export async function listApplications(
 export async function loadApplication(db: D1Database, id: string): Promise<SessionListRow | null> {
   return await db
     .prepare(
-      `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
+      `select sa.*, e.slug as entry_slug, e.name as entry_name, e.kind as entry_kind,
+              r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
               (select count(*) from session_applications x
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count
          from session_applications sa
+         join entries e on e.id = sa.entry_id
          left join responses r on r.id = sa.response_id
         where sa.id = ?`
     )
@@ -517,4 +528,17 @@ export function fieldsJsonError(raw: string): string | null {
   }
   if (parsed.length > 10) return '追加項目は10個までにしてください。';
   return null;
+}
+
+/** 申込一覧の入口フィルタの選択肢。申込が1件でもある入口だけ出す。 */
+export async function entryOptions(db: D1Database): Promise<{ slug: string; name: string }[]> {
+  const { results } = await db
+    .prepare(
+      `select e.slug, e.name from entries e
+        where exists (select 1 from session_applications sa
+                       where sa.entry_id = e.id and sa.deleted_at is null)
+        order by e.system desc, e.created_at desc`
+    )
+    .all<{ slug: string; name: string }>();
+  return results ?? [];
 }

@@ -18,7 +18,7 @@ import { resultShell } from './views/result-page.ts';
 import { closedPage, errorPage, notFoundPage } from './views/layout.ts';
 import { topPage } from './views/quiz-page.ts';
 import { guideShell } from './views/guide-page.ts';
-import { applyPage, SLOTS } from './views/apply-page.ts';
+import { applyClosedPage, applyPage, SLOTS, type ApplyEntry } from './views/apply-page.ts';
 import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
 import { INFO_PATHS, infoPage } from './views/info-page.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
@@ -180,16 +180,97 @@ app.get('/guide', async (c) => {
   return c.html(guideShell());
 });
 
-// ───────── 申込（タイプ別の共通ページ。認可なし。F4-5） ─────────
+// ───────── 申込（認可なし。F4-5） ─────────
+
 /**
- * 申込フォーム。タイプ別の共通ページで、認可は無い（F4-5）。
+ * 既定の入口のID。migrations/0004 が system 行として入れる。
+ * Admin からは消せないので、ここで参照先が消えることはない。
+ */
+const ENTRY_GUIDE = 'entry_guide';
+const ENTRY_DIRECT = 'entry_direct';
+
+type EntryRecord = {
+  id: string; slug: string; headline: string | null; intro: string | null;
+  session_label: string | null; fields_json: string | null; active: number; system: number;
+};
+
+/** 入口の事前入力の追加項目。壊れた JSON は「項目なし」として扱う（画面を落とさない）。 */
+function entryFields(fieldsJson: string | null): string[] {
+  if (!fieldsJson) return [];
+  try {
+    const parsed: unknown = JSON.parse(fieldsJson);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((v): v is string => typeof v === 'string' && !!v.trim()).slice(0, 10);
+  } catch {
+    return [];
+  }
+}
+
+function toApplyEntry(e: EntryRecord): ApplyEntry {
+  return {
+    slug: e.slug,
+    headline: e.headline,
+    intro: e.intro,
+    sessionLabel: e.session_label,
+    fields: entryFields(e.fields_json),
+  };
+}
+
+/**
+ * 入口ごとの申込フォーム（セミナーなど）。
+ *
+ * タイプがURLに無いので、**結果セッションCookieから回答を引いて補う**。
+ * ここで `evaluate()` は通さないのが要点で、「結果を見せてよいか」と
+ * 「どの回答の人か」は別の判定（F4-5）。期限切れでもタブが変わっていても、
+ * 同じブラウザである限り紐づけだけはできる。**結果の本文は出さないので、
+ * F4 のワンタイム表示は緩まない。**
+ *
+ * 引けたときだけ apply_visits に1件記録する（response_id が NOT NULL のため）。
+ * 引けなかった人には、フォームでタイプを聞いて手動紐づけ（F2-4）へ回す。
+ */
+app.get('/apply/s/:slug', async (c) => {
+  const e = await c.env.DB.prepare(
+    `select id, slug, headline, intro, session_label, fields_json, active, system
+       from entries where slug = ?`
+  ).bind(c.req.param('slug')).first<EntryRecord>();
+  // system 行（guide / direct）は公開URLを持たない。guide は /apply/{typeCode} 側。
+  if (!e || e.system === 1) return c.notFound();
+  if (!e.active) return c.html(applyClosedPage(), 410);
+
+  let code: TypeCode | null = null;
+  let visitId: string | null = null;
+  const sessionId = readResultCookie(c.req.header('Cookie'));
+  if (sessionId) {
+    const row = await loadResultSession(c.env.DB, sessionId);
+    if (row) {
+      const r = await c.env.DB.prepare(
+        `select type_code from responses where id = ? and deleted_at is null`
+      ).bind(row.response_id).first<{ type_code: string }>();
+      if (r && r.type_code in TYPES) {
+        code = r.type_code as TypeCode;
+        visitId = randomToken();
+        await c.env.DB.prepare(
+          `insert into apply_visits (id, response_id, visited_at, cta) values (?,?,?,'seminar')`
+        ).bind(visitId, row.response_id, isoNow()).run();
+      }
+    }
+  }
+  return c.html(applyPage({ code, visitId, entry: toApplyEntry(e) }));
+});
+
+/**
+ * 申込フォーム（ガイド終章から）。タイプ別の共通ページで、認可は無い（F4-5）。
  * ?v= は到達IDで、これ自体は何の権限も与えない（付いていても結果は見えない）。
  */
 app.get('/apply/:typeCode', (c) => {
   const code = c.req.param('typeCode');
   if (!(code in TYPES)) return c.notFound();
   const v = c.req.query('v');
-  return c.html(applyPage(code as keyof typeof TYPES, /^[0-9a-f]{64}$/.test(v ?? '') ? v! : null));
+  return c.html(applyPage({
+    code: code as TypeCode,
+    visitId: /^[0-9a-f]{64}$/.test(v ?? '') ? v! : null,
+    entry: null,
+  }));
 });
 
 // ───────── Admin（認証必須。F2） ─────────
@@ -433,8 +514,13 @@ app.post('/api/session-applications', async (c) => {
     return c.json({ ok: false, message: 'メールアドレスの形式をご確認ください。' }, 400);
   }
 
-  const typeCode = str(body.typeCode, 8);
-  if (!(typeCode in TYPES)) return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
+  // タイプは必須にしない。入口によっては、そもそも本人にも分からないことがある
+  // （Cookieで解決できず、設問でも「わからない」を選んだ場合）。
+  // 値が入っているときだけ、実在するタイプかを見る。
+  const postedType = str(body.typeCode, 8);
+  if (postedType && !(postedType in TYPES)) {
+    return c.json({ ok: false, message: 'タイプが不正です。' }, 400);
+  }
 
   const slots = Array.isArray(body.slots)
     ? body.slots.filter((x): x is string => typeof x === 'string' && (SLOTS as readonly string[]).includes(x))
@@ -443,24 +529,75 @@ app.post('/api/session-applications', async (c) => {
   // 到達IDから回答を引く。無ければ未紐づけで登録し、Adminで手動紐づけする（F2-4）。
   const visitId = /^[0-9a-f]{64}$/.test(str(body.v, 64)) ? str(body.v, 64) : null;
   let responseId: string | null = null;
+  let visitCta: string | null = null;
   if (visitId) {
-    const hit = await c.env.DB.prepare(`select response_id from apply_visits where id = ?`)
+    const hit = await c.env.DB.prepare(`select response_id, cta from apply_visits where id = ?`)
       .bind(visitId)
-      .first<{ response_id: string }>();
+      .first<{ response_id: string; cta: string }>();
     responseId = hit?.response_id ?? null;
+    visitCta = hit?.cta ?? null;
+  }
+
+  /**
+   * 入口を決める（F4-5）。**申告より、到達IDから分かる事実を優先する。**
+   * 入口は計測のための項目で権限を持たないが、ガイド経由だけは到達IDで確定できるので、
+   * hidden の付け替えで別の入口に付け替えられないようにしておく。
+   * 申告された入口が実在しなければ「入口不明」に落とす（申込そのものは通す）。
+   */
+  let entryId = ENTRY_DIRECT;
+  let entryName: string | null = null;
+  let fields: string[] = [];
+  if (visitCta === 'epilogue-1' || visitCta === 'epilogue-2') {
+    entryId = ENTRY_GUIDE;
+  } else {
+    const slug = str(body.entry, 40);
+    if (slug) {
+      const e = await c.env.DB.prepare(`select id, name, fields_json from entries where slug = ?`)
+        .bind(slug)
+        .first<{ id: string; name: string; fields_json: string | null }>();
+      if (e) {
+        entryId = e.id;
+        entryName = e.name;
+        fields = entryFields(e.fields_json);
+      }
+    }
+  }
+
+  /**
+   * 入口ごとの追加項目。**ラベルはクライアントから受け取らず、入口から引き直す。**
+   * 並び順だけを信じて対応づけるので、任意のキーを混ぜ込まれることがない。
+   */
+  const answers = Array.isArray(body.custom) ? body.custom : [];
+  const custom: Record<string, string> = {};
+  fields.forEach((label, i) => {
+    const v = typeof answers[i] === 'string' ? (answers[i] as string).trim().slice(0, 200) : '';
+    if (v) custom[label] = v;
+  });
+  const customAnswers = Object.keys(custom).length ? JSON.stringify(custom) : null;
+
+  /**
+   * タイプは、回答が引けたならその回答のものを正とする（クライアントの申告より確か）。
+   * 引けなければ、申告されたものを使う。どちらも無ければ null で登録し、Adminで補う。
+   */
+  let typeCode: string | null = postedType || null;
+  if (responseId) {
+    const r = await c.env.DB.prepare(`select type_code from responses where id = ?`)
+      .bind(responseId)
+      .first<{ type_code: string }>();
+    if (r?.type_code) typeCode = r.type_code;
   }
 
   const applicationId = crypto.randomUUID();
   const concern = str(body.concern, 4000) || null;
   await c.env.DB.prepare(
     `insert into session_applications
-       (id, created_at, apply_visit_id, response_id, type_code, name, email,
-        concern, preferred_slots, question, source, status)
-     values (?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
+       (id, created_at, entry_id, apply_visit_id, response_id, type_code, name, email,
+        concern, preferred_slots, question, custom_answers, source, status)
+     values (?,?,?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
   )
     .bind(
-      applicationId, isoNow(), visitId, responseId, typeCode, name, email,
-      concern, JSON.stringify(slots), str(body.question, 4000) || null
+      applicationId, isoNow(), entryId, visitId, responseId, typeCode, name, email,
+      concern, JSON.stringify(slots), str(body.question, 4000) || null, customAnswers
     )
     .run();
 
@@ -472,10 +609,11 @@ app.post('/api/session-applications', async (c) => {
       name,
       email,
       typeCode,
-      typeName: TYPES[typeCode as keyof typeof TYPES]?.name ?? null,
+      typeName: typeCode ? (TYPES[typeCode as keyof typeof TYPES]?.name ?? null) : null,
       slots,
       concern,
       linked: !!responseId,
+      entryName,
       origin: originOf(c),
     })
   );

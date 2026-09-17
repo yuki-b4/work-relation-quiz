@@ -21,7 +21,8 @@ import { saltedHash } from '../lib/hash.ts';
 import { timingSafeEqualStr } from '../lib/password.ts';
 import {
   APPLICATION_STATUSES, CORP_STATUSES, RESPONSE_STATUSES, fieldsJsonError, filterOptions,
-  heldOnError, issueReferrerCode, linkCandidates, listApplications, listCorpLeads, listEntries,
+  entryOptions, heldOnError, issueReferrerCode, linkCandidates, listApplications, listCorpLeads,
+  listEntries,
   listReferrers, listResponses, listResponsesForCsv, loadAnswers, loadApplication, loadEntry,
   loadRelated, loadResponse, normalizeFilters, normalizeSlug, slugError,
 } from '../lib/admin-queries.ts';
@@ -159,6 +160,21 @@ const FLASH: Record<string, string> = {
   restored: '伏せるのを解除しました。',
   purged: '完全に削除しました。',
 };
+
+/**
+ * 入口ごとの追加項目を CSV の1セルに畳む。入口によって項目が違うので、列にはできない。
+ * 「項目：値」を改行で並べる（toCsv が引用符で包むので、セル内の改行は壊れない）。
+ */
+function customText(json: string | null): string {
+  if (!json) return '';
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return '';
+    return Object.entries(parsed as Record<string, unknown>).map(([k, v]) => `${k}：${String(v)}`).join('\n');
+  } catch {
+    return '';
+  }
+}
 
 function flashOf(key: string): string | undefined {
   return FLASH[key];
@@ -380,11 +396,12 @@ admin.get('/sessions', async (c) => {
   const f = {
     status: c.req.query('status') || undefined,
     linked: c.req.query('linked') || undefined,
+    entry: c.req.query('entry') || undefined,
     q: c.req.query('q') || undefined,
     page: Math.max(1, Number(c.req.query('page')) || 1),
   };
-  const data = await listApplications(c.env.DB, f);
-  return c.html(sessionsListPage(shellOf(c, '体験セッション申込'), data, f, c.var.csrf));
+  const [data, entries] = await Promise.all([listApplications(c.env.DB, f), entryOptions(c.env.DB)]);
+  return c.html(sessionsListPage(shellOf(c, '体験セッション申込'), data, f, entries, c.var.csrf));
 });
 
 admin.get('/sessions/:id', async (c) => {
@@ -798,19 +815,23 @@ admin.get('/export/answers.csv', async (c) => {
 admin.get('/export/applications.csv', async (c) => {
   const p = period(c);
   const { results } = await c.env.DB.prepare(
-    `select sa.*, r.type_code as response_type_code, r.created_at as response_created_at
-       from session_applications sa left join responses r on r.id = sa.response_id
+    `select sa.*, e.slug as entry_slug, e.name as entry_name,
+            r.type_code as response_type_code, r.created_at as response_created_at
+       from session_applications sa
+       join entries e on e.id = sa.entry_id
+       left join responses r on r.id = sa.response_id
       where sa.deleted_at is null
         and (? is null or sa.created_at >= ?) and (? is null or sa.created_at < ?)
       order by sa.created_at desc`
   ).bind(p.from, p.from, p.to, p.to).all<Record<string, string | null>>();
 
   const csv = toCsv(
-    ['申込ID', '申込日時(JST)', '氏名', 'メール', 'タイプ', '気になっていること', '希望の時間帯', '質問',
-     '取り込み元', 'ステータス', '実施日(JST)', 'メモ', '紐づく回答ID', '回答日時(JST)', '到達ID'],
+    ['申込ID', '申込日時(JST)', '入口', '入口コード', '氏名', 'メール', 'タイプ', '気になっていること',
+     '希望の時間帯', '追加項目', '質問', '取り込み元', 'ステータス', '実施日(JST)', 'メモ',
+     '紐づく回答ID', '回答日時(JST)', '到達ID'],
     (results ?? []).map((a) => [
-      a.id, jstFull(a.created_at), a.name, a.email, a.type_code, a.concern,
-      jsonArray(a.preferred_slots).join('／'), a.question, a.source, a.status,
+      a.id, jstFull(a.created_at), a.entry_name, a.entry_slug, a.name, a.email, a.type_code, a.concern,
+      jsonArray(a.preferred_slots).join('／'), customText(a.custom_answers ?? null), a.question, a.source, a.status,
       jstFull(a.held_at), a.admin_note, a.response_id, jstFull(a.response_created_at), a.apply_visit_id,
     ])
   );

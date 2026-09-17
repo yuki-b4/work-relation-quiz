@@ -26,16 +26,6 @@ document.addEventListener('click', function (e) {
 });
 `;
 
-/**
- * 申込ページ（`/apply/s/{slug}`）がまだ無いことの断り。
- * 入口は作れて実績も溜まるが、URLを開いてもまだ表示されない。
- * **公開側が入ったら、この定数と差し込み2か所を消す。**
- */
-const NOT_LIVE_NOTE =
-  '<p class="warn">申込ページ（<code>/apply/s/…</code>）はまだ実装されていません。' +
-  '入口は作れますが、<b>いま申込URLを開いても表示されません。</b>' +
-  '公開側が入るまでは、入口の登録と文面の準備だけができます。</p>';
-
 const KIND_LABEL: Record<string, string> = {
   guide: 'ガイド終章',
   direct: '直接・不明',
@@ -94,7 +84,6 @@ export function entriesListPage(
     '<h1>申込の入口</h1>' +
     '<p class="sub">体験セッションの申込が「どこから来たか」。申込1件につき必ず1つ紐づきます。' +
     '<span class="tag">既定</span> の2つ（ガイド終章・直接アクセス）は固定で、編集も無効化もできません。</p>' +
-    NOT_LIVE_NOTE +
 
     '<div class="panel"><h2>セミナーを追加する</h2>' +
       '<form method="post" action="/admin/entries">' +
@@ -142,7 +131,6 @@ export function entryDetailPage(shell: ShellOptions, e: EntryRow, origin: string
   const body =
     `<h1>${esc(e.name)}</h1>` +
     '<p class="sub"><a href="/admin/entries">← 入口の一覧へ</a></p>' +
-    NOT_LIVE_NOTE +
 
     '<div class="panel"><h2>実績</h2><dl class="kv">' +
       `<dt>申込URL</dt><dd><span class="mono">${esc(url)}</span> ` +
@@ -175,7 +163,7 @@ export function entryDetailPage(shell: ShellOptions, e: EntryRow, origin: string
             `<input id="headline" name="headline" maxlength="120" value="${esc(e.headline ?? '')}" placeholder="体験セッション（60分・無料）">`) +
           field('session_label', 'セッションの長さの表記', '空なら「30〜45分」。本文中の表記に使います。',
             `<input id="session_label" name="session_label" maxlength="40" value="${esc(e.session_label ?? '')}" placeholder="60分">`) +
-          field('intro', '冒頭の説明', '空ならガイド経由と同じ文面が出ます。改行はそのまま反映されます。',
+          field('intro', '冒頭の説明', '空にすると、ガイドへのお礼を除いた既定の文面が出ます。改行はそのまま反映されます。',
             `<textarea id="intro" name="intro" maxlength="4000" rows="6">${esc(e.intro ?? '')}</textarea>`) +
           field('fields_json', '事前入力の追加項目',
             'JSON の配列で書きます。例：<span class="mono">["役職","店舗の人数"]</span>。空なら既定の設問だけになります。',
