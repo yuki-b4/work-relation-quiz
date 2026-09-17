@@ -426,3 +426,95 @@ export async function issueReferrerCode(db: D1Database, initials: string): Promi
   }
   throw new Error('紹介者コードを発行できませんでした');
 }
+
+// ───────── 申込の入口（F4-5） ─────────
+
+/**
+ * Admin から作れる入口の種類。
+ * `guide` と `direct` は migrations/0004 が入れる system 行で、**作らせも消させもしない**。
+ * 種類を増やすときは、ここに足したうえで views/admin/entries.ts のフォームを分岐させる。
+ */
+export const ENTRY_KINDS = ['seminar'] as const;
+
+/** slug として使わせない値。system 行の slug は取り違えると事故になる。 */
+const RESERVED_SLUGS = ['guide', 'direct'];
+
+export type EntryRow = {
+  id: string; slug: string; kind: string; name: string;
+  headline: string | null; intro: string | null;
+  session_label: string | null; fields_json: string | null;
+  system: number; active: number; created_at: string;
+  /** entry_seminars 側。kind='seminar' 以外では常に null。 */
+  held_on: string | null; venue: string | null; audience_count: number | null;
+  application_count: number; closed_count: number;
+};
+
+const ENTRY_SELECT = `
+  select e.id, e.slug, e.kind, e.name, e.headline, e.intro, e.session_label, e.fields_json,
+         e.system, e.active, e.created_at,
+         s.held_on, s.venue, s.audience_count,
+         (select count(*) from session_applications sa
+           where sa.entry_id = e.id and sa.deleted_at is null) as application_count,
+         (select count(*) from session_applications sa
+           where sa.entry_id = e.id and sa.deleted_at is null and sa.status = '成約') as closed_count
+    from entries e left join entry_seminars s on s.entry_id = e.id`;
+
+/** 入口の一覧。system 行（guide / direct）を上に固定し、その下を開催日の新しい順に並べる。 */
+export async function listEntries(db: D1Database): Promise<EntryRow[]> {
+  const { results } = await db
+    .prepare(`${ENTRY_SELECT} order by e.system desc, e.active desc, coalesce(s.held_on, e.created_at) desc`)
+    .all<EntryRow>();
+  return results ?? [];
+}
+
+export async function loadEntry(db: D1Database, id: string): Promise<EntryRow | null> {
+  return await db.prepare(`${ENTRY_SELECT} where e.id = ?`).bind(id).first<EntryRow>();
+}
+
+/**
+ * slug の正規化。URLに載るので、**入力を弾く前に落とせる字は落とす**。
+ * 全角や大文字をそのまま弾くと、貼り付けただけの入力が毎回エラーになって煩わしい。
+ */
+export function normalizeSlug(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+/**
+ * slug の検査。通れば null、駄目なら利用者に見せる文言を返す。
+ * UNIQUE 制約でも重複は弾けるが、それだと生のSQLエラーが画面に出るので先に見る側も要る。
+ */
+export function slugError(slug: string): string | null {
+  if (slug.length < 3 || slug.length > 40) return 'URL用の文字列は3文字以上40文字以下にしてください。';
+  if (!/^[a-z][a-z0-9-]*[a-z0-9]$/.test(slug)) {
+    return 'URL用の文字列は英小文字で始め、英数字で終えてください（使えるのは英小文字・数字・ハイフンです）。';
+  }
+  if (slug.includes('--')) return 'ハイフンを連続させないでください。';
+  if (RESERVED_SLUGS.includes(slug)) return `「${slug}」は既定の入口で使っているので指定できません。`;
+  return null;
+}
+
+/** 開催日（YYYY-MM-DD）。入力欄が type="date" でも、POSTは何でも送れるので見る。 */
+export function heldOnError(heldOn: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(heldOn)) return '開催日は YYYY-MM-DD の形式で入力してください。';
+  if (Number.isNaN(Date.parse(`${heldOn}T00:00:00Z`))) return '開催日が実在しない日付です。';
+  return null;
+}
+
+/**
+ * 事前入力の追加項目。JSON配列（文字列の並び）だけ通す。
+ * 空欄は「追加項目なし」で、NULL として保存する（既定の設問だけになる）。
+ */
+export function fieldsJsonError(raw: string): string | null {
+  if (!raw.trim()) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return '追加項目は JSON の配列で書いてください（例：["役職","店舗の人数"]）。';
+  }
+  if (!Array.isArray(parsed) || parsed.some((v) => typeof v !== 'string' || !v.trim())) {
+    return '追加項目は、空でない文字列だけを並べた JSON の配列にしてください。';
+  }
+  if (parsed.length > 10) return '追加項目は10個までにしてください。';
+  return null;
+}

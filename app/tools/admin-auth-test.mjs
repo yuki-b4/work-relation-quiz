@@ -18,7 +18,9 @@ import {
   jst, jstFull, jstDayStart, jstDayEnd, maskName, maskEmail, duration, jsonArray, guideReach, pct,
 } from '../src/lib/admin-format.ts';
 import { csvCell, csvRow, toCsv } from '../src/lib/csv.ts';
-import { makeReferrerCode } from '../src/lib/admin-queries.ts';
+import {
+  makeReferrerCode, normalizeSlug, slugError, heldOnError, fieldsJsonError,
+} from '../src/lib/admin-queries.ts';
 import { viewAnswers, questionSetOf, CURRENT_SET } from '../src/lib/question-archive.ts';
 import {
   notifyConfigured, notifyApplication, notifyError, notifyTest,
@@ -421,5 +423,38 @@ if (fails.length) {
   for (const f of fails) console.log('  NG:', f);
   process.exit(1);
 }
+// ───────── 申込の入口の入力検査（F4-5） ─────────
+// slug はそのまま申込ページのURLになる。ここが緩いと、配ったあとで直せないURLができる。
+{
+  eq('前後の空白を落とす', normalizeSlug('  sem-0928  '), 'sem-0928');
+  eq('大文字は小文字にする', normalizeSlug('SEM-0928'), 'sem-0928');
+  eq('空白はハイフンにする', normalizeSlug('sem 0928'), 'sem-0928');
+  eq('使えない字は落とす', normalizeSlug('sem_0928!＠あ'), 'sem0928');
+
+  check('通る slug', slugError('sem-0928') === null);
+  check('数字を含む slug も通る', slugError('seminar2026-03') === null);
+  check('3文字未満は弾く', !!slugError('ab'));
+  check('40文字を超えると弾く', !!slugError('a'.repeat(41)));
+  check('数字始まりは弾く', !!slugError('0928-sem'));
+  check('ハイフン始まりは弾く', !!slugError('-sem'));
+  check('ハイフン終わりは弾く', !!slugError('sem-'));
+  check('ハイフンの連続は弾く', !!slugError('sem--0928'));
+  check('既定の入口の slug は使わせない（guide）', !!slugError('guide'));
+  check('既定の入口の slug は使わせない（direct）', !!slugError('direct'));
+
+  check('開催日は YYYY-MM-DD なら通る', heldOnError('2026-09-28') === null);
+  check('区切りが違う開催日は弾く', !!heldOnError('2026/09/28'));
+  check('空の開催日は弾く', !!heldOnError(''));
+  check('実在しない日付は弾く', !!heldOnError('2026-13-01'));
+
+  check('追加項目が空なら通る（既定の設問だけ）', fieldsJsonError('') === null);
+  check('文字列の配列なら通る', fieldsJsonError('["役職","店舗の人数"]') === null);
+  check('壊れたJSONは弾く', !!fieldsJsonError('["役職",'));
+  check('配列でなければ弾く', !!fieldsJsonError('{"a":1}'));
+  check('文字列以外が混じれば弾く', !!fieldsJsonError('["役職",3]'));
+  check('空文字が混じれば弾く', !!fieldsJsonError('["役職",""]'));
+  check('11個以上は弾く', !!fieldsJsonError(JSON.stringify(Array.from({ length: 11 }, (_, i) => `q${i}`))));
+}
+
 console.log(`Admin の試験: ${pass} 件通過`);
 console.log('  → 認証・セッション・マスク・CSV・設問文の引き当ては仕様どおり');

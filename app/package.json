@@ -27,7 +27,7 @@
     "test:admin": "node tools/e2e-admin.mjs",
     "test:auth": "node --experimental-strip-types tools/admin-auth-test.mjs",
     "test:migrate": "node tools/migrate-test.mjs",
-    "test:entries": "node tools/entries-migration-test.mjs",
+    "test:entries": "node --experimental-strip-types tools/entries-migration-test.mjs",
     "migrate": "node tools/migrate-sheets.mjs",
     "admin:password": "node --experimental-strip-types tools/admin-password.mjs",
     "pages": "node tools/extract-pages.mjs",

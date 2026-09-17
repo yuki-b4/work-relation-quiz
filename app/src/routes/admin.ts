@@ -20,9 +20,10 @@ import { notifyConfigured, notifyLogin, notifyTest } from '../lib/notify.ts';
 import { saltedHash } from '../lib/hash.ts';
 import { timingSafeEqualStr } from '../lib/password.ts';
 import {
-  APPLICATION_STATUSES, CORP_STATUSES, RESPONSE_STATUSES, filterOptions, issueReferrerCode,
-  linkCandidates, listApplications, listCorpLeads, listReferrers, listResponses,
-  listResponsesForCsv, loadAnswers, loadApplication, loadRelated, loadResponse, normalizeFilters,
+  APPLICATION_STATUSES, CORP_STATUSES, RESPONSE_STATUSES, fieldsJsonError, filterOptions,
+  heldOnError, issueReferrerCode, linkCandidates, listApplications, listCorpLeads, listEntries,
+  listReferrers, listResponses, listResponsesForCsv, loadAnswers, loadApplication, loadEntry,
+  loadRelated, loadResponse, normalizeFilters, normalizeSlug, slugError,
 } from '../lib/admin-queries.ts';
 import { csvHeaders, toCsv } from '../lib/csv.ts';
 import { jsonArray, jstDayEnd, jstDayStart, jstFull } from '../lib/admin-format.ts';
@@ -31,6 +32,7 @@ import { loginPage, bootstrapPage, lockedMessage } from '../views/admin/login.ts
 import { responseDetailPage, responsesListPage } from '../views/admin/responses.ts';
 import { sessionDetailPage, sessionsListPage } from '../views/admin/sessions.ts';
 import { corpLeadsPage, exportPage, referrersPage } from '../views/admin/misc.ts';
+import { entriesListPage, entryDetailPage } from '../views/admin/entries.ts';
 import type { ShellOptions } from '../views/admin/layout.ts';
 
 export type AdminBindings = {
@@ -150,6 +152,9 @@ const FLASH: Record<string, string> = {
   linked: '申込を回答に紐づけました。',
   unlinked: '紐づけを外しました。',
   issued: '紹介者コードを発行しました。',
+  entry_added: '入口を追加しました。申込ページの文面は、必要なら表示名から開いて設定してください。',
+  opened: '受付を再開しました。',
+  closed: '受付を締めました。',
   deleted: '削除しました（伏せました）。',
   restored: '伏せるのを解除しました。',
   purged: '完全に削除しました。',
@@ -490,6 +495,133 @@ admin.post('/corp-leads/:id', async (c) => {
 });
 
 // ───────── 紹介者マスタ（F2-6） ─────────
+
+// ───────── 申込の入口（F4-5） ─────────
+
+/**
+ * 入口は申込と 1:多 で、申込側の entry_id は NOT NULL。
+ * `guide` / `direct` は migrations/0004 の system 行で、**この画面からは触らせない**。
+ * 消えたり無効になったりすると、既存の申込が参照先を失う。
+ */
+admin.get('/entries', async (c) => {
+  const rows = await listEntries(c.env.DB);
+  return c.html(entriesListPage(shellOf(c, '申込の入口'), rows, originOf(c.req.url), c.var.csrf));
+});
+
+/** 追加できるのはセミナーだけ（ENTRY_KINDS）。entries と entry_seminars は必ず同時に入れる。 */
+admin.post('/entries', async (c) => {
+  const check = await readForm(c);
+  if (!check.ok) return c.text(check.message, 400);
+  const f = check.form;
+  const str = (k: string, max: number) => String(f.get(k) ?? '').trim().slice(0, max);
+
+  const name = str('name', 80);
+  if (!name) return c.text('表示名を入力してください。', 400);
+
+  const slug = normalizeSlug(str('slug', 40));
+  const slugNg = slugError(slug);
+  if (slugNg) return c.text(slugNg, 400);
+  const dup = await c.env.DB.prepare(`select id from entries where slug = ?`).bind(slug).first();
+  if (dup) return c.text(`「${slug}」は既に使われています。別の文字列にしてください。`, 400);
+
+  const heldOn = str('held_on', 10);
+  const heldNg = heldOnError(heldOn);
+  if (heldNg) return c.text(heldNg, 400);
+
+  const audience = audienceOf(str('audience_count', 10));
+  if (audience === undefined) return c.text('参加者数は0以上の整数で入力してください。', 400);
+
+  const id = crypto.randomUUID();
+  // **必ず batch で入れる。** 「kind='seminar' なら付帯行がある」はDBで宣言できないので、
+  // ここで守る（migrations/0004 のコメントと対）。
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      `insert into entries (id, slug, kind, name, system, active, created_at) values (?,?,'seminar',?,0,1,?)`
+    ).bind(id, slug, name, isoNow()),
+    c.env.DB.prepare(
+      `insert into entry_seminars (entry_id, held_on, venue, audience_count) values (?,?,?,?)`
+    ).bind(id, heldOn, str('venue', 120) || null, audience),
+  ]);
+  await audit(c.env.DB, {
+    actorId: c.var.userId, action: 'create', targetType: 'entry', targetId: id,
+    ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT), detail: { slug, kind: 'seminar' },
+  });
+  return c.redirect('/admin/entries?done=entry_added', 303);
+});
+
+admin.get('/entries/:id', async (c) => {
+  const e = await loadEntry(c.env.DB, c.req.param('id'));
+  if (!e || e.system === 1) return c.notFound();
+  return c.html(entryDetailPage(shellOf(c, e.name), e, originOf(c.req.url), c.var.csrf));
+});
+
+/**
+ * 更新。slug は変えさせない（配ったURLが死ぬため。変えたいなら新しい入口を作る）。
+ * 文面の4項目は空欄を NULL に落とす。NULL が「既定の文面を使う」の意味なので、
+ * 空文字で保存すると見出しが消えた申込ページになる。
+ */
+admin.post('/entries/:id', async (c) => {
+  const check = await readForm(c);
+  if (!check.ok) return c.text(check.message, 400);
+  const e = await loadEntry(c.env.DB, c.req.param('id'));
+  if (!e || e.system === 1) return c.notFound();
+  const f = check.form;
+  const str = (k: string, max: number) => String(f.get(k) ?? '').trim().slice(0, max);
+
+  const name = str('name', 80);
+  if (!name) return c.text('表示名を空にはできません。', 400);
+  const heldOn = str('held_on', 10);
+  const heldNg = heldOnError(heldOn);
+  if (heldNg) return c.text(heldNg, 400);
+  const audience = audienceOf(str('audience_count', 10));
+  if (audience === undefined) return c.text('参加者数は0以上の整数で入力してください。', 400);
+  const fieldsJson = str('fields_json', 2000);
+  const fieldsNg = fieldsJsonError(fieldsJson);
+  if (fieldsNg) return c.text(fieldsNg, 400);
+
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      `update entries set name = ?, headline = ?, intro = ?, session_label = ?, fields_json = ? where id = ?`
+    ).bind(
+      name, str('headline', 120) || null, str('intro', 4000) || null,
+      str('session_label', 40) || null, fieldsJson || null, e.id
+    ),
+    // 付帯行が無い入口（SQLで直接作られた場合）でも落ちないように upsert にする。
+    c.env.DB.prepare(
+      `insert into entry_seminars (entry_id, held_on, venue, audience_count) values (?,?,?,?)
+         on conflict(entry_id) do update set held_on = excluded.held_on,
+                                             venue = excluded.venue,
+                                             audience_count = excluded.audience_count`
+    ).bind(e.id, heldOn, str('venue', 120) || null, audience),
+  ]);
+  await audit(c.env.DB, {
+    actorId: c.var.userId, action: 'update', targetType: 'entry', targetId: e.id,
+    ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT),
+  });
+  return c.redirect(`/admin/entries/${e.id}?done=saved`, 303);
+});
+
+/** 受付の開け閉め。**行は消さない**（消すと既存の申込が参照先を失う）。 */
+admin.post('/entries/:id/active', async (c) => {
+  const check = await readForm(c);
+  if (!check.ok) return c.text(check.message, 400);
+  const e = await loadEntry(c.env.DB, c.req.param('id'));
+  if (!e || e.system === 1) return c.notFound();
+  const active = String(check.form.get('active') ?? '1') === '1' ? 1 : 0;
+  await c.env.DB.prepare(`update entries set active = ? where id = ?`).bind(active, e.id).run();
+  await audit(c.env.DB, {
+    actorId: c.var.userId, action: 'update', targetType: 'entry', targetId: e.id,
+    ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT), detail: { active },
+  });
+  return c.redirect(`/admin/entries?done=${active ? 'opened' : 'closed'}`, 303);
+});
+
+/** 参加者数。空欄は null、それ以外は0以上の整数だけ通す。不正なら undefined を返す。 */
+function audienceOf(raw: string): number | null | undefined {
+  if (!raw) return null;
+  if (!/^\d{1,6}$/.test(raw)) return undefined;
+  return Number(raw);
+}
 
 admin.get('/referrers', async (c) => {
   const rows = await listReferrers(c.env.DB);

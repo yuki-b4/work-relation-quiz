@@ -113,11 +113,12 @@ dl.kv dd{word-break:break-all}
 }
 `;
 
-export type Nav = 'responses' | 'sessions' | 'corp-leads' | 'referrers' | 'export' | 'none';
+export type Nav = 'responses' | 'sessions' | 'entries' | 'corp-leads' | 'referrers' | 'export' | 'none';
 
 const NAV: [Nav, string, string][] = [
   ['responses', '/admin/responses', '回答'],
   ['sessions', '/admin/sessions', '体験セッション申込'],
+  ['entries', '/admin/entries', '申込の入口'],
   ['corp-leads', '/admin/corp-leads', '法人リード'],
   ['referrers', '/admin/referrers', '紹介者'],
   ['export', '/admin/export', 'CSV出力'],

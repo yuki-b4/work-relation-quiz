@@ -1,7 +1,7 @@
 /**
- * 申込の入口（migrations/0004_entries.sql）の試験。
+ * 申込の入口（migrations/0004_entries.sql と、それを読む Admin の問い合わせ）の試験。
  *
- *   node tools/entries-migration-test.mjs
+ *   node --experimental-strip-types tools/entries-migration-test.mjs
  *
  * node:sqlite に 0001〜0004 をそのまま流して、本物のスキーマで確かめる。
  * 見どころは4つ。どれも間違えると、本番に当ててから気づくことになる。
@@ -14,6 +14,7 @@
  * 0004 が session_applications だけを作り直している理由がこれ。
  */
 import { DatabaseSync } from 'node:sqlite';
+import { listEntries, loadEntry } from '../src/lib/admin-queries.ts';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -169,10 +170,65 @@ check('入口別のファネルが1クエリで出る', funnel.length === 3 && f
   deferDb.close();
 }
 
+// ───────── Admin の問い合わせ（lib/admin-queries.ts） ─────────
+// 本物の SQL を本物のスキーマに当てる。node:sqlite を D1 の形に被せて呼ぶ。
+/** D1（prepare→bind→all/first/run と batch）を node:sqlite で満たす最小の被せもの。 */
+function asD1(sqlite) {
+  const prepare = (sql) => {
+    let params = [];
+    const stmt = {
+      bind: (...a) => { params = a; return stmt; },
+      all: async () => ({ results: sqlite.prepare(sql).all(...params) }),
+      first: async () => sqlite.prepare(sql).get(...params) ?? null,
+      run: async () => { sqlite.prepare(sql).run(...params); return {}; },
+    };
+    return stmt;
+  };
+  return { prepare, batch: async (stmts) => Promise.all(stmts.map((x) => x.run())) };
+}
+
+{
+  const d1 = asD1(db);
+
+  // Admin の「セミナーを追加する」と同じ形（entries と entry_seminars を必ず同時に入れる）。
+  await d1.batch([
+    d1.prepare(`insert into entries (id, slug, kind, name, system, active, created_at)
+                values (?,?,'seminar',?,0,1,?)`)
+      .bind('entry_sem2', 'sem-1012', '10/12 関係性セミナー', '2026-09-20T00:00:00.000Z'),
+    d1.prepare(`insert into entry_seminars (entry_id, held_on, venue, audience_count) values (?,?,?,?)`)
+      .bind('entry_sem2', '2026-10-12', '梅田 セミナールーム', 20),
+  ]);
+  check('batch でセミナーの入口を追加できる（Adminの追加と同じ形）',
+    one(`select count(*) n from entry_seminars where entry_id='entry_sem2'`).n === 1);
+
+  const rows = await listEntries(d1);
+  const bySlug = Object.fromEntries(rows.map((r) => [r.slug, r]));
+  check('一覧に全ての入口が出る', rows.length === 4);
+  check('既定の2行が先頭に並ぶ', rows[0].system === 1 && rows[1].system === 1);
+  check('セミナーは開催日の新しい順', rows[2].slug === 'sem-1012' && rows[3].slug === 'sem-0928');
+  check('セミナーに付帯情報が結合される',
+    bySlug['sem-0928'].held_on === '2026-09-28' && bySlug['sem-0928'].audience_count === 34);
+  check('既定の入口に付帯情報は付かない', bySlug.guide.held_on === null && bySlug.guide.audience_count === null);
+  check('入口ごとの申込数が出る', bySlug['sem-0928'].application_count === 1 && bySlug['sem-1012'].application_count === 0);
+  check('既定の入口の申込数も出る', bySlug.guide.application_count >= 1);
+  check('成約数は status で数える', bySlug['sem-0928'].closed_count === 0);
+  check('上書き用の文面が読める',
+    bySlug['sem-0928'].session_label === '60分' && bySlug['sem-0928'].fields_json === '["role","team_size"]');
+
+  // 成約を1件入れたら成約数が動く（申込率・成約率の分子）。
+  db.exec(`update session_applications set status = '成約' where id = 'app_sem'`);
+  check('成約に変えると成約数が増える', (await listEntries(d1)).find((r) => r.slug === 'sem-0928').closed_count === 1);
+
+  const one_ = await loadEntry(d1, 'entry_sem1');
+  check('1件読みでも付帯情報と実績が揃う',
+    one_ !== null && one_.slug === 'sem-0928' && one_.held_on === '2026-09-28' && one_.closed_count === 1);
+  check('存在しないIDは null', (await loadEntry(d1, 'entry_nope')) === null);
+}
+
 console.log(`申込の入口（0004）の試験: ${pass} 件通過`);
 if (fails.length) {
   console.error(`\n失敗 ${fails.length} 件:`);
   fails.forEach((f) => console.error('  ' + f));
   process.exit(1);
 }
-console.log('  → 既存の申込と紐づけは保たれ、entry_id の NOT NULL と種類の制約は仕様どおり');
+console.log('  → 移行の保全・entry_id の NOT NULL・種類の制約・Admin の読み取りは仕様どおり');
