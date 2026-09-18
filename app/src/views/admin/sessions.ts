@@ -16,6 +16,24 @@ import { jsonArray, jst, maskEmail, maskName } from '../../lib/admin-format.ts';
 import { deadlineLabel, declarationText, domainLabel, targetLabel } from '../../lib/declaration.ts';
 import { APPLICATION_STATUSES, PER_PAGE, type SessionListRow } from '../../lib/admin-queries.ts';
 
+/**
+ * 入口ごとの追加項目（custom_answers）。項目名も値もデータから来るので、必ずエスケープする。
+ * 壊れた JSON のときは何も出さない（画面を落とさない）。
+ */
+function customRows(json: string | null): string {
+  if (!json) return '';
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return '';
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return '';
+  return Object.entries(parsed as Record<string, unknown>)
+    .map(([k, v]) => `<dt>${esc(k)}</dt><dd class="wrap-cell">${esc(String(v))}</dd>`)
+    .join('');
+}
+
 function option(value: string, label: string, current: string | undefined): string {
   return `<option value="${esc(value)}"${current === value ? ' selected' : ''}>${esc(label)}</option>`;
 }
@@ -33,7 +51,8 @@ function qs(params: Record<string, string | number | undefined>): string {
 export function sessionsListPage(
   shell: ShellOptions,
   data: { rows: SessionListRow[]; total: number; page: number; pages: number },
-  f: { status?: string; linked?: string; q?: string; page?: number },
+  f: { status?: string; linked?: string; entry?: string; q?: string; page?: number },
+  entries: { slug: string; name: string }[],
   csrf: string
 ): string {
   const rows = data.rows
@@ -43,6 +62,7 @@ export function sessionsListPage(
       return (
         `<tr${dup || unlinked ? ' class="is-alert"' : ''}>` +
           `<td class="nowrap"><a href="/admin/sessions/${esc(a.id)}">${esc(jst(a.created_at))}</a></td>` +
+          `<td>${esc(a.entry_name)}</td>` +
           `<td>${esc(maskName(a.name))}</td>` +
           `<td class="mono">${esc(maskEmail(a.email))}</td>` +
           `<td>${a.response_id
@@ -80,15 +100,18 @@ export function sessionsListPage(
       '<div class="f"><label for="linked">回答との紐づけ</label><select id="linked" name="linked">' +
         option('', 'すべて', f.linked) + option('no', '未紐づけのみ', f.linked) + option('yes', '紐づけ済みのみ', f.linked) +
       '</select></div>' +
+      '<div class="f"><label for="entry">入口</label><select id="entry" name="entry">' +
+        option('', 'すべて', f.entry) + entries.map((e) => option(e.slug, e.name, f.entry)).join('') +
+      '</select></div>' +
       `<div class="f"><label for="q">氏名・メール</label><input id="q" type="search" name="q" value="${esc(f.q ?? '')}"></div>` +
       '<div class="f"><button class="btn" type="submit">絞り込む</button></div>' +
       '<div class="f"><a class="btn ghost" href="/admin/sessions">解除</a></div>' +
     '</div></form>' +
     '<div class="panel">' +
       '<div class="scroll"><table><thead><tr>' +
-        '<th>申込日時</th><th>氏名</th><th>メール</th><th>紐づく回答</th><th>宣言</th><th>ステータス</th><th>実施日</th>' +
+        '<th>申込日時</th><th>入口</th><th>氏名</th><th>メール</th><th>紐づく回答</th><th>宣言</th><th>ステータス</th><th>実施日</th>' +
       '</tr></thead><tbody>' +
-      (rows || '<tr><td colspan="7" class="muted">該当する申込がありません。</td></tr>') +
+      (rows || '<tr><td colspan="8" class="muted">該当する申込がありません。</td></tr>') +
       '</tbody></table></div>' +
       '<p class="note">氏名とメールは一覧では伏せています。全部を見るには申込日時のリンクから詳細を開いてください。</p>' +
       (data.pages > 1
@@ -155,6 +178,7 @@ export function sessionDetailPage(
       `<dt>申込日時</dt><dd>${esc(jst(a.created_at, true))}（JST）</dd>` +
       `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
       `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
+      `<dt>入口</dt><dd>${esc(a.entry_name)}（<span class="mono">${esc(a.entry_slug)}</span>）</dd>` +
       `<dt>タイプ</dt><dd>${esc(a.type_code ?? '—')}</dd>` +
       // 希望の時間帯は2026-09-14に聞くのをやめた（送信の直後に予約カレンダーを出すため）。
       // **移行分にだけ値が残る**ので、あるときだけ行を出す
@@ -166,6 +190,7 @@ export function sessionDetailPage(
       `<dt>宣言（いつまでに）</dt><dd>${esc(deadlineLabel(a.response_concern_deadline) ?? '—')}</dd>` +
       `<dt>気になっていること</dt><dd class="wrap-cell">${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
       `<dt>質問</dt><dd class="wrap-cell">${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
+      customRows(a.custom_answers) +
       `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
       `<dt>到達ID</dt><dd class="mono">${a.apply_visit_id ? esc(a.apply_visit_id) : '—'}</dd>` +
     '</dl></div>' +

@@ -230,6 +230,8 @@ export type ApplicationRow = {
   concern: string | null;
   preferred_slots: string | null;
   question: string | null;
+  custom_answers: string | null;
+  entry_id: string;
   source: string;
   status: string;
   held_at: string | null;
@@ -257,6 +259,10 @@ export async function loadRelated(db: D1Database, responseId: string) {
 // ───────── 体験セッション申込（F2-4） ─────────
 
 export type SessionListRow = ApplicationRow & {
+  /** 入口（F4-5）。entry_id は NOT NULL なので、この3つは必ず入る。 */
+  entry_slug: string;
+  entry_name: string;
+  entry_kind: string;
   response_created_at: string | null;
   response_type_code: string | null;
   response_type_name: string | null;
@@ -274,7 +280,7 @@ export type SessionListRow = ApplicationRow & {
 
 export async function listApplications(
   db: D1Database,
-  opts: { status?: string; linked?: string; q?: string; page?: number } = {},
+  opts: { status?: string; linked?: string; entry?: string; q?: string; page?: number } = {},
   perPage = PER_PAGE
 ): Promise<{ rows: SessionListRow[]; total: number; page: number; pages: number }> {
   const parts = ['sa.deleted_at is null'];
@@ -282,6 +288,7 @@ export async function listApplications(
   if (opts.status) { parts.push('sa.status = ?'); binds.push(opts.status); }
   if (opts.linked === 'no') parts.push('sa.response_id is null');
   if (opts.linked === 'yes') parts.push('sa.response_id is not null');
+  if (opts.entry) { parts.push('e.slug = ?'); binds.push(opts.entry); }
   if (opts.q) {
     const like = `%${escapeLike(opts.q)}%`;
     parts.push(`(sa.name like ? escape '\\' or sa.email like ? escape '\\')`);
@@ -292,13 +299,15 @@ export async function listApplications(
 
   const base = `
     from session_applications sa
+    join entries e on e.id = sa.entry_id
     left join responses r on r.id = sa.response_id
    where ${where}`;
 
   const totalRow = await db.prepare(`select count(*) as n ${base}`).bind(...binds).first<{ n: number }>();
   const { results } = await db
     .prepare(
-      `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
+      `select sa.*, e.slug as entry_slug, e.name as entry_name, e.kind as entry_kind,
+              r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
               r.concern_domain as response_concern_domain,
               r.concern_target as response_concern_target,
@@ -319,7 +328,8 @@ export async function listApplications(
 export async function loadApplication(db: D1Database, id: string): Promise<SessionListRow | null> {
   return await db
     .prepare(
-      `select sa.*, r.created_at as response_created_at, r.type_code as response_type_code,
+      `select sa.*, e.slug as entry_slug, e.name as entry_name, e.kind as entry_kind,
+              r.created_at as response_created_at, r.type_code as response_type_code,
               r.type_name as response_type_name,
               r.concern_domain as response_concern_domain,
               r.concern_target as response_concern_target,
@@ -329,6 +339,7 @@ export async function loadApplication(db: D1Database, id: string): Promise<Sessi
                 where x.apply_visit_id = sa.apply_visit_id and x.deleted_at is null
                   and sa.apply_visit_id is not null) as visit_application_count
          from session_applications sa
+         join entries e on e.id = sa.entry_id
          left join responses r on r.id = sa.response_id
         where sa.id = ?`
     )
@@ -439,4 +450,109 @@ export async function issueReferrerCode(db: D1Database, initials: string): Promi
     if (!hit) return code;
   }
   throw new Error('紹介者コードを発行できませんでした');
+}
+
+// ───────── 申込の入口（F4-5） ─────────
+
+/**
+ * Admin から作れる入口の種類。
+ * `guide` と `direct` は migrations/0007 が入れる system 行で、**作らせも消させもしない**。
+ * 種類を増やすときは、ここに足したうえで views/admin/entries.ts のフォームを分岐させる。
+ */
+export const ENTRY_KINDS = ['seminar'] as const;
+
+/** slug として使わせない値。system 行の slug は取り違えると事故になる。 */
+const RESERVED_SLUGS = ['guide', 'direct'];
+
+export type EntryRow = {
+  id: string; slug: string; kind: string; name: string;
+  headline: string | null; intro: string | null;
+  session_label: string | null; fields_json: string | null;
+  system: number; active: number; created_at: string;
+  /** entry_seminars 側。kind='seminar' 以外では常に null。 */
+  held_on: string | null; venue: string | null; audience_count: number | null;
+  application_count: number; closed_count: number;
+};
+
+const ENTRY_SELECT = `
+  select e.id, e.slug, e.kind, e.name, e.headline, e.intro, e.session_label, e.fields_json,
+         e.system, e.active, e.created_at,
+         s.held_on, s.venue, s.audience_count,
+         (select count(*) from session_applications sa
+           where sa.entry_id = e.id and sa.deleted_at is null) as application_count,
+         (select count(*) from session_applications sa
+           where sa.entry_id = e.id and sa.deleted_at is null and sa.status = '成約') as closed_count
+    from entries e left join entry_seminars s on s.entry_id = e.id`;
+
+/** 入口の一覧。system 行（guide / direct）を上に固定し、その下を開催日の新しい順に並べる。 */
+export async function listEntries(db: D1Database): Promise<EntryRow[]> {
+  const { results } = await db
+    .prepare(`${ENTRY_SELECT} order by e.system desc, e.active desc, coalesce(s.held_on, e.created_at) desc`)
+    .all<EntryRow>();
+  return results ?? [];
+}
+
+export async function loadEntry(db: D1Database, id: string): Promise<EntryRow | null> {
+  return await db.prepare(`${ENTRY_SELECT} where e.id = ?`).bind(id).first<EntryRow>();
+}
+
+/**
+ * slug の正規化。URLに載るので、**入力を弾く前に落とせる字は落とす**。
+ * 全角や大文字をそのまま弾くと、貼り付けただけの入力が毎回エラーになって煩わしい。
+ */
+export function normalizeSlug(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+/**
+ * slug の検査。通れば null、駄目なら利用者に見せる文言を返す。
+ * UNIQUE 制約でも重複は弾けるが、それだと生のSQLエラーが画面に出るので先に見る側も要る。
+ */
+export function slugError(slug: string): string | null {
+  if (slug.length < 3 || slug.length > 40) return 'URL用の文字列は3文字以上40文字以下にしてください。';
+  if (!/^[a-z][a-z0-9-]*[a-z0-9]$/.test(slug)) {
+    return 'URL用の文字列は英小文字で始め、英数字で終えてください（使えるのは英小文字・数字・ハイフンです）。';
+  }
+  if (slug.includes('--')) return 'ハイフンを連続させないでください。';
+  if (RESERVED_SLUGS.includes(slug)) return `「${slug}」は既定の入口で使っているので指定できません。`;
+  return null;
+}
+
+/** 開催日（YYYY-MM-DD）。入力欄が type="date" でも、POSTは何でも送れるので見る。 */
+export function heldOnError(heldOn: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(heldOn)) return '開催日は YYYY-MM-DD の形式で入力してください。';
+  if (Number.isNaN(Date.parse(`${heldOn}T00:00:00Z`))) return '開催日が実在しない日付です。';
+  return null;
+}
+
+/**
+ * 事前入力の追加項目。JSON配列（文字列の並び）だけ通す。
+ * 空欄は「追加項目なし」で、NULL として保存する（既定の設問だけになる）。
+ */
+export function fieldsJsonError(raw: string): string | null {
+  if (!raw.trim()) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return '追加項目は JSON の配列で書いてください（例：["役職","店舗の人数"]）。';
+  }
+  if (!Array.isArray(parsed) || parsed.some((v) => typeof v !== 'string' || !v.trim())) {
+    return '追加項目は、空でない文字列だけを並べた JSON の配列にしてください。';
+  }
+  if (parsed.length > 10) return '追加項目は10個までにしてください。';
+  return null;
+}
+
+/** 申込一覧の入口フィルタの選択肢。申込が1件でもある入口だけ出す。 */
+export async function entryOptions(db: D1Database): Promise<{ slug: string; name: string }[]> {
+  const { results } = await db
+    .prepare(
+      `select e.slug, e.name from entries e
+        where exists (select 1 from session_applications sa
+                       where sa.entry_id = e.id and sa.deleted_at is null)
+        order by e.system desc, e.created_at desc`
+    )
+    .all<{ slug: string; name: string }>();
+  return results ?? [];
 }

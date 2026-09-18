@@ -164,6 +164,8 @@ export type ApplicationEvent = {
   declaration: string | null;
   /** 到達IDから回答に紐づいたか。付いていないと Admin で手当てが要る（F2-4）。 */
   linked: boolean;
+  /** どの入口から来た申込か（F4-5）。セミナー名がそのまま出るので、来た経路が一目で分かる。 */
+  entryName: string | null;
   origin: string;
 };
 
@@ -179,6 +181,7 @@ export type ApplicationEvent = {
  */
 export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Promise<NotifyResult> {
   const body = [
+    ...(a.entryName ? [`入口：${a.entryName}`] : []),
     `お名前：${maskName(a.name)}`,
     `メール：${maskEmail(a.email)}`,
     `タイプ：${a.typeName ? `${a.typeName}（${a.typeCode}）` : (a.typeCode ?? '不明')}`,
