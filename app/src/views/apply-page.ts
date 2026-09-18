@@ -53,22 +53,26 @@ export const SLOTS = [
   '土日の午前', '土日の午後', '土日の夜', 'その他',
 ] as const;
 
-/** セッションの長さの表記。入口が上書きしていなければこれ。 */
-const DEFAULT_SESSION_LABEL = '30〜45分';
+/**
+ * セッションの長さの表記。入口が上書きしていなければこれ。
+ *
+ * **60分で固定**（2026-09-18）。予約カレンダー側の枠と揃える必要があるので、
+ * ここを変えるなら Google の予約スケジュールの枠も同時に変えること。
+ */
+const DEFAULT_SESSION_LABEL = '60分';
 
 /**
- * 冒頭の説明。ガイド経由だけ、最後まで読んだことへのお礼から入る。
- * **入口が上書きしていないときに、ガイドのお礼を他の入口へ出さないこと。**
+ * 冒頭の説明の既定。
+ *
+ * **前置きの本文は2026-09-18に削除した。** 長さ・費用は見出し帯（体験セッション
+ * （60分・無料））が、入力の手間は各項目のヒントが伝えているので、同じことを
+ * 長い前置きで繰り返していた。
+ *
+ * 残すのはガイド経由のお礼だけ。**他の入口には出さない。**
  * セミナーで来た人は読み解きガイドを読んでいない。
  */
-function defaultIntro(sessionLabel: string, thanksForGuide: boolean): string {
-  return (
-    (thanksForGuide ? '読み解きガイドを最後まで読んでくださり、ありがとうございます。\n\n' : '') +
-    'このセッションでは、あなたの診断結果をもとに、いま何が起きているのか、次に何をしたら良いのかを一緒に読み解きます。\n\n' +
-    `オンラインで${sessionLabel}。費用はかかりません。\n` +
-    'セッションの最後に、ご希望があれば継続支援のご案内をさせていただきます。\n\n' +
-    '入力は2分ほどで終わります。答えにくい項目は、空のままで大丈夫です。'
-  );
+function defaultIntro(thanksForGuide: boolean): string {
+  return thanksForGuide ? '読み解きガイドを最後まで読んでくださり、ありがとうございます。' : '';
 }
 
 /** 申込ページが使う入口の情報。NULL は「上書きしていない」の意味（migrations/0007）。 */
@@ -90,22 +94,106 @@ export type ApplyOptions = {
   entry: ApplyEntry | null;
 };
 
+/**
+ * 入力の不足を示すスタイル。**この画面だけ**に足す。
+ * アプリのCSSは prototype.html からの機械抽出（content/styles.ts）なので、そちらは手で触らない。
+ *
+ * 赤はブランドの coral（タイプの極を表す色）とは別系統にする。同じ色だと
+ * 「タイプの色」と「エラー」が混ざって見える。
+ */
+const STYLE = `
+:root{--apply-err:#B3261E}
+.field input.is-invalid,
+.field textarea.is-invalid,
+.field select.is-invalid,
+.field input.is-invalid:focus,
+.field textarea.is-invalid:focus,
+.field select.is-invalid:focus{border-color:var(--apply-err)}
+.vq.is-invalid .vq-opt{border-color:var(--apply-err)}
+.field-err{color:var(--apply-err); font-size:12.5px; font-weight:700; line-height:1.6; margin-top:6px; text-align:left}
+`;
+
 const SCRIPT = `
 (function () {
   var f = document.getElementById('applyForm');
   var note = document.getElementById('applyNote');
   var btn = document.getElementById('applySubmit');
 
+  // フォームは novalidate なので、required だけではブラウザが止めてくれない。
+  // **足りないところは一度に全部出す。** 1つ直すたびに送信し直させない。
+
+  /** 直前の指摘を全部消してから付け直す。直した項目が赤のまま残らないようにする。 */
+  function clearErrors() {
+    note.textContent = '';
+    var marked = f.querySelectorAll('.is-invalid');
+    for (var i = 0; i < marked.length; i++) marked[i].classList.remove('is-invalid');
+    var msgs = f.querySelectorAll('.field-err');
+    for (var j = 0; j < msgs.length; j++) msgs[j].parentNode.removeChild(msgs[j]);
+    var flagged = f.querySelectorAll('[aria-invalid]');
+    for (var k = 0; k < flagged.length; k++) flagged[k].removeAttribute('aria-invalid');
+  }
+
+  /** 指摘を1件出す。文言は**その入力欄の直下**に置く（ヒントより前）。 */
+  function mark(el, msg) {
+    var p = document.createElement('p');
+    p.className = 'field-err';
+    p.textContent = msg;
+    if (el.type === 'checkbox') {
+      // 同意はラベルの中にあるので、囲みの .vq を赤くして、その末尾に文言を置く
+      var box = el.closest('.vq');
+      box.classList.add('is-invalid');
+      box.appendChild(p);
+    } else {
+      el.classList.add('is-invalid');
+      el.parentNode.insertBefore(p, el.nextSibling);
+    }
+    el.setAttribute('aria-invalid', 'true');
+  }
+
+  /** 足りないところを全部返す。 */
+  function problems() {
+    var out = [];
+    var name = f.querySelector('#name');
+    var email = f.querySelector('#email');
+    var agree = f.querySelector('#agree');
+    if (!name.value.trim()) out.push([name, 'お名前を入力してください。']);
+    if (!email.value.trim()) out.push([email, 'メールアドレスを入力してください。']);
+    else if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.value.trim())) {
+      out.push([email, 'メールアドレスの形式をご確認ください（例：you@example.com）。']);
+    }
+    if (!agree.checked) out.push([agree, 'プライバシーポリシーへの同意が必要です。']);
+    return out;
+  }
+
+  // 直したら、その場で赤を消す。送信し直すまで残ると、直ったのかが分からない。
+  function onFix(e) {
+    var el = e.target;
+    var box = el.type === 'checkbox' ? el.closest('.vq') : el;
+    if (!box || !box.classList.contains('is-invalid')) return;
+    box.classList.remove('is-invalid');
+    el.removeAttribute('aria-invalid');
+    var msg = (el.type === 'checkbox' ? box : box.parentNode).querySelector('.field-err');
+    if (msg) msg.parentNode.removeChild(msg);
+  }
+  f.addEventListener('input', onFix, true);
+  f.addEventListener('change', onFix, true);
+
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     if (btn.disabled) return;
-    var fd = new FormData(f);
-    // 同意（必須）は送る前にこちらで見る。
-    // フォームは novalidate なので、required だけではブラウザが止めてくれない。
-    if (!f.querySelector('input[name="agree"]').checked) {
-      note.textContent = 'プライバシーポリシーへの同意が必要です。';
+    clearErrors();
+    var bad = problems();
+    if (bad.length) {
+      for (var i = 0; i < bad.length; i++) mark(bad[i][0], bad[i][1]);
+      // ボタンの真下にも出す。指摘が画面の外にあると、押しても何も起きないように見える。
+      note.textContent = bad.length === 1
+        ? '入力に不足があります。上の赤い項目をご確認ください。'
+        : '入力に不足が' + bad.length + '件あります。上の赤い項目をご確認ください。';
+      bad[0][0].focus({ preventScroll: true });
+      bad[0][0].scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
     }
+    var fd = new FormData(f);
     // 追加項目は**並び順のまま**送る。ラベルはサーバが入口から引き直すので送らない。
     var custom = fd.getAll('custom');
     btn.disabled = true;
@@ -153,8 +241,12 @@ function field(id: string, label: string, hint: string, input: string): string {
   );
 }
 
-/** 段落ごとに <p> にする。入口の文面は Admin の textarea から来るので、改行を活かす。 */
+/**
+ * 段落ごとに <p> にする。入口の文面は Admin の textarea から来るので、改行を活かす。
+ * **空なら何も出さない**（空の <p> を置くと、そのぶん余白だけが空く）。
+ */
 function paragraphs(text: string): string {
+  if (!text.trim()) return '';
   return text
     .split(/\n{2,}/)
     .map((p) => `<p class="frame-why">${p.split('\n').map(esc).join('<br>')}</p>`)
@@ -166,12 +258,11 @@ export function applyPage(opts: ApplyOptions): string {
   const isGuide = entry === null;
   const sessionLabel = entry?.sessionLabel || DEFAULT_SESSION_LABEL;
   const headline = entry?.headline || 'お申し込み';
-  const intro = entry?.intro || defaultIntro(sessionLabel, isGuide);
-  const t = code ? TYPES[code] : null;
+  const intro = entry?.intro || defaultIntro(isGuide);
 
   // タイプが分からない人にだけ聞く。分かっている人に聞き直さない（F4-5の設計方針）。
-  const typeField = t
-    ? `<input type="hidden" name="typeCode" value="${esc(code!)}">`
+  const typeField = code
+    ? `<input type="hidden" name="typeCode" value="${esc(code)}">`
     : '<div class="field"><label for="typeCode">診断結果のタイプ（任意）</label>' +
         '<select id="typeCode" name="typeCode">' +
           '<option value="">わからない・覚えていない</option>' +
@@ -196,8 +287,11 @@ export function applyPage(opts: ApplyOptions): string {
       '<section class="screen active">' +
         `<div class="eyebrow">体験セッション（${esc(sessionLabel)}・無料）</div>` +
         `<h1 class="hero" style="font-size:clamp(21px,4.6vw,28px)">${esc(headline)}</h1>` +
-        // 出してよいのはタイプ名だけ。結果の本文は出さない（F4-5）。
-        (t ? `<p class="lead">${esc(t.name)}のあなたへ</p>` : '') +
+        // **タイプ名は出さない**（2026-09-18）。この画面のタイプは、URL か、
+        // セミナー入口では結果セッションCookieから引いている。Cookieから当てた名前を
+        // 名指しで出すと「なぜ知っているのか」と受け取られ、申し込む手前で不信感になる。
+        // **こちら側は type_code を記録して使う。出さないのは画面だけ。**
+        // 結果の本文を出さないのは従来どおり（F4-5）。
 
         paragraphs(intro) +
 
@@ -234,7 +328,7 @@ export function applyPage(opts: ApplyOptions): string {
           // チェックボックスが全幅になり、ラベルと縦積みになる（prototype.html も .vq の下に置いている）。
           '<div class="vq">' +
             '<label class="vq-opt">' +
-              '<input type="checkbox" name="agree" required>' +
+              '<input id="agree" type="checkbox" name="agree" required>' +
               '<span><a href="/privacy" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します（必須）</span>' +
             '</label>' +
           '</div>' +
@@ -250,7 +344,7 @@ export function applyPage(opts: ApplyOptions): string {
         '</form>' +
 
         '<div id="applyDone" hidden>' +
-          '<div class="bk-band">お申し込みありがとうございます。</div>' +
+          '<div class="bk-band">お申し込みありがとうございました。</div>' +
           '<p class="lead">続けて、ご都合のよい日時をお選びください。</p>' +
           // 予約UIは Google の中で完結する。こちらでは選ばれた日時を受け取れないので、
           // 「選べなかった人」の逃げ道（メールでの調整）を必ず残しておく。
@@ -269,6 +363,7 @@ export function applyPage(opts: ApplyOptions): string {
     {
       title: '体験セッションのお申し込み | ナチュール診断',
       noindex: true,
+      head: `<style>${STYLE}</style>`,
       script: SCRIPT,
     },
     body

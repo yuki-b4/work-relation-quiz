@@ -161,9 +161,9 @@ export function entryDetailPage(shell: ShellOptions, e: EntryRow, origin: string
         '<div class="filters">' +
           field('headline', '見出し', '空なら「お申し込み」。',
             `<input id="headline" name="headline" maxlength="120" value="${esc(e.headline ?? '')}" placeholder="体験セッション（60分・無料）">`) +
-          field('session_label', 'セッションの長さの表記', '空なら「30〜45分」。本文中の表記に使います。',
+          field('session_label', 'セッションの長さの表記', '空なら「60分」。見出しの帯に出ます。<b>予約カレンダーの枠と揃えること。</b>',
             `<input id="session_label" name="session_label" maxlength="40" value="${esc(e.session_label ?? '')}" placeholder="60分">`) +
-          field('intro', '冒頭の説明', '空にすると、ガイドへのお礼を除いた既定の文面が出ます。改行はそのまま反映されます。',
+          field('intro', '冒頭の説明', '<b>空なら何も出ません</b>（既定の前置きは廃止しました）。書いたぶんだけ、見出しの下に出ます。改行はそのまま反映されます。',
             `<textarea id="intro" name="intro" maxlength="4000" rows="6">${esc(e.intro ?? '')}</textarea>`) +
           field('fields_json', '事前入力の追加項目',
             'JSON の配列で書きます。例：<span class="mono">["役職","店舗の人数"]</span>。空なら既定の設問だけになります。',
