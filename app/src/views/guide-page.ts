@@ -4,6 +4,9 @@
  * 要件：アプリ化要件定義.md F3-1（本の体裁・章送り・章立てを踏襲）／
  *       F4-5（ガイド本文は結果セッションで認可。申込フォームだけ外に出す）。
  *
+ * 終章の商談前ヒアリング（いま悩んでいること／解消後の毎日）は **2026-09-14に廃止**。
+ * 申込の前に書かせず、聞くのは体験セッションの場にする（集客戦略マップ.md §4.2 の1段目）。
+ *
  * 章のHTMLは prototype.html の bkChapters() を実行して作った生成物（content/guide-chapters.ts）。
  * 器（章送りの土台・終章の申込ブロック・自己紹介）も prototype.html からそのまま写している。
  *
@@ -96,25 +99,6 @@ const SHELL_SCRIPT = `
     });
   }
 
-  // 商談前ヒアリング。送信ボタンは持たせず、入力が変わるたびに書き足す（F4-5）。
-  var lastSent = '';
-  function saveHearing() {
-    var now = $('hearNow').value.trim(), future = $('hearFuture').value.trim();
-    var sig = now + '\\u0000' + future;
-    if (sig === lastSent || (!now && !future)) return;
-    lastSent = sig;
-    fetch('/api/hearing', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tabToken: token, now: now, future: future })
-    }).then(function (r) {
-      $('hearNote').textContent = r.ok ? 'ここまでの内容をお預かりしました。' : '';
-      if (!r.ok) lastSent = '';
-    }).catch(function () {
-      lastSent = '';
-      $('hearNote').textContent = '送信に失敗しました。通信環境を確認してください。';
-    });
-  }
-
   fetch('/api/guide/view', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tabToken: token })
@@ -128,10 +112,6 @@ const SHELL_SCRIPT = `
       bk.style.setProperty('--accent-soft', d.guard ? 'var(--teal-soft)' : 'var(--coral-soft)');
       bk.style.setProperty('--accent-ink', d.guard ? 'var(--teal-ink)' : 'var(--coral-ink)');
       bk.style.setProperty('--accent-deep', d.guard ? '#0E5040' : '#7A2E1A');
-      $('hearingBlock').hidden = false;
-      ['hearNow', 'hearFuture'].forEach(function (id) {
-        $(id).addEventListener('change', saveHearing);
-      });
       wireApply('sessionApply');
       wireApply('sessionApply2');
       go(0);

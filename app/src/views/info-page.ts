@@ -40,6 +40,9 @@ const INFO_CSS =
   '.info li{margin-bottom:7px; line-height:1.9}' +
   '.info li::marker{color:var(--faint)}' +
   '.info a{color:var(--trust); text-underline-offset:3px}' +
+  // **ボタンはこの規則から外す。** `.info a`（0-2-0）が `.btn`（0-1-0）の白文字に勝つので、
+  // 外さないと濃紺の地に濃紺の文字が乗り、このページのボタンだけ色が違って見える。
+  '.info a.btn{color:#fff}' +
   '.info strong{font-weight:700}' +
   '.info code{font-size:.92em; background:#EDEDE8; border-radius:4px; padding:1px 5px}' +
   // 節の見出し。.sectlabel の見た目を借りつつ、最初の1つだけ上の余白を詰める。
@@ -117,9 +120,10 @@ function faqLd() {
 
 /** ページの下に置く導線。どこから来ても診断へ戻れるようにする（F6-2）。 */
 function cta(key: InfoKey): string {
+  // **全8タイプ（/types）へは、ここからは繋がない。** 結果画面から進む場所にする（2026-09-14）。
   const links: Record<InfoKey, [string, string][]> = {
-    about: [['/types', '全8タイプを見る'], ['/faq', 'よくある質問']],
-    faq: [['/about', 'ナチュール診断とは'], ['/types', '全8タイプを見る']],
+    about: [['/faq', 'よくある質問'], ['/contact', 'お問い合わせ']],
+    faq: [['/about', 'ナチュール診断とは'], ['/contact', 'お問い合わせ']],
     contact: [['/faq', 'よくある質問'], ['/about', 'ナチュール診断とは']],
     privacy: [['/terms', '利用規約'], ['/contact', 'お問い合わせ']],
     terms: [['/privacy', 'プライバシーポリシー'], ['/contact', 'お問い合わせ']],

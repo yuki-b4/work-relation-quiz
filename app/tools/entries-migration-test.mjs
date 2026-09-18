@@ -1,5 +1,7 @@
 /**
- * 申込の入口（migrations/0004_entries.sql と、それを読む Admin の問い合わせ）の試験。
+ * 申込の入口（migrations/0007_entries.sql と、それを読む Admin の問い合わせ）の試験。
+ *
+ * 0007 より前のマイグレーションは、ディレクトリから拾って全部当てる。
  *
  *   node --experimental-strip-types tools/entries-migration-test.mjs
  *
@@ -15,12 +17,16 @@
  */
 import { DatabaseSync } from 'node:sqlite';
 import { listEntries, loadEntry } from '../src/lib/admin-queries.ts';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const MIGRATIONS = join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 const sql = (f) => readFileSync(join(MIGRATIONS, f), 'utf8');
+
+/** 試す対象と、その前に当たるもの。 */
+const SUBJECT = '0007_entries.sql';
+const BEFORE = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f < SUBJECT).sort();
 
 let pass = 0;
 const fails = [];
@@ -29,7 +35,9 @@ const check = (label, cond) => { if (cond) pass++; else fails.push(label); };
 /** 0001〜0003 を当て、標本データを入れた状態のDBを作る。外部キーは有効のまま。 */
 function seeded() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_client_request_id.sql', '0003_admin.sql']) db.exec(sql(f));
+  // **0007 より前を全部当ててから試す。** 決め打ちで並べると、あいだに
+  // マイグレーションが増えたとき（0004〜0006 がそうだった）に本番と違う順序を試すことになる。
+  for (const f of BEFORE) db.exec(sql(f));
   db.exec('pragma foreign_keys = on');
   db.exec(`
     insert into responses (id, created_at, question_set_version, type_code, type_name, axis_h, axis_c, axis_w)
@@ -48,7 +56,7 @@ function seeded() {
 
 const db = seeded();
 // **外部キーを有効にしたまま**当てられることも、この試験の確認事項のひとつ。
-db.exec(sql('0004_entries.sql'));
+db.exec(sql(SUBJECT));
 
 const all = (s) => db.prepare(s).all();
 const one = (s) => db.prepare(s).get();
@@ -225,7 +233,7 @@ function asD1(sqlite) {
   check('存在しないIDは null', (await loadEntry(d1, 'entry_nope')) === null);
 }
 
-console.log(`申込の入口（0004）の試験: ${pass} 件通過`);
+console.log(`申込の入口（${SUBJECT}）の試験: ${pass} 件通過`);
 if (fails.length) {
   console.error(`\n失敗 ${fails.length} 件:`);
   fails.forEach((f) => console.error('  ' + f));

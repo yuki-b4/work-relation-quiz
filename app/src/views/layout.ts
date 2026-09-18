@@ -50,7 +50,8 @@ export type PageOptions = {
  */
 const FOOT_LINKS: [string, string][] = [
   ['/', '診断を受ける'],
-  ['/types', '全8タイプ'],
+  // **全8タイプ（/types）は入れない。** 結果画面から進む場所にする（2026-09-14）。
+  // 検索からは直接入れるので、`sitemap.xml` と index 対象からは外していない。
   ['/about', 'ナチュール診断とは'],
   ['/faq', 'よくある質問'],
   ['/contact', 'お問い合わせ'],

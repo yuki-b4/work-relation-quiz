@@ -13,6 +13,9 @@ import {
   APPLICATION_STATUSES, PER_PAGE, RESPONSE_STATUSES,
   type ApplicationRow, type ResponseDetail, type ResponseFilters, type ResponseListRow,
 } from '../../lib/admin-queries.ts';
+import {
+  deadlineLabel, domainLabel, targetLabel,
+} from '../../lib/declaration.ts';
 import { AX, RADAR_AXES, RADAR_META } from '../../content/quiz.ts';
 import { TYPES, TYPE_CODES } from '../../content/types.ts';
 import type { QuestionView } from '../../lib/question-archive.ts';
@@ -202,6 +205,24 @@ const SURVEY_LABELS: [string, string][] = [
   ['dig', '深掘りしたい'], ['miss', '滑った部分'],
 ];
 
+/**
+ * 宣言（施策a 段1・A-1）。**取るのは結果画面直後のフォーク1か所だけ。**
+ * 当日はここの読み上げから始め、無ければセッションの場で聞く（集客戦略マップ.md §4.2 の1）。
+ */
+function declarationRows(d: {
+  concern_domain?: unknown; concern_target?: unknown; concern_deadline?: unknown;
+}): string {
+  const s = (v: unknown) => (typeof v === 'string' ? v : null);
+  const cell = (v: string | null, raw: string | null) =>
+    v ? esc(v) : (raw ? `<span class="mono faint">${esc(raw)}</span>` : '<span class="faint">—</span>');
+  const domain = s(d.concern_domain);
+  return (
+    `<dt>場面</dt><dd>${cell(domainLabel(domain), domain)}</dd>` +
+    `<dt>相手</dt><dd>${cell(targetLabel(domain, s(d.concern_target)), s(d.concern_target))}</dd>` +
+    `<dt>いつまでに</dt><dd>${cell(deadlineLabel(s(d.concern_deadline)), s(d.concern_deadline))}</dd>`
+  );
+}
+
 function applicationBlock(a: ApplicationRow, csrf: string): string {
   const slots = jsonArray(a.preferred_slots);
   return (
@@ -210,7 +231,9 @@ function applicationBlock(a: ApplicationRow, csrf: string): string {
         `<dt>申込日時</dt><dd>${esc(jst(a.created_at))}</dd>` +
         `<dt>氏名</dt><dd>${esc(a.name)}</dd>` +
         `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
-        `<dt>希望の時間帯</dt><dd>${slots.length ? esc(slots.join('／')) : '<span class="faint">—</span>'}</dd>` +
+        // 希望の時間帯は2026-09-14に聞くのをやめた。**移行分にだけ値が残る**ので、あるときだけ出す
+        (slots.length ? `<dt>希望の時間帯</dt><dd>${esc(slots.join('／'))}</dd>` : '') +
+        // 宣言はこのページのブロック5に出るので、ここでは繰り返さない（申込フォームでは聞かない）
         `<dt>気になっていること</dt><dd>${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
         `<dt>質問</dt><dd>${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
         `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
@@ -235,7 +258,6 @@ export function responseDetailPage(
     questions: QuestionView[];
     versionKnown: boolean;
     survey: Record<string, string | null> | null;
-    hearing: Record<string, string | null> | null;
     visits: { id: string; visited_at: string; cta: string; application_count: number }[];
     applications: ApplicationRow[];
   },
@@ -292,15 +314,15 @@ export function responseDetailPage(
         : '<p class="muted">なし。検証アンケートは新規収集を廃止しているので、移行データにだけ入っています。</p>') +
     '</div>';
 
-  const hearing =
-    '<div class="panel"><h2>5. 商談前ヒアリング</h2>' +
-      (extra.hearing
-        ? '<dl class="kv">' +
-          `<dt>いま悩んでいること</dt><dd class="wrap-cell">${extra.hearing.now_text ? esc(String(extra.hearing.now_text)) : '<span class="faint">—</span>'}</dd>` +
-          `<dt>解消後の毎日</dt><dd class="wrap-cell">${extra.hearing.future_text ? esc(String(extra.hearing.future_text)) : '<span class="faint">—</span>'}</dd>` +
-          `<dt>更新日時</dt><dd>${esc(jst(String(extra.hearing.updated_at ?? '')))}</dd>` +
-          '</dl>'
-        : '<p class="muted">入力なし。</p>') +
+  // 5. 宣言（施策a 段1・A-1）。**取るのはフォーク1か所だけ**なので、申込フォーム側に同じ欄は無い。
+  // 商談前ヒアリングの2欄は2026-09-14に廃止した（聞くのは体験セッションの場。§4.2 の1段目）。
+  const declaration =
+    '<div class="panel"><h2>5. 宣言</h2>' +
+      '<dl class="kv">' +
+        `<dt>宣言日時</dt><dd>${r.declared_at ? esc(jst(String(r.declared_at))) : '<span class="faint">未宣言</span>'}</dd>` +
+        declarationRows(r) +
+        `<dt>相手のタイプ</dt><dd>${r.partner_type_code ? esc(String(r.partner_type_code)) : '<span class="faint">未（段2で埋まる）</span>'}</dd>` +
+      '</dl>' +
     '</div>';
 
   const guide =
@@ -373,7 +395,7 @@ export function responseDetailPage(
     `<h1>${esc(String(r.type_name ?? ''))}<span class="muted" style="font-weight:400; font-size:14px"> ／ ${esc(jst(String(r.created_at)))}</span></h1>` +
     `<p class="sub"><a href="/admin/responses">← 回答一覧へ</a></p>` +
     (r.deleted_at ? '<p class="warn">この回答は削除済み（伏せている）です。一覧とCSVには出ません。</p>' : '') +
-    basic + result + answers + survey + hearing + guide + apply + ops;
+    basic + result + answers + survey + declaration + guide + apply + ops;
 
   return adminPage({ ...shell, nav: 'responses' }, body);
 }

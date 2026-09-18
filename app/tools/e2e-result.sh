@@ -45,12 +45,24 @@ echo "=== 3. Cookieが無いと出ない（別デバイス／URLを受け取っ�
 t "Cookieなしで GET /result" "$(C -o /dev/null -w '%{http_code}' "$B/result")" "410"
 t "Cookieなしで view" "$(C -o /dev/null -w '%{http_code}' -X POST "$B/api/result/view" -H 'Content-Type: application/json' -d "{\"tabToken\":\"$TAB\"}")" "410"
 
-echo "=== 4. 閉じたら、3つ揃っていても出ない ==="
+echo "=== 4. 宣言（施策a 段1・A-1） ==="
+D() { C -b $J/cookie.txt -o /dev/null -w '%{http_code}' -X POST "$B/api/declaration" -H 'Content-Type: application/json' -d "$1"; }
+t "場面が無いと400" "$(D "{\"tabToken\":\"$TAB\"}")" "400"
+t "場面が不正だと400" "$(D "{\"tabToken\":\"$TAB\",\"domain\":\"none\"}")" "400"
+t "職場なのに相手が無いと400" "$(D "{\"tabToken\":\"$TAB\",\"domain\":\"work\"}")" "400"
+t "場面と相手の組が合わないと400" "$(D "{\"tabToken\":\"$TAB\",\"domain\":\"work\",\"target\":\"partner\",\"deadline\":\"now\"}")" "400"
+t "Cookieが無いと410" "$(C -o /dev/null -w '%{http_code}' -X POST "$B/api/declaration" -H 'Content-Type: application/json' -d "{\"tabToken\":\"$TAB\",\"domain\":\"unknown\"}")" "410"
+t "3つ揃えば記録できる" "$(D "{\"tabToken\":\"$TAB\",\"domain\":\"work\",\"target\":\"boss\",\"deadline\":\"now\"}")" "200"
+C -b $J/cookie.txt -o $J/view2.json -X POST "$B/api/result/view" -H 'Content-Type: application/json' -d "{\"tabToken\":\"$TAB\"}" >/dev/null
+t "宣言済みが結果に返る（二度は聞かない）" "$(python3 -c "
+import json;print(json.load(open('$J/view2.json')).get('declared'))")" "True"
+
+echo "=== 5. 閉じたら、3つ揃っていても出ない ==="
 C -b $J/cookie.txt -o /dev/null -X POST "$B/api/result/close" -H 'Content-Type: application/json' -d '{"reason":"user_close"}' >/dev/null
 t "閉じた後の view" "$(C -b $J/cookie.txt -o /dev/null -w '%{http_code}' -X POST "$B/api/result/view" -H 'Content-Type: application/json' -d "{\"tabToken\":\"$TAB\"}")" "410"
 t "閉じた後の GET /result" "$(C -b $J/cookie.txt -o /dev/null -w '%{http_code}' "$B/result")" "410"
 
-echo "=== 5. 案内画面 ==="
+echo "=== 6. 案内画面 ==="
 t "/result/closed は410" "$(C -o /dev/null -w '%{http_code}' "$B/result/closed")" "410"
 t "案内文が出る" "$(C "$B/result/closed" | grep -c 'すでに閉じられています')" "1"
 
