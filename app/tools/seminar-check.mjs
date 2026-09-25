@@ -62,6 +62,10 @@ for (const slug of slugs) {
     t(`${label} 本文へ飛ぶリンクがある`, body.includes('<a class="lp-skip" href="#main">') && body.includes('<main id="main">'), true);
     t(`${label} 言語が日本語`, html.startsWith('<!DOCTYPE html><html lang="ja">'), true);
     t(`${label} FAQ が details で開閉する`, (body.match(/<details><summary>/g) ?? []).length, s.sections.find((x) => x.kind === 'faq')?.items.length ?? 0);
+    // イラスト：md に書いた枠には、必ず絵が入っている（絵の無い空の枠を出さない）
+    const figs = body.match(/<figure class="lp-illust"[^>]*>[\s\S]*?<\/figure>/g) ?? [];
+    t(`${label} イラストの枠に絵が入っている`, figs.every((f) => f.includes('<svg') && /aria-label="[^"]+"/.test(f)), true);
+    t(`${label} イラストの枠が残っていない`, body.includes('data-labels='), false);
     // 表記ルール（CLAUDE.md）：ダッシュを本文に使わない
     t(`${label} ダッシュを使っていない`, /[—―]/.test(body.replace(/<[^>]+>/g, '')), false);
   }

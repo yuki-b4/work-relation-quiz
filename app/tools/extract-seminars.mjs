@@ -16,7 +16,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { blocks, textOf } from './md-lite.mjs';
+import { blocks, esc, textOf } from './md-lite.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, '../..');
@@ -99,6 +99,34 @@ function splitEyebrow(heading) {
 const FAQ_HEADINGS = ['よくあるご質問', 'よくある質問'];
 
 /**
+ * 文の代わりに置くイラスト。絵そのもの（SVG）は `src/views/seminar-page.ts` の ILLUSTS にある。
+ * ここに無い名前を md に書いたら止める（絵が無いまま空の枠が出るのを防ぐ）。
+ */
+const ILLUSTS = ['silence'];
+
+/**
+ * 段落として組みつつ、`![説明](illust:名前 "左の吹き出し|右の吹き出し")` の行だけイラストの枠にする。
+ * 説明は読み上げ用（画面には出ない）、吹き出しは絵の中に出す。吹き出しの中の `／` は改行。
+ * 画面の側（seminar-page.ts）が枠に絵を差し込む。
+ */
+function blocksWithIllust(lines, label) {
+  const out = [];
+  let chunk = [];
+  for (const line of lines) {
+    const m = /^!\[(.+)\]\(illust:([a-z-]+)(?:\s+"(.+)")?\)\s*$/.exec(line.trim());
+    if (!m) { chunk.push(line); continue; }
+    const [, alt, name, labels = ''] = m;
+    if (!ILLUSTS.includes(name)) throw new Error(`${label}: イラスト「${name}」は無い（使えるのは ${ILLUSTS.join('・')}）`);
+    checkDash(`${label} イラスト`, `${alt} ${labels}`);
+    out.push(blocks(chunk));
+    chunk = [];
+    out.push(`<figure class="lp-illust" role="img" aria-label="${esc(alt)}" data-illust="${name}" data-labels="${esc(labels)}"></figure>`);
+  }
+  out.push(blocks(chunk));
+  return out.join('');
+}
+
+/**
  * `###` で節に、`####` で節の中の小見出しに割る。
  * 特別な節（登壇者・開催概要・よくあるご質問）は種類を付けて返す。
  */
@@ -126,7 +154,7 @@ function sectionsOf(lines, label) {
 
   const out = sections.map((s) => {
     checkDash(`${label} 見出し`, s.heading);
-    const html = blocks(s.lines);
+    const html = blocksWithIllust(s.lines, label);
     checkDash(`${label} ${s.heading}`, textOf(html));
     if (s.heading === '開催概要') {
       if (textOf(html) || s.items.length) throw new Error(`${label}: 「開催概要」には本文を書かない（meta から組む）`);

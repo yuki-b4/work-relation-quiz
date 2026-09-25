@@ -67,6 +67,7 @@ const LP_CSS = `
   --lp-ink:#2c2c2c; --lp-sub:#767676; --lp-rule:#d7eef3;
   --lp-navy:#022c42; --lp-navy-2:#0d4c6d;
   --lp-focus:#ffd43d; --lp-disabled-bg:#b3b3b3; --lp-disabled-text:#ffffff;
+  --lp-heart:#f28b82;
   --lp-shadow:0 6px 24px rgba(2,44,66,.08);
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -177,6 +178,21 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-h2{margin:.25rem 0 1.75rem; font-size:clamp(1.375rem,5.6vw,2rem); font-weight:700; line-height:1.45; letter-spacing:.06em; color:var(--lp-cyan-strong)}
 .lp-body p+p,.lp-body p+ul,.lp-body p+ol,.lp-body ul+p,.lp-body ol+p{margin-top:1.25rem}
 .lp-body strong{font-weight:700}
+
+/* 文の代わりのイラスト（人と心）。吹き出しの文字も絵と一緒に拡大縮小する */
+.lp-illust{max-width:26rem; margin:1.75rem auto}
+.lp-illust svg{display:block; width:100%; height:auto; overflow:visible}
+.lp-illust .b{fill:#fff; stroke:var(--lp-cyan); stroke-width:2}
+.lp-illust .t{font-family:var(--lp-font); font-weight:700; font-size:16px; letter-spacing:.02em; fill:var(--lp-ink)}
+.lp-illust .p1{fill:var(--lp-bubble); stroke:var(--lp-navy); stroke-width:2.5}
+.lp-illust .p2{fill:var(--lp-aqua-hero); stroke:var(--lp-navy); stroke-width:2.5}
+.lp-illust .e{fill:var(--lp-navy)}
+.lp-illust .m{fill:none; stroke:var(--lp-navy); stroke-width:2.5; stroke-linecap:round}
+.lp-illust .q{font-family:var(--lp-font-en); font-weight:600; font-size:30px; fill:var(--lp-cyan-strong)}
+.lp-illust .h{fill:var(--lp-heart)}
+.lp-illust .ho{fill:#fff; stroke:var(--lp-heart); stroke-width:1.8}
+.lp-illust .d{fill:none; stroke:var(--lp-heart); stroke-width:3; stroke-linecap:round; stroke-dasharray:1 9}
+.lp-card .lp-illust .b{fill:var(--lp-aqua)}
 
 /* 番号なしの箇条書き：水色のチェック */
 .lp-body ul{list-style:none}
@@ -371,6 +387,58 @@ function overview(s: Seminar, ended: boolean): string {
   );
 }
 
+/**
+ * 吹き出しの文字（`／` で改行）を、吹き出しの中央に縦に並べる。
+ * 文字は md から来てエスケープ済み。
+ */
+function bubbleText(label: string, cx: number, cy: number): string {
+  const lines = label.split('／').filter(Boolean);
+  return lines.map((l, i) =>
+    `<text class="t" x="${cx}" y="${cy + (i - (lines.length - 1) / 2) * 24}" text-anchor="middle" dominant-baseline="central">${l}</text>`
+  ).join('');
+}
+
+/**
+ * 文の代わりに置くイラスト（md の `![説明](illust:名前 "左|右")`）。名前は extract-seminars.mjs の ILLUSTS と揃える。
+ * 人と心だけで描く。左が「あなた」、右が「相手」。色は --lp-* を使う。
+ */
+const ILLUSTS: Record<string, (left: string, right: string) => string> = {
+  // 気づかいの沈黙が、相手には届かない：左の人の心から出た点線が、右の人の手前で途切れる
+  silence: (left, right) =>
+    '<svg viewBox="0 0 400 250" aria-hidden="true" focusable="false">' +
+      // 吹き出し（心の中の声）
+      '<rect class="b" x="4" y="10" width="190" height="78" rx="24"/>' +
+      '<circle class="b" cx="122" cy="101" r="6"/><circle class="b" cx="128" cy="114" r="3.5"/>' +
+      '<rect class="b" x="206" y="10" width="190" height="78" rx="24"/>' +
+      '<circle class="b" cx="278" cy="101" r="6"/><circle class="b" cx="272" cy="114" r="3.5"/>' +
+      bubbleText(left, 99, 49) + bubbleText(right, 301, 49) +
+      // 人
+      '<path class="p1" d="M48 250C48 208 72 186 100 186S152 208 152 250Z"/><circle class="p1" cx="100" cy="150" r="30"/>' +
+      '<path class="p2" d="M248 250C248 208 272 186 300 186S352 208 352 250Z"/><circle class="p2" cx="300" cy="150" r="30"/>' +
+      // 顔：左は口を閉じている、右は首をかしげる
+      '<circle class="e" cx="90" cy="147" r="2.8"/><circle class="e" cx="110" cy="147" r="2.8"/><path class="m" d="M93 162H107"/>' +
+      '<circle class="e" cx="290" cy="147" r="2.8"/><circle class="e" cx="310" cy="147" r="2.8"/><path class="m" d="M293 163C298 159 302 165 307 161"/>' +
+      '<text class="q" x="342" y="128" text-anchor="middle">?</text>' +
+      // 心：左は気づかいで満ちている。点線は相手に届く前に途切れる。右の心は輪郭だけ
+      '<path class="h" transform="translate(87 207) scale(1.1)" d="M12 21.4l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.5z"/>' +
+      '<path class="d" d="M130 214C168 194 206 194 238 208"/>' +
+      '<path class="ho" transform="translate(287 207) scale(1.1)" d="M12 21.4l-1.5-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.5 11.5z"/>' +
+    '</svg>',
+};
+
+/** extract-seminars.mjs が置いたイラストの枠に、絵を差し込む。 */
+function illustrate(html: string): string {
+  return html.replace(
+    /<figure class="lp-illust" role="img" aria-label="([^"]*)" data-illust="([a-z-]+)" data-labels="([^"]*)"><\/figure>/g,
+    (whole, alt: string, name: string, labels: string) => {
+      const draw = ILLUSTS[name];
+      if (!draw) return whole;
+      const [left = '', right = ''] = labels.split('|');
+      return `<figure class="lp-illust" role="img" aria-label="${alt}">${draw(left, right)}</figure>`;
+    },
+  );
+}
+
 /** 節の背景。先頭から淡い水色と白を交互にする（締めの波の色もこれに合わせる）。 */
 const isAqua = (i: number) => i % 2 === 0;
 
@@ -393,7 +461,7 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
     let carded = aqua;
     switch (sec.kind) {
       case 'speaker':
-        body = speakerBlock(s, origin) + `<div class="lp-body">${sec.html}</div>`;
+        body = speakerBlock(s, origin) + `<div class="lp-body">${illustrate(sec.html)}</div>`;
         break;
       case 'overview':
         body = overview(s, ended);
@@ -410,7 +478,7 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
         break;
       default:
         if (sec.html.includes('<ol')) carded = false;
-        body = `<div class="lp-body">${sec.html}</div>`;
+        body = `<div class="lp-body">${illustrate(sec.html)}</div>`;
     }
     // STEP は横に並べるので幅いっぱい。それ以外は読みやすい行の長さに収める
     const wide = sec.kind === 'text' && sec.html.includes('<ol');
