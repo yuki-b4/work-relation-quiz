@@ -124,6 +124,8 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 @media (min-width:64rem){
   .lp-hero{min-height:40rem}
   .lp-hero-photo{position:absolute; inset:0 0 0 auto; width:50%; aspect-ratio:auto}
+  /* PCでは縦長の枠になり左右が大きく切れるので、人物（写真の右寄り）が入るように寄せる */
+  .lp-hero-photo img{object-position:86% 50%}
   .lp-hero-photo::after{inset:0 auto 0 0; width:45%; height:auto; background:linear-gradient(to right,#fff,rgba(255,255,255,0))}
   .lp-hero-body{padding:4.5rem 0 5rem; max-width:36rem}
   .lp-h1{font-size:2.375rem; letter-spacing:.04em}
@@ -306,6 +308,10 @@ function priceOf(fee: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/**
+ * 画像のURL。**ページの中の <img> は origin を空にしてサイト内の相対パスにする**（ステージングや手元で
+ * 開いたときも、そのサーバーの画像を読む）。共有用の og:image と構造化データだけは絶対URLにする。
+ */
 function imageUrl(origin: string, slug: string, name: string, img: SeminarImage): string {
   return `${origin}/seminar/${slug}/${name}.${img.ext}?v=${img.version}`;
 }
@@ -355,7 +361,7 @@ function cta(s: Seminar, ended: boolean): string {
 function speakerBlock(s: Seminar, origin: string): string {
   const img = s.images.speaker;
   const face = img
-    ? `<img src="${esc(imageUrl(origin, s.slug, 'speaker', img))}" alt="${esc(s.speakerName)}の写真"` +
+    ? `<img src="${esc(imageUrl('', s.slug, 'speaker', img))}" alt="${esc(s.speakerName)}の写真"` +
       ` width="${img.width}" height="${img.height}" loading="lazy">`
     // 写真が無いあいだは名前の頭文字。空の枠や仮の写真は置かない
     : `<span class="lp-initial" aria-hidden="true">${esc(s.speakerName.slice(0, 1))}</span>`;
@@ -592,7 +598,7 @@ export function seminarPage(s: Seminar, origin: string, now: number): string {
   // 写真があれば写真、無いあいだは淡い泡の飾り（空の枠や仮の写真は置かない）
   const heroVisual = hero
     ? '<div class="lp-hero-photo">' +
-        `<img src="${esc(imageUrl(origin, s.slug, 'hero', hero))}" alt=""` +
+        `<img src="${esc(imageUrl('', s.slug, 'hero', hero))}" alt=""` +
         ` width="${hero.width}" height="${hero.height}" fetchpriority="high">` +
       '</div>'
     : '<span class="lp-bubble b1" aria-hidden="true"></span>' +

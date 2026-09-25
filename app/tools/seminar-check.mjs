@@ -62,6 +62,12 @@ for (const slug of slugs) {
     t(`${label} 本文へ飛ぶリンクがある`, body.includes('<a class="lp-skip" href="#main">') && body.includes('<main id="main">'), true);
     t(`${label} 言語が日本語`, html.startsWith('<!DOCTYPE html><html lang="ja">'), true);
     t(`${label} FAQ が details で開閉する`, (body.match(/<details><summary>/g) ?? []).length, s.sections.find((x) => x.kind === 'faq')?.items.length ?? 0);
+    // 写真：置いてあればファーストビューに出る（無ければ飾りの丸）。ページ内の画像はサイト内の相対パス
+    // （ステージングでも本番の画像を読みに行かない）。URL は差し替えでキャッシュが切れる ?v= 付き
+    if (s.images.hero) {
+      t(`${label} 写真がファーストビューに出る`, body.includes(`class="lp-hero-photo"><img src="/seminar/${slug}/hero.${s.images.hero.ext}?v=${s.images.hero.version}"`), true);
+      t(`${label} 写真があれば飾りの丸を出さない`, body.includes('lp-bubble'), false);
+    }
     // イラスト：md に書いた枠には、必ず絵が入っている（絵の無い空の枠を出さない）
     const figs = body.match(/<figure class="lp-illust"[^>]*>[\s\S]*?<\/figure>/g) ?? [];
     t(`${label} イラストの枠に絵が入っている`, figs.every((f) => f.includes('<svg') && /aria-label="[^"]+"/.test(f)), true);

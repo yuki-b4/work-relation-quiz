@@ -2,6 +2,7 @@
 // 生成元：セミナーLP文面.md（文面と開催情報の正）と app/assets/seminar/{slug}/ の画像
 // 再生成：cd app && npm run content
 // /seminar/{slug} の中身（アプリ化要件定義.md F4-5「セミナーの告知ページ」）
+import img_sem_1010_hero from '../../assets/seminar/sem-1010/hero.jpg';
 
 export type SeminarImage = {
   data: ArrayBuffer;
@@ -186,6 +187,6 @@ export const SEMINARS: Record<string, Seminar> = {
         ]
       }
     ],
-    images: {},
+    images: { hero: { data: img_sem_1010_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' } },
   },
 };
