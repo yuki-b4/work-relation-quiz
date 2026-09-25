@@ -9,6 +9,11 @@
 import { HONSHITSU, TORISET, TYPES, TYPE_CODES } from '../src/content/types.ts';
 import { FAQ_ITEMS, INFO_PAGES } from '../src/content/pages.ts';
 import { apexUrl } from '../src/lib/canonical-host.ts';
+import { SEMINARS } from '../src/content/seminars.ts';
+import { seminarEnded } from '../src/views/seminar-page.ts';
+
+// 開催前のセミナーLPは index 対象（F4-5）。終了後は外れるので、件数は今の時刻で数える
+const OPEN_SEMINARS = Object.values(SEMINARS).filter((s) => !seminarEnded(s, Date.now())).map((s) => `/seminar/${s.slug}`);
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8787';
 let fail = 0;
@@ -35,7 +40,7 @@ const pick = (s, re) => (s.match(re) ?? [])[1] ?? null;
 // ── index させるページ ──
 for (const path of ['/', '/types', '/types/OBL', '/types/OBS', '/types/OKL', '/types/OKS',
                     '/types/GBL', '/types/GBS', '/types/GKL', '/types/GKS',
-                    '/about', '/faq', '/contact', '/privacy', '/terms']) {
+                    '/about', '/faq', '/contact', '/privacy', '/terms', ...OPEN_SEMINARS]) {
   const r = await get(path);
   t(`${path} が 200`, r.status, 200);
   t(`${path} に noindex が付いていない`, /noindex/.test(r.body) || r.robots?.includes('noindex') || false, false);
@@ -164,7 +169,8 @@ t('壊れたURLでも落ちない', apexUrl('not a url'), null);
 
 // ── sitemap と robots ──
 const sm = await get('/sitemap.xml');
-t('sitemap が15件', (sm.body.match(/<loc>/g) ?? []).length, 15);
+t(`sitemap が${15 + OPEN_SEMINARS.length}件`, (sm.body.match(/<loc>/g) ?? []).length, 15 + OPEN_SEMINARS.length);
+for (const path of OPEN_SEMINARS) t(`${path} が sitemap に載っている`, sm.body.includes(`${path}<`), true);
 t('sitemap が https', sm.body.includes('<loc>https://'), true);
 
 const rb = await get('/robots.txt');

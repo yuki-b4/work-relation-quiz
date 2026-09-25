@@ -33,7 +33,7 @@ preview_urls = false
 # **import したものだけが入る**ので、ここに書いただけで重くなることはない。
 [[rules]]
 type = "Data"
-globs = ["**/*.png", "**/*.ico", "**/*.svg"]
+globs = ["**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.ico", "**/*.svg"]
 fallthrough = true
 
 [observability]

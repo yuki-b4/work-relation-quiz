@@ -34,6 +34,11 @@ export type PageOptions = {
    * **絶対URLでないとSNS側が拾わない**ので、呼び出し側で origin を付けて渡す。
    */
   ogImage?: string;
+  /**
+   * og:image の寸法と説明。省略するとサイト既定の画像（/ogp.png・1200×630）の値を出す。
+   * **別の画像を渡すときは必ず添える。** 寸法が実物と違うと、SNS側で切り抜きがずれる。
+   */
+  ogImageMeta?: { width: number; height: number; alt: string };
   /** <head> に足すもの（OGP・構造化データなど）。 */
   head?: string;
   /** </body> の直前に置くスクリプト。 */
@@ -82,13 +87,15 @@ export function siteFooter(): string {
 }
 
 /** og:image と twitter:image（F7-3）。幅と高さも添えると、取得前から場所を確保してもらえる。 */
-function ogImage(url: string | undefined): string {
+const DEFAULT_OG_META = { width: 1200, height: 630, alt: 'ナチュール診断　あなたの自然体がわかる診断' };
+
+function ogImage(url: string | undefined, meta = DEFAULT_OG_META): string {
   if (!url) return '';
   return (
     `<meta property="og:image" content="${esc(url)}">` +
-    '<meta property="og:image:width" content="1200">' +
-    '<meta property="og:image:height" content="630">' +
-    '<meta property="og:image:alt" content="ナチュール診断　あなたの自然体がわかる診断">' +
+    `<meta property="og:image:width" content="${meta.width}">` +
+    `<meta property="og:image:height" content="${meta.height}">` +
+    `<meta property="og:image:alt" content="${esc(meta.alt)}">` +
     `<meta name="twitter:image" content="${esc(url)}">`
   );
 }
@@ -103,7 +110,7 @@ export function page(opts: PageOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
-    desc + robots + canonical + ICONS + ogImage(opts.ogImage) + (opts.head ?? '') + FONTS +
+    desc + robots + canonical + ICONS + ogImage(opts.ogImage, opts.ogImageMeta) + (opts.head ?? '') + FONTS +
     `<style>${APP_CSS}\n${INDEX_CSS}\n${FOOT_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +
