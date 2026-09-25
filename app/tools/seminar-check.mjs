@@ -36,7 +36,7 @@ for (const slug of slugs) {
     t(`${label} 開催前は noindex でない`, /noindex/.test(html), false);
     t(`${label} h1 が1つ`, (body.match(/<h1/g) ?? []).length, 1);
     t(`${label} canonical`, html.includes(`<link rel="canonical" href="${ORIGIN}/seminar/${slug}">`), true);
-    t(`${label} 縦書きの一文が文字で入っている`, body.includes('class="lp-catch"') && s.catchLines.every((l) => body.includes(l)), true);
+    t(`${label} キャッチの一文が文字で入っている`, body.includes('class="lp-catch"') && s.catchLines.every((l) => body.includes(l)), true);
     t(`${label} 見出しが入っている`, s.headlineLines.every((l) => body.includes(l)), true);
     t(`${label} og:image が絶対URL`, /property="og:image" content="https:\/\//.test(html), true);
     // 申込ボタン：URLがあれば Peatix へ、無ければ押せない表示

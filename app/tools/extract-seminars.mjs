@@ -28,7 +28,7 @@ const REQUIRED = [
   'title', 'description', 'catch', 'headline', 'sub', 'date', 'start', 'end',
   'place', 'fee', 'speaker_name', 'speaker_role',
 ];
-const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing'];
+const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing', 'closing_note', 'badges'];
 
 /** 表記ルール（CLAUDE.md）。「——」も単独の「—」も本文に使わない。 */
 function checkDash(label, text) {
@@ -67,12 +67,40 @@ function metaOf(lines, label) {
   return { meta, rest: [...lines.slice(0, start), ...lines.slice(end + 1)] };
 }
 
-/** `|` で行を分ける（縦書きの行・見出しの改行位置）。 */
+/** `|` で行を分ける（キャッチ・見出しの改行位置）。 */
 const linesOf = (s) => s.split('|').map((x) => x.trim()).filter(Boolean);
 
 /**
+ * バッジ（`ラベル＝値` を `|` でつなぐ）。ファーストビューの丸い印に出す。
+ * **事実だけを書く約束**なので、実績や順位らしい語（No.1・位・満足度・%）は弾く。
+ */
+function badgesOf(raw, label) {
+  if (!raw) return [];
+  const items = linesOf(raw).map((pair) => {
+    const m = /^([^＝=]+)[＝=](.+)$/.exec(pair);
+    if (!m) throw new Error(`${label}: badges は「ラベル＝値」を | でつなぐ：${pair}`);
+    return { label: m[1].trim(), value: m[2].trim() };
+  });
+  if (items.length > 3) throw new Error(`${label}: badges は3つまで`);
+  for (const b of items) {
+    if (/No\.?\s*1|第?\d+位|満足度|%|％/.test(b.label + b.value)) {
+      throw new Error(`${label}: badges に実績や順位は書かない（事実だけ）：${b.label}＝${b.value}`);
+    }
+  }
+  return items;
+}
+
+/** 見出しの先頭の `[英字]` は、見出しの上に小さく出す英字（書いたとおりの大文字・小文字で出す）。 */
+function splitEyebrow(heading) {
+  const m = /^\[([A-Za-z][A-Za-z ]*)\]\s*(.+)$/.exec(heading);
+  return m ? { eyebrow: m[1], heading: m[2].trim() } : { eyebrow: '', heading };
+}
+
+const FAQ_HEADINGS = ['よくあるご質問', 'よくある質問'];
+
+/**
  * `###` で節に、`####` で節の中の小見出しに割る。
- * 特別な節（登壇者・開催概要・よくある質問）は種類を付けて返す。
+ * 特別な節（登壇者・開催概要・よくあるご質問）は種類を付けて返す。
  */
 function sectionsOf(lines, label) {
   const lead = [];
@@ -82,7 +110,7 @@ function sectionsOf(lines, label) {
     const h3 = /^###\s+(.*)$/.exec(line);
     const h4 = /^####\s+(.*)$/.exec(line);
     if (h3 && !h4) {
-      current = { heading: h3[1].trim(), lines: [], items: [] };
+      current = { ...splitEyebrow(h3[1].trim()), lines: [], items: [] };
       sections.push(current);
       continue;
     }
@@ -102,13 +130,14 @@ function sectionsOf(lines, label) {
     checkDash(`${label} ${s.heading}`, textOf(html));
     if (s.heading === '開催概要') {
       if (textOf(html) || s.items.length) throw new Error(`${label}: 「開催概要」には本文を書かない（meta から組む）`);
-      return { kind: 'overview', heading: s.heading };
+      return { kind: 'overview', heading: s.heading, eyebrow: s.eyebrow };
     }
-    if (s.heading === 'よくある質問') {
-      if (!s.items.length) throw new Error(`${label}: 「よくある質問」に #### の質問が無い`);
+    if (FAQ_HEADINGS.includes(s.heading)) {
+      if (!s.items.length) throw new Error(`${label}: 「${s.heading}」に #### の質問が無い`);
       return {
         kind: 'faq',
         heading: s.heading,
+        eyebrow: s.eyebrow,
         items: s.items.map((it) => {
           checkDash(`${label} 質問`, it.q);
           const a = blocks(it.lines);
@@ -117,8 +146,8 @@ function sectionsOf(lines, label) {
         }),
       };
     }
-    if (s.items.length) throw new Error(`${label}: #### は「よくある質問」の中だけで使う（${s.heading}）`);
-    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, html };
+    if (s.items.length) throw new Error(`${label}: #### は「よくあるご質問」の中だけで使う（${s.heading}）`);
+    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, eyebrow: s.eyebrow, html };
   });
 
   const leadHtml = blocks(lead.filter((l) => l.trim() !== '---'));
@@ -205,6 +234,8 @@ for (let i = 1; i < parts.length; i += 2) {
       ticketUrl: meta.ticket_url ?? '',
       ctaNote: meta.cta_note ?? '',
       closing: meta.closing ?? '',
+      closingNote: meta.closing_note ?? '',
+      badges: badgesOf(meta.badges, label),
       speakerName: meta.speaker_name,
       speakerRole: meta.speaker_role,
       lead,
@@ -245,17 +276,18 @@ const body = [
   version: string;
 };
 
+/** eyebrow は見出しの上に小さく出す英字（無ければ空文字）。 */
 export type SeminarSection =
-  | { kind: 'text'; heading: string; html: string }
-  | { kind: 'speaker'; heading: string; html: string }
-  | { kind: 'overview'; heading: string }
-  | { kind: 'faq'; heading: string; items: { q: string; html: string; text: string }[] };
+  | { kind: 'text'; heading: string; eyebrow: string; html: string }
+  | { kind: 'speaker'; heading: string; eyebrow: string; html: string }
+  | { kind: 'overview'; heading: string; eyebrow: string }
+  | { kind: 'faq'; heading: string; eyebrow: string; items: { q: string; html: string; text: string }[] };
 
 export type Seminar = {
   slug: string;
   title: string;
   description: string;
-  /** 縦書きで出す一文。1要素が1行。 */
+  /** ファーストビューに手書き風の書体で出す一文。1要素が1行。 */
   catchLines: string[];
   /** 見出し。要素の切れ目で改行する（狭い画面でも）。 */
   headlineLines: string[];
@@ -273,6 +305,10 @@ export type Seminar = {
   ctaNote: string;
   /** ページの最後、申込ボタンの上に置く一文。「|」の位置で改行する。空なら出さない。 */
   closing: string;
+  /** 締めのひと言の下に置く短い文。空なら出さない。 */
+  closingNote: string;
+  /** ファーストビューの丸いバッジ（3つまで）。事実だけ。 */
+  badges: { label: string; value: string }[];
   speakerName: string;
   speakerRole: string;
   /** 最初の見出しより前の導入。組み立て済みのHTML。 */
