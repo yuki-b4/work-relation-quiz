@@ -36,7 +36,7 @@ for (const slug of slugs) {
     t(`${label} 開催前は noindex でない`, /noindex/.test(html), false);
     t(`${label} h1 が1つ`, (body.match(/<h1/g) ?? []).length, 1);
     t(`${label} canonical`, html.includes(`<link rel="canonical" href="${ORIGIN}/seminar/${slug}">`), true);
-    t(`${label} 縦書きの一文が文字で入っている`, body.includes('class="sem-catch"') && s.catchLines.every((l) => body.includes(l)), true);
+    t(`${label} 縦書きの一文が文字で入っている`, body.includes('class="lp-catch"') && s.catchLines.every((l) => body.includes(l)), true);
     t(`${label} 見出しが入っている`, s.headlineLines.every((l) => body.includes(l)), true);
     t(`${label} og:image が絶対URL`, /property="og:image" content="https:\/\//.test(html), true);
     // 申込ボタン：URLがあれば Peatix へ、無ければ押せない表示
@@ -53,8 +53,15 @@ for (const slug of slugs) {
     t(`${label} オンライン開催`, ev.eventAttendanceMode, 'https://schema.org/OnlineEventAttendanceMode');
     t(`${label} WebSite がある`, graph.some((g) => g['@type'] === 'WebSite'), true);
     // 開催概要と登壇者が組まれていること（md では本文を書かない／meta から組む節）
-    t(`${label} 開催概要の表がある`, body.includes('class="sem-dl"'), true);
-    t(`${label} 登壇者の名前がある`, body.includes(`class="sem-spk-name">${s.speakerName}<`), true);
+    t(`${label} 開催概要の表がある`, body.includes('class="lp-dl"'), true);
+    t(`${label} 登壇者の名前がある`, body.includes(`class="lp-spk-name">${s.speakerName}<`), true);
+    // 独立したLP（F4-5）：診断サイトの共通CSS・ヘッダー・フッターを持ち込まない
+    t(`${label} 診断サイトのヘッダーを使っていない`, body.includes('app-header') || body.includes('site-foot'), false);
+    t(`${label} 診断サイトのCSSを使っていない`, /\.screen\{|--coral:/.test(html), false);
+    // DADS：本文へ飛ぶリンク・言語・FAQ は details で開閉
+    t(`${label} 本文へ飛ぶリンクがある`, body.includes('<a class="lp-skip" href="#main">') && body.includes('<main id="main">'), true);
+    t(`${label} 言語が日本語`, html.startsWith('<!DOCTYPE html><html lang="ja">'), true);
+    t(`${label} FAQ が details で開閉する`, (body.match(/<details><summary>/g) ?? []).length, s.sections.find((x) => x.kind === 'faq')?.items.length ?? 0);
     // 表記ルール（CLAUDE.md）：ダッシュを本文に使わない
     t(`${label} ダッシュを使っていない`, /[—―]/.test(body.replace(/<[^>]+>/g, '')), false);
   }
@@ -77,7 +84,7 @@ for (const slug of slugs) {
     t(`${label} 終了後は noindex`, html.includes('<meta name="robots" content="noindex, nofollow">'), true);
     t(`${label} 終了後は申込ボタンを外す`, body.includes('peatix.com/event/0000000'), false);
     t(`${label} 終了後は終了と出す`, body.includes('このセミナーは終了しました。'), true);
-    t(`${label} 終了後は診断へ戻れる`, body.includes('<a class="btn btn-wide" href="/">'), true);
+    t(`${label} 終了後は診断へ戻れる`, body.includes('<a class="lp-btn" href="/"'), true);
   }
 }
 

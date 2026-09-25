@@ -12,7 +12,7 @@ import { esc } from './result.ts';
  * `/favicon.ico` は <link> が無くてもブラウザが取りに来るが、書いておくと
  * ルート以外の階層から見たときも確実に当たる。
  */
-const ICONS =
+export const ICONS =
   '<link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
   '<link rel="icon" href="/favicon.ico" sizes="32x32">' +
   '<link rel="apple-touch-icon" href="/apple-touch-icon.png">';
