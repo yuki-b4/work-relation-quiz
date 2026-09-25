@@ -99,7 +99,7 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-header{position:sticky; top:0; z-index:10; background:rgba(255,255,255,.96); box-shadow:0 1px 0 var(--lp-rule)}
 .lp-header .lp-wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:4rem}
 .lp-brand{line-height:1.2; color:var(--lp-ink); font-weight:700; font-size:.9375rem}
-.lp-brand span{display:block; font-family:var(--lp-font-en); font-weight:500; font-size:.75rem; letter-spacing:.14em; color:var(--lp-cyan-text)}
+.lp-brand span{display:block; font-weight:700; font-size:.75rem; letter-spacing:.1em; color:var(--lp-cyan-text)}
 .lp-header .lp-btn{min-height:2.75rem; padding:0 1.25rem; font-size:.875rem; width:auto; box-shadow:none}
 .lp-header-date{font-size:.875rem; font-weight:700; color:var(--lp-cyan-text)}
 
@@ -363,7 +363,8 @@ function speakerBlock(s: Seminar, origin: string): string {
     '<div class="lp-spk">' + face +
       '<div>' +
         `<p class="lp-spk-name">${esc(s.speakerName)}</p>` +
-        `<p class="lp-spk-role">${esc(s.speakerRole)}</p>` +
+        // 肩書きは「／」の位置でだけ折る（「開発／者」のように語の途中で割らない）
+        `<p class="lp-spk-role">${s.speakerRole.split('／').map((r) => `<span class="lp-nowrap">${esc(r)}</span>`).join('／')}</p>` +
       '</div>' +
     '</div>'
   );
@@ -618,7 +619,7 @@ export function seminarPage(s: Seminar, origin: string, now: number): string {
   const body =
     '<a class="lp-skip" href="#main">本文へ移動</a>' +
     '<header class="lp-header"><div class="lp-wrap">' +
-      `<p class="lp-brand">${SITE}<span>ONLINE SEMINAR</span></p>` +
+      `<p class="lp-brand">${SITE}<span>オンラインセミナー</span></p>` +
       (open
         ? `<a class="lp-btn" href="${esc(s.ticketUrl)}">${esc(applyLabel(s))}</a>`
         : `<p class="lp-header-date">${nums(`${dayLabel(s.date)} ${s.start}〜`)}</p>`) +
