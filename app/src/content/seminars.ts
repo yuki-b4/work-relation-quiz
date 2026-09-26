@@ -137,7 +137,7 @@ export const SEMINARS: Record<string, Seminar> = {
     ],
     "speakerName": "齋藤祐希",
     "speakerRole": "プロコーチ／ナチュール診断 開発者／Mikata 代表",
-    "lead": "<p>転職しても<wbr>同じような<wbr>人間関係でしんどくなり、<wbr>その<wbr>たびに<wbr>「自分が<wbr>悪いのかな」と<wbr>考えてしまう。</p><p>その<wbr>原因は<wbr>性格ではなく、<wbr>自分では<wbr>気づきにくい<wbr>関わり方の<wbr>クセに<wbr>あり、<wbr>本や<wbr>性格診断では<wbr>見えてきません。</p><p>その<wbr>場の<wbr>診断で<wbr>自分の<wbr>関わり方の<wbr>クセを<wbr>知り、<wbr>どうすれば<wbr>抜け出せるかまでを、<wbr>一人<wbr>ひとりの<wbr>結果から<wbr>解説します。</p>",
+    "lead": "<p>転職しても<wbr>同じような<wbr>人間関係でしんどくなり、<wbr>その<wbr>たびに<wbr>「自分が<wbr>悪いのかな」と<wbr>考えてしまう。</p><p>その<wbr>原因は<wbr>性格ではなく、<wbr>自分では<wbr>気づきにくい<wbr>関わり方の<wbr>クセに<wbr>あり、<wbr>本や<wbr>性格診断では<wbr>見えてきません。</p><p>その<wbr>場の<wbr>診断で<wbr>自分の<wbr>関わり方の<wbr>クセを<wbr>知り、<wbr>どうすれば<wbr>抜け出せるかまでを<wbr>解説します。</p>",
     "sections": [
       {
         "kind": "text",
@@ -161,13 +161,13 @@ export const SEMINARS: Record<string, Seminar> = {
         "kind": "text",
         "heading": "すり減る関係から、抜け出すには",
         "eyebrow": "",
-        "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<strong><wbr>ナチュール診断</strong>です。</p><ul><li>9つの<wbr>質問に<wbr>答えるだけ。<wbr>約2分で<wbr>終わります</li><li>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自然体の<wbr>あなた</strong>の<wbr>人との<wbr>関わり方です</li><li>8つの<wbr>タイプから<wbr>あなたを<wbr>最も<wbr>表すタイプが<wbr>表示されます</li></ul><p>自分の<wbr>関わり方が<wbr>わかると、<wbr>なぜ<wbr>自分だけが<wbr>どっと<wbr>疲れるのか、<wbr>その<wbr>手が<wbr>かりが<wbr>見えてきます。</p><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
+        "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<wbr>あなたの<wbr>人間関係タイプを<wbr>特定する<strong><wbr>ナチュール診断</strong>です。</p><ul><li>9つの<wbr>質問に<wbr>答えるだけ。<wbr>約2分で<wbr>終わります</li><li>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自然体の<wbr>あなた</strong>の<wbr>人との<wbr>関わり方です</li><li>8つの<wbr>タイプから<wbr>あなたを<wbr>最も<wbr>表すタイプが<wbr>表示されます</li></ul><p>自分の<wbr>関わり方が<wbr>わかると、<wbr>なぜ<wbr>自分だけが<wbr>どっと<wbr>疲れるのか、<wbr>その<wbr>手が<wbr>かりが<wbr>見えてきます。</p><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
       },
       {
         "kind": "text",
         "heading": "当日の流れ",
         "eyebrow": "",
-        "html": "<ol><li><strong>その<wbr>場で<wbr>ナチュール診断</strong> 約2分。<wbr>登録は<wbr>いりません</li><li><strong><wbr>自然体の<wbr>あなたを<wbr>読み解く</strong><wbr> ふだんの<wbr>あなたが、<wbr>人と<wbr>どう<wbr>関わっているのか</li><li><strong><wbr>「自分が<wbr>悪い」の<wbr>正体</strong> そう<wbr>感じる<wbr>場面で、<wbr>実際には<wbr>何が<wbr>起きているのか</li><li><strong><wbr>ひとりで<wbr>抜け出しに<wbr>くい理由</strong> ひとりで<wbr>考えても、<wbr>同じ<wbr>悩みに<wbr>戻ってしまうわけ</li><li><strong>どうやったら<wbr>解決できるか</strong><wbr> 診断結果を<wbr>もとに、<wbr>一人<wbr>ひとりが<wbr>どう<wbr>解決できるかを<wbr>解説</li></ol>"
+        "html": "<ol><li><strong>その<wbr>場で<wbr>ナチュール診断</strong> 約2分であなたの<wbr>タイプが<wbr>わかります</li><li><strong><wbr>自然体の<wbr>あなたを<wbr>読み解く</strong><wbr> ふだんの<wbr>あなたが、<wbr>人と<wbr>どう<wbr>関わっているのか</li><li><strong><wbr>「自分が<wbr>悪い」の<wbr>正体</strong> そう<wbr>感じる<wbr>場面で、<wbr>実際には<wbr>何が<wbr>起きているのか</li><li><strong><wbr>ひとりで<wbr>抜け出しに<wbr>くい理由</strong> ひとりで<wbr>考えても、<wbr>同じ<wbr>悩みに<wbr>戻ってしまうわけ</li><li><strong>どうやったら<wbr>解決できるか</strong><wbr> 診断結果を<wbr>もとに、<wbr>一人<wbr>ひとりが<wbr>どう<wbr>解決できるかを<wbr>解説</li></ol>"
       },
       {
         "kind": "text",
