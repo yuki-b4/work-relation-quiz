@@ -59,6 +59,9 @@ for (const slug of slugs) {
       t(`${label} 定員が構造化データに入る`, ev.maximumAttendeeCapacity > 0, true);
     }
     t(`${label} 登壇者の名前がある`, body.includes(`class="lp-spk-name">${s.speakerName}<`), true);
+    if (s.images.speaker) {
+      t(`${label} 登壇者の写真が出る`, body.includes(`<img src="/seminar/${slug}/speaker.${s.images.speaker.ext}?v=${s.images.speaker.version}" alt="${s.speakerName}の写真"`), true);
+    }
     // 独立したLP（F4-5）：診断サイトの共通CSS・ヘッダー・フッターを持ち込まない
     t(`${label} 診断サイトのヘッダーを使っていない`, body.includes('app-header') || body.includes('site-foot'), false);
     t(`${label} 診断サイトのCSSを使っていない`, /\.screen\{|--coral:/.test(html), false);

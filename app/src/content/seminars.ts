@@ -3,6 +3,7 @@
 // 再生成：cd app && npm run content
 // /seminar/{slug} の中身（アプリ化要件定義.md F4-5「セミナーの告知ページ」）
 import img_sem_1010_hero from '../../assets/seminar/sem-1010/hero.jpg';
+import img_sem_1010_speaker from '../../assets/seminar/sem-1010/speaker.jpg';
 
 export type SeminarImage = {
   data: ArrayBuffer;
@@ -190,6 +191,6 @@ export const SEMINARS: Record<string, Seminar> = {
         ]
       }
     ],
-    images: { hero: { data: img_sem_1010_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' } },
+    images: { hero: { data: img_sem_1010_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, speaker: { data: img_sem_1010_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
   },
 };
