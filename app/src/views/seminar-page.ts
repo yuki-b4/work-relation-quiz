@@ -67,7 +67,7 @@ const LP_CSS = `
   --lp-ink:#2c2c2c; --lp-sub:#767676; --lp-rule:#d7eef3;
   --lp-navy:#022c42; --lp-navy-2:#0d4c6d;
   --lp-focus:#ffd43d; --lp-disabled-bg:#b3b3b3; --lp-disabled-text:#ffffff;
-  --lp-heart:#f28b82;
+  --lp-heart:#f28b82; --lp-note:#555555;
   --lp-shadow:0 6px 24px rgba(2,44,66,.08);
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -215,6 +215,10 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-illust .ho{fill:#fff; stroke:var(--lp-heart); stroke-width:1.8}
 .lp-illust .d{fill:none; stroke:var(--lp-heart); stroke-width:3; stroke-linecap:round; stroke-dasharray:1 9}
 .lp-card .lp-illust .b{fill:var(--lp-aqua)}
+
+/* 注意書き（md の「※」で始まる段落）：白いカードの外に小さく。淡い水色の地でも読める濃さにする */
+.lp-aside{max-width:48rem; margin:1.25rem auto 0; padding:0 .25rem; font-size:.8125rem; line-height:1.7; color:var(--lp-note)}
+.lp-aside p+p{margin-top:.5rem}
 
 /* 番号なしの箇条書き：水色のチェック */
 .lp-body ul{list-style:none}
@@ -486,9 +490,12 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
       '</div>';
     let body: string;
     let carded = aqua;
+    // 「※」で始まる段落は注意書き。本文（白いカード）から外して、下に小さく出す
+    const notes: string[] = [];
+    const html = 'html' in sec ? sec.html.replace(/<p>※[\s\S]*?<\/p>/g, (p) => { notes.push(p); return ''; }) : '';
     switch (sec.kind) {
       case 'speaker':
-        body = speakerBlock(s, origin) + `<div class="lp-body">${illustrate(sec.html)}</div>`;
+        body = speakerBlock(s, origin) + `<div class="lp-body">${illustrate(html)}</div>`;
         break;
       case 'overview':
         body = overview(s, ended);
@@ -504,12 +511,14 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
           '</div>';
         break;
       default:
-        if (sec.html.includes('<ol')) carded = false;
-        body = `<div class="lp-body">${illustrate(sec.html)}</div>`;
+        if (html.includes('<ol')) carded = false;
+        body = `<div class="lp-body">${illustrate(html)}</div>`;
     }
     // STEP は横に並べるので幅いっぱい。それ以外は読みやすい行の長さに収める
-    const wide = sec.kind === 'text' && sec.html.includes('<ol');
-    const inner = carded ? `<div class="lp-card">${body}</div>` : wide ? body : `<div class="lp-prose">${body}</div>`;
+    const wide = sec.kind === 'text' && html.includes('<ol');
+    const inner =
+      (carded ? `<div class="lp-card">${body}</div>` : wide ? body : `<div class="lp-prose">${body}</div>`) +
+      (notes.length ? `<div class="lp-aside">${notes.join('')}</div>` : '');
     return (
       `<section class="lp-sec${aqua ? ' is-aqua' : ''}" aria-labelledby="${id}">` +
         `<div class="lp-wrap">${head}${inner}</div>` +
@@ -682,7 +691,6 @@ export function seminarPage(s: Seminar, origin: string, now: number): string {
       '<ul>' +
         '<li><a href="/privacy">プライバシーポリシー</a></li>' +
         '<li><a href="/contact">お問い合わせ</a></li>' +
-        `<li><a href="/">${SITE}を受ける</a></li>` +
       '</ul>' +
       '<small>&copy; Mikata</small>' +
     '</div></footer>';

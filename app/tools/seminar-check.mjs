@@ -68,6 +68,10 @@ for (const slug of slugs) {
       t(`${label} 写真がファーストビューに出る`, body.includes(`class="lp-hero-photo"><img src="/seminar/${slug}/hero.${s.images.hero.ext}?v=${s.images.hero.version}"`), true);
       t(`${label} 写真があれば飾りの丸を出さない`, body.includes('lp-bubble'), false);
     }
+    // 注意書き（md の「※」で始まる段落）は、白いカードの中でなく外に出る
+    if (s.sections.some((x) => 'html' in x && x.html.includes('<p>※'))) {
+      t(`${label} 注意書きがカードの外に出る`, /<\/div><\/div><div class="lp-aside"><p>※/.test(body), true);
+    }
     // イラスト：md に書いた枠には、必ず絵が入っている（絵の無い空の枠を出さない）
     const figs = body.match(/<figure class="lp-illust"[^>]*>[\s\S]*?<\/figure>/g) ?? [];
     t(`${label} イラストの枠に絵が入っている`, figs.every((f) => f.includes('<svg') && /aria-label="[^"]+"/.test(f)), true);
