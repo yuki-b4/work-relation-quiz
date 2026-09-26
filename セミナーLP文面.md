@@ -60,6 +60,20 @@ meta の項目：
 | `og.png` / `og.jpg` | SNSで共有されたときの画像（横長バナー。1200×630前後） | サイトの既定の画像 |
 | `speaker.png` / `speaker.jpg` | 登壇者の顔写真（正方形） | 名前の頭文字の丸 |
 
+### 告知物の一覧（1か所変えたら全部そろえる）
+
+タイトル・名乗り・日時・定員・参加費・開催方法のどれかを変えたら、下の**全部**を同じ言い方にそろえる。
+LP だけ直して、バナーや Peatix に古い言い方が残るのが一番起きやすい（2026-09-26 のタイトル変更で、4〜5か所を追いかけた）。
+
+| 告知物 | どこにあるか | 誰が直すか |
+|:--|:--|:--|
+| LP（`/seminar/sem-1010`） | このファイル → `cd app && npm run content` → デプロイ | Claude（デプロイは手元） |
+| 横長バナー（採用） | Canva `DAHWRIgJonE`（オンラインセミナー告知バナー（リデザイン案）） | Claude（Canva MCP） |
+| Threads 用バナー（採用） | Canva `DAHWSFvm2AI`（1080×1350） | Claude（Canva MCP） |
+| OG画像（SNSで共有されたとき） | 横長バナーを書き出して `app/assets/seminar/sem-1010/og.png`（1200×600）。**この環境からは書き出し画像を取れない**ので、ユーザーから受け取る | Claude（置いて `npm run content`） |
+| Peatix のタイトル・本文・カバー画像 | https://peatix.com/event/5200484 （本文の冒頭はリードと同じ3文） | ユーザー（Claude は文面を渡す） |
+| 写真版のバナー（不採用・予備） | Canva `DAHWMOBDzE4`（横長）・`DAHWMBWhHmM`（Threads） | 使うときだけそろえる |
+
 ---
 
 ## /seminar/sem-1010
