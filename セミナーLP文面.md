@@ -75,7 +75,7 @@ place: オンライン
 place_note: Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします
 fee: 無料
 capacity: 10名（先着順）
-ticket_url:
+ticket_url: https://peatix.com/event/5200484
 cta_note: 顔出し・発言なしで参加OK
 badges: 所要時間＝60分|参加費＝無料|顔出し・発言＝なしでOK
 closing: 参加は無料です

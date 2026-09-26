@@ -82,7 +82,7 @@ export const SEMINARS: Record<string, Seminar> = {
     "place": "オンライン",
     "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします",
     "fee": "無料",
-    "ticketUrl": "",
+    "ticketUrl": "https://peatix.com/event/5200484",
     "ctaNote": "顔出し・発言なしで参加OK",
     "closing": "参加は無料です",
     "closingNote": "辞めるかどうか、まだ決めきれない。人に相談するのは、少し苦手。そんな方こそ、次の職場を探す前に、60分だけ自分の関わり方を見てみませんか。",
