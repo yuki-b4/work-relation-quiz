@@ -16,3 +16,14 @@ declare module '*.svg' {
   const data: ArrayBuffer;
   export default data;
 }
+
+// セミナーLPの写真（app/assets/seminar/{slug}/）。写真は png より jpg の方が軽い
+declare module '*.jpg' {
+  const data: ArrayBuffer;
+  export default data;
+}
+
+declare module '*.jpeg' {
+  const data: ArrayBuffer;
+  export default data;
+}

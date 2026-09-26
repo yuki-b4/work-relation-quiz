@@ -67,8 +67,8 @@ function ogp(title: string, description: string, canonical: string): string {
   );
 }
 
-/** サイト名としての認識（F7-3）。全ページに同じものを載せる。 */
-function websiteLd(origin: string) {
+/** サイト名としての認識（F7-3）。全ページに同じものを載せる。セミナーLPも使う。 */
+export function websiteLd(origin: string) {
   return {
     '@type': 'WebSite',
     name: SITE,

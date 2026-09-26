@@ -22,6 +22,8 @@ import { guideShell } from './views/guide-page.ts';
 import { applyClosedPage, applyPage, SLOTS, type ApplyEntry } from './views/apply-page.ts';
 import { typesIndexPage, typeDetailPage } from './views/types-page.ts';
 import { INFO_PATHS, infoPage } from './views/info-page.ts';
+import { seminarEnded, seminarPage } from './views/seminar-page.ts';
+import { SEMINARS } from './content/seminars.ts';
 import { GUIDE_CHAPTERS } from './content/guide-chapters.ts';
 import { TYPES, TYPE_CODES } from './content/types.ts';
 import { RADAR_AXES } from './content/quiz.ts';
@@ -257,6 +259,37 @@ app.get('/apply/s/:slug', async (c) => {
     }
   }
   return c.html(applyPage({ code, visitId, entry: toApplyEntry(e) }));
+});
+
+/**
+ * セミナーの告知ページ（F4-5「セミナーの告知ページ」）。
+ *
+ * 参加申込はここでは受けず、Peatix へ送る。中身は `セミナーLP文面.md` から生成した
+ * SEMINARS だけで決まり、DBは見ない（入口の受付状態とは独立に、告知だけ出せる）。
+ * 終了時刻を過ぎたら申込ボタンを外して noindex にする。URLは残す（SNSのリンクを切らない）。
+ */
+app.get('/seminar/:slug', (c) => {
+  const s = SEMINARS[c.req.param('slug')];
+  if (!s) return c.notFound();
+  const now = Date.now();
+  if (seminarEnded(s, now)) c.header('X-Robots-Tag', 'noindex, nofollow');
+  return c.html(seminarPage(s, originOf(c), now));
+});
+
+/**
+ * セミナーLPの画像（写真・共有用・登壇者）。置かれているものだけを返す。
+ * URL に中身から作った ?v= が付くので、差し替えても古いキャッシュは使われない。長めに持たせてよい。
+ */
+app.get('/seminar/:slug/:file', (c) => {
+  const s = SEMINARS[c.req.param('slug')];
+  const m = /^(hero|og|speaker)\.(png|jpg)$/.exec(c.req.param('file'));
+  if (!s || !m) return c.notFound();
+  const img = s.images[m[1] as 'hero' | 'og' | 'speaker'];
+  if (!img || img.ext !== m[2]) return c.notFound();
+  return c.body(img.data, 200, {
+    'Content-Type': img.mime,
+    'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+  });
 });
 
 /**
@@ -758,9 +791,12 @@ app.get('/apple-touch-icon.png', (c) =>
 /** sitemap.xml（F6-4）。index対象だけを載せる。 */
 app.get('/sitemap.xml', (c) => {
   const origin = originOf(c);
+  const now = Date.now();
   const urls = [
     '/', '/types', ...TYPE_CODES.map((code) => `/types/${code}`),
     ...Object.keys(INFO_PATHS),
+    // セミナーLPは開催前のものだけ。終了後は noindex にするので載せない（F4-5）
+    ...Object.values(SEMINARS).filter((s) => !seminarEnded(s, now)).map((s) => `/seminar/${s.slug}`),
   ];
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>' +
