@@ -28,7 +28,7 @@ const REQUIRED = [
   'title', 'description', 'catch', 'headline', 'sub', 'date', 'start', 'end',
   'place', 'fee', 'speaker_name', 'speaker_role',
 ];
-const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing', 'closing_note', 'badges'];
+const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing', 'closing_note', 'badges', 'capacity'];
 
 /** 表記ルール（CLAUDE.md）。「——」も単独の「—」も本文に使わない。 */
 function checkDash(label, text) {
@@ -263,6 +263,7 @@ for (let i = 1; i < parts.length; i += 2) {
       ctaNote: meta.cta_note ?? '',
       closing: meta.closing ?? '',
       closingNote: meta.closing_note ?? '',
+      capacity: meta.capacity ?? '',
       badges: badgesOf(meta.badges, label),
       speakerName: meta.speaker_name,
       speakerRole: meta.speaker_role,
@@ -335,6 +336,8 @@ export type Seminar = {
   closing: string;
   /** 締めのひと言の下に置く短い文。空なら出さない。 */
   closingNote: string;
+  /** 定員の表記（例：10名（先着順））。空なら開催概要に出さない。 */
+  capacity: string;
   /** ファーストビューの丸いバッジ（3つまで）。事実だけ。 */
   badges: { label: string; value: string }[];
   speakerName: string;

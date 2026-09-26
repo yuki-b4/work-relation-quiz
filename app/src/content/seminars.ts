@@ -46,6 +46,8 @@ export type Seminar = {
   closing: string;
   /** 締めのひと言の下に置く短い文。空なら出さない。 */
   closingNote: string;
+  /** 定員の表記（例：10名（先着順））。空なら開催概要に出さない。 */
+  capacity: string;
   /** ファーストビューの丸いバッジ（3つまで）。事実だけ。 */
   badges: { label: string; value: string }[];
   speakerName: string;
@@ -77,12 +79,13 @@ export const SEMINARS: Record<string, Seminar> = {
     "start": "13:00",
     "end": "14:00",
     "place": "オンライン",
-    "placeNote": "参加用のURLは、お申し込み後にPeatixからお送りします",
+    "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixのイベント視聴ページでご確認いただけます",
     "fee": "無料",
     "ticketUrl": "",
     "ctaNote": "顔出し・発言なしで参加OK",
     "closing": "参加は無料です",
     "closingNote": "辞めるかどうか、まだ決めきれない。人に相談するのは、少し苦手。そんな方こそ、次の職場を探す前に、60分だけ自分の関わり方を見てみませんか。",
+    "capacity": "10名（先着順）",
     "badges": [
       {
         "label": "所要時間",
@@ -171,8 +174,8 @@ export const SEMINARS: Record<string, Seminar> = {
           },
           {
             "q": "必要なものはありますか？",
-            "html": "<p>インターネットにつながるパソコンか、スマートフォンがあれば参加できます。</p>",
-            "text": "インターネットにつながるパソコンか、スマートフォンがあれば参加できます。"
+            "html": "<p>インターネットにつながるパソコンか、スマートフォンがあれば参加できます。Zoomを使うので、スマートフォンの場合はアプリを入れておくとスムーズです。</p>",
+            "text": "インターネットにつながるパソコンか、スマートフォンがあれば参加できます。Zoomを使うので、スマートフォンの場合はアプリを入れておくとスムーズです。"
           },
           {
             "q": "売り込みはされませんか？",

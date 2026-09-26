@@ -325,6 +325,12 @@ const timeSpan = (s: Seminar) => `<span class="lp-nowrap">${esc(s.start)}〜${es
 
 const feeLabel = (fee: string) => (fee === '無料' ? '参加無料' : `参加費 ${fee}`);
 
+/** 構造化データ用の定員。表記の最初の数字（「10名（先着順）」なら 10）。読めなければ出さない。 */
+function capacityOf(capacity: string): number | null {
+  const n = Number(/\d+/.exec(capacity)?.[0]);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 /** 構造化データ用の参加費。「無料」は 0。数字が読めなければ出さない。 */
 function priceOf(fee: string): number | null {
   if (fee.includes('無料')) return 0;
@@ -410,6 +416,7 @@ function overview(s: Seminar, ended: boolean): string {
     '<dl class="lp-dl">' +
       `<dt>日時</dt><dd>${esc(dayLabel(s.date, true))}${timeSpan(s)}</dd>` +
       `<dt>形式</dt><dd>${esc(s.place)}${s.placeNote ? `<span class="lp-note">${esc(s.placeNote)}</span>` : ''}</dd>` +
+      (s.capacity ? `<dt>定員</dt><dd>${esc(s.capacity)}</dd>` : '') +
       `<dt>参加費</dt><dd>${esc(s.fee)}</dd>` +
       `<dt>登壇</dt><dd>${esc(s.speakerName)}</dd>` +
       '<dt>主催</dt><dd>ナチュール診断（運営：Mikata）</dd>' +
@@ -560,6 +567,7 @@ function eventLd(s: Seminar, origin: string, canonical: string, ended: boolean) 
     inLanguage: 'ja',
     organizer: { '@type': 'Organization', name: 'Mikata', url: `${origin}/about` },
     performer: { '@type': 'Person', name: s.speakerName },
+    ...(capacityOf(s.capacity) ? { maximumAttendeeCapacity: capacityOf(s.capacity) } : {}),
     ...(price === null ? {} : {
       offers: {
         '@type': 'Offer',

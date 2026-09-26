@@ -54,6 +54,10 @@ for (const slug of slugs) {
     t(`${label} WebSite がある`, graph.some((g) => g['@type'] === 'WebSite'), true);
     // 開催概要と登壇者が組まれていること（md では本文を書かない／meta から組む節）
     t(`${label} 開催概要の表がある`, body.includes('class="lp-dl"'), true);
+    if (s.capacity) {
+      t(`${label} 定員が開催概要に出る`, body.includes(`<dt>定員</dt><dd>${s.capacity}</dd>`), true);
+      t(`${label} 定員が構造化データに入る`, ev.maximumAttendeeCapacity > 0, true);
+    }
     t(`${label} 登壇者の名前がある`, body.includes(`class="lp-spk-name">${s.speakerName}<`), true);
     // 独立したLP（F4-5）：診断サイトの共通CSS・ヘッダー・フッターを持ち込まない
     t(`${label} 診断サイトのヘッダーを使っていない`, body.includes('app-header') || body.includes('site-foot'), false);
