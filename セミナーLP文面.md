@@ -72,7 +72,7 @@ date: 2026-10-10
 start: 13:00
 end: 14:00
 place: オンライン
-place_note: Zoomで開催します。参加用のURLは、お申し込み後にPeatixのイベント視聴ページでご確認いただけます
+place_note: Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします
 fee: 無料
 capacity: 10名（先着順）
 ticket_url:

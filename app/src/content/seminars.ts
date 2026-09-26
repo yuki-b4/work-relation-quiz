@@ -79,7 +79,7 @@ export const SEMINARS: Record<string, Seminar> = {
     "start": "13:00",
     "end": "14:00",
     "place": "オンライン",
-    "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixのイベント視聴ページでご確認いただけます",
+    "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします",
     "fee": "無料",
     "ticketUrl": "",
     "ctaNote": "顔出し・発言なしで参加OK",
