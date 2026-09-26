@@ -16,12 +16,12 @@ export type SeminarImage = {
   version: string;
 };
 
-/** eyebrow は見出しの上に小さく出す英字（無ければ空文字）。 */
+/** eyebrow は見出しの上に小さく出す英字（無ければ空文字）。fill はスマホで本文を幅いっぱいまで詰めて折り返す節。 */
 export type SeminarSection =
-  | { kind: 'text'; heading: string; eyebrow: string; html: string }
-  | { kind: 'speaker'; heading: string; eyebrow: string; html: string }
-  | { kind: 'overview'; heading: string; eyebrow: string }
-  | { kind: 'faq'; heading: string; eyebrow: string; items: { q: string; html: string; text: string }[] };
+  | { kind: 'text'; heading: string; eyebrow: string; fill: boolean; html: string }
+  | { kind: 'speaker'; heading: string; eyebrow: string; fill: boolean; html: string }
+  | { kind: 'overview'; heading: string; eyebrow: string; fill: boolean }
+  | { kind: 'faq'; heading: string; eyebrow: string; fill: boolean; items: { q: string; html: string; text: string }[] };
 
 export type Seminar = {
   slug: string;
@@ -66,9 +66,9 @@ export type Seminar = {
  * 画面の側は `PHRASES[文字列] ?? esc(文字列)` で使う。title や構造化データには素の文字列を使う。
  */
 export const PHRASES: Record<string, string> = {
-  "「自分が悪い」と": "「自分が<wbr>悪い」と",
-  "思ってしまう": "思ってしまう",
-  "クセのやめ方": "クセの<wbr>やめ方",
+  "「自分が悪い」": "「自分が<wbr>悪い」",
+  "と思ってしまうクセの": "と<wbr>思ってしまう<wbr>クセの",
+  "やめ方": "やめ方",
   "性格診断だけでは作れない": "性格診断だけでは<wbr>作れない",
   "自然体でいられる関係": "自然体で<wbr>いられる<wbr>関係",
   "参加は無料です": "参加は<wbr>無料です",
@@ -102,9 +102,9 @@ export const SEMINARS: Record<string, Seminar> = {
     ],
     "kicker": "人間関係タイプ診断つきセミナー",
     "headlineLines": [
-      "「自分が悪い」と",
-      "思ってしまう",
-      "クセのやめ方"
+      "「自分が悪い」",
+      "と思ってしまうクセの",
+      "やめ方"
     ],
     "subLines": [
       "性格診断だけでは作れない",
@@ -143,59 +143,69 @@ export const SEMINARS: Record<string, Seminar> = {
         "kind": "text",
         "heading": "こんなお悩み、ありませんか",
         "eyebrow": "",
+        "fill": false,
         "html": "<ul><li>転職しても、<wbr>なぜか<wbr>毎回、<wbr>苦手な<wbr>人が<wbr>いる</li><li>相手は<wbr>平気そうなのに、<wbr>自分だけが<wbr>どっと<wbr>疲れている</li><li>人と<wbr>うまく<wbr>いかないと、<wbr>「自分の<wbr>言い方が<wbr>悪かったのかな」と<wbr>何日も<wbr>引きずる</li><li>好き嫌いは<wbr>はっきり<wbr>あるのに、<wbr>顔には<wbr>出さずに<wbr>合わせている</li><li>本や<wbr>YouTubeで<wbr>調べて、<wbr>頭では<wbr>わかっている。<wbr>でも、<wbr>いざ<wbr>その<wbr>人の<wbr>前だと<wbr>うまく<wbr>できない</li><li>職場の<wbr>人間関係の<wbr>悩みを、<wbr>誰にも<wbr>相談できずに<wbr>いる</li><li>転職サイトを<wbr>開いては、<wbr>閉じている</li></ul>"
       },
       {
         "kind": "text",
         "heading": "それは、あなたの性格のせいではありません",
         "eyebrow": "",
+        "fill": false,
         "html": "<p>人間関係が<wbr>うまく<wbr>いくかどうかは、<wbr>性格の<wbr>良し悪しでは<wbr>決まりません。</p><p>こちらの<wbr>気づかいが、<wbr>相手には<wbr>違う形で<wbr>伝わる<wbr>ことがあります。</p><figure class=\"lp-illust\" role=\"img\" aria-label=\"気をつかって黙っていたのに、「何を考えているかわからない人」と思われることもあります。\" data-illust=\"silence\" data-labels=\"気をつかって、／黙っておこう|何を考えているのか、／わからない…\"></figure><p>すれ違いのもとは、<wbr>性格<wbr>その<wbr>ものではなく、<strong><wbr>関わり方の<wbr>クセ</strong>に<wbr>あることが<wbr>よく<wbr>あります。<wbr>だから<wbr>職場を<wbr>変えても、<wbr>同じ<wbr>クセの<wbr>ままで<wbr>いると、<wbr>同じことがくり返されます。</p><p>クセは、<wbr>欠点ではありません。<wbr>自分が<wbr>どんな<wbr>クセで<wbr>人と<wbr>関わっているのかが<wbr>わかれば、<wbr>「自分が<wbr>悪い」の<wbr>ひと言で<wbr>片づけずに<wbr>済みます。</p>"
       },
       {
         "kind": "text",
         "heading": "本や性格診断では、足りなかった理由",
         "eyebrow": "",
+        "fill": true,
         "html": "<p><strong>本や<wbr>YouTube</strong>に<wbr>書いてあるのは、<wbr>誰に<wbr>でも<wbr>当ては<wbr>まる<wbr>一般論です。<wbr>あなた<wbr>自身の<wbr>関わり方に<wbr>合わせた<wbr>答えではありません。</p><p><strong><wbr>性格診断</strong>で<wbr>わかるのは、<wbr>あなたが<wbr>どんな<wbr>性格か、<wbr>までです。<wbr>人と<wbr>どう<wbr>関わっているのか、<wbr>どこですれ違いやすいのかまでは、<wbr>教えてくれません。</p><p>そして、<strong><wbr>自分の<wbr>関わり方の<wbr>クセ</strong>は、<wbr>自分ではなかなか<wbr>気づけません。<wbr>知っているだけでは<wbr>変わらないのは、<wbr>この<wbr>ためです。</p>"
       },
       {
         "kind": "text",
         "heading": "すり減る関係から、抜け出すには",
         "eyebrow": "",
+        "fill": false,
         "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<wbr>あなたの<wbr>人間関係タイプを<wbr>特定する<strong><wbr>ナチュール診断</strong>です。</p><ul><li>9つの<wbr>質問に<wbr>答えるだけ。<wbr>約2分で<wbr>終わります</li><li>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自然体の<wbr>あなた</strong>の<wbr>人との<wbr>関わり方です</li><li>8つの<wbr>タイプから<wbr>あなたを<wbr>最も<wbr>表すタイプが<wbr>表示されます</li></ul><p>自分の<wbr>関わり方が<wbr>わかると、<wbr>なぜ<wbr>自分だけが<wbr>どっと<wbr>疲れるのか、<wbr>その<wbr>手が<wbr>かりが<wbr>見えてきます。</p><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
       },
       {
         "kind": "text",
         "heading": "当日の流れ",
         "eyebrow": "",
-        "html": "<ol><li><strong>その<wbr>場で<wbr>ナチュール診断</strong> その<wbr>場であなたの<wbr>タイプが<wbr>わかります</li><li><strong><wbr>自然体の<wbr>あなたを<wbr>読み解く</strong><wbr> ふだんの<wbr>あなたが、<wbr>人と<wbr>どう<wbr>関わっているのか</li><li><strong><wbr>「自分が<wbr>悪い」の<wbr>正体</strong> そう<wbr>感じる<wbr>場面で、<wbr>実際には<wbr>何が<wbr>起きているのか</li><li><strong><wbr>ひとりで<wbr>抜け出しに<wbr>くい理由</strong> ひとりで<wbr>考えても、<wbr>同じ<wbr>悩みに<wbr>戻ってしまうわけ</li><li><strong>どうやったら<wbr>解決できるか</strong><wbr> 診断結果を<wbr>もとに、<wbr>一人<wbr>ひとりが<wbr>どう<wbr>解決できるかを<wbr>解説</li></ol>"
+        "fill": false,
+        "html": "<ol><li><strong>ナチュール診断を<wbr>受ける</strong><wbr> その<wbr>場であなたの<wbr>タイプが<wbr>わかります</li><li><strong><wbr>自然体の<wbr>あなたを<wbr>読み解く</strong><wbr> ふだんの<wbr>あなたが、<wbr>人と<wbr>どう<wbr>関わっているのか</li><li><strong><wbr>「自分が<wbr>悪い」の<wbr>正体</strong> そう<wbr>感じる<wbr>場面で、<wbr>実際には<wbr>何が<wbr>起きているのか</li><li><strong><wbr>ひとりで<wbr>抜け出しに<wbr>くい理由</strong> ひとりで<wbr>考えても、<wbr>同じ<wbr>悩みに<wbr>戻ってしまうわけ</li><li><strong>どうやったら<wbr>解決できるか</strong><wbr> 診断結果を<wbr>もとに、<wbr>一人<wbr>ひとりが<wbr>どう<wbr>解決できるかを<wbr>解説</li></ol>"
       },
       {
         "kind": "text",
         "heading": "顔出し・発言なしで参加OK",
         "eyebrow": "",
+        "fill": false,
         "html": "<ul><li>カメラは<wbr>オフの<wbr>ままで<wbr>大丈夫です</li><li>声に<wbr>出して<wbr>発言する<wbr>場面は<wbr>ありません<wbr>（チャットへの<wbr>書き込みを<wbr>お願いする<wbr>ことは<wbr>あります）</li><li>表示名は、<wbr>ニックネームで<wbr>構いません</li><li>診断の<wbr>結果を、<wbr>ほかの<wbr>参加者に<wbr>見せる<wbr>ことは<wbr>ありません</li><li>最後に<wbr>継続サポートと<wbr>体験セッションの<wbr>ご案内を<wbr>しますが、<wbr>申し込みは<wbr>任意です</li></ul>"
       },
       {
         "kind": "text",
         "heading": "転職を、すすめも止めもしません",
         "eyebrow": "",
+        "fill": false,
         "html": "<p>辞めるか、<wbr>続けるか。<wbr>決めるのは、<wbr>あなたです。</p><p>ただ、<wbr>辞めたい<wbr>理由が<wbr>「会社」なのか、<wbr>「あの<wbr>人との<wbr>関係」なのか。<wbr>ここを<wbr>切り分けて<wbr>おくと、<wbr>どちらを<wbr>選ぶに<wbr>しても、<wbr>判断の<wbr>材料が<wbr>ひとつ<wbr>増えます。</p><p>※ハラスメントや<wbr>暴力を<wbr>受けている<wbr>場合は、<wbr>関わり方を<wbr>工夫するより<wbr>先に、<wbr>その<wbr>人から<wbr>距離を<wbr>取り、<wbr>社内外の<wbr>相談窓口を<wbr>頼ってください。<wbr>この<wbr>セミナーは、<wbr>その<wbr>代わりには<wbr>なりません。</p>"
       },
       {
         "kind": "speaker",
         "heading": "登壇者",
         "eyebrow": "",
+        "fill": false,
         "html": "<p>プロコーチと<wbr>して、<wbr>心理学・脳科学・潜在意識・対人関係に<wbr>ついて<wbr>学び、<wbr>1000時間以上の<wbr>有償サポート経験を<wbr>経て、<wbr>ナチュール診断を<wbr>つくりました。</p><p>私自身、<wbr>不満を<wbr>自分の<wbr>中に<wbr>抱え込んでしまい、<wbr>自分が<wbr>我慢する<wbr>関係性に<wbr>悩み続けた<wbr>経験が<wbr>あります。</p><p>この<wbr>ナチュール診断には、<wbr>その<wbr>時の<wbr>苦しさから<wbr>解放される<wbr>人が<wbr>一人でも<wbr>増えて<wbr>欲しいと<wbr>いう<wbr>想いを<wbr>込めています。</p>"
       },
       {
         "kind": "overview",
         "heading": "開催概要",
-        "eyebrow": ""
+        "eyebrow": "",
+        "fill": true
       },
       {
         "kind": "faq",
         "heading": "よくあるご質問",
         "eyebrow": "",
+        "fill": true,
         "items": [
           {
             "q": "事前に診断を受けておく必要はありますか？",

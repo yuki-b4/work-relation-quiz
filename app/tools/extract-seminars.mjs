@@ -91,10 +91,15 @@ function badgesOf(raw, label) {
   return items;
 }
 
-/** 見出しの先頭の `[英字]` は、見出しの上に小さく出す英字（書いたとおりの大文字・小文字で出す）。 */
-function splitEyebrow(heading) {
+/**
+ * 見出しの先頭の `[英字]` は、見出しの上に小さく出す英字（書いたとおりの大文字・小文字で出す）。
+ * 見出しの末尾の `{fill}` は、スマホでその節の本文を文節で折らず、幅いっぱいまで詰めて折り返す印。
+ */
+function splitEyebrow(raw) {
+  const f = /^(.+?)\s*\{fill\}$/.exec(raw);
+  const heading = f ? f[1].trim() : raw;
   const m = /^\[([A-Za-z][A-Za-z ]*)\]\s*(.+)$/.exec(heading);
-  return m ? { eyebrow: m[1], heading: m[2].trim() } : { eyebrow: '', heading };
+  return { ...(m ? { eyebrow: m[1], heading: m[2].trim() } : { eyebrow: '', heading }), fill: Boolean(f) };
 }
 
 const FAQ_HEADINGS = ['よくあるご質問', 'よくある質問'];
@@ -201,7 +206,7 @@ function sectionsOf(lines, label) {
     checkDash(`${label} ${s.heading}`, textOf(html));
     if (s.heading === '開催概要') {
       if (textOf(html) || s.items.length) throw new Error(`${label}: 「開催概要」には本文を書かない（meta から組む）`);
-      return { kind: 'overview', heading: s.heading, eyebrow: s.eyebrow };
+      return { kind: 'overview', heading: s.heading, eyebrow: s.eyebrow, fill: s.fill };
     }
     if (FAQ_HEADINGS.includes(s.heading)) {
       if (!s.items.length) throw new Error(`${label}: 「${s.heading}」に #### の質問が無い`);
@@ -209,6 +214,7 @@ function sectionsOf(lines, label) {
         kind: 'faq',
         heading: s.heading,
         eyebrow: s.eyebrow,
+        fill: s.fill,
         items: s.items.map((it) => {
           checkDash(`${label} 質問`, it.q);
           const a = blocks(it.lines);
@@ -218,7 +224,7 @@ function sectionsOf(lines, label) {
       };
     }
     if (s.items.length) throw new Error(`${label}: #### は「よくあるご質問」の中だけで使う（${s.heading}）`);
-    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, eyebrow: s.eyebrow, html: phraseHtml(html) };
+    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, eyebrow: s.eyebrow, fill: s.fill, html: phraseHtml(html) };
   });
 
   const leadHtml = blocks(lead.filter((l) => l.trim() !== '---'));
@@ -360,12 +366,12 @@ const body = [
   version: string;
 };
 
-/** eyebrow は見出しの上に小さく出す英字（無ければ空文字）。 */
+/** eyebrow は見出しの上に小さく出す英字（無ければ空文字）。fill はスマホで本文を幅いっぱいまで詰めて折り返す節。 */
 export type SeminarSection =
-  | { kind: 'text'; heading: string; eyebrow: string; html: string }
-  | { kind: 'speaker'; heading: string; eyebrow: string; html: string }
-  | { kind: 'overview'; heading: string; eyebrow: string }
-  | { kind: 'faq'; heading: string; eyebrow: string; items: { q: string; html: string; text: string }[] };
+  | { kind: 'text'; heading: string; eyebrow: string; fill: boolean; html: string }
+  | { kind: 'speaker'; heading: string; eyebrow: string; fill: boolean; html: string }
+  | { kind: 'overview'; heading: string; eyebrow: string; fill: boolean }
+  | { kind: 'faq'; heading: string; eyebrow: string; fill: boolean; items: { q: string; html: string; text: string }[] };
 
 export type Seminar = {
   slug: string;

@@ -85,6 +85,14 @@ img{max-width:100%; height:auto; display:block}
  */
 .lp-h1,.lp-h2,.lp-sub,.lp-closing,.lp-closing-note,.lp-lead p,.lp-body p,.lp-body li,.lp-faq summary,.lp-aside p,.lp-note,.lp-support,.lp-ended,.lp-keep{word-break:keep-all; overflow-wrap:anywhere}
 .lp-h2,.lp-closing,.lp-closing-note,.lp-lead p,.lp-body li,.lp-faq summary{text-wrap:balance}
+/*
+ * md の見出しに {fill} を付けた節は、スマホでは本文を文節で折らず、幅いっぱいまで詰めて折り返す
+ * （ブラウザの既定と同じ）。表や Q&A のように狭い幅で行が短くなり、右に空きが目立つ節に使う。見出しは文節で折ったまま
+ */
+@media (max-width:39.99rem){
+  .lp-sec.is-fill :is(.lp-body p,.lp-body li,.lp-faq summary,.lp-aside p,.lp-note,.lp-keep){word-break:normal; text-wrap:wrap}
+  .lp-sec.is-fill .lp-dl dd .lp-nowrap{white-space:normal}
+}
 h1,h2,h3,p,ul,ol,dl,dd{margin:0}
 ul,ol{padding:0}
 
@@ -550,7 +558,7 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
       (carded ? `<div class="lp-card">${body}</div>` : wide ? body : `<div class="lp-prose">${body}</div>`) +
       (notes.length ? `<div class="lp-aside">${notes.join('')}</div>` : '');
     return (
-      `<section class="lp-sec${aqua ? ' is-aqua' : ''}" aria-labelledby="${id}">` +
+      `<section class="lp-sec${aqua ? ' is-aqua' : ''}${sec.fill ? ' is-fill' : ''}" aria-labelledby="${id}">` +
         `<div class="lp-wrap">${head}${inner}</div>` +
       '</section>'
     );

@@ -93,6 +93,10 @@ for (const slug of slugs) {
       t(`${label} リードに文節の切れ目がある`, /<div class="lp-lead">[\s\S]*?<wbr>/.test(raw), true);
       t(`${label} タグの中に切れ目が入っていない`, /<[^>]*<wbr>[^<]*>/.test(raw.replace(/<script[\s\S]*?<\/script>/g, '')), false);
       t(`${label} Chrome だけの改行指定を使っていない`, /auto-phrase|text-wrap:pretty/.test(html), false);
+      // {fill} を付けた節だけ、スマホで本文を幅いっぱいまで詰めて折り返す
+      const fills = s.sections.filter((x) => x.fill).length;
+      t(`${label} {fill} の節に印が付く`, (raw.match(/<section class="lp-sec[^"]* is-fill"/g) ?? []).length, fills);
+      t(`${label} {fill} の節はスマホで既定の折り返しに戻す`, /@media \(max-width:39\.99rem\)\{\s*\.lp-sec\.is-fill [^{]*\{word-break:normal/.test(html), true);
     }
     // 表記ルール（CLAUDE.md）：ダッシュを本文に使わない
     t(`${label} ダッシュを使っていない`, /[—―]/.test(body.replace(/<[^>]+>/g, '')), false);
