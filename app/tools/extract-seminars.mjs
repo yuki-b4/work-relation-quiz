@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadDefaultJapaneseParser } from 'budoux';
 import { blocks, esc, textOf } from './md-lite.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -99,6 +100,48 @@ function splitEyebrow(heading) {
 const FAQ_HEADINGS = ['よくあるご質問', 'よくある質問'];
 
 /**
+ * 文節の切れ目に <wbr> を入れる（BudouX。Google の日本語の文節区切り）。
+ *
+ * 画面の側は見出し・リード・箇条書きなどに `word-break: keep-all` を掛けて、ここで入れた切れ目でだけ折る。
+ * 「自分／が悪いのかな」「理／由」のような語の途中の改行を作らないため。
+ * **iPhone のブラウザは Chrome も含めて WebKit** で、Chrome だけの `word-break: auto-phrase` が効かない
+ * （2026-09-26、本番で iPhone の改行が崩れて判明）。切れ目を文字として持たせれば、どのブラウザでも同じに折れる。
+ */
+const phraser = loadDefaultJapaneseParser();
+const unesc = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+
+/** 素の文字列を、文節の切れ目に <wbr> を入れた HTML にする。 */
+const phrase = (text) => phraser.parse(text).map(esc).join('<wbr>');
+
+/**
+ * HTML の文字の部分にだけ <wbr> を入れる。タグ（属性の中の文字も）には触らない。
+ * 文節は**タグを外した地の文全体**で切る。`**強調**` の前後で切ると、強調の境目の文節の切れ目が消えるため。
+ */
+function phraseHtml(html) {
+  const parts = html.split(/(<[^>]+>)/);
+  const texts = parts.map((p) => (p.startsWith('<') ? '' : unesc(p)));
+  const cuts = new Set();
+  let pos = 0;
+  for (const seg of phraser.parse(texts.join(''))) { pos += seg.length; cuts.add(pos); }
+  let offset = 0;
+  return parts.map((p, i) => {
+    if (p.startsWith('<')) return p;
+    const text = texts[i];
+    let out = '';
+    // 段落や項目の頭には入れない（ブロックの境目ではどのみち改行するうえ、`<p>※` のような目印が崩れる）。
+    // 入れるのは地の文の途中と、強調やリンクの境目だけ
+    const afterInline = i > 0 && /^<\/?(strong|a|code|em)\b/.test(parts[i - 1]);
+    for (let k = 0; k < text.length; k++) {
+      const at = offset + k;
+      if (at > 0 && cuts.has(at) && text.trim() && (k > 0 || afterInline)) out += '<wbr>';
+      out += esc(text[k]);
+    }
+    offset += text.length;
+    return out;
+  }).join('');
+}
+
+/**
  * 文の代わりに置くイラスト。絵そのもの（SVG）は `src/views/seminar-page.ts` の ILLUSTS にある。
  * ここに無い名前を md に書いたら止める（絵が無いまま空の枠が出るのを防ぐ）。
  */
@@ -170,12 +213,12 @@ function sectionsOf(lines, label) {
           checkDash(`${label} 質問`, it.q);
           const a = blocks(it.lines);
           checkDash(`${label} ${it.q}`, textOf(a));
-          return { q: it.q, html: a, text: textOf(a) };
+          return { q: it.q, html: phraseHtml(a), text: textOf(a) };
         }),
       };
     }
     if (s.items.length) throw new Error(`${label}: #### は「よくあるご質問」の中だけで使う（${s.heading}）`);
-    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, eyebrow: s.eyebrow, html };
+    return { kind: s.heading === '登壇者' ? 'speaker' : 'text', heading: s.heading, eyebrow: s.eyebrow, html: phraseHtml(html) };
   });
 
   const leadHtml = blocks(lead.filter((l) => l.trim() !== '---'));
@@ -183,7 +226,7 @@ function sectionsOf(lines, label) {
   for (const kind of ['overview', 'speaker']) {
     if (!out.some((s) => s.kind === kind)) throw new Error(`${label}: 「${kind === 'overview' ? '開催概要' : '登壇者'}」の節が無い`);
   }
-  return { lead: leadHtml, sections: out };
+  return { lead: phraseHtml(leadHtml), sections: out };
 }
 
 // ───────── 画像（置かれている分だけ） ─────────
@@ -276,6 +319,17 @@ for (let i = 1; i < parts.length; i += 2) {
 
 // ───────── 書き出し ─────────
 
+// 画面で文節ごとに折りたい素の文字列を集める（本文の HTML は上で <wbr> を入れ済み）
+const phrases = {};
+for (const { data: d } of seminars) {
+  const texts = [
+    ...d.headlineLines, ...d.subLines, ...d.closing.split('|'), d.closingNote, d.ctaNote, d.placeNote,
+    ...d.sections.map((x) => x.heading),
+    ...d.sections.flatMap((x) => (x.kind === 'faq' ? x.items.map((it) => it.q) : [])),
+  ];
+  for (const text of texts) if (text) phrases[text] = phrase(text);
+}
+
 const imports = seminars.flatMap((s) =>
   Object.values(s.images).map((img) => `import ${img.ident} from '${img.path}';`)
 );
@@ -348,6 +402,12 @@ export type Seminar = {
   images: { hero?: SeminarImage; og?: SeminarImage; speaker?: SeminarImage };
 };
 `,
+  '/**',
+  ' * 素の文字列（見出し・質問・見出しの行・締めの文など）を、文節の切れ目に <wbr> を入れた HTML に引く表。',
+  ' * 画面の側は `PHRASES[文字列] ?? esc(文字列)` で使う。title や構造化データには素の文字列を使う。',
+  ' */',
+  `export const PHRASES: Record<string, string> = ${JSON.stringify(phrases, null, 2)};`,
+  '',
   'export const SEMINARS: Record<string, Seminar> = {',
   ...seminars.map((s) => {
     const json = JSON.stringify(s.data, null, 2).replace(/\n}$/, '');

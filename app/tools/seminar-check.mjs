@@ -14,7 +14,8 @@ let fail = 0;
 const t = (label, actual, expected) => {
   if (String(actual) !== String(expected)) { fail++; console.log(`  NG: ${label} → 期待 ${expected} / 実際 ${actual}`); }
 };
-const markup = (html) => html.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, '');
+// 文節の切れ目の <wbr> は、文字列が入っているかを見るときには外す
+const markup = (html) => html.replace(/<style>[\s\S]*?<\/style>/g, '').replace(/<script[\s\S]*?<\/script>/g, '').replace(/<wbr>/g, '');
 const ldOf = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1].replace(/<\\\//g, '</'));
 
 const ORIGIN = 'https://natur-indicator.com';
@@ -76,6 +77,8 @@ for (const slug of slugs) {
       t(`${label} 写真があれば飾りの丸を出さない`, body.includes('lp-bubble'), false);
     }
     // 注意書き（md の「※」で始まる段落）は、白いカードの中でなく外に出る
+    // 注意書きの目印は md にある（生成物の HTML は <wbr> が入るので、そちらで数えると取りこぼす）
+    t(`${label} md の注意書きが生成物でも段落の頭にある`, s.sections.some((x) => 'html' in x && x.html.includes('<p>※')), true);
     if (s.sections.some((x) => 'html' in x && x.html.includes('<p>※'))) {
       t(`${label} 注意書きがカードの外に出る`, /<\/div><\/div><div class="lp-aside"><p>※/.test(body), true);
     }
@@ -83,6 +86,14 @@ for (const slug of slugs) {
     const figs = body.match(/<figure class="lp-illust"[^>]*>[\s\S]*?<\/figure>/g) ?? [];
     t(`${label} イラストの枠に絵が入っている`, figs.every((f) => f.includes('<svg') && /aria-label="[^"]+"/.test(f)), true);
     t(`${label} イラストの枠が残っていない`, body.includes('data-labels='), false);
+    // 改行：見出しとリードには文節の切れ目（<wbr>）が入り、タグの中には入らない。Chrome だけの指定は使わない
+    {
+      const raw = seminarPage(s, ORIGIN, before).replace(/<style>[\s\S]*?<\/style>/g, '');
+      t(`${label} 見出しに文節の切れ目がある`, /<h2 class="lp-h2"[^>]*>[^<]*<wbr>/.test(raw), true);
+      t(`${label} リードに文節の切れ目がある`, /<div class="lp-lead">[\s\S]*?<wbr>/.test(raw), true);
+      t(`${label} タグの中に切れ目が入っていない`, /<[^>]*<wbr>[^<]*>/.test(raw.replace(/<script[\s\S]*?<\/script>/g, '')), false);
+      t(`${label} Chrome だけの改行指定を使っていない`, /auto-phrase|text-wrap:pretty/.test(html), false);
+    }
     // 表記ルール（CLAUDE.md）：ダッシュを本文に使わない
     t(`${label} ダッシュを使っていない`, /[—―]/.test(body.replace(/<[^>]+>/g, '')), false);
   }

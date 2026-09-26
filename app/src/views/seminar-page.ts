@@ -20,6 +20,7 @@
  * 構造化データを組み、終了後の表示に切り替えるだけ。
  */
 import type { Seminar, SeminarImage } from '../content/seminars.ts';
+import { PHRASES } from '../content/seminars.ts';
 import { websiteLd } from './info-page.ts';
 import { ICONS } from './layout.ts';
 import { esc } from './result.ts';
@@ -75,9 +76,15 @@ html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:4
 body{margin:0; background:#fff; color:var(--lp-ink); font-family:var(--lp-font);
   font-size:1rem; line-height:1.75; letter-spacing:.04em; overflow-wrap:anywhere}
 img{max-width:100%; height:auto; display:block}
-/* 見出し・箇条書き・ボタンは文節の切れ目で折る（「限り／ません」「理／由」のような1字だけの行を作らない） */
-.lp-h1,.lp-h2,.lp-closing,.lp-closing-note,.lp-lead p,.lp-body li,.lp-faq summary,.lp-btn,.lp-support,.lp-sub{word-break:auto-phrase; text-wrap:balance}
-p{text-wrap:pretty}
+/*
+ * 見出し・リード・箇条書きなどは、文節の切れ目でだけ折る（「自分／が悪い」「理／由」を作らない）。
+ * 切れ目は extract-seminars.mjs が BudouX で <wbr> として入れてある。keep-all はその <wbr> でだけ折らせる。
+ * 1文節が行より長いときだけ overflow-wrap:anywhere で折れて、はみ出しは防ぐ。
+ * **Chrome だけの word-break:auto-phrase と、WebKit で段落全体の折り方が変わる text-wrap:pretty は使わない**
+ * （iPhone は Chrome も WebKit。2026-09-26 に本番の iPhone で改行が崩れた原因）。
+ */
+.lp-h1,.lp-h2,.lp-sub,.lp-closing,.lp-closing-note,.lp-lead p,.lp-body p,.lp-body li,.lp-faq summary,.lp-aside p,.lp-note,.lp-support,.lp-ended,.lp-keep{word-break:keep-all; overflow-wrap:anywhere}
+.lp-h2,.lp-closing,.lp-closing-note,.lp-lead p,.lp-body li,.lp-faq summary{text-wrap:balance}
 h1,h2,h3,p,ul,ol,dl,dd{margin:0}
 ul,ol{padding:0}
 
@@ -116,7 +123,7 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-hero-body{position:relative; padding:2rem 0 3rem}
 .lp-chip{display:inline-flex; flex-wrap:wrap; gap:0 1em; padding:.375rem 1rem; border:1px solid var(--lp-cyan);
   border-radius:999px; background:#fff; color:var(--lp-cyan-text); font-weight:700; font-size:.875rem; line-height:1.5}
-.lp-catch{margin-top:1.25rem;
+.lp-catch{margin-top:1.25rem; white-space:nowrap;
   font-family:var(--lp-font-hand); font-weight:400; color:var(--lp-cyan-strong);
   font-size:clamp(2.25rem,9.5vw,3.75rem); line-height:1.3; letter-spacing:.04em}
 .lp-h1{margin-top:1rem; font-size:clamp(1.625rem,6.6vw,2.625rem); font-weight:700; line-height:1.5; letter-spacing:.06em}
@@ -301,7 +308,7 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
   .lp-btn::before{background:CanvasText}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-`.replace(/\n\s*/g, ' ').trim();
+`.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\n\s*/g, ' ').trim(); // 注釈はページに出さない
 
 /** 開始・終了の時刻（日本時間）を UNIX ミリ秒にする。 */
 function at(date: string, time: string): number {
@@ -350,10 +357,22 @@ function imageUrl(origin: string, slug: string, name: string, img: SeminarImage)
  * `|` の位置で改行する。**狭い画面でも改行する。** 1行が12字前後で収まる長さなので、
  * 自然な折り返しに任せると「やめ／る」のように語の途中で折れる方が読みにくい。
  */
-const joinLines = (lines: string[]) => lines.map(esc).join('<br>');
+const joinLines = (lines: string[]) => lines.map(ph).join('<br>');
 
 /** 数字だけ英字の書体にする（`60分` の `60`）。手本のLPは数字を大きく、英字の書体で見せている。 */
 const nums = (text: string) => esc(text).replace(/\d+/g, (d) => `<span class="lp-num">${d}</span>`);
+
+/**
+ * 文節の切れ目に <wbr> を入れた HTML（extract-seminars.mjs が BudouX で作った表から引く）。表に無ければエスケープだけ。
+ * CSS の `word-break: keep-all` と組み合わせて、語の途中で折らない。iPhone（WebKit）でも効く。
+ */
+function ph(text: string): string {
+  return PHRASES[text] ?? esc(text);
+}
+
+/** ph() の数字だけ英字の書体にする。文字参照（&#39; など）の中の数字には触らない。 */
+const phNums = (text: string) =>
+  ph(text).replace(/(&#?\w+;)|(\d+)/g, (m, entity) => (entity ? m : `<span class="lp-num">${m}</span>`));
 
 /** 申込ボタンの文言。無料なら「無料で」を先に言う（手本のボタンの言い方）。 */
 const applyLabel = (s: Seminar) => (s.fee === '無料' ? '無料で申し込む' : `申し込む（${s.fee}）`);
@@ -366,8 +385,9 @@ function cta(s: Seminar, ended: boolean): string {
   if (ended) {
     return (
       '<div class="lp-cta">' +
-        '<p class="lp-ended">このセミナーは終了しました。</p>' +
-        '<p class="lp-support">ナチュール診断は、いつでも受けられます。</p>' +
+        // 文面が固定なので、文節の切れ目（<wbr>）はここで手で入れる
+        '<p class="lp-ended">この<wbr>セミナーは<wbr>終了しました。</p>' +
+        '<p class="lp-support">ナチュール診断は、<wbr>いつでも<wbr>受けられます。</p>' +
         '<a class="lp-btn" href="/" style="margin-top:1rem">診断を受ける（約2分・無料）</a>' +
       '</div>'
     );
@@ -378,12 +398,13 @@ function cta(s: Seminar, ended: boolean): string {
     : '<span class="lp-btn" role="link" aria-disabled="true">お申し込みの受付は準備中です</span>';
   const support = [
     s.ctaNote,
-    s.ticketUrl ? 'お申し込みは、イベント受付サービスのPeatixで受け付けます。' : '',
+    s.ticketUrl ? 'お申し込みは、<wbr>イベント受付サービスの<wbr>Peatixで<wbr>受け付けます。' : '',
   ].filter(Boolean);
   return (
     '<div class="lp-cta">' +
       button +
-      support.map((t) => `<p class="lp-support">${esc(t)}</p>`).join('') +
+      // ctaNote は文節の表から引く。固定の文は <wbr> 入りで書いてあるのでそのまま出す
+      support.map((t) => `<p class="lp-support">${t.includes('<wbr>') ? t : ph(t)}</p>`).join('') +
     '</div>'
   );
 }
@@ -407,20 +428,21 @@ function speakerBlock(s: Seminar, origin: string): string {
 }
 
 function overview(s: Seminar, ended: boolean): string {
+  // 文面が固定なので、文節の切れ目（<wbr>）はここで手で入れる。この行だけ keep-all にする
   const apply = ended
-    ? '受付を終了しました'
+    ? '受付を<wbr>終了しました'
     : s.ticketUrl
-      ? `<a href="${esc(s.ticketUrl)}">Peatixのイベントページ</a>から`
-      : '準備中です（Peatixで受け付けます）';
+      ? `<a href="${esc(s.ticketUrl)}">Peatixの<wbr>イベントページ</a>から`
+      : '準備中です<wbr>（Peatixで<wbr>受け付けます）';
   return (
     '<dl class="lp-dl">' +
       `<dt>日時</dt><dd>${esc(dayLabel(s.date, true))}${timeSpan(s)}</dd>` +
-      `<dt>形式</dt><dd>${esc(s.place)}${s.placeNote ? `<span class="lp-note">${esc(s.placeNote)}</span>` : ''}</dd>` +
+      `<dt>形式</dt><dd>${esc(s.place)}${s.placeNote ? `<span class="lp-note">${ph(s.placeNote)}</span>` : ''}</dd>` +
       (s.capacity ? `<dt>定員</dt><dd>${esc(s.capacity)}</dd>` : '') +
       `<dt>参加費</dt><dd>${esc(s.fee)}</dd>` +
       `<dt>登壇</dt><dd>${esc(s.speakerName)}</dd>` +
-      '<dt>主催</dt><dd>ナチュール診断（運営：Mikata）</dd>' +
-      `<dt>お申し込み</dt><dd>${apply}</dd>` +
+      '<dt>主催</dt><dd>ナチュール診断<span class="lp-nowrap">（運営：Mikata）</span></dd>' +
+      `<dt>お申し込み</dt><dd class="lp-keep">${apply}</dd>` +
     '</dl>'
   );
 }
@@ -493,7 +515,7 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
     const head =
       '<div class="lp-sec-head">' +
         (sec.eyebrow ? `<p class="lp-eyebrow" aria-hidden="true">${esc(sec.eyebrow)}</p>` : '') +
-        `<h2 class="lp-h2" id="${id}">${esc(sec.heading)}</h2>` +
+        `<h2 class="lp-h2" id="${id}">${ph(sec.heading)}</h2>` +
       '</div>';
     let body: string;
     let carded = aqua;
@@ -512,7 +534,7 @@ function sections(s: Seminar, origin: string, ended: boolean): string {
         body =
           '<div class="lp-faq">' +
             sec.items.map((it) =>
-              `<details><summary><span class="lp-q" aria-hidden="true">Q</span><span>${esc(it.q)}</span></summary>` +
+              `<details><summary><span class="lp-q" aria-hidden="true">Q</span><span>${ph(it.q)}</span></summary>` +
               `<div class="lp-answer"><span class="lp-a" aria-hidden="true">A</span><div class="lp-body">${it.html}</div></div></details>`
             ).join('') +
           '</div>';
@@ -687,8 +709,8 @@ export function seminarPage(s: Seminar, origin: string, now: number): string {
         : '<section class="lp-close" aria-label="お申し込み">') +
         wave(lastAqua) +
         '<div class="lp-wrap">' +
-          (closing ? `<h2 class="lp-closing" id="sec-close">${s.closing.split('|').map(nums).join('<br>')}</h2>` : '') +
-          (closing && s.closingNote ? `<p class="lp-closing-note">${esc(s.closingNote)}</p>` : '') +
+          (closing ? `<h2 class="lp-closing" id="sec-close">${s.closing.split('|').map(phNums).join('<br>')}</h2>` : '') +
+          (closing && s.closingNote ? `<p class="lp-closing-note">${ph(s.closingNote)}</p>` : '') +
           cta(s, ended) +
         '</div>' +
       '</section>' +
