@@ -96,7 +96,7 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-num{font-family:var(--lp-font-en); font-weight:600; letter-spacing:.02em}
 
 /* ヘッダー：白地に名乗りと小さな申込ボタン。スクロールしても上に残す */
-.lp-header{position:sticky; top:0; z-index:10; background:rgba(255,255,255,.96); box-shadow:0 1px 0 var(--lp-rule)}
+.lp-header{position:sticky; top:0; z-index:10; background:#fff; box-shadow:0 1px 0 var(--lp-rule)}
 .lp-header .lp-wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:4rem}
 .lp-brand{line-height:1.2; color:var(--lp-ink); font-weight:700; font-size:.9375rem}
 .lp-brand span{display:block; font-weight:700; font-size:.75rem; letter-spacing:.1em; color:var(--lp-cyan-text)}
@@ -121,6 +121,27 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
   font-size:clamp(2.25rem,9.5vw,3.75rem); line-height:1.3; letter-spacing:.04em}
 .lp-h1{margin-top:1rem; font-size:clamp(1.625rem,6.6vw,2.625rem); font-weight:700; line-height:1.5; letter-spacing:.06em}
 .lp-sub{margin-top:1rem; font-size:clamp(1.0625rem,4.4vw,1.5rem); font-weight:700; line-height:1.6; letter-spacing:.06em}
+/*
+ * 写真があるとき（スマホ・タブレット）：キャッチを写真の左側に、白の縦書きで重ねる（バナーと同じ見せ方）。
+ * 写真の左は線路の暗いところなので、白い字が読める。左から薄い影を足して、明るい写真でも読めるようにする。
+ * 字が写真の下のぼかし（白へ溶ける部分）にかからないよう、写真の高さと字の大きさを揃えてある。
+ */
+@media (max-width:63.99rem){
+  .lp-hero.has-photo .lp-hero-body{position:static}
+  .lp-hero.has-photo .lp-hero-photo{aspect-ratio:1/1}
+  .lp-hero.has-photo .lp-hero-photo img{object-position:80% 50%}
+  .lp-hero.has-photo .lp-hero-photo::after{height:18%}
+  .lp-hero.has-photo .lp-hero-photo::before{content:""; position:absolute; inset:0 auto 0 0; z-index:1; width:60%;
+    background:linear-gradient(to right,rgba(0,0,0,.35),rgba(0,0,0,0))}
+  .lp-hero.has-photo .lp-catch{position:absolute; top:1.25rem; left:1.25rem; z-index:2; margin:0;
+    writing-mode:vertical-rl; font-family:var(--lp-font); font-weight:700; color:#fff;
+    font-size:clamp(1.625rem,8vw,3.25rem); line-height:1.5; letter-spacing:.14em;
+    text-shadow:0 2px 12px rgba(0,0,0,.55)}
+}
+@media (min-width:40rem) and (max-width:63.99rem){
+  .lp-hero.has-photo .lp-hero-photo{aspect-ratio:4/3}
+  .lp-hero.has-photo .lp-hero-photo img{object-position:75% 45%}
+}
 @media (min-width:64rem){
   .lp-hero{min-height:40rem}
   .lp-hero-photo{position:absolute; inset:0 0 0 auto; width:50%; aspect-ratio:auto}
@@ -156,13 +177,12 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
 .lp-support{margin-top:.625rem; font-size:.875rem; line-height:1.6; color:var(--lp-sub)}
 
 /* 事実だけの丸いバッジ（手本の実績バッジの位置。実績は作らない） */
-.lp-badges{display:flex; flex-wrap:wrap; gap:.75rem; margin-top:2rem; list-style:none}
-.lp-badge{display:flex; flex-direction:column; align-items:center; justify-content:center; width:6.5rem; height:6.5rem;
+.lp-badges{display:grid; grid-template-columns:repeat(3,minmax(0,7.5rem)); gap:.75rem; margin-top:2rem; list-style:none}
+.lp-badge{display:flex; flex-direction:column; align-items:center; justify-content:center; aspect-ratio:1/1;
   border-radius:50%; background:var(--lp-bubble); text-align:center; box-shadow:var(--lp-shadow)}
 .lp-badge-label{font-size:.75rem; font-weight:700; line-height:1.4; letter-spacing:.02em}
-.lp-badge-value{margin-top:.125rem; font-size:1.125rem; font-weight:700; line-height:1.2; color:var(--lp-cyan-text)}
-.lp-badge-value .lp-num{font-size:1.875rem; color:var(--lp-cyan-strong)}
-@media (min-width:40rem){.lp-badge{width:7.5rem; height:7.5rem}}
+.lp-badge-value{margin-top:.125rem; font-size:clamp(.9375rem,4.2vw,1.125rem); font-weight:700; line-height:1.2; color:var(--lp-cyan-text)}
+.lp-badge-value .lp-num{font-size:clamp(1.5rem,7.5vw,1.875rem); color:var(--lp-cyan-strong)}
 
 /* 導入：短い段落を中央に */
 .lp-lead{padding:3.5rem 0; text-align:center}
