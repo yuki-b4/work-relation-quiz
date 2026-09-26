@@ -127,6 +127,7 @@ a:not(.lp-btn):focus-visible{background:var(--lp-focus); color:#000; border-radi
   font-family:var(--lp-font-hand); font-weight:400; color:var(--lp-cyan-strong);
   font-size:clamp(2.25rem,9.5vw,3.75rem); line-height:1.3; letter-spacing:.04em}
 .lp-h1{margin-top:1rem; font-size:clamp(1.625rem,6.6vw,2.625rem); font-weight:700; line-height:1.5; letter-spacing:.06em}
+.lp-kicker{display:block; margin-bottom:.25rem; font-size:1rem; line-height:1.6; letter-spacing:.14em; color:var(--lp-cyan-text)}
 .lp-sub{margin-top:1rem; font-size:clamp(1.0625rem,4.4vw,1.5rem); font-weight:700; line-height:1.6; letter-spacing:.06em}
 /*
  * 写真があるとき（スマホ・タブレット）：キャッチを写真の左側に、白の縦書きで重ねる（バナーと同じ見せ方）。
@@ -695,7 +696,8 @@ export function seminarPage(s: Seminar, origin: string, now: number): string {
         '<div class="lp-wrap"><div class="lp-hero-body"><div class="lp-hero-text">' +
           `<p class="lp-chip">${chip}</p>` +
           `<p class="lp-catch">${joinLines(s.catchLines)}</p>` +
-          `<h1 class="lp-h1">${joinLines(s.headlineLines)}</h1>` +
+          // 名乗り（診断セミナー）は見出しの一部として h1 に入れる。見た目だけ小さく上に置く
+          `<h1 class="lp-h1">${s.kicker ? `<span class="lp-kicker">${esc(s.kicker)}</span>` : ''}${joinLines(s.headlineLines)}</h1>` +
           `<p class="lp-sub">${joinLines(s.subLines)}</p>` +
           cta(s, ended) +
         '</div>' +

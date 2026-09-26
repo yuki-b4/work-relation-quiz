@@ -29,7 +29,7 @@ const REQUIRED = [
   'title', 'description', 'catch', 'headline', 'sub', 'date', 'start', 'end',
   'place', 'fee', 'speaker_name', 'speaker_role',
 ];
-const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing', 'closing_note', 'badges', 'capacity'];
+const OPTIONAL = ['place_note', 'ticket_url', 'cta_note', 'closing', 'closing_note', 'badges', 'capacity', 'kicker'];
 
 /** 表記ルール（CLAUDE.md）。「——」も単独の「—」も本文に使わない。 */
 function checkDash(label, text) {
@@ -294,6 +294,7 @@ for (let i = 1; i < parts.length; i += 2) {
       title: meta.title,
       description: meta.description,
       catchLines: linesOf(meta.catch),
+      kicker: meta.kicker ?? '',
       headlineLines: linesOf(meta.headline),
       subLines: linesOf(meta.sub),
       date: meta.date,
@@ -373,6 +374,8 @@ export type Seminar = {
   /** ファーストビューに手書き風の書体で出す一文。1要素が1行。 */
   catchLines: string[];
   /** 見出し。要素の切れ目で改行する（狭い画面でも）。 */
+  /** 見出しの上に小さく添える短い名乗り（例：診断セミナー）。h1 の一部として読み上げる。空なら出さない。 */
+  kicker: string;
   headlineLines: string[];
   subLines: string[];
   /** 開催日（YYYY-MM-DD）と時刻（HH:MM）。いずれも日本時間。 */
