@@ -96,8 +96,8 @@ export const PHRASES: Record<string, string> = {
   "うまくいく人が": "うまく<wbr>いく<wbr>人が",
   "やっていること": "やっている<wbr>こと",
   "あなたの周りに": "あなたの<wbr>周りに",
-  "良い人ばかり集まる": "良い<wbr>人ばかり集まる",
-  "身の振る舞い": "身の<wbr>振る<wbr>舞い"
+  "良い人が集まる": "良い<wbr>人が<wbr>集まる",
+  "関わり方": "関わり方"
 };
 
 export const SEMINARS: Record<string, Seminar> = {
@@ -248,13 +248,13 @@ export const SEMINARS: Record<string, Seminar> = {
   },
   "sem-1020": {
     "slug": "sem-1020",
-    "title": "もう転職しようかなと思ったら知って欲しい。転職して人間関係がうまくいく人がやっていること｜人間関係タイプ診断つきセミナー",
+    "title": "もう転職しようかな、と思ったら知ってほしい。転職して人間関係がうまくいく人がやっていること｜人間関係タイプ診断つきセミナー",
     "description": "転職しても、また同じような人間関係でしんどくなる。そんな方のための、60分の無料オンラインセミナーです。その場でナチュール診断を受け、「自分が悪い」と感じる場面で本当は何が起きているのかを読み解きます。顔出し・発言なしで参加できます。",
     "catchLines": [
       "もう",
-      "転職しようかな",
+      "転職しようかな、",
       "と思ったら",
-      "知って欲しい"
+      "知ってほしい。"
     ],
     "kicker": "人間関係タイプ診断つきセミナー",
     "headlineLines": [
@@ -264,8 +264,8 @@ export const SEMINARS: Record<string, Seminar> = {
     ],
     "subLines": [
       "あなたの周りに",
-      "良い人ばかり集まる",
-      "身の振る舞い"
+      "良い人が集まる",
+      "関わり方"
     ],
     "date": "2026-10-20",
     "start": "21:00",
@@ -294,7 +294,7 @@ export const SEMINARS: Record<string, Seminar> = {
     ],
     "speakerName": "齋藤祐希",
     "speakerRole": "プロコーチ／ナチュール診断 開発者／Mikata 代表",
-    "lead": "<p>転職しても<wbr>同じような<wbr>人間関係でしんどくなり、<wbr>また<wbr>転職を<wbr>考える。</p><p>自分らしく<wbr>活躍したいのに<wbr>できない<wbr>理由は、<wbr>あなたの<wbr>性格の<wbr>せいではありません。</p><p>その<wbr>場の<wbr>診断で<wbr>自分が<wbr>伸び伸びと<wbr>活躍する<wbr>転職を<wbr>成功させる<wbr>本質を<wbr>お伝えします。</p>",
+    "lead": "<p>転職しても<wbr>同じような<wbr>人間関係でしんどくなり、<wbr>また<wbr>転職を<wbr>考える。</p><p>自分らしく<wbr>活躍したいのに<wbr>できないのは、<wbr>あなたの<wbr>性格の<wbr>せいではありません。</p><p>その<wbr>場の<wbr>診断で<wbr>関わり方の<wbr>クセを<wbr>知り、<wbr>どこでも<wbr>伸び伸びと<wbr>働ける<wbr>本質を<wbr>お伝えします。</p>",
     "sections": [
       {
         "kind": "text",
