@@ -5,6 +5,8 @@
 import img_sem_1010_hero from '../../assets/seminar/sem-1010/hero.jpg';
 import img_sem_1010_og from '../../assets/seminar/sem-1010/og.png';
 import img_sem_1010_speaker from '../../assets/seminar/sem-1010/speaker.jpg';
+import img_sem_1020_hero from '../../assets/seminar/sem-1020/hero.jpg';
+import img_sem_1020_speaker from '../../assets/seminar/sem-1020/speaker.jpg';
 
 export type SeminarImage = {
   data: ArrayBuffer;
@@ -89,7 +91,13 @@ export const PHRASES: Record<string, string> = {
   "途中で抜けても大丈夫ですか？": "途中で<wbr>抜けても<wbr>大丈夫ですか？",
   "必要なものはありますか？": "必要な<wbr>ものは<wbr>ありますか？",
   "売り込みはされませんか？": "売り込みは<wbr>されませんか？",
-  "職場以外の人間関係の悩みがあっても参加できますか？": "職場以外の<wbr>人間関係の<wbr>悩みが<wbr>あっても<wbr>参加できますか？"
+  "職場以外の人間関係の悩みがあっても参加できますか？": "職場以外の<wbr>人間関係の<wbr>悩みが<wbr>あっても<wbr>参加できますか？",
+  "転職して人間関係が": "転職して<wbr>人間関係が",
+  "うまくいく人が": "うまく<wbr>いく<wbr>人が",
+  "やっていること": "やっている<wbr>こと",
+  "あなたの周りに": "あなたの<wbr>周りに",
+  "良い人ばかり集まる": "良い<wbr>人ばかり集まる",
+  "身の振る舞い": "身の<wbr>振る<wbr>舞い"
 };
 
 export const SEMINARS: Record<string, Seminar> = {
@@ -230,12 +238,160 @@ export const SEMINARS: Record<string, Seminar> = {
           },
           {
             "q": "職場以外の人間関係の悩みがあっても参加できますか？",
+            "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自然体の<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p><p>---</p>",
+            "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自然体のあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。---"
+          }
+        ]
+      }
+    ],
+    images: { hero: { data: img_sem_1010_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, og: { data: img_sem_1010_og, mime: 'image/png', ext: 'png', width: 1200, height: 600, version: '34394fbca4' }, speaker: { data: img_sem_1010_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
+  },
+  "sem-1020": {
+    "slug": "sem-1020",
+    "title": "もう転職しようかなと思ったら知って欲しい。転職して人間関係がうまくいく人がやっていること｜人間関係タイプ診断つきセミナー",
+    "description": "転職しても、また同じような人間関係でしんどくなる。そんな方のための、60分の無料オンラインセミナーです。その場でナチュール診断を受け、「自分が悪い」と感じる場面で本当は何が起きているのかを読み解きます。顔出し・発言なしで参加できます。",
+    "catchLines": [
+      "もう",
+      "転職しようかな",
+      "と思ったら",
+      "知って欲しい"
+    ],
+    "kicker": "人間関係タイプ診断つきセミナー",
+    "headlineLines": [
+      "転職して人間関係が",
+      "うまくいく人が",
+      "やっていること"
+    ],
+    "subLines": [
+      "あなたの周りに",
+      "良い人ばかり集まる",
+      "身の振る舞い"
+    ],
+    "date": "2026-10-20",
+    "start": "21:00",
+    "end": "22:00",
+    "place": "オンライン",
+    "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします",
+    "fee": "無料",
+    "ticketUrl": "",
+    "ctaNote": "顔出し・発言なしで参加OK",
+    "closing": "参加は無料です",
+    "closingNote": "辞めるかどうか、まだ決めきれない。人に相談するのは、少し苦手。そんな方こそ、次の職場を探す前に、60分だけ自分の関わり方を見てみませんか。",
+    "capacity": "10名（先着順）",
+    "badges": [
+      {
+        "label": "所要時間",
+        "value": "60分"
+      },
+      {
+        "label": "参加費",
+        "value": "無料"
+      },
+      {
+        "label": "顔出し・発言",
+        "value": "なしでOK"
+      }
+    ],
+    "speakerName": "齋藤祐希",
+    "speakerRole": "プロコーチ／ナチュール診断 開発者／Mikata 代表",
+    "lead": "<p>転職しても<wbr>同じような<wbr>人間関係でしんどくなり、<wbr>また<wbr>転職を<wbr>考える。</p><p>自分らしく<wbr>活躍したいのに<wbr>できない<wbr>理由は、<wbr>あなたの<wbr>性格の<wbr>せいではありません。</p><p>その<wbr>場の<wbr>診断で<wbr>自分が<wbr>伸び伸びと<wbr>活躍する<wbr>転職を<wbr>成功させる<wbr>本質を<wbr>お伝えします。</p>",
+    "sections": [
+      {
+        "kind": "text",
+        "heading": "こんなお悩み、ありませんか",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>転職しても、<wbr>なぜか<wbr>毎回、<wbr>苦手な<wbr>人が<wbr>いる</li><li>相手は<wbr>平気そうなのに、<wbr>自分だけが<wbr>どっと<wbr>疲れている</li><li>人と<wbr>うまく<wbr>いかないと、<wbr>「自分の<wbr>言い方が<wbr>悪かったのかな」と<wbr>何日も<wbr>引きずる</li><li>好き嫌いは<wbr>はっきり<wbr>あるのに、<wbr>顔には<wbr>出さずに<wbr>合わせている</li><li>本や<wbr>YouTubeで<wbr>調べて、<wbr>頭では<wbr>わかっている。<wbr>でも、<wbr>いざ<wbr>その<wbr>人の<wbr>前だと<wbr>うまく<wbr>できない</li><li>職場の<wbr>人間関係の<wbr>悩みを、<wbr>誰にも<wbr>相談できずに<wbr>いる</li><li>転職サイトを<wbr>開いては、<wbr>閉じている</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "それは、あなたの性格のせいではありません",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>人間関係が<wbr>うまく<wbr>いくかどうかは、<wbr>性格の<wbr>良し悪しでは<wbr>決まりません。</p><p>こちらの<wbr>気づかいが、<wbr>相手には<wbr>違う形で<wbr>伝わる<wbr>ことがあります。</p><figure class=\"lp-illust\" role=\"img\" aria-label=\"気をつかって黙っていたのに、「何を考えているかわからない人」と思われることもあります。\" data-illust=\"silence\" data-labels=\"気をつかって、／黙っておこう|何を考えているのか、／わからない…\"></figure><p>すれ違いのもとは、<wbr>性格<wbr>その<wbr>ものではなく、<strong><wbr>関わり方の<wbr>クセ</strong>に<wbr>あることが<wbr>よく<wbr>あります。<wbr>だから<wbr>職場を<wbr>変えても、<wbr>同じ<wbr>クセの<wbr>ままで<wbr>いると、<wbr>同じことがくり返されます。</p><p>クセは、<wbr>欠点ではありません。<wbr>自分が<wbr>どんな<wbr>クセで<wbr>人と<wbr>関わっているのかが<wbr>わかれば、<wbr>「自分が<wbr>悪い」の<wbr>ひと言で<wbr>片づけずに<wbr>済みます。</p>"
+      },
+      {
+        "kind": "text",
+        "heading": "本や性格診断では、足りなかった理由",
+        "eyebrow": "",
+        "fill": true,
+        "html": "<p><strong>本や<wbr>YouTube</strong>に<wbr>書いてあるのは、<wbr>誰に<wbr>でも<wbr>当ては<wbr>まる<wbr>一般論です。<wbr>あなた<wbr>自身の<wbr>関わり方に<wbr>合わせた<wbr>答えではありません。</p><p><strong><wbr>性格診断</strong>で<wbr>わかるのは、<wbr>あなたが<wbr>どんな<wbr>性格か、<wbr>までです。<wbr>人と<wbr>どう<wbr>関わっているのか、<wbr>どこですれ違いやすいのかまでは、<wbr>教えてくれません。</p><p>そして、<strong><wbr>自分の<wbr>関わり方の<wbr>クセ</strong>は、<wbr>自分ではなかなか<wbr>気づけません。<wbr>知っているだけでは<wbr>変わらないのは、<wbr>この<wbr>ためです。</p>"
+      },
+      {
+        "kind": "text",
+        "heading": "すり減る関係から、抜け出すには",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<wbr>あなたの<wbr>人間関係タイプを<wbr>特定する<strong><wbr>ナチュール診断</strong>です。</p><ul><li>9つの<wbr>質問に<wbr>答えるだけ。<wbr>約2分で<wbr>終わります</li><li>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自然体の<wbr>あなた</strong>の<wbr>人との<wbr>関わり方です</li><li>8つの<wbr>タイプから<wbr>あなたを<wbr>最も<wbr>表すタイプが<wbr>表示されます</li></ul><p>自分の<wbr>関わり方が<wbr>わかると、<wbr>なぜ<wbr>自分だけが<wbr>どっと<wbr>疲れるのか、<wbr>その<wbr>手が<wbr>かりが<wbr>見えてきます。</p><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
+      },
+      {
+        "kind": "text",
+        "heading": "当日の流れ",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ol><li><strong>ナチュール診断を<wbr>受ける</strong><wbr> その<wbr>場であなたの<wbr>タイプが<wbr>わかります</li><li><strong><wbr>自然体の<wbr>あなたを<wbr>読み解く</strong><wbr> ふだんの<wbr>あなたが、<wbr>人と<wbr>どう<wbr>関わっているのか</li><li><strong><wbr>「自分が<wbr>悪い」の<wbr>正体</strong> そう<wbr>感じる<wbr>場面で、<wbr>実際には<wbr>何が<wbr>起きているのか</li><li><strong><wbr>ひとりで<wbr>抜け出しに<wbr>くい理由</strong> ひとりで<wbr>考えても、<wbr>同じ<wbr>悩みに<wbr>戻ってしまうわけ</li><li><strong>どうやったら<wbr>解決できるか</strong><wbr> 診断結果を<wbr>もとに、<wbr>一人<wbr>ひとりが<wbr>どう<wbr>解決できるかを<wbr>解説</li></ol>"
+      },
+      {
+        "kind": "text",
+        "heading": "顔出し・発言なしで参加OK",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>カメラは<wbr>オフの<wbr>ままで<wbr>大丈夫です</li><li>声に<wbr>出して<wbr>発言する<wbr>場面は<wbr>ありません<wbr>（チャットへの<wbr>書き込みを<wbr>お願いする<wbr>ことは<wbr>あります）</li><li>表示名は、<wbr>ニックネームで<wbr>構いません</li><li>診断の<wbr>結果を、<wbr>ほかの<wbr>参加者に<wbr>見せる<wbr>ことは<wbr>ありません</li><li>最後に<wbr>継続サポートと<wbr>体験セッションの<wbr>ご案内を<wbr>しますが、<wbr>申し込みは<wbr>任意です</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "転職を、すすめも止めもしません",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>辞めるか、<wbr>続けるか。<wbr>決めるのは、<wbr>あなたです。</p><p>ただ、<wbr>辞めたい<wbr>理由が<wbr>「会社」なのか、<wbr>「あの<wbr>人との<wbr>関係」なのか。<wbr>ここを<wbr>切り分けて<wbr>おくと、<wbr>どちらを<wbr>選ぶに<wbr>しても、<wbr>判断の<wbr>材料が<wbr>ひとつ<wbr>増えます。</p><p>※ハラスメントや<wbr>暴力を<wbr>受けている<wbr>場合は、<wbr>関わり方を<wbr>工夫するより<wbr>先に、<wbr>その<wbr>人から<wbr>距離を<wbr>取り、<wbr>社内外の<wbr>相談窓口を<wbr>頼ってください。<wbr>この<wbr>セミナーは、<wbr>その<wbr>代わりには<wbr>なりません。</p>"
+      },
+      {
+        "kind": "speaker",
+        "heading": "登壇者",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>プロコーチと<wbr>して、<wbr>心理学・脳科学・潜在意識・対人関係に<wbr>ついて<wbr>学び、<wbr>1000時間以上の<wbr>有償サポート経験を<wbr>経て、<wbr>ナチュール診断を<wbr>つくりました。</p><p>私自身、<wbr>不満を<wbr>自分の<wbr>中に<wbr>抱え込んでしまい、<wbr>自分が<wbr>我慢する<wbr>関係性に<wbr>悩み続けた<wbr>経験が<wbr>あります。</p><p>この<wbr>ナチュール診断には、<wbr>その<wbr>時の<wbr>苦しさから<wbr>解放される<wbr>人が<wbr>一人でも<wbr>増えて<wbr>欲しいと<wbr>いう<wbr>想いを<wbr>込めています。</p>"
+      },
+      {
+        "kind": "overview",
+        "heading": "開催概要",
+        "eyebrow": "",
+        "fill": true
+      },
+      {
+        "kind": "faq",
+        "heading": "よくあるご質問",
+        "eyebrow": "",
+        "fill": true,
+        "items": [
+          {
+            "q": "事前に診断を受けておく必要はありますか？",
+            "html": "<p>いいえ、<wbr>当日<wbr>その<wbr>場で<wbr>受けていただきます。<wbr>約2分で<wbr>終わるので、<wbr>準備は<wbr>いりません。<wbr>結果は<wbr>一度しか<wbr>表示されないため、<wbr>受けた<wbr>ことがある<wbr>方も、<wbr>当日もう<wbr>一度<wbr>受けてください。</p>",
+            "text": "いいえ、当日その場で受けていただきます。約2分で終わるので、準備はいりません。結果は一度しか表示されないため、受けたことがある方も、当日もう一度受けてください。"
+          },
+          {
+            "q": "途中で抜けても大丈夫ですか？",
+            "html": "<p>大丈夫です。<wbr>途中からの<wbr>参加も、<wbr>途中での<wbr>退出も<wbr>できます。</p>",
+            "text": "大丈夫です。途中からの参加も、途中での退出もできます。"
+          },
+          {
+            "q": "必要なものはありますか？",
+            "html": "<p>インターネットに<wbr>つながる<wbr>パソコンか、<wbr>スマートフォンが<wbr>あれば<wbr>参加できます。<wbr>Zoomを<wbr>使うので、<wbr>スマートフォンの<wbr>場合は<wbr>アプリを<wbr>入れておくと<wbr>スムーズです。</p>",
+            "text": "インターネットにつながるパソコンか、スマートフォンがあれば参加できます。Zoomを使うので、スマートフォンの場合はアプリを入れておくとスムーズです。"
+          },
+          {
+            "q": "売り込みはされませんか？",
+            "html": "<p>最後に、<wbr>継続サポートと<wbr>体験セッション<wbr>（個別・60分・無料）の<wbr>ご案内を<wbr>します。<wbr>ただ、<wbr>申し込みは<wbr>任意です。<wbr>受けるか<wbr>どうかは、<wbr>ご自身で<wbr>決めてください。</p>",
+            "text": "最後に、継続サポートと体験セッション（個別・60分・無料）のご案内をします。ただ、申し込みは任意です。受けるかどうかは、ご自身で決めてください。"
+          },
+          {
+            "q": "職場以外の人間関係の悩みがあっても参加できますか？",
             "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自然体の<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p>",
             "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自然体のあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。"
           }
         ]
       }
     ],
-    images: { hero: { data: img_sem_1010_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, og: { data: img_sem_1010_og, mime: 'image/png', ext: 'png', width: 1200, height: 600, version: '34394fbca4' }, speaker: { data: img_sem_1010_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
+    images: { hero: { data: img_sem_1020_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, speaker: { data: img_sem_1020_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
   },
 };
