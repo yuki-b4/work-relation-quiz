@@ -81,7 +81,7 @@ LP だけ直して、バナーや Peatix に古い言い方が残るのが一番
 | LP（`/seminar/sem-1020`） | 2026-09-27 に作った。写真と登壇者の顔写真は `sem-1010` と同じもの | Claude（デプロイは手元） |
 | 横長バナー | Canva `DAHWYKFnJB0`（セミナー告知バナー 横長 sem-1020）。2026-09-27 に `DAHWRIgJonE` を複製して作った | Claude（Canva MCP） |
 | Threads 用バナー | Canva `DAHWYCO6YIc`（セミナー告知バナー Threads sem-1020）。`DAHWSFvm2AI` を複製して作った | Claude（Canva MCP） |
-| OG画像 | **未作成**（横長バナーを 1200 幅で書き出して置く。置くまではサイト既定の画像で共有される） | Claude（ユーザーから受け取って置く） |
+| OG画像 | 2026-09-27 に置いた（横長バナーを受け取った WebP から 1200×600 の PNG に変換。`app/assets/seminar/sem-1020/og.png`） | Claude（ユーザーから受け取って置く） |
 | Peatix | **未作成**。できたら `ticket_url` を埋める（空のあいだは申込ボタンを押せない） | ユーザー |
 | Admin の入口 | slug `sem-1020` で登録する（当日の診断URL `/?ref=sem-1020` と申込 `/apply/s/sem-1020` のため） | ユーザー |
 

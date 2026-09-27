@@ -6,6 +6,7 @@ import img_sem_1010_hero from '../../assets/seminar/sem-1010/hero.jpg';
 import img_sem_1010_og from '../../assets/seminar/sem-1010/og.png';
 import img_sem_1010_speaker from '../../assets/seminar/sem-1010/speaker.jpg';
 import img_sem_1020_hero from '../../assets/seminar/sem-1020/hero.jpg';
+import img_sem_1020_og from '../../assets/seminar/sem-1020/og.png';
 import img_sem_1020_speaker from '../../assets/seminar/sem-1020/speaker.jpg';
 
 export type SeminarImage = {
@@ -392,6 +393,6 @@ export const SEMINARS: Record<string, Seminar> = {
         ]
       }
     ],
-    images: { hero: { data: img_sem_1020_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, speaker: { data: img_sem_1020_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
+    images: { hero: { data: img_sem_1020_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, og: { data: img_sem_1020_og, mime: 'image/png', ext: 'png', width: 1200, height: 600, version: 'f71a1b3504' }, speaker: { data: img_sem_1020_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
   },
 };
