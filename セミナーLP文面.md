@@ -82,7 +82,7 @@ LP だけ直して、バナーや Peatix に古い言い方が残るのが一番
 | 横長バナー | Canva `DAHWYKFnJB0`（セミナー告知バナー 横長 sem-1020）。2026-09-27 に `DAHWRIgJonE` を複製して作った | Claude（Canva MCP） |
 | Threads 用バナー | Canva `DAHWYCO6YIc`（セミナー告知バナー Threads sem-1020）。`DAHWSFvm2AI` を複製して作った | Claude（Canva MCP） |
 | OG画像 | 2026-09-27 に置いた（横長バナーを受け取った WebP から 1200×600 の PNG に変換。`app/assets/seminar/sem-1020/og.png`） | Claude（ユーザーから受け取って置く） |
-| Peatix | **未作成**。できたら `ticket_url` を埋める（空のあいだは申込ボタンを押せない） | ユーザー |
+| Peatix | https://peatix.com/event/5202871 （2026-09-27 に作成。`ticket_url` に入れた） | ユーザー |
 | Admin の入口 | slug `sem-1020` で登録する（当日の診断URL `/?ref=sem-1020` と申込 `/apply/s/sem-1020` のため） | ユーザー |
 
 ---
@@ -238,7 +238,7 @@ place: オンライン
 place_note: Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします
 fee: 無料
 capacity: 10名（先着順）
-ticket_url:
+ticket_url: https://peatix.com/event/5202871
 cta_note: 顔出し・発言なしで参加OK
 badges: 所要時間＝60分|参加費＝無料|顔出し・発言＝なしでOK
 closing: 参加は無料です
