@@ -93,7 +93,7 @@ LP だけ直して、バナーや Peatix に古い言い方が残るのが一番
 | 横長バナー | Canva `DAHW6TELSZo`（セミナー告知バナー 横長 sem-1026（10/26 21:00））。2026-10-03 に `DAHWRIgJonE` を複製して作った。曜日は英字でなく `2026.10.26(月)` と半角のカッコで書く（2026-10-03 にユーザーの指示で「mon」から変えた。Threads 用も同じ）。日付の文字の大きさと位置は `sem-1010` と同じ（200） | Claude（Canva MCP） |
 | Threads 用バナー | Canva `DAHW6bPj0W8`（セミナー告知バナー Threads sem-1026（10/26 21:00））。`DAHWSFvm2AI` を複製して作った | Claude（Canva MCP） |
 | OG画像 | 2026-10-03 に置いた（横長バナー（`(月)` の版）を受け取った WebP 2000×1000 から 1200×600 の PNG に変換。`app/assets/seminar/sem-1026/og.png`）。先に受け取った PNG のダウンロードは和文が細い書体になっていたので使わなかった（`アプリ化実装状況.md` §6） | Claude（ユーザーから受け取って置く） |
-| Peatix | **未作成**。作ったら `ticket_url` に入れる（空のあいだ申込ボタンは押せない） | ユーザー |
+| Peatix | https://peatix.com/event/5212129 （2026-10-03 に作成。`ticket_url` に入れた） | ユーザー |
 | Admin の入口 | slug `sem-1026` で登録する（当日の診断URL `/?ref=sem-1026` と申込 `/apply/s/sem-1026` のため） | ユーザー |
 
 ---
@@ -384,7 +384,7 @@ place: オンライン
 place_note: Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします
 fee: 無料
 capacity: 10名（先着順）
-ticket_url:
+ticket_url: https://peatix.com/event/5212129
 cta_note: 顔出し・発言なしで参加OK
 badges: 所要時間＝60分|参加費＝無料|顔出し・発言＝なしでOK
 closing: 参加は無料です
