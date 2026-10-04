@@ -100,6 +100,11 @@ export type ApplyOptions = {
  *
  * 赤はブランドの coral（タイプの極を表す色）とは別系統にする。同じ色だと
  * 「タイプの色」と「エラー」が混ざって見える。
+ *
+ * **入力欄の下の補足（.qhint）は、入力欄と同じ幅いっぱいまで詰めて折る**（2026-10-03）。
+ * 抽出したCSSは .qhint に text-wrap:balance を掛けている（診断画面の中央揃えの短い設問用）。
+ * この画面の補足は左揃えなので、balance だと行の長さが均されて右に大きな空きが出る。
+ * このページの <style> は抽出CSSより前に置かれるので、`.app` を足して優先度で勝たせる。
  */
 const STYLE = `
 :root{--apply-err:#B3261E}
@@ -111,6 +116,7 @@ const STYLE = `
 .field select.is-invalid:focus{border-color:var(--apply-err)}
 .vq.is-invalid .vq-opt{border-color:var(--apply-err)}
 .field-err{color:var(--apply-err); font-size:12.5px; font-weight:700; line-height:1.6; margin-top:6px; text-align:left}
+.app .qhint{text-wrap:wrap}
 `;
 
 const SCRIPT = `
