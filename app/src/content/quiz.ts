@@ -285,6 +285,103 @@ export const LIKERT = [
   }
 ] as const;
 
+/**
+ * 設問文と選択肢を文節で区切ったもの（<wbr> 入りのHTML）。並びは ITEMS と同じ。
+ * 画面はこれを innerHTML に入れ、word-break:keep-all で文節の切れ目でだけ折る。
+ */
+export const ITEM_HTML = [
+  {
+    "text": "誰かと<wbr>話していて<wbr>違和感を<wbr>覚えた<wbr>とき、<wbr>あなたは？",
+    "a": "その<wbr>場で<wbr>「ちょっと<wbr>いい？」と<wbr>口に<wbr>出す",
+    "b": "ひとまず<wbr>飲み込んで、<wbr>あとで<wbr>個別に<wbr>言うか<wbr>考える"
+  },
+  {
+    "text": "意見が<wbr>真っ向から<wbr>対立した<wbr>とき、<wbr>あなたは？",
+    "a": "納得いくまで<wbr>議論する。<wbr>逃げない",
+    "b": "一度<wbr>引いて、<wbr>角が<wbr>立たない<wbr>落としどころを<wbr>探す"
+  },
+  {
+    "text": "誰も<wbr>決めない<wbr>・動かない<wbr>場面で、<wbr>あなたは？",
+    "a": "「じゃあ<wbr>自分が」と<wbr>前に<wbr>出て<wbr>引っ張る",
+    "b": "引っ張る<wbr>人を<wbr>支える<wbr>・補佐に<wbr>回る"
+  },
+  {
+    "text": "あなた<wbr>自身が<wbr>モヤモヤや<wbr>不満を<wbr>抱えている<wbr>とき、<wbr>周りは？",
+    "a": "わりと<wbr>すぐ<wbr>気づく<wbr>（顔や<wbr>言葉に<wbr>出ている）",
+    "b": "言わないと<wbr>気づかれない<wbr>（表には<wbr>出さない）"
+  },
+  {
+    "text": "解決すべき<wbr>問題が<wbr>あって、<wbr>場の<wbr>空気が<wbr>張りつめている<wbr>とき、<wbr>あなたは？",
+    "a": "問題<wbr>その<wbr>ものに<wbr>切り込む",
+    "b": "冗談や<wbr>話題転換で、<wbr>まず<wbr>空気を<wbr>ゆる<wbr>める"
+  },
+  {
+    "text": "あなたが<wbr>心地よいのは？",
+    "a": "自分が<wbr>主導権を<wbr>握って<wbr>進める<wbr>立場",
+    "b": "前に<wbr>立つ人を<wbr>立て、<wbr>後ろから<wbr>支える<wbr>立場"
+  },
+  {
+    "text": "自分が<wbr>手一杯で<wbr>苦しい<wbr>とき、<wbr>あなたは？",
+    "a": "「ちょっと<wbr>厳しいです」と<wbr>早めに<wbr>声を<wbr>上げる",
+    "b": "まず<wbr>自分で<wbr>抱えて、<wbr>なんとかしようと<wbr>する"
+  },
+  {
+    "text": "相手が<wbr>明らかに<wbr>間違った<wbr>ことを<wbr>言っている・している<wbr>とき、<wbr>あなたは？",
+    "a": "はっきり指摘する",
+    "b": "直接は<wbr>言わず、<wbr>別の<wbr>形で<wbr>伝えるか流す"
+  },
+  {
+    "text": "みんなで<wbr>何かに<wbr>取り組む<wbr>とき、<wbr>つい取りに<wbr>行くのは？",
+    "a": "旗を<wbr>振る<wbr>・<wbr>引っ張る<wbr>ポジション",
+    "b": "縁の<wbr>下・サポートの<wbr>ポジション"
+  },
+  {
+    "text": "相手や<wbr>立場が<wbr>変わっても、<wbr>反対意見は<wbr>はっきり口に<wbr>する<wbr>ほうだ"
+  },
+  {
+    "text": "大事な<wbr>ことでも、<wbr>思い切って<wbr>人に<wbr>任せる<wbr>ほうだ"
+  },
+  {
+    "text": "引き受けると<wbr>手一杯に<wbr>なる<wbr>依頼は<wbr>「できません」と<wbr>断る<wbr>ほうだ"
+  },
+  {
+    "text": "意見が<wbr>ぶつかっても、<wbr>逃げずに、<wbr>関係を<wbr>保ちながら<wbr>話し合う<wbr>ほうだ"
+  },
+  {
+    "text": "相手の<wbr>良い<wbr>ところは、<wbr>自分から<wbr>言葉に<wbr>して<wbr>伝える<wbr>ほうだ"
+  },
+  {
+    "text": "自分の<wbr>失敗や<wbr>ミスは、<wbr>隠さず<wbr>打ち明ける<wbr>ほうだ"
+  },
+  {
+    "text": "人に<wbr>任せたら、<wbr>細かく<wbr>口を<wbr>出さずに<wbr>見守る<wbr>ほうだ"
+  },
+  {
+    "text": "手一杯な<wbr>ときは<wbr>「いま厳しい」と<wbr>早めに<wbr>伝える<wbr>ほうだ"
+  },
+  {
+    "text": "必要な<wbr>ときは、<wbr>対立から<wbr>逃げずに<wbr>向き合う<wbr>ほうだ"
+  },
+  {
+    "text": "感謝や<wbr>「ありがとう」を、<wbr>ためらわず口に<wbr>する<wbr>ほうだ"
+  },
+  {
+    "text": "困った<wbr>ときは<wbr>「助けて<wbr>ほしい」と、<wbr>自分から<wbr>言う<wbr>ほうだ"
+  },
+  {
+    "text": "何かを<wbr>任せる<wbr>とき、<wbr>相手の<wbr>力量を<wbr>信じて、<wbr>安心してゆだねる<wbr>ほうだ"
+  },
+  {
+    "text": "相手の<wbr>期待と<wbr>自分の<wbr>事情を、<wbr>自分から<wbr>すり合わせる<wbr>ほうだ"
+  },
+  {
+    "text": "揉めた<wbr>あとも、<wbr>自分から<wbr>関係を<wbr>立て直す<wbr>ほうだ"
+  },
+  {
+    "text": "立場を<wbr>超えて、<wbr>自分から<wbr>つながりを<wbr>築きに<wbr>いく<wbr>ほうだ"
+  }
+] as const;
+
 /** 出題順：9問（二択）→ 15問（リッカート）。全24問。 */
 export const ITEMS = [
   ...QUESTIONS.map((q) => ({ kind: 'bin' as const, axis: q.axis, text: q.text, a: q.a, b: q.b })),

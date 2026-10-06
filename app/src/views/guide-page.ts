@@ -59,7 +59,8 @@ const SHELL_SCRIPT = `
     $('guideEnd').hidden = !last;
     $('bkNext').hidden = last;
     $('bkPrev').hidden = idx === 0;
-    if (!last) $('bkNextT').textContent = chapters[idx + 1].label;
+    // 下のバーは短く「第二章へ」。章の正式名は上の点（title）と柱に出ている
+    if (!last) $('bkNextT').textContent = chapters[idx + 1].label.split('　')[0] + 'へ';
     renderRail();
     // 到達を記録する（F4-5）。終章に着いた回数と時刻はAdminで見る。
     reportProgress(idx);

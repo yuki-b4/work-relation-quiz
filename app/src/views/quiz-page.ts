@@ -9,8 +9,10 @@
  * /result へ進む（F4-2）。
  */
 import { INTRO_MARKUP, FRAME_MARKUP, QUIZ_MARKUP } from '../content/screens.ts';
-import { ITEMS, LIKERT } from '../content/quiz.ts';
-import { page, siteFooter } from './layout.ts';
+import { ITEMS, ITEM_HTML, LIKERT } from '../content/quiz.ts';
+import { TYPES, TYPE_CODES, TYPE_NAME_HTML } from '../content/types.ts';
+import { page, siteFooter, topHeader } from './layout.ts';
+import { esc } from './result.ts';
 
 const TITLE = '人間関係タイプ診断（無料・登録不要） | ナチュール診断';
 const DESCRIPTION =
@@ -21,9 +23,14 @@ function clientScript(): string {
   return `
 (function () {
   var ITEMS = ${JSON.stringify(ITEMS)};
+  // 設問文と選択肢の文節区切り（<wbr> 入り）。文面は ITEMS と同じで、折る位置だけを持たせたもの
+  var ITEM_HTML = ${JSON.stringify(ITEM_HTML)};
   var LIKERT = ${JSON.stringify(LIKERT)};
   var KEY = 'natur.tab';
   var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  };
   var idx = 0;
   var answers = new Array(ITEMS.length).fill(null);
   var sending = false;
@@ -39,25 +46,30 @@ function clientScript(): string {
     $(id).classList.add('active');
     toTop();
   }
+  // 1問あたり約5秒（24問で約2分）として、残りの時間を分で出す。最後まで「約1分」は残す。
+  function leftText(i) { return 'あと約' + Math.max(1, Math.round((ITEMS.length - i) * 5 / 60)) + '分'; }
   function renderQ() {
     var q = ITEMS[idx];
     var pct = Math.round((idx / ITEMS.length) * 100);
     $('qcount').textContent = (idx + 1) + ' / ' + ITEMS.length;
-    $('qpct').textContent = pct + '%';
+    $('qno').textContent = 'Q' + (idx + 1);
+    $('qleft').textContent = leftText(idx);
     $('barfill').style.width = pct + '%';
-    $('qtext').textContent = q.text;
+    $('qbar').setAttribute('aria-valuenow', String(idx));
+    $('qtext').innerHTML = ITEM_HTML[idx].text;
     var c = $('choices');
     c.innerHTML = '';
     if (q.kind === 'bin') {
       [['A', q.a], ['B', q.b]].forEach(function (pair) {
         var b = document.createElement('button');
-        b.className = 'choice';
+        // ひとつ戻ったときは、選んでいた答えに印を付けておく
+        b.className = 'choice' + (answers[idx] === pair[1].p ? ' is-on' : '');
         b.type = 'button';
         var mk = document.createElement('span');
         mk.className = 'mk';
         mk.textContent = pair[0];
         var tx = document.createElement('span');
-        tx.textContent = pair[1].t;
+        tx.innerHTML = ITEM_HTML[idx][pair[0] === 'A' ? 'a' : 'b'];
         b.appendChild(mk); b.appendChild(tx);
         b.onclick = function () { pick(pair[1].p); };
         c.appendChild(b);
@@ -69,18 +81,25 @@ function clientScript(): string {
       var dots = document.createElement('div');
       dots.className = 'scale-dots';
       dots.setAttribute('role', 'radiogroup');
+      dots.setAttribute('aria-label', 'どれくらい当てはまるか');
+      // 4つ全部に言葉を付ける。「とても／そう思う」のように、程度の語のあとで改行する
       LIKERT.slice().reverse().forEach(function (opt) {
+        var on = answers[idx] === opt.v;
         var b = document.createElement('button');
-        b.className = 'dot dot-' + opt.v;
+        b.className = 'dot dot-' + opt.v + (on ? ' is-on' : '');
         b.type = 'button';
-        b.setAttribute('aria-label', opt.t);
-        b.title = opt.t;
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+        var ring = document.createElement('span');
+        ring.className = 'dot-ring';
+        var label = document.createElement('span');
+        label.className = 'dot-label';
+        label.innerHTML = esc(opt.t).replace(/^(まったく|あまり|やや|とても)/, '$1<br>');
+        b.appendChild(ring); b.appendChild(label);
         b.onclick = function () { pick(opt.v); };
         dots.appendChild(b);
       });
       scale.appendChild(dots);
-      scale.insertAdjacentHTML('beforeend',
-        '<div class="scale-legend"><span>当てはまらない</span><span>当てはまる</span></div>');
       c.appendChild(scale);
       $('qhint').innerHTML = 'ふだんの自分を思い浮かべて、<br>どれくらい当てはまるか直感で。';
     }
@@ -137,8 +156,11 @@ function clientScript(): string {
 
   $('backBtn').onclick = function () { if (idx > 0) { idx--; renderQ(); } };
   $('startBtn').onclick = function () { show('frame'); };
+  // ヘッダー（PC）とトップ下の帯にも、同じ「はじめる」ボタンがある
+  var starts = document.querySelectorAll('[data-start]');
+  for (var i = 0; i < starts.length; i++) starts[i].onclick = function () { show('frame'); };
   $('frameStart').onclick = function () {
-    $('qframe').textContent = '力を抜いた「普段のあなた」で答えてください';
+    $('qframe').innerHTML = '力を抜いた<wbr>「いつものあなた」で<wbr>答えてください';
     idx = 0; answers.fill(null);
     renderQ(); show('quiz');
   };
@@ -146,6 +168,32 @@ function clientScript(): string {
 })();
 `;
 }
+
+/**
+ * トップの「8つのタイプ」。prototype.html は TYPES からJSで描くが、こちらはサーバで描いて本文に含める
+ * （検索とAI要約に、タイプ名が本文として届くように）。器の形は prototype.html と同じ。
+ */
+const TOP_TYPES_SLOT = '<div class="type-grid" id="topTypes"></div>';
+function topTypes(): string {
+  return (
+    '<div class="type-grid" id="topTypes">' +
+    TYPE_CODES.map((code) => {
+      const t = TYPES[code];
+      return (
+        `<a class="type-tile${t.pole === 'guard' ? ' is-guard' : ''}" href="/types/${code}">` +
+        `<span class="tt-code">${esc(code)}</span><span class="tt-name">${TYPE_NAME_HTML[code]}</span>` +
+        `<span class="tt-catch">${esc(t.catch)}</span></a>`
+      );
+    }).join('') +
+    '</div>'
+  );
+}
+const INTRO = (() => {
+  if (!INTRO_MARKUP.includes(TOP_TYPES_SLOT)) {
+    throw new Error('トップの8タイプの器が見つかりません。prototype.html を確認してください');
+  }
+  return INTRO_MARKUP.replace(TOP_TYPES_SLOT, topTypes());
+})();
 
 export function topPage(origin: string): string {
   const canonical = origin + '/';
@@ -179,8 +227,8 @@ export function topPage(origin: string): string {
       script: clientScript(),
     },
     '<div class="app">' +
-      '<header class="app-header">ナチュール診断</header>' +
-      INTRO_MARKUP + FRAME_MARKUP + QUIZ_MARKUP +
+      topHeader() +
+      INTRO + FRAME_MARKUP + QUIZ_MARKUP +
       siteFooter() +
     '</div>'
   );

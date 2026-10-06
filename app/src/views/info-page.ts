@@ -11,7 +11,7 @@
  * この器は、その中身に見出しとメタ情報と構造化データを付けるだけ。
  */
 import { FAQ_ITEMS, INFO_PAGES, type InfoPage } from '../content/pages.ts';
-import { page, siteFooter } from './layout.ts';
+import { page, siteFooter, siteHeader } from './layout.ts';
 import { esc } from './result.ts';
 
 export type InfoKey = keyof typeof INFO_PAGES;
@@ -44,9 +44,9 @@ const INFO_CSS =
   // 外さないと濃紺の地に濃紺の文字が乗り、このページのボタンだけ色が違って見える。
   '.info a.btn{color:#fff}' +
   '.info strong{font-weight:700}' +
-  '.info code{font-size:.92em; background:#EDEDE8; border-radius:4px; padding:1px 5px}' +
+  '.info code{font-size:.92em; background:var(--sunken); border-radius:4px; padding:1px 5px}' +
   // 節の見出し。.sectlabel の見た目を借りつつ、最初の1つだけ上の余白を詰める。
-  '.info h2{font-size:18px; font-weight:900; letter-spacing:.02em; line-height:1.5;' +
+  '.info h2{font-size:20px; font-weight:700; letter-spacing:.02em; line-height:1.5;' +
   ' margin:40px 0 14px}' +
   '.info h2:first-of-type{margin-top:30px}' +
   '.info .lead-in{font-size:15.5px; color:var(--ink); line-height:1.95; margin-bottom:6px}' +
@@ -164,7 +164,7 @@ export function infoPage(key: InfoKey, origin: string): string {
         `<script type="application/ld+json">${jsonLd}</script>`,
     },
     '<div class="app">' +
-      `<header class="app-header"><a href="/" style="color:inherit; text-decoration:none">${SITE}</a></header>` +
+      siteHeader() +
       '<section class="screen active info">' +
         `<h1 class="hero">${esc(data.h1)}</h1>` +
         (data.lead ? `<div class="lead-in">${data.lead}</div>` : '') +

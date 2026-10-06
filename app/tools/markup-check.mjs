@@ -82,9 +82,11 @@ const withAngle = renderResultCard({
   radar,
 });
 const idsMine = idsOf(withAngle);
+// 「3つの極 → タイプ」の図（r-axes-note）は 2026-10-06 に外した。節へ飛ぶチップの行き先（sec-*）を足した
 for (const need of ['card', 'r-emblem', 'r-rays', 'r-catch', 'r-name', 'r-code', 'r-axes',
-                    'r-axes-note', 'r-aru', 'r-tsuyomi', 'r-toriset', 'r-spectrums', 'r-focus',
-                    'r-hs-core', 'r-hs-cost', 'r-hs-loop', 'deepBlock', 'openGuide', 'restartBtn']) {
+                    'r-aru', 'r-tsuyomi', 'r-toriset', 'r-spectrums', 'r-focus',
+                    'r-hs-core', 'r-hs-cost', 'r-hs-loop', 'deepBlock', 'openGuide', 'restartBtn',
+                    'sec-axes', 'sec-aru', 'sec-tori', 'sec-tend', 'sec-deep']) {
   if (!idsMine.has(need)) problems.push(`id が無い: ${need}`);
 }
 

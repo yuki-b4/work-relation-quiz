@@ -324,5 +324,17 @@ export const TYPE_ICON = {
   "GKS": "<path d=\"M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z\"/>"
 } as const;
 
+/** タイプ名を文節で区切ったもの（<wbr> 入りのHTML。エスケープ済み）。見出しやカードで語の途中で折らない。 */
+export const TYPE_NAME_HTML: Record<string, string> = {
+  "OBL": "突撃隊長",
+  "OBS": "正論<wbr>ハンマー",
+  "OKL": "お祭り隊長",
+  "OKS": "自由人<wbr>コメンテーター",
+  "GBL": "沈黙の<wbr>大黒柱",
+  "GBS": "縁の<wbr>下の<wbr>職人",
+  "GKL": "根回しの<wbr>仕掛け人",
+  "GKS": "がんばり屋の<wbr>調整役"
+};
+
 export type TypeCode = keyof typeof TYPES;
 export const TYPE_CODES = Object.keys(TYPES) as TypeCode[];
