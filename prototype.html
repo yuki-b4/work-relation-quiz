@@ -758,11 +758,10 @@
 </head>
 <body>
 <div class="app">
-  <!-- ヘッダー：ロゴと診断名。右側はトップでは案内のリンク、設問では件数を出す（CSSで出し分け） -->
+  <!-- ヘッダー：ロゴと診断名。右側はトップでは案内のリンク（PCだけ）、設問では件数を出す（CSSで出し分け）。全8タイプ一覧へのリンクは置かない（2026-10-06） -->
   <header class="app-header">
     <a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 28 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#2D4A6B"/><circle cx="18" cy="10" r="8" fill="#E9A24C"/><path d="M14 3.07A8 8 0 0 1 14 16.93A8 8 0 0 1 14 3.07Z" fill="#F6F1E9"/></svg><span class="brand-name">ナチュール診断</span></a>
     <nav class="head-nav" aria-label="メイン">
-      <a class="head-link" href="/types">8タイプ一覧</a>
       <a class="head-link head-pc" href="/about">ナチュール診断とは</a>
       <a class="head-link head-pc" href="/faq">よくある質問</a>
       <button class="head-cta head-pc" type="button" data-start>診断を始める</button>
