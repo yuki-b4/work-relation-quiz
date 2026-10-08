@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadDefaultJapaneseParser } from 'budoux';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(here, '../../prototype.html');
@@ -76,6 +77,15 @@ function fnSource(name) {
   throw new Error(`括弧が閉じていません: ${name}`);
 }
 
+// 文節の切れ目に <wbr> を入れる（2026-10-06）。iPhone（WebKit）は Chrome だけで効く改行指定が使えないので、
+// 切れ目を文字として持たせ、画面は word-break:keep-all でその位置でだけ折る（.claude/rules/frontend.md）。
+// 使うのは見出し・設問・タイプ名のような短い文だけ。文面そのものは変えない。
+const phraser = loadDefaultJapaneseParser();
+const escHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const phrase = (t) => phraser.parse(String(t)).map(escHtml).join('<wbr>');
+// タイプ名は BudouX が区切らないもの（自由人コメンテーター）があるので、漢字からカタカナへ変わる所でも区切る
+const phraseName = (t) => phrase(t).replace(/([\u4E00-\u9FFF])(?=[\u30A1-\u30FA])/g, '$1<wbr>');
+
 const NAMES = [
   'QUESTIONS', 'RADAR_Q', 'RADAR_AXES', 'RADAR_META', 'AX', 'LIKERT',
   'TYPES', 'TORISET', 'TORI_LABEL', 'HONSHITSU', 'HONSHITSU_LOOP', 'TYPE_ICON',
@@ -117,6 +127,15 @@ export const RADAR_Q = ${j(v.RADAR_Q)} as const;
 /** 4件法の選択肢。表示は右（そう思う）から左（思わない）の順に並べる。 */
 export const LIKERT = ${j(v.LIKERT)} as const;
 
+/**
+ * 設問文と選択肢を文節で区切ったもの（<wbr> 入りのHTML）。並びは ITEMS と同じ。
+ * 画面はこれを innerHTML に入れ、word-break:keep-all で文節の切れ目でだけ折る。
+ */
+export const ITEM_HTML = ${j([
+  ...v.QUESTIONS.map((q) => ({ text: phrase(q.text), a: phrase(q.a.t), b: phrase(q.b.t) })),
+  ...v.RADAR_Q.map((q) => ({ text: phrase(q.text) })),
+])} as const;
+
 /** 出題順：9問（二択）→ 15問（リッカート）。全24問。 */
 export const ITEMS = [
   ...QUESTIONS.map((q) => ({ kind: 'bin' as const, axis: q.axis, text: q.text, a: q.a, b: q.b })),
@@ -143,6 +162,9 @@ export const HONSHITSU_LOOP = ${j(v.HONSHITSU_LOOP)};
 
 /** エンブレムのSVGパス（自作インライン。外部素材は使わない）。 */
 export const TYPE_ICON = ${j(v.TYPE_ICON)} as const;
+
+/** タイプ名を文節で区切ったもの（<wbr> 入りのHTML。エスケープ済み）。見出しやカードで語の途中で折らない。 */
+export const TYPE_NAME_HTML: Record<string, string> = ${j(Object.fromEntries(Object.entries(v.TYPES).map(([c, t]) => [c, phraseName(t.name)])))};
 
 export type TypeCode = keyof typeof TYPES;
 export const TYPE_CODES = Object.keys(TYPES) as TypeCode[];
@@ -172,7 +194,13 @@ const buildChapters = new Function(
 )(v.TYPES, v.GUIDE_BODY, v.TORI_LABEL, guideAuthor, bkDiv);
 
 const guideChapters = {};
-for (const code of Object.keys(v.TYPES)) guideChapters[code] = buildChapters(code);
+for (const code of Object.keys(v.TYPES)) {
+  // 章扉のタイトルだけ文節で区切る（狭い画面で「環/境」のように折れないように）
+  guideChapters[code] = buildChapters(code).map((c) => ({
+    ...c,
+    open: c.open.replace(/<h2 class="bk-title">([^<]*)<\/h2>/g, (m, inner) => `<h2 class="bk-title">${phrase(inner)}</h2>`),
+  }));
+}
 
 writeFileSync(
   resolve(OUT, 'guide-chapters.ts'),
@@ -209,6 +237,8 @@ const ixCss = (() => {
   return allTypesHtml.slice(from, to);
 })();
 
+// 全画面共通のヘッダー（ロゴ・トップの案内・設問の件数）。layout.ts が使う。
+const headerMarkup = between(/<!-- ヘッダー[^\n]*\n/, /\n\n  <!-- INTRO/);
 // イントロ・フレーム・設問の素のHTML。ここは埋める値が無いので、そのまま使う。
 const introMarkup = between(/<!-- INTRO -->\n/, /\n\n  <!-- FRAME/);
 const frameMarkup = between(/<!-- FRAME（[^\n]*\n/, /\n\n  <!-- QUIZ/);
@@ -239,6 +269,7 @@ writeFileSync(
  * prototype.html の該当節をそのまま写したもの。埋める値が無いので、このまま出す。
  * 文面を変えるときは prototype.html を直して \`npm run content\` で再生成する。
  */
+export const HEADER_MARKUP = ${JSON.stringify(headerMarkup)};
 export const INTRO_MARKUP = ${JSON.stringify(introMarkup)};
 export const FRAME_MARKUP = ${JSON.stringify(frameMarkup)};
 export const QUIZ_MARKUP = ${JSON.stringify(quizMarkup)};
@@ -287,6 +318,7 @@ console.log('生成しました:');
 console.log(`  APP_CSS          ${css.length} 文字`);
 console.log(`  INDEX_CSS        ${ixCss.length} 文字`);
 console.log(`  PROTO_CLASSES    ${protoClasses.size} 種`);
+console.log(`  HEADER           ${headerMarkup.length} 文字`);
 console.log(`  INTRO/FRAME/QUIZ ${introMarkup.length} / ${frameMarkup.length} / ${quizMarkup.length} 文字`);
 console.log(`  GUIDE_CHAPTERS   ${Object.keys(guideChapters).length}タイプ × ${guideChapters.OBL.length}章`);
 console.log(`  GUIDE_MARKUP     ${guideMarkup.length} 文字`);

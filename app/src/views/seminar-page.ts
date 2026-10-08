@@ -22,7 +22,7 @@
 import type { Seminar, SeminarImage } from '../content/seminars.ts';
 import { PHRASES } from '../content/seminars.ts';
 import { websiteLd } from './info-page.ts';
-import { ICONS } from './layout.ts';
+import { ICONS, OGP_PATH } from './layout.ts';
 import { esc } from './result.ts';
 
 const SITE = 'ナチュール診断';
@@ -583,7 +583,7 @@ function wave(fromAqua: boolean): string {
 function eventLd(s: Seminar, origin: string, canonical: string, ended: boolean) {
   const image = s.images.og
     ? [imageUrl(origin, s.slug, 'og', s.images.og)]
-    : s.images.hero ? [imageUrl(origin, s.slug, 'hero', s.images.hero)] : [`${origin}/ogp.png`];
+    : s.images.hero ? [imageUrl(origin, s.slug, 'hero', s.images.hero)] : [`${origin}${OGP_PATH}`];
   const price = priceOf(s.fee);
   return {
     '@type': 'Event',
@@ -613,7 +613,7 @@ function eventLd(s: Seminar, origin: string, canonical: string, ended: boolean) 
 
 function head(s: Seminar, origin: string, canonical: string, ended: boolean): string {
   const og = s.images.og;
-  const ogUrl = og ? imageUrl(origin, s.slug, 'og', og) : `${origin}/ogp.png`;
+  const ogUrl = og ? imageUrl(origin, s.slug, 'og', og) : `${origin}${OGP_PATH}`;
   const ogW = og ? og.width : 1200;
   const ogH = og ? og.height : 630;
 

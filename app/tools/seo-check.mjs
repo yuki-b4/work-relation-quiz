@@ -191,8 +191,9 @@ t('robots に /admin を書いていない', rb.body.includes('/admin'), false);
 // ブックマークや共有のときに何のページか分からなくなる）。
 {
   const top = await get('/');
-  t('svg の favicon を出す', top.markup.includes('<link rel="icon" href="/favicon.svg"'), true);
-  t('ico の favicon も出す', top.markup.includes('<link rel="icon" href="/favicon.ico"'), true);
+  // 差し替えたときにブラウザの古いアイコンを切るため、?v= が付くことがある（layout.ts の ASSET_VER）
+  t('svg の favicon を出す', /<link rel="icon" href="\/favicon\.svg(\?v=\w+)?"/.test(top.markup), true);
+  t('ico の favicon も出す', /<link rel="icon" href="\/favicon\.ico(\?v=\w+)?"/.test(top.markup), true);
   t('apple-touch-icon を出す', top.markup.includes('rel="apple-touch-icon"'), true);
   for (const [path, type] of [
     ['/favicon.ico', 'image/x-icon'],

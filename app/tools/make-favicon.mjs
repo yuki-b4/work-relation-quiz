@@ -8,14 +8,17 @@
  *   favicon.ico          16+32px を1つにまとめた古い形式。/favicon.ico を直接見に来る相手向け
  *   apple-touch-icon.png 180×180。iOS のホーム画面用。**透過にしない**（黒地に合成されるため）
  *
- * **意匠は OGP と同じ2色で作る。** コーラル＝オープン、ティール＝ガードで、診断の2つの極。
- * 16px では文字は読めないので、色と形だけで見分けがつくようにする。
+ * **意匠はサイトのロゴと同じ（2026-10-06 の刷新で変えた）。** 藍と杏の2つの円を少し重ね、
+ * 重なった部分を抜く。「あなた」と「相手」、そのあいだにある関係。ヘッダーのロゴ・OGP の印と同じもの。
+ * 以前はコーラル／ティールを左右に塗り分けていたが、その2色は**タイプの極だけ**に使うことにしたので変えた。
  *
- * **分け方は左右にする。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
- * 2つの極に優劣は無い。左右は並置に見えるので、意味を持ち込まずに済む。
+ * **重なりは塗らずに抜く。** ヘッダーでは地の色で塗っているが、タブの地は明るいことも暗いこともあるので、
+ * 透過にしてどちらの地でも同じ形に見えるようにする。
+ *
+ * 16px では文字は読めないので、色と形だけで見分けがつくようにする。円の間隔は半径と同じにして、
+ * 重なりの幅（16px で約5px）が潰れないようにする。
  *
  * 色は prototype.html の CSS から取る（OGP と同じやり方）。サイトの色を変えれば追従する。
- * **境目はぼかさない。** 中間色を作るとにじみに見えて、2つの極という意味が消える。
  */
 import { writeFileSync, mkdirSync, existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -31,27 +34,40 @@ function cssVar(name, fallback) {
   return m ? m[1].trim() : fallback;
 }
 const C = {
-  bg: cssVar('bg', '#F3F3EF'),
-  coral: cssVar('coral', '#C0492B'),
-  teal: cssVar('teal', '#0F6E56'),
+  bg: cssVar('bg', '#F6F1E9'),
+  ai: cssVar('ai', '#2D4A6B'),
+  an: cssVar('an', '#E9A24C'),
 };
 
 // ───────── 意匠（SVGが正。PNG も ICO もこれを描いて作る） ─────────
 
 /**
- * @param opaque true なら背景を塗る（iOS 用）。false なら丸の外は透過にして、
+ * 2つの円（左＝藍、右＝杏）と、重なりのレンズ形。
+ * 半径 r の円を、中心の間隔 r で並べる（ロゴの viewBox 28×20 と同じ比率）。
+ */
+function mark(r, cx, cy) {
+  const x1 = cx - r / 2, x2 = cx + r / 2;
+  const h = Math.sqrt(r * r - (r / 2) * (r / 2));   // 交点の上下の距離
+  const top = (cy - h).toFixed(3), bottom = (cy + h).toFixed(3);
+  const lens = `M${cx} ${top}A${r} ${r} 0 0 1 ${cx} ${bottom}A${r} ${r} 0 0 1 ${cx} ${top}Z`;
+  return { x1, x2, lens };
+}
+
+/**
+ * @param opaque true なら背景を塗る（iOS 用）。false なら円の外と重なりは透過にして、
  *   濃いタブバーでも明るいタブバーでも浮かないようにする。
  */
 function svg(opaque) {
-  // 丸を切って左右を塗り分ける。パスで半円2つを描くより、clipPath のほうが
-  // 半径を変えたときにズレない。
+  // iOS のホーム画面は角丸で切り抜かれるので、背景ありのときは小さめにして余白を取る
+  const r = opaque ? 15 : 19;
+  const m = mark(r, 32, 32);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <title>ナチュール診断</title>
   ${opaque ? `<rect width="64" height="64" fill="${C.bg}"/>` : ''}
-  <clipPath id="c"><circle cx="32" cy="32" r="${opaque ? 24 : 30}"/></clipPath>
-  <g clip-path="url(#c)">
-    <rect x="0" y="0" width="32" height="64" fill="${C.coral}"/>
-    <rect x="32" y="0" width="32" height="64" fill="${C.teal}"/>
+  <mask id="m"><rect width="64" height="64" fill="#fff"/><path d="${m.lens}" fill="#000"/></mask>
+  <g mask="url(#m)">
+    <circle cx="${m.x1}" cy="32" r="${r}" fill="${C.ai}"/>
+    <circle cx="${m.x2}" cy="32" r="${r}" fill="${C.an}"/>
   </g>
 </svg>`;
 }

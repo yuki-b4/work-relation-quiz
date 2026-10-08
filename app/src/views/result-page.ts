@@ -15,7 +15,7 @@
  */
 import { TYPE_NOTE } from '../lib/declaration.ts';
 import { declareSection, DECLARE_CSS } from './declare.ts';
-import { page } from './layout.ts';
+import { page, siteHeader } from './layout.ts';
 
 /**
  * 押していない人にフォークを出すきっかけ（2026-09-12）。**ここだけ見れば調整できる**ようにまとめる。
@@ -260,7 +260,7 @@ export function resultShell(): string {
   return page(
     { title: '診断結果 | ナチュール診断', noindex: true, script: SHELL_SCRIPT, head: DECLARE_CSS },
     '<div class="app">' +
-      '<header class="app-header">ナチュール診断</header>' +
+      siteHeader() +
       '<section class="screen active" id="result"><div id="resultMount"></div></section>' +
       // 宣言のフォーク（A-1）。結果に重ねて出す。CTAを押した人にも、押さない人にも
       declareSection() +

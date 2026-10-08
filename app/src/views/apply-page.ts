@@ -15,7 +15,7 @@
  *   ・honeypot ＋ レート制限を必ず入れる
  */
 import { TYPES, type TypeCode } from '../content/types.ts';
-import { page } from './layout.ts';
+import { page, siteHeader } from './layout.ts';
 import { esc } from './result.ts';
 
 /**
@@ -289,7 +289,7 @@ export function applyPage(opts: ApplyOptions): string {
 
   const body =
     '<div class="app">' +
-      '<header class="app-header">ナチュール診断</header>' +
+      siteHeader() +
       '<section class="screen active">' +
         `<div class="eyebrow">体験セッション（${esc(sessionLabel)}・無料）</div>` +
         `<h1 class="hero" style="font-size:clamp(21px,4.6vw,28px)">${esc(headline)}</h1>` +
@@ -345,7 +345,8 @@ export function applyPage(opts: ApplyOptions): string {
           '<p class="qhint" style="text-align:left; margin-bottom:10px">' +
           '申込完了後に日程調整のリンクが表示されますので、希望される日程を選択してください。</p>' +
 
-          '<button class="btn btn-wide btn-accent" id="applySubmit" type="submit">この内容で申し込む</button>' +
+          // 主役のボタンは藍（2026-10-06）。タイプの極の色（coral／teal）は使わない
+          '<button class="btn btn-wide" id="applySubmit" type="submit">この内容で申し込む</button>' +
           '<p class="proto-note" id="applyNote"></p>' +
         '</form>' +
 
@@ -381,7 +382,7 @@ export function applyClosedPage(): string {
   return page(
     { title: '受付を終了しました | ナチュール診断', noindex: true },
     '<div class="app">' +
-      '<header class="app-header">ナチュール診断</header>' +
+      siteHeader() +
       '<section class="screen active">' +
         '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">この体験セッションの受付は終了しました</h1>' +
         '<p class="lead">お申し込みいただける期間が過ぎています。ご案内の行き違いでしたら、申し訳ありません。</p>' +

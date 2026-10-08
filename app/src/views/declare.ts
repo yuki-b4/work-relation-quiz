@@ -113,13 +113,14 @@ export const DECLARE_CSS =
   '#dcModal{position:fixed; inset:0; width:100%; max-width:none; height:100%; max-height:none;' +
   ' margin:0; padding:0; border:0; background:transparent; overflow-y:auto; overscroll-behavior:contain}' +
   '#dcModal[open]{display:flex; align-items:center; justify-content:center}' +
-  '#dcModal::backdrop{background:rgba(24,24,22,.5)}' +
+  '#dcModal::backdrop{background:rgba(43,39,36,.5)}' +
   '.dc-sheet{position:relative; width:100%; max-width:470px; margin:auto; padding:26px 22px 30px;' +
   ' background:var(--bg); border-radius:20px; box-shadow:var(--shadow)}' +
   // 閉じるは**必ず見える位置に置く**。逃げ場の無いモーダルは、結果ごと嫌われる。
-  '.dc-close{position:absolute; top:10px; right:12px; width:34px; height:34px; padding:0;' +
+  '.dc-close{position:absolute; top:6px; right:8px; width:44px; height:44px; padding:0;' +
   ' background:none; border:none; cursor:pointer; color:var(--faint); font-size:20px; line-height:1}' +
   '.dc-close:hover{color:var(--muted)}' +
+  '.dc-close:focus-visible{outline:3px solid var(--an); outline-offset:-4px; border-radius:12px}' +
   '@media (max-width:520px){.dc-sheet{max-width:none; margin:auto 0 0; border-radius:20px 20px 0 0}}' +
   '</style>';
 
