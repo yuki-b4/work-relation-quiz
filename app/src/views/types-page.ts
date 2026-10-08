@@ -12,7 +12,7 @@
  */
 import { AX } from '../content/quiz.ts';
 import { TYPES, TYPE_CODES, TYPE_ICON, TYPE_NAME_HTML, type TypeCode } from '../content/types.ts';
-import { page, siteFooter, siteHeader } from './layout.ts';
+import { page, siteFooter, siteHeader, OGP_PATH } from './layout.ts';
 import { esc } from './result.ts';
 
 /** そのタイプが3軸のどちら側かを言葉にする。 */
@@ -122,7 +122,7 @@ export function typesIndexPage(origin: string): string {
       title: `${LIST_TITLE} | ナチュール診断`,
       description: LIST_DESC,
       canonical,
-      ogImage: `${origin}/ogp.png`,
+      ogImage: `${origin}${OGP_PATH}`,
       head:
         `<meta property="og:type" content="website">` +
         `<meta property="og:site_name" content="ナチュール診断">` +
@@ -190,7 +190,7 @@ export function typeDetailPage(code: TypeCode, origin: string): string {
       title,
       description: desc,
       canonical,
-      ogImage: `${origin}/ogp.png`,
+      ogImage: `${origin}${OGP_PATH}`,
       head:
         `<meta property="og:type" content="article">` +
         `<meta property="og:site_name" content="ナチュール診断">` +

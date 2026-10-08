@@ -9,14 +9,24 @@ import { HEADER_MARKUP } from '../content/screens.ts';
 import { esc } from './result.ts';
 
 /**
+ * 画像を差し替えたら上げる（2026-10-08：ロゴを藍と杏の2つの円に変え、favicon と OGP を作り直した）。
+ * タブのアイコンと SNS の共有カードは、URL が同じだと古い画像を持ち続けるので、?v= で切る。
+ * 返す側（src/index.ts）はクエリを見ないので、値を変えるだけでよい。
+ */
+const ASSET_VER = '20261008';
+
+/** サイト既定の OGP 画像のパス。origin を前に付けて og:image に渡す（絶対URLでないとSNSが拾わない）。 */
+export const OGP_PATH = `/ogp.png?v=${ASSET_VER}`;
+
+/**
  * タブとホーム画面のアイコン（D-4）。**全ページに出す。**
  * `/favicon.ico` は <link> が無くてもブラウザが取りに来るが、書いておくと
  * ルート以外の階層から見たときも確実に当たる。
  */
 export const ICONS =
-  '<link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
-  '<link rel="icon" href="/favicon.ico" sizes="32x32">' +
-  '<link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+  `<link rel="icon" href="/favicon.svg?v=${ASSET_VER}" type="image/svg+xml">` +
+  `<link rel="icon" href="/favicon.ico?v=${ASSET_VER}" sizes="32x32">` +
+  `<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=${ASSET_VER}">`;
 
 const FONTS =
   '<link rel="preconnect" href="https://fonts.googleapis.com">' +

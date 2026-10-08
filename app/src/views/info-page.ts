@@ -11,7 +11,7 @@
  * この器は、その中身に見出しとメタ情報と構造化データを付けるだけ。
  */
 import { FAQ_ITEMS, INFO_PAGES, type InfoPage } from '../content/pages.ts';
-import { page, siteFooter, siteHeader } from './layout.ts';
+import { page, siteFooter, siteHeader, OGP_PATH } from './layout.ts';
 import { esc } from './result.ts';
 
 export type InfoKey = keyof typeof INFO_PAGES;
@@ -157,7 +157,7 @@ export function infoPage(key: InfoKey, origin: string): string {
       title: `${data.title} | ${SITE}`,
       description: data.description,
       canonical,
-      ogImage: `${origin}/ogp.png`,
+      ogImage: `${origin}${OGP_PATH}`,
       head:
         `<style>${INFO_CSS}</style>` +
         ogp(data.title, data.description, canonical) +

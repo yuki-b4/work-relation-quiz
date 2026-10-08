@@ -11,7 +11,7 @@
 import { INTRO_MARKUP, FRAME_MARKUP, QUIZ_MARKUP } from '../content/screens.ts';
 import { ITEMS, ITEM_HTML, LIKERT } from '../content/quiz.ts';
 import { TYPES, TYPE_CODES, TYPE_NAME_HTML } from '../content/types.ts';
-import { page, siteFooter, topHeader } from './layout.ts';
+import { page, siteFooter, topHeader, OGP_PATH } from './layout.ts';
 import { esc } from './result.ts';
 
 const TITLE = '人間関係タイプ診断（無料・登録不要） | ナチュール診断';
@@ -222,7 +222,7 @@ export function topPage(origin: string): string {
       title: TITLE,
       description: DESCRIPTION,
       canonical,
-      ogImage: `${origin}/ogp.png`,
+      ogImage: `${origin}${OGP_PATH}`,
       head: ogp + `<script type="application/ld+json">${jsonLd}</script>`,
       script: clientScript(),
     },

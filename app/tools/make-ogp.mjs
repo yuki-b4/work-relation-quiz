@@ -43,9 +43,9 @@ const C = {
   ink: cssVar('ink', '#232427'),
   muted: cssVar('muted', '#6E7176'),
   line: cssVar('line', '#E4E3DD'),
-  trust: cssVar('trust', '#274A73'),
-  coral: cssVar('coral', '#C0492B'),
-  teal: cssVar('teal', '#0F6E56'),
+  trust: cssVar('trust', '#2D4A6B'),
+  ai: cssVar('ai', '#2D4A6B'),
+  an: cssVar('an', '#E9A24C'),
 };
 
 // ───────── フォント ─────────
@@ -108,19 +108,12 @@ body{width:1200px;height:630px;overflow:hidden;
   background:${C.bg}; color:${C.ink}; -webkit-font-smoothing:antialiased}
 .card{position:relative;width:1200px;height:630px;display:flex;flex-direction:column;
   justify-content:center; padding:0 96px}
-/* 診断名の隣に置く印。**favicon と同じ意匠**（tools/make-favicon.mjs）にして、
-   タブのアイコンと共有カードが同じものに見えるようにする。
-   色はタイプの2つの極（オープン＝コーラル／ガード＝ティール）。
-
-   **左右に分ける。上下にしない。** 上下に割ると「上が優れている」と読めてしまうが、
-   2つの極に優劣は無い。左右は並置に見えるので、意味を持ち込まずに済む。
-   **境目はぼかさない。** 中間色を作るとにじみに見えて、2つの極という意味が消える。
-
-   帯にして端に置く案も試したが、幅いっぱいの帯を50%で割ると進捗バーに見えた。
-   印にすると、その読み違いが起きないうえ、favicon と揃う。 */
+/* 診断名の隣に置く印。**サイトのロゴ・favicon と同じ意匠**（tools/make-favicon.mjs）にして、
+   ヘッダー・タブのアイコン・共有カードが同じものに見えるようにする。
+   藍と杏の2つの円を少し重ね、重なりは地の色で抜く（2026-10-06 の刷新で変えた。
+   以前のコーラル／ティールの塗り分けは、その2色をタイプの極だけに使うことにしたのでやめた）。 */
 .lockup{display:flex;align-items:center;gap:22px;margin-bottom:30px}
-.mark{width:54px;height:54px;border-radius:50%;flex:none;
-  background:linear-gradient(90deg, ${C.coral} 0%, ${C.coral} 50%, ${C.teal} 50%, ${C.teal} 100%)}
+.mark{display:block;width:76px;height:54px;flex:none}
 /* 診断名。F7-3 が「**診断名が読める大きさ**で入っていること」を求めているので、
    共有カードが小さく出る場面（Xのタイムラインは幅500px前後）でも読める大きさにする。 */
 .site{font-size:40px;font-weight:900;letter-spacing:.16em;color:${C.trust}}
@@ -134,7 +127,9 @@ body{width:1200px;height:630px;overflow:hidden;
 </style></head><body>
 <div class="card">
   <div class="blob"></div>
-  <div class="lockup"><div class="mark"></div><div class="site">${COPY.site}</div></div>
+  <div class="lockup"><svg class="mark" viewBox="0 0 28 20" aria-hidden="true">
+    <circle cx="10" cy="10" r="8" fill="${C.ai}"/><circle cx="18" cy="10" r="8" fill="${C.an}"/>
+    <path d="M14 3.07A8 8 0 0 1 14 16.93A8 8 0 0 1 14 3.07Z" fill="${C.bg}"/></svg><div class="site">${COPY.site}</div></div>
   <div class="head">${COPY.head.join('<br>')}</div>
   <div class="sub">${COPY.sub}</div>
   <div class="foot">${COPY.url}</div>
