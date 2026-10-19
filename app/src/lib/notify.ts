@@ -176,7 +176,7 @@ export type ApplicationEvent = {
  * Slack は検索できて残るので、そこへ個人情報を撒かない（6.2 の「一覧では伏せ、詳細で全表示」と
  * 同じ考え方）。判断に要る情報（タイプ・宣言・紐づいたか）は伏せずに出す。
  *
- * **日程は通知に出ない。** 予約は送信の直後に Google の予約カレンダーで取るので、
+ * **日程は通知に出ない。** 予約は申込画面に埋め込んだ Google の予約カレンダーで取るので、
  * こちらでは受け取れない（`apply-page.ts` の `BOOKING_URL`）。突き合わせは氏名・メールで行う。
  */
 export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Promise<NotifyResult> {

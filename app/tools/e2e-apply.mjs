@@ -128,13 +128,41 @@ t('場面を聞かない', (await apply.$$('input[name="concernDomain"]')).lengt
 t('相手を聞かない', (await apply.$$('input[name="concernTarget"]')).length, 0);
 t('期限を聞かない', (await apply.$$('input[name="concernDeadline"]')).length, 0);
 
-// ── 希望の時間帯も聞かない（2026-09-14）。送信の直後に予約カレンダーを出すので、
-// 先に候補を聞くと同じことを2回させる。代わりに、その順番をボタンの直前で伝える ──
+// ── 希望の時間帯も聞かない（2026-09-14）。同じ画面の予約カレンダーで選ぶので、
+// 先に候補を聞くと同じことを2回させる ──
 t('希望の時間帯を聞かない', (await apply.$$('input[name="slots"]')).length, 0);
-t('送信後に日程を選ぶと伝えている',
-  (await apply.textContent('#applyForm')).includes('申込完了後に日程調整のリンクが表示されます'), true);
+// タイプのプルダウンは出さない（2026-10-19）。分かっているときだけ hidden で送る
+t('タイプを聞かない', (await apply.$$('select[name="typeCode"]')).length, 0);
 
-t('開いた時点では予約カレンダーを読み込まない', await apply.getAttribute('#bookFrame', 'src'), null);
+// ── 日程は送信より先に、入力画面の「日程の選択」で選ぶ（2026-10-19） ──
+t('送信後に日程を選ぶという案内は出さない',
+  (await apply.textContent('#applyForm')).includes('申込完了後に日程調整のリンクが表示されます'), false);
+t('「日程の選択」の枠がある', (await apply.textContent('#bookTitle')).trim(), '日程の選択');
+t('予約カレンダーは入力画面の中にある', await apply.$eval('#bookFrame', (e) => !!e.closest('#applyForm')), true);
+t('開いた時点で予約カレンダーの src が入っている',
+  (await apply.getAttribute('#bookFrame', 'src') ?? '').startsWith('https://calendar.google.com/calendar/appointments/'), true);
+t('開かないときの逃げ道がある',
+  (await apply.textContent('#applyForm')).includes('こちらから日程を選べます'), true);
+// 見出しは「ご質問・伝えておきたいこと（任意）」と同じ大きさ。計算後のスタイルで比べる
+const heads = await apply.evaluate(() => {
+  const pick = (el) => { const c = getComputedStyle(el); return [c.fontSize, c.fontWeight, c.color].join(' '); };
+  return { book: pick(document.getElementById('bookTitle')), question: pick(document.querySelector('label[for="question"]')) };
+});
+t('「日程の選択」の見出しが他の項目と同じ見た目', heads.book, heads.question);
+const bookedBox = await apply.evaluate(() => {
+  const input = document.getElementById('booked');
+  return { w: getComputedStyle(input).width, display: getComputedStyle(input.closest('label')).display, text: input.closest('label').textContent.trim() };
+});
+t('「日程を選択しました」の文言', bookedBox.text, '日程を選択しました');
+t('「日程を選択しました」も横並び', `${bookedBox.w} ${bookedBox.display}`, '16px flex');
+
+// チェックが入るまで申込ボタンを押せない
+t('開いた時点ではボタンを押せない', await apply.isDisabled('#applySubmit'), true);
+await apply.check('#booked');
+t('チェックを入れると押せる', await apply.isDisabled('#applySubmit'), false);
+await apply.uncheck('#booked');
+t('チェックを外すと、また押せなくなる', await apply.isDisabled('#applySubmit'), true);
+await apply.check('#booked');
 
 // ── 必須の入力検査（2026-09-18）。**足りないところは一度に全部出す** ──
 // 1つ直すたびに送信し直させない。どこが足りないかは、その入力欄の直下に出す。
@@ -180,12 +208,9 @@ await apply.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 t('完了画面が出る', (await apply.textContent('#applyDone')).includes('2営業日以内'), true);
 t('完了の文言', (await apply.textContent('#applyDone .bk-band')).trim(), 'お申し込みありがとうございました。');
 t('フォームは隠れる', await apply.isHidden('#applyForm'), true);
-
-// 予約カレンダー：**送信が通ってから**読み込む（開いただけで Google へ通信させない）
-t('送信後に予約カレンダーの src が入る',
-  (await apply.getAttribute('#bookFrame', 'src') ?? '').startsWith('https://calendar.google.com/calendar/appointments/'), true);
-t('開かないときの逃げ道がある',
-  (await apply.textContent('#applyDone')).includes('こちらから日程を選べます'), true);
+t('完了画面の連絡の文言（2026-10-19に確定）',
+  (await apply.textContent('#applyDone')).includes('申し込みいただいて2営業日以内にご連絡を差し上げます。'), true);
+t('完了画面では日程を選ばせない', (await apply.textContent('#applyDone')).includes('ご都合のよい日時をお選びください'), false);
 
 await browser.close();
 console.log(fail ? `\n失敗 ${fail} 件` : '\n申込とX共有：問題なし');

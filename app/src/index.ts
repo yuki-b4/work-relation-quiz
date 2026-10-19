@@ -229,7 +229,7 @@ function toApplyEntry(e: EntryRecord): ApplyEntry {
  * F4 のワンタイム表示は緩まない。**
  *
  * 引けたときだけ apply_visits に1件記録する（response_id が NOT NULL のため）。
- * 引けなかった人には、フォームでタイプを聞いて手動紐づけ（F2-4）へ回す。
+ * 引けなかった人にはタイプを聞かず（2026-10-19）、手動紐づけ（F2-4）へ回す。
  */
 app.get('/apply/s/:slug', async (c) => {
   const e = await c.env.DB.prepare(
@@ -584,7 +584,7 @@ app.post('/api/session-applications', async (c) => {
   }
 
   // タイプは必須にしない。入口によっては、そもそも本人にも分からないことがある
-  // （Cookieで解決できず、設問でも「わからない」を選んだ場合）。
+  // （Cookieで解決できなかった場合。画面ではタイプを聞かない）。
   // 値が入っているときだけ、実在するタイプかを見る。
   const postedType = str(body.typeCode, 8);
   if (postedType && !(postedType in TYPES)) {
@@ -595,7 +595,7 @@ app.post('/api/session-applications', async (c) => {
   // フォークで宣言していればその値を当日に使い、していなければ体験セッションの場で聞く
   // （§4.2 の1段目）。同じことを2回聞かないぶん、フォームの摩擦も増やさない。
 
-  // 希望の時間帯は**もう画面で聞かない**（2026-09-14）。送信の直後に予約カレンダーを出すので、
+  // 希望の時間帯は**もう画面で聞かない**（2026-09-14）。同じ画面の予約カレンダーで日程を選ぶので、
   // ここで候補を聞くと同じことを2回させることになる。受け口だけ残してあるのは、キャッシュに
   // 残った古い画面から飛んできたときに既知の値だけ拾うため（新しい申込は必ず空になる）。
   const slots = Array.isArray(body.slots)
