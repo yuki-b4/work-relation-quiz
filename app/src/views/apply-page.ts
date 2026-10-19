@@ -14,24 +14,26 @@
  *   ・入力済みのヒアリングも出さない（その人のものだと確定できないため）
  *   ・honeypot ＋ レート制限を必ず入れる
  */
-import { TYPES, type TypeCode } from '../content/types.ts';
+import type { TypeCode } from '../content/types.ts';
 import { page, siteHeader } from './layout.ts';
 import { esc } from './result.ts';
 
 /**
  * 体験セッションの予約カレンダー（Googleカレンダーの予約スケジュール）。
  *
- * **送信が終わってから、同じ画面で出す。** 順番に理由がある。
- *   ・予約が先だと、予約だけして申込フォームを出さない人が生まれる。**こちらに記録が何も残らない**
- *   ・送信を先にすれば、到達ID → 回答 → 宣言の紐づけと通知が確実に立つ（F4-5）
- *   ・遷移はしないので、本人の体感は「送信 → そのまま日程を選ぶ」の一続きになる
+ * **入力画面の「日程の選択」の枠に置き、送信より先に選んでもらう**（2026-10-19）。
+ * 以前は送信の後に同じ画面で出していた。いまは「日程を選択しました」に
+ * チェックが入るまで、申込ボタンを押せない（下のスクリプト）。
+ *   ・この順番だと、予約だけして申込フォームを出さない人が生まれうる。その予約は
+ *     こちらに記録が残らないので、Googleカレンダー側で気づいて拾う
+ *   ・チェックは自己申告で、予約したかどうかは確かめられない（下の段落）
  *
  * **予約された日時をこちらの画面に取り込むことはできない。** 予約UIは calendar.google.com の
  * iframe の中で完結し、別オリジンなので中身を読めず、予約完了を知らせる仕組みも公開されていない。
  * 突き合わせは、申込の氏名・メールとGoogleカレンダーの予約で行う。
  *
- * **src は送信が成功するまで入れない**（下のスクリプト）。開いただけで Google に
- * 通信させないため。プライバシーポリシーへの同意は送信時に取っている。
+ * **開いた時点で Google と通信する。** 送信前に選んでもらうので、送信まで遅らせられない。
+ * `loading="lazy"` で、枠が画面に近づくまでは読み込まない。
  *
  * **入口ごとに変えられない。** セミナーでセッションの長さを変えるなら、予約枠も
  * 分ける必要がある（`entries` に予約URLの列を足す）。いまは1本で足りている。
@@ -43,7 +45,7 @@ const BOOKING_URL =
 /**
  * 希望の時間帯の選択肢。**画面にはもう出さない**（2026-09-14）。
  *
- * 送信の直後に Google の予約カレンダーを出すので、フォームで候補を聞くと同じことを2回させる。
+ * 同じ画面で Google の予約カレンダーから日程を選ぶので、フォームで候補を聞くと同じことを2回させる。
  * 残してあるのは2つの理由から。
  *   ・移行データ（旧Googleフォーム）の `preferred_slots` にこの言葉が入っていて、Adminが表示する
  *   ・キャッシュに残った古い画面から `slots` が飛んできても、既知の値だけ受ける（index.ts）
@@ -86,7 +88,7 @@ export type ApplyEntry = {
 };
 
 export type ApplyOptions = {
-  /** 分かっているタイプ。null なら設問で聞く（Cookieで解決できなかった人）。 */
+  /** 分かっているタイプ。null なら送らない（Cookieで解決できなかった人。設問でも聞かない）。 */
   code: TypeCode | null;
   /** 到達ID。送信時にサーバが response_id へ解決する。 */
   visitId: string | null;
@@ -117,6 +119,7 @@ const STYLE = `
 .vq.is-invalid .vq-opt{border-color:var(--apply-err)}
 .field-err{color:var(--apply-err); font-size:12.5px; font-weight:700; line-height:1.6; margin-top:6px; text-align:left}
 .app .qhint{text-wrap:wrap}
+.field .field-title{display:block; font-size:14px; color:var(--muted); margin-bottom:7px; font-weight:500}
 `;
 
 const SCRIPT = `
@@ -124,6 +127,14 @@ const SCRIPT = `
   var f = document.getElementById('applyForm');
   var note = document.getElementById('applyNote');
   var btn = document.getElementById('applySubmit');
+  var booked = document.getElementById('booked');
+  var sending = false;
+
+  // 「日程を選択しました」にチェックが入るまで、申込ボタンを押せない（2026-10-19）。
+  // 読み込み時にも合わせる。戻る操作でチェックが残ったまま開き直されることがある。
+  function syncButton() { if (!sending) btn.disabled = !booked.checked; }
+  booked.addEventListener('change', syncButton);
+  syncButton();
 
   // フォームは novalidate なので、required だけではブラウザが止めてくれない。
   // **足りないところは一度に全部出す。** 1つ直すたびに送信し直させない。
@@ -186,7 +197,7 @@ const SCRIPT = `
 
   f.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (btn.disabled) return;
+    if (sending || !booked.checked) return;
     clearErrors();
     var bad = problems();
     if (bad.length) {
@@ -202,6 +213,7 @@ const SCRIPT = `
     var fd = new FormData(f);
     // 追加項目は**並び順のまま**送る。ラベルはサーバが入口から引き直すので送らない。
     var custom = fd.getAll('custom');
+    sending = true;
     btn.disabled = true;
     btn.classList.add('is-loading');
     note.textContent = '';
@@ -225,13 +237,11 @@ const SCRIPT = `
         if (!res.d || !res.d.ok) throw new Error((res.d && res.d.message) || '送信に失敗しました。入力内容をご確認ください。');
         document.getElementById('applyForm').hidden = true;
         document.getElementById('applyDone').hidden = false;
-        // 予約カレンダーは、送信が通ってから読み込む（開いただけで Google へ通信させない）
-        var frame = document.getElementById('bookFrame');
-        if (frame && !frame.src) frame.src = frame.dataset.src;
         window.scrollTo(0, 0);
       })
       .catch(function (err) {
-        btn.disabled = false;
+        sending = false;
+        syncButton();
         btn.classList.remove('is-loading');
         note.textContent = err.message || '送信に失敗しました。通信環境を確認して、もう一度お試しください。';
       });
@@ -266,19 +276,10 @@ export function applyPage(opts: ApplyOptions): string {
   const headline = entry?.headline || 'お申し込み';
   const intro = entry?.intro || defaultIntro(isGuide);
 
-  // タイプが分からない人にだけ聞く。分かっている人に聞き直さない（F4-5の設計方針）。
-  const typeField = code
-    ? `<input type="hidden" name="typeCode" value="${esc(code)}">`
-    : '<div class="field"><label for="typeCode">診断結果のタイプ（任意）</label>' +
-        '<select id="typeCode" name="typeCode">' +
-          '<option value="">わからない・覚えていない</option>' +
-          (Object.keys(TYPES) as TypeCode[])
-            .map((k) => `<option value="${esc(k)}">${esc(TYPES[k].name)}</option>`)
-            .join('') +
-        '</select>' +
-        '<p class="qhint" style="text-align:left; margin-top:6px">' +
-        '診断結果の画面に出ていたタイプです。分からなければ、そのままで大丈夫です。</p>' +
-      '</div>';
+  // タイプは画面では聞かない（2026-10-19。以前はセミナー入口で Cookie から引けなかった人に
+  // 8タイプのプルダウンを出していた）。分かっているときだけ hidden で送り、
+  // 分からない人の申込は Admin の手動紐づけ（F2-4）で補う。
+  const typeField = code ? `<input type="hidden" name="typeCode" value="${esc(code)}">` : '';
 
   const customFields = (entry?.fields ?? [])
     .map((label, i) =>
@@ -329,6 +330,27 @@ export function applyPage(opts: ApplyOptions): string {
           field('question', 'ご質問・伝えておきたいこと（任意）', '',
             '<textarea id="question" name="question" maxlength="4000"></textarea>') +
 
+          // 日程は送信より先に、この枠で選んでもらう（2026-10-19）。見出しは他の項目と同じ大きさ。
+          // 予約UIは Google の中で完結し、選ばれた日時はこちらで受け取れないので、
+          // 選んだことは下のチェックで申告してもらう（入るまで申込ボタンを押せない）。
+          '<div role="group" aria-labelledby="bookTitle">' +
+            '<div class="field">' +
+              '<p class="field-title" id="bookTitle">日程の選択</p>' +
+              `<iframe id="bookFrame" src="${esc(BOOKING_URL)}" title="体験セッションの日程を選ぶ"` +
+              ' style="border:0; width:100%; max-width:100%; height:620px; background:var(--surface);' +
+              ' border-radius:14px" loading="lazy"></iframe>' +
+              // 枠の中で開けない環境向けの逃げ道（アプリ内ブラウザなど）
+              `<p class="qhint" style="text-align:left; margin-top:6px">カレンダーが開かないときは<a href="${esc(BOOKING_URL)}"` +
+              ' target="_blank" rel="noopener" style="color:var(--trust)">こちらから日程を選べます</a>。</p>' +
+            '</div>' +
+            '<div class="vq">' +
+              '<label class="vq-opt">' +
+                '<input id="booked" type="checkbox" name="booked">' +
+                '<span>日程を選択しました</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+
           // .vq-opt は .field の中に置かないこと。
           // .field label{display:block} と .field input{width:100%} が .vq-opt を上書きして、
           // チェックボックスが全幅になり、ラベルと縦積みになる（prototype.html も .vq の下に置いている）。
@@ -339,28 +361,21 @@ export function applyPage(opts: ApplyOptions): string {
             '</label>' +
           '</div>' +
 
-          // 希望の時間帯は聞かない（2026-09-14）。送信後に Google の予約カレンダーを出すので、
-          // ここで候補を聞くと同じことを2回させることになる。**代わりに、その順番を先に伝える。**
-          // 送信して終わりだと思って離脱されると、日程が埋まらない。
-          '<p class="qhint" style="text-align:left; margin-bottom:10px">' +
-          '申込完了後に日程調整のリンクが表示されますので、希望される日程を選択してください。</p>' +
+          // 希望の時間帯は聞かない（2026-09-14）。上の予約カレンダーで選ぶので、
+          // ここで候補を聞くと同じことを2回させることになる。
+          // ボタンは「日程を選択しました」にチェックが入るまで押せない（SCRIPT）。
 
           // 主役のボタンは藍（2026-10-06）。タイプの極の色（coral／teal）は使わない
-          '<button class="btn btn-wide" id="applySubmit" type="submit">この内容で申し込む</button>' +
+          '<button class="btn btn-wide" id="applySubmit" type="submit" disabled>この内容で申し込む</button>' +
           '<p class="proto-note" id="applyNote"></p>' +
         '</form>' +
 
         '<div id="applyDone" hidden>' +
           '<div class="bk-band">お申し込みありがとうございました。</div>' +
-          '<p class="lead">続けて、ご都合のよい日時をお選びください。</p>' +
-          // 予約UIは Google の中で完結する。こちらでは選ばれた日時を受け取れないので、
-          // 「選べなかった人」の逃げ道（メールでの調整）を必ず残しておく。
-          `<iframe id="bookFrame" data-src="${esc(BOOKING_URL)}" title="体験セッションの日程を選ぶ"` +
-          ' style="border:0; width:100%; max-width:100%; height:620px; background:var(--surface);' +
-          ' border-radius:14px" loading="lazy"></iframe>' +
-          `<p class="qhint" style="text-align:left">カレンダーが開かないときは<a href="${esc(BOOKING_URL)}"` +
-          ' target="_blank" rel="noopener" style="color:var(--trust)">こちらから日程を選べます</a>。</p>' +
-          '<p class="lead" style="margin-top:14px">日程が決まらない場合も、2営業日以内にご連絡を差し上げます。<br>' +
+          '<p class="lead">選んでいただいた日時に、お会いできるのを楽しみにしています。</p>' +
+          // 日程を選んだかは自己申告で、こちらでは選ばれた日時を受け取れない。
+          // 「選べていなかった人」の逃げ道（メールでの調整）を必ず残しておく。
+          '<p class="lead" style="margin-top:14px">日程を選べていなかった場合も、2営業日以内にご連絡を差し上げます。<br>' +
           '迷惑メールフォルダに入ることがあるので、あわせてご確認ください。</p>' +
         '</div>' +
       '</section>' +

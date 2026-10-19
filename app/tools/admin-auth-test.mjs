@@ -281,7 +281,7 @@ const eq = (label, a, b) =>
   globalThis.fetch = realFetch;
   check('未紐づけは警告を出す', posted2[0].text.includes('回答に紐づいていません'));
   // 2026-09-14に画面で聞くのをやめたので、新しい申込では行ごと出さない
-  // （日程は送信の直後に出す予約カレンダーで決まる）
+  // （日程は申込画面の予約カレンダーで決まる）
   check('希望が無ければ行ごと出さない', !posted2[0].text.includes('希望の時間帯'));
   check('宣言が無ければ当日に聞くと書く', posted2[0].text.includes('未宣言（当日に聞く）'));
 

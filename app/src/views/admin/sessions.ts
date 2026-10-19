@@ -180,7 +180,7 @@ export function sessionDetailPage(
       `<dt>メール</dt><dd><a href="mailto:${esc(a.email)}">${esc(a.email)}</a></dd>` +
       `<dt>入口</dt><dd>${esc(a.entry_name)}（<span class="mono">${esc(a.entry_slug)}</span>）</dd>` +
       `<dt>タイプ</dt><dd>${esc(a.type_code ?? '—')}</dd>` +
-      // 希望の時間帯は2026-09-14に聞くのをやめた（送信の直後に予約カレンダーを出すため）。
+      // 希望の時間帯は2026-09-14に聞くのをやめた（申込画面の予約カレンダーで日程を選ぶため）。
       // **移行分にだけ値が残る**ので、あるときだけ行を出す
       (slots.length ? `<dt>希望の時間帯</dt><dd>${esc(slots.join('／'))}</dd>` : '') +
       // 紐づく回答でのフォークの宣言（施策a 段1・A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
