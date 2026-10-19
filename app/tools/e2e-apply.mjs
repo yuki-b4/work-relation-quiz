@@ -208,6 +208,8 @@ await apply.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 t('完了画面が出る', (await apply.textContent('#applyDone')).includes('2営業日以内'), true);
 t('完了の文言', (await apply.textContent('#applyDone .bk-band')).trim(), 'お申し込みありがとうございました。');
 t('フォームは隠れる', await apply.isHidden('#applyForm'), true);
+t('完了画面の連絡の文言（2026-10-19に確定）',
+  (await apply.textContent('#applyDone')).includes('申し込みいただいて2営業日以内にご連絡を差し上げます。'), true);
 t('完了画面では日程を選ばせない', (await apply.textContent('#applyDone')).includes('ご都合のよい日時をお選びください'), false);
 
 await browser.close();
