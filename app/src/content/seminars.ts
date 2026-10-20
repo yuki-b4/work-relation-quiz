@@ -104,6 +104,7 @@ export const PHRASES: Record<string, string> = {
   "あなたの周りに": "あなたの<wbr>周りに",
   "良い人が集まる": "良い<wbr>人が<wbr>集まる",
   "関わり方": "関わり方",
+  "これらの悩みの本当の原因をお伝えします": "これらの<wbr>悩みの<wbr>本当の<wbr>原因を<wbr>お伝えします",
   "目指すのは、こんな毎日": "目指すのは、<wbr>こんな<wbr>毎日"
 };
 
@@ -605,7 +606,7 @@ export const SEMINARS: Record<string, Seminar> = {
       },
       {
         "kind": "text",
-        "heading": "それは、あなたの性格のせいではありません",
+        "heading": "これらの悩みの本当の原因をお伝えします",
         "eyebrow": "",
         "fill": false,
         "html": "<p>人間関係が<wbr>うまく<wbr>いくかどうかは、<wbr>性格の<wbr>良し悪しでは<wbr>決まりません。</p><p>こちらの<wbr>気づかいが、<wbr>相手には<wbr>違う形で<wbr>伝わる<wbr>ことがあります。</p><figure class=\"lp-illust\" role=\"img\" aria-label=\"気をつかって黙っていたのに、「何を考えているかわからない人」と思われることもあります。\" data-illust=\"silence\" data-labels=\"気をつかって、／黙っておこう|何を考えているのか、／わからない…\"></figure><p>すれ違いのもとは、<wbr>性格<wbr>その<wbr>ものではなく、<strong><wbr>関わり方の<wbr>クセ</strong>に<wbr>あることが<wbr>よく<wbr>あります。<wbr>だから<wbr>職場を<wbr>変えても、<wbr>同じ<wbr>クセの<wbr>ままで<wbr>いると、<wbr>同じことがくり返されます。</p><p>クセは、<wbr>欠点ではありません。<wbr>自分が<wbr>どんな<wbr>クセで<wbr>人と<wbr>関わっているのかが<wbr>わかれば、<wbr>「自分が<wbr>悪い」の<wbr>ひと言で<wbr>片づけずに<wbr>済みます。</p>"
@@ -622,21 +623,14 @@ export const SEMINARS: Record<string, Seminar> = {
         "heading": "すり減る関係から、抜け出すには",
         "eyebrow": "",
         "fill": false,
-        "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<wbr>あなたの<wbr>人間関係タイプを<wbr>特定する<strong><wbr>ナチュール診断</strong>です。<wbr>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自然体の<wbr>あなた</strong>です。<wbr>当日<wbr>その<wbr>場で<wbr>受けると、<wbr>こんな<wbr>ことが<wbr>わかります。</p><ul><li><strong><wbr>自分が<wbr>活きる<wbr>環境</strong>と、<wbr>苦手な<wbr>状況</li><li>気づくと<wbr>やってしまう、<strong><wbr>関わり方の<wbr>クセ</strong></li><li>自分では<wbr>気づきにくい、<strong><wbr>あなたの<wbr>魅力</strong></li></ul><p>自分が<wbr>活きる<wbr>環境が<wbr>わかれば、<wbr>次の<wbr>職場を<wbr>選ぶ<wbr>ときの<wbr>基準に<wbr>なります。<wbr>今の<wbr>職場に<wbr>残ると<wbr>しても、<wbr>どこで<wbr>自分らしさを<wbr>出せばいいかが<wbr>見えてきます。</p>"
+        "html": "<p>まず、<wbr>自分が<wbr>ふだん<wbr>どんな<wbr>ふうに<wbr>人と<wbr>関わっているのかを<wbr>知る<wbr>ことから<wbr>始めます。</p><p>その<wbr>ために<wbr>使うのが、<wbr>あなたの<wbr>人間関係タイプを<wbr>特定する<strong><wbr>ナチュール診断</strong>です。<wbr>見るのは、<wbr>その<wbr>場その<wbr>場で<wbr>合わせている<wbr>顔ではなく、<strong><wbr>自分らしく<wbr>いる<wbr>ときの<wbr>あなた</strong>です。<wbr>当日<wbr>その<wbr>場で<wbr>受けると、<wbr>こんな<wbr>ことが<wbr>わかります。</p><ul><li><strong><wbr>自分が<wbr>活きる<wbr>環境</strong>と、<wbr>苦手な<wbr>状況</li><li>気づくと<wbr>やってしまう、<strong><wbr>関わり方の<wbr>クセ</strong></li><li>自分では<wbr>気づきにくい、<strong><wbr>あなたの<wbr>魅力</strong></li></ul><p>自分が<wbr>活きる<wbr>環境が<wbr>わかれば、<wbr>次の<wbr>職場を<wbr>選ぶ<wbr>ときの<wbr>基準に<wbr>なります。<wbr>今の<wbr>職場に<wbr>残ると<wbr>しても、<wbr>どこで<wbr>自分を<wbr>出せばいいかが<wbr>見えてきます。</p>"
       },
       {
         "kind": "text",
         "heading": "目指すのは、こんな毎日",
         "eyebrow": "",
         "fill": false,
-        "html": "<ul><li>自分だけが<wbr>我慢しなくても、<wbr>人と<wbr>うまく<wbr>やれている</li><li>自分の<wbr>時間と<wbr>気持ちを、<wbr>後回しに<wbr>しなくていい</li><li>周りの<wbr>目を<wbr>気にしすぎずに、<wbr>自分らしく<wbr>振る<wbr>舞える</li><li>自分の<wbr>魅力が、<wbr>相手に<wbr>ちゃんと<wbr>届いている</li><li>一緒に<wbr>いたいと<wbr>思える<wbr>人が、<wbr>自然と<wbr>周りに<wbr>集まってくる</li></ul><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
-      },
-      {
-        "kind": "text",
-        "heading": "顔出し・発言なしで参加OK",
-        "eyebrow": "",
-        "fill": false,
-        "html": "<ul><li>カメラは<wbr>オフの<wbr>ままで<wbr>大丈夫です</li><li>声に<wbr>出して<wbr>発言する<wbr>場面は<wbr>ありません<wbr>（チャットへの<wbr>書き込みを<wbr>お願いする<wbr>ことは<wbr>あります）</li><li>表示名は、<wbr>ニックネームで<wbr>構いません</li><li>診断の<wbr>結果を、<wbr>ほかの<wbr>参加者に<wbr>見せる<wbr>ことは<wbr>ありません</li><li>最後に<wbr>継続サポートと<wbr>体験セッションの<wbr>ご案内を<wbr>しますが、<wbr>申し込みは<wbr>任意です</li></ul>"
+        "html": "<ul><li>自分だけが<wbr>我慢しなくても、<wbr>人と<wbr>うまく<wbr>やれている</li><li>自分の<wbr>時間と<wbr>気持ちを、<wbr>後回しに<wbr>しなくていい</li><li>周りの<wbr>目を<wbr>気にしすぎずに、のびの<wbr>び振る<wbr>舞える</li><li>自分の<wbr>魅力が、<wbr>相手に<wbr>ちゃんと<wbr>届いている</li><li>一緒に<wbr>いたいと<wbr>思える<wbr>人が、<wbr>自然と<wbr>周りに<wbr>集まってくる</li></ul><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自分らしく<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
       },
       {
         "kind": "text",
@@ -646,11 +640,18 @@ export const SEMINARS: Record<string, Seminar> = {
         "html": "<p>辞めるか、<wbr>続けるか。<wbr>決めるのは、<wbr>あなたです。</p><p>ただ、<wbr>辞めたい<wbr>理由が<wbr>「会社」なのか、<wbr>「あの<wbr>人との<wbr>関係」なのか。<wbr>ここを<wbr>切り分けて<wbr>おくと、<wbr>どちらを<wbr>選ぶに<wbr>しても、<wbr>判断の<wbr>材料が<wbr>ひとつ<wbr>増えます。</p><p>※ハラスメントや<wbr>暴力を<wbr>受けている<wbr>場合は、<wbr>関わり方を<wbr>工夫するより<wbr>先に、<wbr>その<wbr>人から<wbr>距離を<wbr>取り、<wbr>社内外の<wbr>相談窓口を<wbr>頼ってください。<wbr>この<wbr>セミナーは、<wbr>その<wbr>代わりには<wbr>なりません。</p>"
       },
       {
+        "kind": "text",
+        "heading": "顔出し・発言なしで参加OK",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>カメラは<wbr>オフの<wbr>ままで<wbr>大丈夫です</li><li>声に<wbr>出して<wbr>発言する<wbr>場面は<wbr>ありません<wbr>（チャットへの<wbr>書き込みを<wbr>お願いする<wbr>ことは<wbr>あります）</li><li>表示名は、<wbr>ニックネームで<wbr>構いません</li><li>診断の<wbr>結果を、<wbr>ほかの<wbr>参加者に<wbr>見せる<wbr>ことは<wbr>ありません</li><li>最後に<wbr>継続サポートと<wbr>体験セッションの<wbr>ご案内を<wbr>しますが、<wbr>申し込みは<wbr>任意です</li></ul>"
+      },
+      {
         "kind": "speaker",
         "heading": "登壇者",
         "eyebrow": "",
         "fill": false,
-        "html": "<p>プロコーチと<wbr>して、<wbr>心理学・脳科学・潜在意識・対人関係に<wbr>ついて<wbr>学び、<wbr>100名以上の<wbr>方の<wbr>人間関係と<wbr>向き合ってきました。<wbr>2000時間以上の<wbr>有償セッション経験を<wbr>経て、<wbr>ナチュール診断を<wbr>つくりました。<wbr>日本プロコーチ協会認定コーチです。</p><p>私自身、<wbr>子どもの<wbr>頃から<wbr>人が<wbr>怖く、<wbr>職場でも<wbr>周りの<wbr>目が<wbr>気に<wbr>なって、<wbr>誰にも<wbr>頼れずに<wbr>抱え込んでいました。<wbr>「自分が<wbr>悪い」と<wbr>思ってしまう<wbr>関係性に、<wbr>長く<wbr>悩み続けた<wbr>経験が<wbr>あります。</p><p>今は、<wbr>自分らしく<wbr>振る<wbr>舞いながら、<wbr>尊敬できる<wbr>仲間と<wbr>働いています。</p><p>この<wbr>ナチュール診断には、<wbr>あの<wbr>頃の<wbr>私のような<wbr>苦しさから<wbr>解放される<wbr>人が<wbr>一人でも<wbr>増えて<wbr>欲しいと<wbr>いう<wbr>想いを<wbr>込めています。</p>"
+        "html": "<p>プロコーチと<wbr>して、<wbr>心理学・脳科学・潜在意識・対人関係に<wbr>ついて<wbr>学び、<wbr>100名以上の<wbr>方の<wbr>人間関係と<wbr>向き合ってきました。<wbr>2000時間以上の<wbr>有償セッション経験を<wbr>経て、<wbr>ナチュール診断を<wbr>つくりました。</p><p>この<wbr>ナチュール診断には、<wbr>人間関係の<wbr>苦しさから<wbr>解放される<wbr>人が<wbr>一人でも<wbr>増えて<wbr>欲しいと<wbr>いう<wbr>想いを<wbr>込めています。</p>"
       },
       {
         "kind": "overview",
@@ -666,8 +667,8 @@ export const SEMINARS: Record<string, Seminar> = {
         "items": [
           {
             "q": "事前に診断を受けておく必要はありますか？",
-            "html": "<p>いいえ、<wbr>当日<wbr>その<wbr>場で<wbr>受けていただきます。<wbr>約2分で<wbr>終わるので、<wbr>準備は<wbr>いりません。<wbr>結果は<wbr>一度しか<wbr>表示されないため、<wbr>受けた<wbr>ことがある<wbr>方も、<wbr>当日もう<wbr>一度<wbr>受けてください。</p>",
-            "text": "いいえ、当日その場で受けていただきます。約2分で終わるので、準備はいりません。結果は一度しか表示されないため、受けたことがある方も、当日もう一度受けてください。"
+            "html": "<p>いいえ、<wbr>当日<wbr>その<wbr>場で<wbr>受けていただきます。<wbr>約2分で<wbr>終わるので、<wbr>準備は<wbr>いりません。</p>",
+            "text": "いいえ、当日その場で受けていただきます。約2分で終わるので、準備はいりません。"
           },
           {
             "q": "途中で抜けても大丈夫ですか？",
@@ -686,8 +687,8 @@ export const SEMINARS: Record<string, Seminar> = {
           },
           {
             "q": "職場以外の人間関係の悩みがあっても参加できますか？",
-            "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自然体の<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p>",
-            "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自然体のあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。"
+            "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自分らしく<wbr>いる<wbr>ときの<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p>",
+            "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自分らしくいるときのあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。"
           }
         ]
       }
