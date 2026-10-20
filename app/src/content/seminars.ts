@@ -104,8 +104,7 @@ export const PHRASES: Record<string, string> = {
   "あなたの周りに": "あなたの<wbr>周りに",
   "良い人が集まる": "良い<wbr>人が<wbr>集まる",
   "関わり方": "関わり方",
-  "目指すのは、こんな毎日": "目指すのは、<wbr>こんな<wbr>毎日",
-  "同じように悩んでいた方の、その後": "同じように<wbr>悩んでいた方の、<wbr>その<wbr>後"
+  "目指すのは、こんな毎日": "目指すのは、<wbr>こんな<wbr>毎日"
 };
 
 export const SEMINARS: Record<string, Seminar> = {
@@ -631,13 +630,6 @@ export const SEMINARS: Record<string, Seminar> = {
         "eyebrow": "",
         "fill": false,
         "html": "<ul><li>自分だけが<wbr>我慢しなくても、<wbr>人と<wbr>うまく<wbr>やれている</li><li>自分の<wbr>時間と<wbr>気持ちを、<wbr>後回しに<wbr>しなくていい</li><li>周りの<wbr>目を<wbr>気にしすぎずに、<wbr>自分らしく<wbr>振る<wbr>舞える</li><li>自分の<wbr>魅力が、<wbr>相手に<wbr>ちゃんと<wbr>届いている</li><li>一緒に<wbr>いたいと<wbr>思える<wbr>人が、<wbr>自然と<wbr>周りに<wbr>集まってくる</li></ul><p><strong><wbr>自分だけが<wbr>すり<wbr>減る<wbr>関係性を<wbr>終わりに<wbr>して、<wbr>自然体で<wbr>いられる<wbr>関係性を<wbr>始める。</strong></p><p>この<wbr>セミナーは、<wbr>その<wbr>ための<wbr>最初の<wbr>60分です。</p>"
-      },
-      {
-        "kind": "text",
-        "heading": "同じように悩んでいた方の、その後",
-        "eyebrow": "",
-        "fill": false,
-        "html": "<p>これまで<wbr>支援してきた<wbr>方にも、<wbr>同じように<wbr>悩んでいた<wbr>方が<wbr>います。</p><ul><li>職場で<wbr>自分を<wbr>出せずに<wbr>いたのが、<wbr>自分らしく<wbr>いられるようになり、<wbr>昇進した</li><li>自信が<wbr>なくて、<wbr>転職も<wbr>独立も<wbr>決めきれずに<wbr>いたのが、<wbr>思い切って<wbr>独立し、<wbr>居心地の<wbr>いい<wbr>環境を<wbr>手に<wbr>入れた</li><li>「人を<wbr>悪く<wbr>思ってはいけない」と<wbr>いう<wbr>思い込みを<wbr>手放して、<wbr>やりたいことができる<wbr>職場に<wbr>転職した</li></ul><p>※変わり方や、<wbr>変わるまでの<wbr>時間は、<wbr>人に<wbr>よって<wbr>違います。</p>"
       },
       {
         "kind": "text",
