@@ -149,6 +149,7 @@ LP だけ直して、バナーや Peatix に古い言い方が残るのが一番
 | Instagram・Threads（11/18・男性向け） | Canva `DAHZW_yfddQ`（1080×1350・4:5）。2026-10-30 に 11/18 の打ち出しへ差し替えた。見た目は YouTube のサムネイル風のまま。写真は男性の手元（白いワイシャツ・腕時計・図を描いたノート）に替えた（`MAHZiW5GZO4`。子どもの絵は外した） | Claude（Canva MCP） |
 | 横長（11/18・男性向け） | Canva `DAHZW8srlTY`（3780×1890）。同上。写真は横長に作り直したもの（`MAHZiRmHA0I`） | Claude（Canva MCP） |
 | Instagram ストーリーズ（11/18・男性向け） | Canva `DAHZiRHWxfM`（1080×1920・9:16）。4:5 版を `resize-design` で作ると配置が崩れたので、上に文字・下に写真で組み直した | Claude（Canva MCP） |
+| スライドの表紙（11/11・11/18） | ワーク版スライド `DAHZXCxP7oI` の P.2（11/11）と P.3（11/18）。それぞれの横長バナーを 16:9 にしたもの（元のデザインは `DAHZiZZaN8g`・`DAHZiR0S3Ek`）。本文（P.4 以降）は両日共通で、当日はその日の表紙から始め、もう一方は飛ばす（発表者メモに書いた）。古い表紙は最後（P.92）に移した（消してよい） | Claude（Canva MCP） |
 | LP | 未作成（`sem-1111` を副業テーマに差し替え、`sem-1118` を足す） | Claude（デプロイは手元） |
 | OG画像・Peatix・Admin の入口 | 未作成 | ユーザー（OG画像は Claude が置く） |
 
