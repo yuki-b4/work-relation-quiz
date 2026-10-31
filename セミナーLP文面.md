@@ -140,12 +140,15 @@ LP だけ直して、バナーや Peatix に古い言い方が残るのが一番
 |:--|:--|:--|
 | 横長バナー（11/11） | Canva `DAHZWMySZrI`。2026-10-29 に見た目を作り直した（下の「副業テーマのバナーの考え方」）。**2026-10-30 に 11/11 を女性向けに分けたので、11/11 では使わない**（Threads 用 `DAHZWGAi4Ns` も同じ） | Claude（Canva MCP） |
 | Threads 用バナー（11/11） | Canva `DAHZWGAi4Ns` | Claude（Canva MCP） |
-| 横長バナー（11/18） | Canva `DAHZW8srlTY`。11/11 版を複製して日付だけ変えた | Claude（Canva MCP） |
+| 横長バナー（11/18） | Canva `DAHZW8srlTY`。11/11 版を複製して日付だけ変えた。**2026-10-30 に男性向けへ差し替えた（下の「横長（11/18・男性向け）」）** | Claude（Canva MCP） |
 | Threads 用バナー（11/18） | Canva `DAHZW_yfddQ`。同上（最初に作った 11/18 版 `DAHZWHeCp2Y`・`DAHZWFyXvO4` は古い見た目なので `集客_アーカイブ` に移した） | Claude（Canva MCP） |
 | Instagram フィード（11/11・女性向け） | Canva `DAHZh3qaFwM`（1080×1440）。2026-10-30 に作った下書き。イラスト `MAHZiLDgqWU`（登壇者の写真 `MAHZiEVqqTE` は Canva に取り込んであるが、バナーからは外した）。Canva の自動生成で下地を作ったので、見出しは明朝体（`YAFdJiqf9b8`）になっている。生成直後は、登壇者の枠に AI が作った架空の女性の顔が入っていたので差し替えた（自動生成を使うときは、人の写真の枠を必ず確かめる） | Claude（Canva MCP） |
 | Instagram 広告（11/11・女性向け） | Canva `DAHZiBOvfSM`（1080×1350・4:5）。フィード版を `resize-design` で作り、呼びかけがイラストに隠れたので位置を直した | Claude（Canva MCP） |
 | Instagram ストーリーズ（11/11・女性向け） | Canva `DAHZiFPsI0k`（1080×1920・9:16）。上下およそ 250px はストーリーズの操作部分に隠れるので、文字は 290〜1670 に収めた | Claude（Canva MCP） |
-| 横長（11/11・女性向け） | Canva `DAHZiOyaRko`（3780×1890。既存の横長バナーと同じ大きさ）。Peatix・LP の共有用。左に文字、右にイラスト | Claude（Canva MCP） |
+| 横長（11/11・女性向け） | Canva `DAHZiOyaRko`（3780×1890。既存の横長バナーと同じ大きさ）。Peatix・LP の共有用。左に文字、右にイラスト。**2026-10-30 にユーザーの指摘で文字を大きくし、行間を広げて縦の空きを埋めた**（縦が空くと、Peatix の一覧のように小さく表示される場所で目立たない。横長は文字を上下いっぱいまで使う） | Claude（Canva MCP） |
+| Instagram・Threads（11/18・男性向け） | Canva `DAHZW_yfddQ`（1080×1350・4:5）。2026-10-30 に 11/18 の打ち出しへ差し替えた。見た目は YouTube のサムネイル風のまま。写真は男性の手元（白いワイシャツ・腕時計・図を描いたノート）に替えた（`MAHZiW5GZO4`。子どもの絵は外した） | Claude（Canva MCP） |
+| 横長（11/18・男性向け） | Canva `DAHZW8srlTY`（3780×1890）。同上。写真は横長に作り直したもの（`MAHZiRmHA0I`） | Claude（Canva MCP） |
+| Instagram ストーリーズ（11/18・男性向け） | Canva `DAHZiRHWxfM`（1080×1920・9:16）。4:5 版を `resize-design` で作ると配置が崩れたので、上に文字・下に写真で組み直した | Claude（Canva MCP） |
 | LP | 未作成（`sem-1111` を副業テーマに差し替え、`sem-1118` を足す） | Claude（デプロイは手元） |
 | OG画像・Peatix・Admin の入口 | 未作成 | ユーザー（OG画像は Claude が置く） |
 
