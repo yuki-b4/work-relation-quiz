@@ -31,6 +31,7 @@ const AUTO = { MIN_MS: 10000, READ_MS: 1200, IDLE_MS: 45000 };
 
 const SHELL_SCRIPT = `
 (function () {
+  console.log("hoge");
   var KEY = 'natur.tab';
   var mount = document.getElementById('resultMount');
   function closed() { location.replace('/result/closed'); }
