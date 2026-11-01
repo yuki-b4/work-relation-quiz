@@ -22,6 +22,7 @@ const DESCRIPTION =
 function clientScript(): string {
   return `
 (function () {
+  console.log("hoge");
   var ITEMS = ${JSON.stringify(ITEMS)};
   // 設問文と選択肢の文節区切り（<wbr> 入り）。文面は ITEMS と同じで、折る位置だけを持たせたもの
   var ITEM_HTML = ${JSON.stringify(ITEM_HTML)};
