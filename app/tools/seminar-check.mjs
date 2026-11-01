@@ -7,6 +7,7 @@
  * dev サーバーを立てて今の時刻で見るだけでは、終了後の表示が確かめられない。
  * ここでは「今」を渡して描き分ける。
  */
+import { readFileSync } from 'node:fs';
 import { SEMINARS } from '../src/content/seminars.ts';
 import { seminarEnded, seminarPage } from '../src/views/seminar-page.ts';
 
@@ -20,6 +21,10 @@ const ldOf = (html) => JSON.parse(html.match(/<script type="application\/ld\+jso
 
 const ORIGIN = 'https://natur-indicator.com';
 const slugs = Object.keys(SEMINARS);
+// 文面の正（md）を節ごとに引く。注意書きのように「あるべき件数」を md から数えて、生成物と突き合わせるため
+const MD = readFileSync(new URL('../../セミナーLP文面.md', import.meta.url), 'utf8');
+const mdParts = MD.split(/^##\s+\/seminar\/(\S+)\s*$/m);
+const mdOf = (slug) => mdParts[mdParts.indexOf(slug) + 1] ?? '';
 t('セミナーが1件以上ある', slugs.length > 0, true);
 
 for (const slug of slugs) {
@@ -78,7 +83,11 @@ for (const slug of slugs) {
     }
     // 注意書き（md の「※」で始まる段落）は、白いカードの中でなく外に出る
     // 注意書きの目印は md にある（生成物の HTML は <wbr> が入るので、そちらで数えると取りこぼす）
-    t(`${label} md の注意書きが生成物でも段落の頭にある`, s.sections.some((x) => 'html' in x && x.html.includes('<p>※')), true);
+    {
+      const notes = (mdOf(slug).match(/^※/gm) ?? []).length;
+      const made = s.sections.reduce((n, x) => n + ('html' in x ? (x.html.match(/<p>※/g) ?? []).length : 0), 0);
+      t(`${label} md の注意書き（${notes} 件）が生成物でも段落の頭にある`, made, notes);
+    }
     if (s.sections.some((x) => 'html' in x && x.html.includes('<p>※'))) {
       t(`${label} 注意書きがカードの外に出る`, /<\/div><\/div><div class="lp-aside"><p>※/.test(body), true);
     }
