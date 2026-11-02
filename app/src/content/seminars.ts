@@ -657,7 +657,7 @@ export const SEMINARS: Record<string, Seminar> = {
         "heading": "最後まで参加した方へ、豪華プレゼント3点",
         "eyebrow": "",
         "fill": false,
-        "html": "<p>最後まで<wbr>ご参加いただいた方に、<wbr>次の<wbr>3点を<wbr>プレゼントします。</p><p><strong><wbr>① 強み発掘AIプロンプト</strong></p><p>あなたの<wbr>経験から、<wbr>お金を<wbr>いただける<wbr>サービス案を<wbr>引き出す</p><p><strong>② 声かけ文面AIプロンプト</strong></p><p>お試しの<wbr>値段と、<wbr>売り込みに<wbr>見えない<wbr>声かけの<wbr>文面を<wbr>つくる</p><p><strong><wbr>③ 最初の<wbr>一歩ワークシート</strong></p><p>今日の<wbr>ワークを、<wbr>自分用の<wbr>シートで<wbr>続けられる<wbr>（1週間後に<wbr>見返す<wbr>欄つき）</p>"
+        "html": "<p>最後まで<wbr>ご参加いただいた方に、<wbr>次の<wbr>3点を<wbr>プレゼントします。</p><p><strong><wbr>① 強み発掘AIプロンプト</strong></p><p>あなたの<wbr>経験から、<wbr>お金を<wbr>いただける<wbr>サービス案を<wbr>引き出す</p><p><strong>② 声かけ文面AIプロンプト</strong></p><p>お試しの<wbr>値段と、<wbr>売り込みに<wbr>見えない<wbr>声かけの<wbr>文面を<wbr>つくる</p><p><strong><wbr>③ 時短副業ワークシート</strong></p><p>今日の<wbr>ワークを、<wbr>自分用の<wbr>シートで<wbr>続けられる<wbr>（1週間後に<wbr>見返す<wbr>欄つき）</p>"
       },
       {
         "kind": "speaker",
