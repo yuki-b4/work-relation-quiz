@@ -11,6 +11,7 @@ import img_sem_1020_speaker from '../../assets/seminar/sem-1020/speaker.jpg';
 import img_sem_1026_hero from '../../assets/seminar/sem-1026/hero.jpg';
 import img_sem_1026_og from '../../assets/seminar/sem-1026/og.png';
 import img_sem_1026_speaker from '../../assets/seminar/sem-1026/speaker.jpg';
+import img_sem_1111_speaker from '../../assets/seminar/sem-1111/speaker.jpg';
 
 export type SeminarImage = {
   data: ArrayBuffer;
@@ -101,7 +102,24 @@ export const PHRASES: Record<string, string> = {
   "やっていること": "やっている<wbr>こと",
   "あなたの周りに": "あなたの<wbr>周りに",
   "良い人が集まる": "良い<wbr>人が<wbr>集まる",
-  "関わり方": "関わり方"
+  "関わり方": "関わり方",
+  "スキマ時間で": "スキマ時間で",
+  "稼ぐ力の": "稼ぐ<wbr>力の",
+  "身につけ方": "身に<wbr>つけ方",
+  "「時間がない」を、": "「時間が<wbr>ない」を、",
+  "言い訳にしない": "言い訳に<wbr>しない",
+  "効率的な副業の始め方": "効率的な<wbr>副業の<wbr>始め方",
+  "毎日忙しくて、何から始めればいいか分からない。一人だと、つい後回しにしてしまう。そんな方こそ、60分だけ、一緒に手を動かしてみませんか。": "毎日<wbr>忙しくて、<wbr>何から<wbr>始めればいいか<wbr>分からない。<wbr>一人だと、<wbr>つい<wbr>後回しに<wbr>してしまう。<wbr>そんな<wbr>方こそ、<wbr>60分だけ、<wbr>一緒に<wbr>手を<wbr>動かしてみませんか。",
+  "多くの人がやろうと思っても自分の名前で稼げない理由": "多くの<wbr>人が<wbr>やろうと<wbr>思っても<wbr>自分の<wbr>名前で<wbr>稼げない<wbr>理由",
+  "聞くだけで終わらない、ワークショップ付きの60分": "聞くだけで<wbr>終わらない、<wbr>ワークショップ付きの<wbr>60分",
+  "目指すのは、こんな毎日": "目指すのは、<wbr>こんな<wbr>毎日",
+  "ご用意いただくもの": "ご用意いただく<wbr>もの",
+  "最後まで参加した方へ、豪華プレゼント3点": "最後まで<wbr>参加した<wbr>方へ、<wbr>豪華プレゼント3点",
+  "開催条件": "開催条件",
+  "キャンセルについて": "キャンセルに<wbr>ついて",
+  "何をやるか、まだ決まっていなくても参加できますか？": "何を<wbr>やるか、<wbr>まだ<wbr>決まっていなくても<wbr>参加できますか？",
+  "AIを使ったことがなくても大丈夫ですか？": "AIを<wbr>使った<wbr>ことがなくても<wbr>大丈夫ですか？",
+  "会社を辞めるつもりはありませんが、参加できますか？": "会社を<wbr>辞める<wbr>つもりは<wbr>ありませんが、<wbr>参加できますか？"
 };
 
 export const SEMINARS: Record<string, Seminar> = {
@@ -535,12 +553,173 @@ export const SEMINARS: Record<string, Seminar> = {
           },
           {
             "q": "職場以外の人間関係の悩みがあっても参加できますか？",
-            "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自然体の<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p>",
-            "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自然体のあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。"
+            "html": "<p>はい。<wbr>ナチュール診断が<wbr>映すのは、<wbr>職場での<wbr>顔ではなく、<wbr>自然体の<wbr>あなたの<wbr>関わり方です。<wbr>当日は<wbr>職場を<wbr>例に<wbr>お話ししますが、<wbr>家族や<wbr>友人との<wbr>関係にも<wbr>当てはめて<wbr>考えられます。</p><p>---</p>",
+            "text": "はい。ナチュール診断が映すのは、職場での顔ではなく、自然体のあなたの関わり方です。当日は職場を例にお話ししますが、家族や友人との関係にも当てはめて考えられます。---"
           }
         ]
       }
     ],
     images: { hero: { data: img_sem_1026_hero, mime: 'image/jpeg', ext: 'jpg', width: 1920, height: 1080, version: 'b946ff7197' }, og: { data: img_sem_1026_og, mime: 'image/png', ext: 'png', width: 1200, height: 600, version: 'dce6c5b7ca' }, speaker: { data: img_sem_1026_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
+  },
+  "sem-1111": {
+    "slug": "sem-1111",
+    "title": "スキマ時間で稼ぐ力の身につけ方｜会社員のまま始める、副業セミナー（ワークショップ付き）",
+    "description": "「時間がない」を言い訳にしたくない会社員のための、60分の無料オンライン副業セミナー（ワークショップ付き）です。AIを活用して、自分の強みから商品を作る最初の一歩を、その場で踏み出せます。顔出し・発言なしで参加できます。",
+    "catchLines": [
+      "この先も、",
+      "今の働き方で",
+      "大丈夫かな。"
+    ],
+    "kicker": "会社員のまま始める、副業セミナー（ワークショップ付き）",
+    "headlineLines": [
+      "スキマ時間で",
+      "稼ぐ力の",
+      "身につけ方"
+    ],
+    "subLines": [
+      "「時間がない」を、",
+      "言い訳にしない",
+      "効率的な副業の始め方"
+    ],
+    "date": "2026-11-11",
+    "start": "21:00",
+    "end": "22:00",
+    "place": "オンライン",
+    "placeNote": "Zoomで開催します。参加用のURLは、お申し込み後にPeatixからお送りします",
+    "fee": "無料",
+    "ticketUrl": "https://peatix.com/event/5255773",
+    "ctaNote": "顔出し・発言なしで参加OK",
+    "closing": "参加は無料です",
+    "closingNote": "毎日忙しくて、何から始めればいいか分からない。一人だと、つい後回しにしてしまう。そんな方こそ、60分だけ、一緒に手を動かしてみませんか。",
+    "capacity": "10名（先着順）",
+    "badges": [
+      {
+        "label": "所要時間",
+        "value": "60分"
+      },
+      {
+        "label": "参加費",
+        "value": "無料"
+      },
+      {
+        "label": "顔出し・発言",
+        "value": "なしでOK"
+      }
+    ],
+    "speakerName": "齋藤祐希",
+    "speakerRole": "プロコーチ／Mikata 代表",
+    "lead": "<p>「時間が<wbr>ない」を<wbr>言い訳に<wbr>したくないのに、<wbr>副業を<wbr>始められないまま、<wbr>今日も<wbr>一日が<wbr>終わっていく。</p><p>副業の<wbr>ことを<wbr>いくら<wbr>調べても、<wbr>自分は<wbr>何から<wbr>始めればいいのかが<wbr>分からず、<wbr>一人では<wbr>手が<wbr>止まっていませんか？</p><p>この<wbr>セミナーでは、<wbr>時間が<wbr>なくても<wbr>副業で<wbr>結果が<wbr>出ている<wbr>人が<wbr>実践している<wbr>ことを、<wbr>その<wbr>場で<wbr>体験し、<wbr>最初の<wbr>一歩を<wbr>踏み出しましょう。</p>",
+    "sections": [
+      {
+        "kind": "text",
+        "heading": "こんなお悩み、ありませんか",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>この<wbr>先も、<wbr>今の<wbr>働き方を<wbr>続けていけるのか<wbr>分からない</li><li>いつか<wbr>仕事を<wbr>失うのかと、<wbr>不安になってしまう</li><li>会社だけに<wbr>頼らず、<wbr>自分の<wbr>力でも<wbr>稼げるようになりたい</li><li>仕事と<wbr>家の<wbr>ことで、<wbr>平日は<wbr>自分の<wbr>時間が<wbr>ほとんど<wbr>残らない</li><li>副業の<wbr>広告が<wbr>流れてくると、<wbr>つい<wbr>開いてしまう。<wbr>でも、<wbr>まだ<wbr>何も<wbr>始められていない</li><li>自分に、<wbr>お金を<wbr>いただけるような<wbr>強みが<wbr>あるのか<wbr>分からない</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "多くの人がやろうと思っても自分の名前で稼げない理由",
+        "eyebrow": "",
+        "fill": true,
+        "html": "<p>自分の<wbr>名前で<wbr>稼ごうと<wbr>思った<wbr>とき、<wbr>多くの<wbr>人は<wbr>まず、<wbr>スキルや<wbr>ノウハウを<wbr>手に<wbr>入れようとします。<wbr>動画を<wbr>見て、<wbr>本を<wbr>読んで、<wbr>やり方を<wbr>調べる。</p><p>でも、<wbr>スキルや<wbr>ノウハウを<wbr>いくら集めても、<wbr>それだけでは<wbr>結果に<wbr>つながりません。</p><p>本当に<wbr>結果を<wbr>出している<wbr>人は、<wbr>この<wbr>セミナーで<wbr>お話しする<wbr>「ある<wbr>こと」を<wbr>守っています。</p><p>この<wbr>ポイントを<wbr>意識するだけで、<wbr>なぜ<wbr>今まで<wbr>副業で<wbr>結果が<wbr>出なかったのか、<wbr>なぜ<wbr>憧れの<wbr>あの<wbr>人のようになれないのかが<wbr>分かります。</p>"
+      },
+      {
+        "kind": "text",
+        "heading": "聞くだけで終わらない、ワークショップ付きの60分",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>AIを<wbr>活用して、<wbr>自分の<wbr>強みから<wbr>商品を<wbr>作ると<wbr>いう<wbr>最初の<wbr>一歩を<wbr>踏み出せます。<wbr>AIを<wbr>どう<wbr>使うかまで<wbr>丁寧に<wbr>解説するので、<wbr>AIを<wbr>使った<wbr>ことがない<wbr>人でも<wbr>大丈夫です。</p><p>一人では<wbr>後回しに<wbr>してきた<wbr>ことを、<wbr>この<wbr>60分で、<wbr>一緒に<wbr>形にします。<wbr>参加すると、<wbr>こんな<wbr>ものを<wbr>持ち帰れます。</p><ul><li>「自分にも<wbr>できそう」と<wbr>思える<wbr>手応え</li><li>限られた<wbr>時間の<wbr>中で、<wbr>来週から<wbr>動ける<wbr>見通し</li><li>どこでなぜ手が<wbr>止まりやすいのかの<wbr>気づき</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "目指すのは、こんな毎日",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>「時間が<wbr>ないから」を<wbr>言い訳に<wbr>せずに<wbr>済むようになる</li><li>お給料の<wbr>ほかにも、<wbr>自分で<wbr>得た<wbr>収入が<wbr>ある</li><li>この<wbr>先働き方が<wbr>変わっても、<wbr>稼ぐ<wbr>力が<wbr>手元に<wbr>ある</li><li>副業の<wbr>広告を<wbr>見ても、<wbr>もう<wbr>焦らない</li><li>自分の<wbr>強みで、<wbr>誰かの<wbr>役に<wbr>立てている</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "顔出し・発言なしで参加OK",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>カメラは<wbr>オフ、<wbr>マイクは<wbr>ミュートの<wbr>ままで<wbr>大丈夫です</li><li>声に<wbr>出して<wbr>発言する<wbr>場面は<wbr>ありません<wbr>（チャットへの<wbr>書き込みやリアクションを<wbr>お願いする<wbr>ことは<wbr>あります）</li><li>表示名は、<wbr>ニックネームで<wbr>構いません</li><li>ワークで<wbr>書いた<wbr>ことは、<wbr>誰にも<wbr>見せなくて<wbr>大丈夫です</li><li>最後に<wbr>継続サポートの<wbr>ご案内を<wbr>しますが、<wbr>申し込みは<wbr>任意です</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "ご用意いただくもの",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>インターネットに<wbr>つながる<wbr>パソコンか、<wbr>スマートフォン<wbr>（内容の<wbr>関係で、<wbr>パソコンでの<wbr>参加を<wbr>推奨しております）</li><li>AI<wbr>（Claude・ChatGPT・Gemini の<wbr>どれか<wbr>1つ）</li><li>メモ帳か<wbr>紙</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "最後まで参加した方へ、豪華プレゼント3点",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>最後まで<wbr>ご参加いただいた方に、<wbr>次の<wbr>3点を<wbr>プレゼントします。</p><p><strong><wbr>① 強み発掘AIプロンプト</strong></p><p>あなたの<wbr>経験から、<wbr>お金を<wbr>いただける<wbr>サービス案を<wbr>引き出す</p><p><strong>② 声かけ文面AIプロンプト</strong></p><p>お試しの<wbr>値段と、<wbr>売り込みに<wbr>見えない<wbr>声かけの<wbr>文面を<wbr>つくる</p><p><strong><wbr>③ 時短副業ワークシート</strong></p><p>今日の<wbr>ワークを、<wbr>自分用の<wbr>シートで<wbr>続けられる<wbr>（1週間後に<wbr>見返す<wbr>欄つき）</p>"
+      },
+      {
+        "kind": "speaker",
+        "heading": "登壇者",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<p>エンジニアと<wbr>して<wbr>キャリアを<wbr>スタートし、<wbr>バリスタや<wbr>農家の<wbr>仕事も<wbr>経験してきました。<wbr>現在は<wbr>プロコーチと<wbr>して<wbr>活動しています。<wbr>エンジニア時代に<wbr>身に<wbr>つけた<wbr>仕組み化力と<wbr>AI活用の<wbr>実践経験、<wbr>コーチと<wbr>して<wbr>導く<wbr>力を<wbr>強みと<wbr>しています。</p><p>かつては<wbr>自分も、<wbr>会社の<wbr>看板が<wbr>ないと<wbr>通用しない<wbr>気が<wbr>して、<wbr>自分の<wbr>力で<wbr>稼ぐのが<wbr>怖かった<wbr>一人です。<wbr>今は<wbr>自分の<wbr>名前で<wbr>仕事が<wbr>生まれ、<wbr>働く<wbr>時間も<wbr>場所も<wbr>自分で<wbr>決めています。</p><p>これまで<wbr>100名以上の<wbr>方の<wbr>キャリアと<wbr>向き合い、<wbr>有償セッションの<wbr>経験は<wbr>2000時間を<wbr>超えます。</p>"
+      },
+      {
+        "kind": "overview",
+        "heading": "開催概要",
+        "eyebrow": "",
+        "fill": true
+      },
+      {
+        "kind": "text",
+        "heading": "開催条件",
+        "eyebrow": "",
+        "fill": false,
+        "html": "<ul><li>お申し込みが<wbr>2名以上の<wbr>場合に<wbr>開催します</li><li>開催するか<wbr>どうかは、<wbr>前日の<wbr>11月10日<wbr>（火）<wbr>19:00までに<wbr>決定します</li><li>開催しない<wbr>場合は、<wbr>Peatix の<wbr>メッセージで<wbr>お知らせします</li><li>その<wbr>場合、<wbr>お申し込みは<wbr>キャンセルと<wbr>なります</li></ul>"
+      },
+      {
+        "kind": "text",
+        "heading": "キャンセルについて",
+        "eyebrow": "",
+        "fill": true,
+        "html": "<p>無断で<wbr>キャンセルされた<wbr>方には、<wbr>今後の<wbr>イベントへの<wbr>ご参加を<wbr>お断りさせていただく<wbr>ことが<wbr>ございます。<wbr>あらかじめご了承ください。</p>"
+      },
+      {
+        "kind": "faq",
+        "heading": "よくあるご質問",
+        "eyebrow": "",
+        "fill": true,
+        "items": [
+          {
+            "q": "何をやるか、まだ決まっていなくても参加できますか？",
+            "html": "<p>はい。<wbr>決まっていない<wbr>方こそ、<wbr>お越しください。<wbr>ワークの<wbr>中で、<wbr>自分に<wbr>できそうな<wbr>ことから<wbr>考えていきます。</p>",
+            "text": "はい。決まっていない方こそ、お越しください。ワークの中で、自分にできそうなことから考えていきます。"
+          },
+          {
+            "q": "AIを使ったことがなくても大丈夫ですか？",
+            "html": "<p>大丈夫です。<wbr>AIに<wbr>貼り付ける<wbr>文章は、<wbr>こちらで<wbr>用意しています。<wbr>Claude・ChatGPT・Gemini の<wbr>どれか<wbr>1つを、<wbr>すぐ<wbr>開ける<wbr>状態に<wbr>しておいてください。</p>",
+            "text": "大丈夫です。AIに貼り付ける文章は、こちらで用意しています。Claude・ChatGPT・Gemini のどれか1つを、すぐ開ける状態にしておいてください。"
+          },
+          {
+            "q": "会社を辞めるつもりはありませんが、参加できますか？",
+            "html": "<p>はい。<wbr>会社員の<wbr>まま<wbr>始める<wbr>ことを<wbr>前提に<wbr>した<wbr>セミナーです。<wbr>辞める<wbr>ことを<wbr>おすすめする<wbr>内容ではありません。</p>",
+            "text": "はい。会社員のまま始めることを前提にしたセミナーです。辞めることをおすすめする内容ではありません。"
+          },
+          {
+            "q": "途中で抜けても大丈夫ですか？",
+            "html": "<p>大丈夫です。<wbr>途中からの<wbr>参加も、<wbr>途中での<wbr>退出も<wbr>できます。<wbr>ただ、<wbr>プレゼント3点は、<wbr>最後まで<wbr>ご参加いただいた方に<wbr>お渡しします。</p>",
+            "text": "大丈夫です。途中からの参加も、途中での退出もできます。ただ、プレゼント3点は、最後までご参加いただいた方にお渡しします。"
+          },
+          {
+            "q": "売り込みはされませんか？",
+            "html": "<p>はい、<wbr>売り込みは<wbr>致しませんが、<wbr>最後に<wbr>私が<wbr>提供している<wbr>継続サポートの<wbr>ご案内の<wbr>お時間を<wbr>いただいて<wbr>おります。</p>",
+            "text": "はい、売り込みは致しませんが、最後に私が提供している継続サポートのご案内のお時間をいただいております。"
+          }
+        ]
+      }
+    ],
+    images: { speaker: { data: img_sem_1111_speaker, mime: 'image/jpeg', ext: 'jpg', width: 480, height: 480, version: '4dc1073255' } },
   },
 };
