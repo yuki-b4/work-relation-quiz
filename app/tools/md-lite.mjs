@@ -3,7 +3,7 @@
  *
  * 使う側：
  *   tools/extract-pages.mjs     公開ページ文面.md・プライバシーポリシー.md・利用規約.md
- *   tools/extract-seminars.mjs  セミナーLP文面.md
+ *   tools/extract-seminars.mjs  セミナーLP文面/*.md（1回の開催につき1ファイル）
  *
  * どちらも「自分たちが書いた文面」だけを読む。汎用の Markdown パーサにしないのは、
  * 書ける記法を絞っておくと、文面の側で表現が暴れず、画面の見た目が揃うから。

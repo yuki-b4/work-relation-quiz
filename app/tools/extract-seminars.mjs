@@ -4,7 +4,9 @@
  *
  *   node tools/extract-seminars.mjs
  *
- * 読む先（文面の正）：セミナーLP文面.md
+ * 読む先（文面の正）：セミナーLP文面/{開催日}_{slug}.md（1回の開催につき1ファイル）
+ *   LP の無い回（Peatix だけで受ける回）の {開催日}_peatix.md は、告知の記録だけなので読み飛ばす
+ *   書き方の約束・meta の項目・画像の置き場所は セミナーLP文面.md（ここからは読まない）
  * 要件：アプリ化要件定義.md F4-5「セミナーの告知ページ」
  *
  * 画像は app/assets/seminar/{slug}/ に置かれたものだけを取り込む（hero・og・speaker）。
@@ -13,7 +15,7 @@
  * ここで作った `src/content/seminars.ts` は生成物なので直接編集しない。
  */
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadDefaultJapaneseParser } from 'budoux';
@@ -21,7 +23,7 @@ import { blocks, esc, textOf } from './md-lite.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, '../..');
-const SRC = resolve(ROOT, 'セミナーLP文面.md');
+const SRC_DIR = resolve(ROOT, 'セミナーLP文面');
 const ASSETS = resolve(here, '../assets/seminar');
 const OUT = resolve(here, '../src/content/seminars.ts');
 
@@ -196,6 +198,9 @@ function sectionsOf(lines, label) {
       continue;
     }
     if (!current) { lead.push(line); continue; }
+    // 見出しより後ろの区切り線は、md-lite が段落として本文にそのまま出す。
+    // 1ファイルにまとめていた頃、回と回の間の --- が前の回の最後の答えに出ていた（2026-11-04 に分けて直した）
+    if (line.trim() === '---') throw new Error(`${label}: 「${current.heading}」の中に --- がある（本文にそのまま出る。消す）`);
     const item = current.items.at(-1);
     (item ? item.lines : current.lines).push(line);
   }
@@ -281,17 +286,36 @@ function imagesOf(slug) {
 
 // ───────── 読み込み ─────────
 
-const src = readFileSync(SRC, 'utf8');
-const parts = src.split(/^##\s+\/seminar\/(\S+)\s*$/m);
-if (parts.length < 3) throw new Error('セミナーLP文面.md に `## /seminar/{slug}` が1つも無い');
+// 1回の開催につき1ファイル。ファイル名は `{開催日}_{slug}.md` で、名前の順（＝開催日の順）に並べる
+// LP の無い回（Peatix だけで受ける回）は `{開催日}_peatix.md` で、見出しが無いので読み飛ばす
+const files = readdirSync(SRC_DIR).filter((f) => f.endsWith('.md')).sort();
+if (!files.length) throw new Error('セミナーLP文面/ に .md が1つも無い');
 
 const seminars = [];
-for (let i = 1; i < parts.length; i += 2) {
-  const slug = parts[i];
-  const label = `/seminar/${slug}`;
+const skipped = [];
+for (const file of files) {
+  const where = `セミナーLP文面/${file}`;
+  // `## /seminar/{slug}` より前はその回の告知物の表など（ページには出ない）。後ろはファイルの終わりまでがページ
+  const text = readFileSync(resolve(SRC_DIR, file), 'utf8');
+  const parts = text.split(/^##\s+\/seminar\/(\S+)\s*$/m);
+  if (parts.length === 1) {
+    if (!/^\d{4}-\d{2}-\d{2}_/.test(file)) throw new Error(`${where}: ファイル名は開催日で始める（LP の無い回は {開催日}_peatix.md）`);
+    // meta を書いたのに見出しを忘れると、LP が黙って消える。それは止める
+    if (/^```meta\s*$/m.test(text)) throw new Error(`${where}: \`\`\`meta があるのに \`## /seminar/{slug}\` が無い（LP を作るなら見出しを書く）`);
+    skipped.push(file);
+    continue;
+  }
+  if (parts.length !== 3) {
+    throw new Error(`${where}: \`## /seminar/{slug}\` は1ファイルに1つだけ書く（${(parts.length - 1) / 2} 個ある）`);
+  }
+  const slug = parts[1];
+  const label = `/seminar/${slug}（${where}）`;
   if (!/^[a-z0-9-]+$/.test(slug)) throw new Error(`${label}: slug は英小文字・数字・- だけにする`);
   if (seminars.some((s) => s.slug === slug)) throw new Error(`${label}: slug が重複している`);
-  const { meta, rest } = metaOf(parts[i + 1].split('\n'), label);
+  const { meta, rest } = metaOf(parts[2].split('\n'), label);
+  // 日付ごとに分けたので、ファイル名と中身（開催日・slug）が食い違わないようにする
+  const expected = `${meta.date}_${slug}.md`;
+  if (file !== expected) throw new Error(`${label}: ファイル名を ${expected} にする（{開催日}_{slug}.md。開催日は meta の date）`);
   const { lead, sections } = sectionsOf(rest, label);
   seminars.push({
     slug,
@@ -350,7 +374,7 @@ const imageLiteral = (images) => {
 
 const body = [
   '// 自動生成。直接編集しない。',
-  '// 生成元：セミナーLP文面.md（文面と開催情報の正）と app/assets/seminar/{slug}/ の画像',
+  '// 生成元：セミナーLP文面/{開催日}_{slug}.md（文面と開催情報の正。1回の開催につき1ファイル）と app/assets/seminar/{slug}/ の画像',
   '// 再生成：cd app && npm run content',
   '// /seminar/{slug} の中身（アプリ化要件定義.md F4-5「セミナーの告知ページ」）',
   ...imports,
@@ -435,6 +459,7 @@ for (const name of ['SeminarImage', 'SeminarSection', 'Seminar']) {
 writeFileSync(OUT, body, 'utf8');
 
 console.log('セミナーLPの文面を書き出しました');
+for (const file of skipped) console.log(`  セミナーLP文面/${file}  LP なし（読み飛ばした）`);
 for (const s of seminars) {
   const imgs = IMAGE_NAMES.map((n) => `${n}:${s.images[n] ? `${s.images[n].width}x${s.images[n].height}` : 'なし'}`).join(' ');
   console.log(`  /seminar/${s.slug}  ${s.data.date} ${s.data.start}〜${s.data.end}  ${s.data.sections.length} 節  申込URL:${s.data.ticketUrl ? 'あり' : '未設定'}  ${imgs}`);
