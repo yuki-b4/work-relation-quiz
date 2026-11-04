@@ -36,6 +36,11 @@
   （`preserve_aspect_ratio: true`）で拡大し、`position_element` で動かす
 - 作ったら `update_title` で用途が分かる名前にする（`resize-design` は元と同じ名前のまま作る）
 
+## ユーザーにリンクを渡す
+
+- **デザインIDから組み立てた `https://www.canva.com/design/{ID}/edit` は、ユーザーの側でエラーになる**（2026-11-04）。
+  渡すリンクは `read-design`（`design_metadata`）や `list-folder-items` が返す `edit_url`（`https://www.canva.com/d/...`）をそのまま使う
+
 ## 画像の書き出し
 
 - `export-design` は書き出せるが、**この環境からはその URL（`export-download.canva.com`）を取れない**（ネットワーク設定で遮断）。
