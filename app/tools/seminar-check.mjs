@@ -7,7 +7,7 @@
  * dev サーバーを立てて今の時刻で見るだけでは、終了後の表示が確かめられない。
  * ここでは「今」を渡して描き分ける。
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { SEMINARS } from '../src/content/seminars.ts';
 import { seminarEnded, seminarPage } from '../src/views/seminar-page.ts';
 
@@ -22,8 +22,10 @@ const ldOf = (html) => JSON.parse(html.match(/<script type="application\/ld\+jso
 const ORIGIN = 'https://natur-indicator.com';
 const slugs = Object.keys(SEMINARS);
 // 文面の正（md）を節ごとに引く。注意書きのように「あるべき件数」を md から数えて、生成物と突き合わせるため
-const MD = readFileSync(new URL('../../セミナーLP文面.md', import.meta.url), 'utf8');
-const mdParts = MD.split(/^##\s+\/seminar\/(\S+)\s*$/m);
+// md は1回の開催につき1ファイル（セミナーLP文面/{開催日}_{slug}.md）。見出しより前（告知物の表など）は数えない
+const MD_DIR = new URL('../../セミナーLP文面/', import.meta.url);
+const mdParts = readdirSync(MD_DIR).filter((f) => f.endsWith('.md'))
+  .flatMap((f) => readFileSync(new URL(f, MD_DIR), 'utf8').split(/^##\s+\/seminar\/(\S+)\s*$/m).slice(1));
 const mdOf = (slug) => mdParts[mdParts.indexOf(slug) + 1] ?? '';
 t('セミナーが1件以上ある', slugs.length > 0, true);
 
