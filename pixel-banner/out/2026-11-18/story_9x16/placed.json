@@ -1,0 +1,44 @@
+[
+ {
+  "name": "bg",
+  "left": 0,
+  "top": 0,
+  "width": 1080,
+  "height": 1920
+ },
+ {
+  "name": "message",
+  "left": 40,
+  "top": 325,
+  "width": 1000,
+  "height": 266
+ },
+ {
+  "name": "headline",
+  "left": 0,
+  "top": 615,
+  "width": 1080,
+  "height": 200
+ },
+ {
+  "name": "kicker",
+  "left": 40,
+  "top": 840,
+  "width": 780,
+  "height": 157
+ },
+ {
+  "name": "date",
+  "left": 40,
+  "top": 1025,
+  "width": 520,
+  "height": 332
+ },
+ {
+  "name": "present",
+  "left": 40,
+  "top": 1371,
+  "width": 1000,
+  "height": 244
+ }
+]
