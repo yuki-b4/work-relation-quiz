@@ -1,0 +1,44 @@
+[
+ {
+  "name": "bg",
+  "left": 0,
+  "top": 0,
+  "width": 3780,
+  "height": 1890
+ },
+ {
+  "name": "label",
+  "left": 150,
+  "top": 120,
+  "width": 931,
+  "height": 112
+ },
+ {
+  "name": "message",
+  "left": 150,
+  "top": 280,
+  "width": 1900,
+  "height": 590
+ },
+ {
+  "name": "headline",
+  "left": 0,
+  "top": 950,
+  "width": 2070,
+  "height": 380
+ },
+ {
+  "name": "kicker",
+  "left": 150,
+  "top": 1400,
+  "width": 1900,
+  "height": 370
+ },
+ {
+  "name": "present",
+  "left": 2190,
+  "top": 1240,
+  "width": 1460,
+  "height": 530
+ }
+]
