@@ -10,6 +10,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { SEMINARS } from '../src/content/seminars.ts';
 import { seminarEnded, seminarPage } from '../src/views/seminar-page.ts';
+import { applyClosedPage, applyPage } from '../src/views/apply-page.ts';
 
 let fail = 0;
 const t = (label, actual, expected) => {
@@ -133,6 +134,32 @@ for (const slug of slugs) {
     t(`${label} 終了後は終了と出す`, body.includes('このセミナーは終了しました。'), true);
     t(`${label} 終了後は診断へ戻れる`, body.includes('<a class="lp-btn" href="/"'), true);
   }
+}
+
+// ── セミナーの申込ページ（/apply/s/{slug}）には、ナチュール診断の名前とロゴを出さない（2026-11-09） ──
+// 診断を使わないセミナー（副業・転職など）も含めた、主催するセミナー全般の申込ページにするため。
+// ガイド経由（/apply/{typeCode}）は診断の続きなので、名前とロゴを残す。DB を引かずに描いて比べる。
+{
+  const entry = { slug: 'sem-test', headline: null, intro: null, sessionLabel: null, fields: [] };
+  const pages = {
+    guide: applyPage({ code: 'OBL', visitId: null, entry: null }),
+    seminar: applyPage({ code: null, visitId: null, entry }),
+    closed: applyClosedPage(),
+  };
+  const brand = (html) => markup(html).includes('class="brand"');
+  const named = (html) => markup(html).replace(/<[^>]+>/g, '').includes('ナチュール診断');
+  const logoIcon = (html) => /<link rel="icon" href="\/favicon\./.test(html);
+  t('ガイド経由の申込：ロゴと診断名を出す', brand(pages.guide), true);
+  t('ガイド経由の申込：タブの題名に診断名', named(pages.guide), true);
+  t('ガイド経由の申込：タブのアイコンはロゴ', logoIcon(pages.guide), true);
+  for (const k of ['seminar', 'closed']) {
+    t(`${k}：ロゴを出さない`, brand(pages[k]), false);
+    t(`${k}：診断名が本文にもタブの題名にも無い`, named(pages[k]), false);
+    t(`${k}：タブのアイコンもロゴにしない`, logoIcon(pages[k]), false);
+    t(`${k}：空のアイコンを明示する（無いとブラウザが /favicon.ico を取りに来る）`, pages[k].includes('<link rel="icon" href="data:,">'), true);
+    t(`${k}：診断への誘導が無い`, markup(pages[k]).includes('href="/"'), false);
+  }
+  t('セミナー経由の申込：フォームはある', pages.seminar.includes('id="applyForm"'), true);
 }
 
 if (fail) {

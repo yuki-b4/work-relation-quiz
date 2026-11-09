@@ -74,6 +74,12 @@ export type PageOptions = {
   head?: string;
   /** </body> の直前に置くスクリプト。 */
   script?: string;
+  /**
+   * false にするとタブのアイコン（ナチュール診断のロゴ）を出さない。
+   * 診断と関係の無いセミナーの申込ページ（`/apply/s/{slug}`）のため（2026-11-09）。
+   * <link> を外すだけではブラウザが `/favicon.ico` を取りに来てロゴが出るので、空のアイコンを明示する。
+   */
+  icons?: boolean;
 };
 
 /**
@@ -146,7 +152,7 @@ export function page(opts: PageOptions, body: string): string {
     '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
     `<title>${esc(opts.title)}</title>` +
-    desc + robots + canonical + ICONS + ogImage(opts.ogImage, opts.ogImageMeta) + (opts.head ?? '') + FONTS +
+    desc + robots + canonical + (opts.icons === false ? '<link rel="icon" href="data:,">' : ICONS) + ogImage(opts.ogImage, opts.ogImageMeta) + (opts.head ?? '') + FONTS +
     `<style>${APP_CSS}\n${INDEX_CSS}\n${FOOT_CSS}</style></head>` +
     `<body${opts.bodyClass ? ` class="${esc(opts.bodyClass)}"` : ''}>` +
     body +

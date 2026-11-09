@@ -9,6 +9,12 @@
  *   ・`/apply/{typeCode}` … 診断 → 読み解きガイド終章から。タイプはURLで確定する
  *   ・`/apply/s/{slug}`   … セミナーなど。タイプはURLに無いので、Cookieで解決するか設問で聞く
  *
+ * **ナチュール診断の名前とロゴは、ガイド経由（`/apply/{typeCode}`）にだけ出す**（2026-11-09）。
+ * `/apply/s/{slug}` は、診断を使わないセミナー（副業・転職など）も含めた、主催するセミナー全般の
+ * 申込ページとして使う。診断から来た人には名前とロゴが「同じサービスの続き」という目印になるが、
+ * セミナーから来た人には知らない名前で、別のサービスに飛ばされたように見える。
+ * 外すのはヘッダー（ロゴと診断名）・タブの題名とアイコン・受付終了の画面の診断への誘導。
+ *
  * このページだけがワンタイムの外に出る。URLを知っていれば誰でも開けるので、
  *   ・**診断結果の本文は一切出さない**。出してよいのはタイプ名だけ
  *   ・入力済みのヒアリングも出さない（その人のものだと確定できないため）
@@ -258,6 +264,12 @@ function field(id: string, label: string, hint: string, input: string): string {
 }
 
 /**
+ * ヘッダーを出さない画面（セミナー経由の申込・受付終了）の上の余白。
+ * ヘッダーの高さ（スマホ60px・PC80px）をそのまま空けると間延びするので、半分ほどにする。
+ */
+const BARE_TOP = 'margin-top:clamp(28px,4vw,56px)';
+
+/**
  * 段落ごとに <p> にする。入口の文面は Admin の textarea から来るので、改行を活かす。
  * **空なら何も出さない**（空の <p> を置くと、そのぶん余白だけが空く）。
  */
@@ -290,8 +302,9 @@ export function applyPage(opts: ApplyOptions): string {
 
   const body =
     '<div class="app">' +
-      siteHeader() +
-      '<section class="screen active">' +
+      // セミナー経由はヘッダーごと出さない（冒頭のコメント）。ロゴは `/` へのリンクでもあるので、
+      // 残すと診断への出口にもなる。
+      (isGuide ? siteHeader() + '<section class="screen active">' : `<section class="screen active" style="${BARE_TOP}">`) +
         `<div class="eyebrow">体験セッション（${esc(sessionLabel)}・無料）</div>` +
         `<h1 class="hero" style="font-size:clamp(21px,4.6vw,28px)">${esc(headline)}</h1>` +
         // **タイプ名は出さない**（2026-09-18）。この画面のタイプは、URL か、
@@ -383,8 +396,9 @@ export function applyPage(opts: ApplyOptions): string {
 
   return page(
     {
-      title: '体験セッションのお申し込み | ナチュール診断',
+      title: isGuide ? '体験セッションのお申し込み | ナチュール診断' : '体験セッションのお申し込み',
       noindex: true,
+      icons: isGuide,
       head: `<style>${STYLE}</style>`,
       script: SCRIPT,
     },
@@ -392,17 +406,20 @@ export function applyPage(opts: ApplyOptions): string {
   );
 }
 
-/** 受付を締めた入口（entries.active = 0）。入口の行は残っているので 410 で返す。 */
+/**
+ * 受付を締めた入口（entries.active = 0）。入口の行は残っているので 410 で返す。
+ *
+ * 開くのは `/apply/s/{slug}` だけなので、申込ページのセミナー経由と同じく診断の名前とロゴを出さない。
+ * **診断への誘導も置かない**（2026-11-09。以前は「診断を受ける」のボタンがあった）。
+ * 診断を使わないセミナーの参加者には、行き違いの先が知らないサービスになる。
+ */
 export function applyClosedPage(): string {
   return page(
-    { title: '受付を終了しました | ナチュール診断', noindex: true },
+    { title: '受付を終了しました', noindex: true, icons: false },
     '<div class="app">' +
-      siteHeader() +
-      '<section class="screen active">' +
+      `<section class="screen active" style="${BARE_TOP}">` +
         '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">この体験セッションの受付は終了しました</h1>' +
         '<p class="lead">お申し込みいただける期間が過ぎています。ご案内の行き違いでしたら、申し訳ありません。</p>' +
-        '<p class="lead">診断は引き続きお受けいただけます。結果の読み解きガイドからも、体験セッションへお申し込みいただけます。</p>' +
-        '<a class="btn btn-wide" href="/" style="display:block; text-align:center; text-decoration:none">診断を受ける</a>' +
       '</section>' +
     '</div>'
   );
