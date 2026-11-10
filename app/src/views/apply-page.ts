@@ -51,6 +51,12 @@ const BOOKING_URL =
   'AcZssZ3yRjdmK7tTy3DsAQsNzPIZA8f6vHBB5CBEdIUm3xmM995noeSvd1yG5iZ65P5d1KUOKlud1yJ0?gv=true';
 
 /**
+ * 日程確定のメールを送るアドレス。申込の完了画面に出す（2026-11-10）。
+ * 送り元を変えたらここも変える。受け取る側は、このアドレスを頼りに迷惑メールの中を探す。
+ */
+const SENDER_EMAIL = 'mikata.relational@gmail.com';
+
+/**
  * 希望の時間帯の選択肢。**画面にはもう出さない**（2026-09-14）。
  *
  * 同じ画面で Google の予約カレンダーから日程を選ぶので、フォームで候補を聞くと同じことを2回させる。
@@ -136,6 +142,8 @@ const STYLE = `
 .field-err{color:var(--apply-err); font-size:12.5px; font-weight:700; line-height:1.6; margin-top:6px; text-align:left}
 .app .qhint{text-wrap:wrap}
 .field .field-title{display:block; font-size:14px; color:var(--muted); margin-bottom:7px; font-weight:500}
+.app .done-mail{word-break:keep-all; overflow-wrap:anywhere}
+.app .mail-from{overflow-wrap:anywhere}
 `;
 
 const SCRIPT = `
@@ -392,9 +400,14 @@ export function applyPage(opts: ApplyOptions): string {
           '<div class="bk-band">お申し込みありがとうございました。</div>' +
           '<p class="lead">選んでいただいた日時に、お会いできるのを楽しみにしています。</p>' +
           // 日程を選んだかは自己申告で、こちらでは選ばれた日時を受け取れない。
-          // 申込のあとに、こちらからもメールで連絡する（文言は2026-10-19にユーザーが確定）。
-          '<p class="lead" style="margin-top:14px">申し込みいただいて2営業日以内にご連絡を差し上げます。<br>' +
-          '迷惑メールフォルダに入ることがあるので、併せてご確認ください。</p>' +
+          // 申込のあとに、こちらから日程確定のメールを送る（文言は2026-11-10にユーザーの指示で変えた。
+          // 以前は「申し込みいただいて2営業日以内にご連絡を差し上げます。」）。
+          // **送り元のアドレスを書く**のは、受け取る側が迷惑メールの中から見つけやすくするため。
+          // 文節の切れ目（<wbr>）でだけ折る（.done-mail）。既定の折り方だと「か｜ら」「日程確｜定」のように
+          // 語の途中で折れる。アドレスは狭い画面で収まらないときだけ途中で折る（.mail-from）。
+          `<p class="lead done-mail" style="margin-top:14px"><span class="mail-from">${esc(SENDER_EMAIL)}</span> から、<wbr>` +
+          '日程確定の<wbr>メールを<wbr>2営業日以内に<wbr>お送りします。<br>' +
+          '迷惑メール<wbr>フォルダに<wbr>入ることが<wbr>あるので、<wbr>併せて<wbr>ご確認ください。</p>' +
         '</div>' +
       '</section>' +
     '</div>';
