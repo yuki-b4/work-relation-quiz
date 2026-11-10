@@ -595,7 +595,7 @@ admin.post('/entries/:id', async (c) => {
   if (!picked.ok) return c.text(picked.message, 400);
 
   await c.env.DB.batch([
-    // session_label / fields_json はもう書かない（0009 で列ごと消す）
+    // 旧列（session_label / fields_json）は 0009 で消した。帯は eyebrow、設問は entry_questions
     c.env.DB.prepare(
       `update entries set name = ?, eyebrow = ?, headline = ?, intro = ? where id = ?`
     ).bind(

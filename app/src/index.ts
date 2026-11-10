@@ -661,7 +661,7 @@ app.post('/api/session-applications', async (c) => {
 
   const applicationId = crypto.randomUUID();
   // 申込と回答は1回の batch で入れる（途中で落ちて、回答の無い申込が残らないように）。
-  // 旧列（concern / question / custom_answers）にはもう書かない。0009 で列ごと消す。
+  // 旧列（concern / question / custom_answers）は 0009 で消した。書いてもらった内容は question_answers だけ。
   await c.env.DB.batch([
     c.env.DB.prepare(
       `insert into session_applications

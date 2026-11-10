@@ -1,5 +1,5 @@
 /**
- * 申込フォームの設問マスタ（migrations/0008_questions.sql と lib/questions.ts）の試験。
+ * 申込フォームの設問マスタ（migrations/0008_questions.sql・0009_drop_legacy_columns.sql と lib/questions.ts）の試験。
  *
  *   node --experimental-strip-types tools/questions-migration-test.mjs
  *
@@ -10,6 +10,7 @@
  *   ・**古いコードのまま動く**（0008 を当ててからデプロイするまでの間も申込は来る）
  *   ・写す部分を2回流しても増えない（0009 で流し直して、その間の申込を拾う）
  *   ・外部キー：申込を消せば回答も消え、回答のある設問は消せない
+ *   ・0009：その間の申込を拾ってから旧列を消す。**行も回答も1件も消えない**（表を作り直さない）
  */
 import { DatabaseSync } from 'node:sqlite';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -22,6 +23,7 @@ import {
 const MIGRATIONS = join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 const sql = (f) => readFileSync(join(MIGRATIONS, f), 'utf8');
 const SUBJECT = '0008_questions.sql';
+const DROP = '0009_drop_legacy_columns.sql';
 const BEFORE = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f < SUBJECT).sort();
 /** 「既存の回答を写す」から後ろ。0009 で流し直す部分。 */
 const COPY = sql(SUBJECT).split(/^-- 既存の回答を写す。.*$/m)[1];
@@ -214,7 +216,62 @@ function asD1(sqlite) {
   check('知らない設問は選べない', !pick(['q_nope']).ok);
 }
 
-console.log(`申込の設問マスタ（${SUBJECT}）の試験: ${pass} 件通過`);
+// ───────── 0009：その間の申込を拾ってから旧列を消す ─────────
+{
+  const d = new DatabaseSync(':memory:');
+  for (const f of BEFORE) d.exec(sql(f));
+  d.exec('pragma foreign_keys = on');
+  d.exec(`
+    insert into entries (id, slug, kind, name, session_label, fields_json, created_at) values
+      ('entry_s1','sem-0928','seminar','9/28','45分','["役職"]','2026-09-17T00:00:00.000Z');
+    insert into entry_seminars (entry_id, held_on) values ('entry_s1','2026-09-28');
+    insert into session_applications (id, created_at, entry_id, name, email, concern, question, custom_answers) values
+      ('app_old','2026-09-28T00:00:00.000Z','entry_s1','高橋','b@example.com','前から','質問','{"役職":"店長"}');
+  `);
+  d.exec(sql(SUBJECT));
+  // 0008 を当ててから新しいコードを出すまでの間に、古いコードが受けた申込
+  d.exec(`insert into session_applications (id, created_at, entry_id, name, email, concern, question, custom_answers) values
+            ('app_gap','2026-11-10T01:00:00.000Z','entry_s1','間','g@example.com','間の悩み','間の質問','{"役職":"副店長","新しいラベル":"y"}')`);
+  const n = (s_) => d.prepare(s_).get().n;
+  const appsBefore = n(`select count(*) n from session_applications`);
+  const answersBefore = n(`select count(*) n from question_answers`);
+  const eqBefore = n(`select count(*) n from entry_questions`);
+
+  d.exec(sql(DROP));
+
+  const cols = (t) => d.prepare(`select name from pragma_table_info('${t}')`).all().map((r) => r.name);
+  const fmt9 = (id) => d.prepare(`select question_id, position, answer from question_answers where application_id = ? order by position, question_id`)
+    .all(id).map((r) => `${r.position}:${r.question_id}=${r.answer}`).join(' | ');
+  const idOf = (label) => d.prepare(`select id from questions where label = ?`).get(label)?.id;
+  check('0009：その間の申込の気になっていること・追加項目・ご質問を拾う',
+    fmt9('app_gap') === `1:q_concern=間の悩み | 2:${idOf('役職')}=副店長 | 90:${idOf('新しいラベル')}=y | 91:q_message=間の質問`);
+  check('0009：その間に増えたラベルも設問にする（ID は 0008 と被らない）',
+    idOf('新しいラベル')?.startsWith('q_legacy9_') && d.prepare(`select archived from questions where label = '新しいラベル'`).get().archived === 1);
+  check('0009：0008 で写した回答は増えない', fmt9('app_old') === `1:q_concern=前から | 2:${idOf('役職')}=店長 | 3:q_message=質問`);
+  check('0009：回答の件数は「その間の申込」の分だけ増える', n(`select count(*) n from question_answers`) === answersBefore + 4);
+  check('0009：申込は1件も消えない', n(`select count(*) n from session_applications`) === appsBefore);
+  check('0009：入口の設問も消えない', n(`select count(*) n from entry_questions`) === eqBefore);
+  check('0009：氏名とメールは残る', d.prepare(`select name, email from session_applications where id = 'app_old'`).get().email === 'b@example.com');
+  for (const c of ['concern', 'question', 'custom_answers']) check(`0009：session_applications.${c} が消える`, !cols('session_applications').includes(c));
+  for (const c of ['session_label', 'fields_json']) check(`0009：entries.${c} が消える`, !cols('entries').includes(c));
+  check('0009：帯は残る', d.prepare(`select eyebrow from entries where id = 'entry_s1'`).get().eyebrow === '体験セッション（45分・無料）');
+  check('0009：新しいコードの申込の insert が通る', !(() => { try {
+    d.exec(`insert into session_applications (id, created_at, entry_id, apply_visit_id, response_id, type_code, name, email, preferred_slots, source, status)
+              values ('app_new','2026-11-11T00:00:00.000Z','entry_s1',null,null,null,'新','n@example.com','[]','in-app','未対応');
+            insert into question_answers (application_id, question_id, position, label, answer) values ('app_new','q_message',1,'ご質問・伝えておきたいこと',null)`);
+    return false; } catch { return true; } })());
+  check('0009：古いコードの申込の insert は落ちる（だからデプロイを先にする）', (() => { try {
+    d.exec(`insert into session_applications (id, created_at, entry_id, name, email, concern) values ('app_x','2026-11-11T00:00:00.000Z','entry_s1','x','x@example.com','x')`);
+    return false; } catch { return true; } })());
+  check('0009：外部キーは効いたまま', (() => { try {
+    d.exec(`insert into question_answers (application_id, question_id, position, label) values ('app_nope','q_concern',1,'x')`); return false; } catch { return true; } })());
+  d.exec(`delete from session_applications where id = 'app_gap'`);
+  check('0009：申込を消すと回答も消える（cascade は効いたまま）', n(`select count(*) n from question_answers where application_id = 'app_gap'`) === 0);
+  check('0009：外部キーの不整合が無い', d.prepare('pragma foreign_key_check').all().length === 0);
+  d.close();
+}
+
+console.log(`申込の設問マスタ（${SUBJECT}・${DROP}）の試験: ${pass} 件通過`);
 if (fails.length) {
   console.error(`\n失敗 ${fails.length} 件:`);
   fails.forEach((f) => console.error('  ' + f));

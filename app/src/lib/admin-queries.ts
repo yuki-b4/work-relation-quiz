@@ -228,8 +228,7 @@ export type ApplicationRow = {
   type_code: string | null;
   name: string;
   email: string;
-  // concern / question / custom_answers は 2026-11-10 から書かない（question_answers へ移した。
-  // migrations/0008）。列は 0009 で消すまで残るが、読まないように型から外してある。
+  // concern / question / custom_answers は 0009 で消した（書いてもらった内容は question_answers。migrations/0008）。
   preferred_slots: string | null;
   entry_id: string;
   source: string;

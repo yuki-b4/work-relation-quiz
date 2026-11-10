@@ -316,19 +316,30 @@ export function buildApplications(rows, typeByResponseId = new Map()) {
     const typeCode = (responseId && typeByResponseId.get(responseId)) || typeCodeOf(row[FORM.type]);
     const slots = splitIssues(row[FORM.slots]);
 
-    // 旧列（concern / question）に書く。2026-11-10 から画面は question_answers を読む（migrations/0008）。
-    // 0009 で旧列を消す前に流し直す写しで question_answers に移るが、0009 の後はこの insert が落ちる。
-    // 取り込みは済んでいる（2026-09）ので、もう一度使うなら question_answers に書くように直すこと。
+    // 書いてもらった内容は question_answers に入れる（migrations/0008。旧列 concern / question は 0009 で消した）。
+    // 設問文は申込フォームと同じ写し。申込が入らなかったとき（同じIDが既にある）に回答だけ残らないよう、
+    // 回答は申込の行から SELECT して入れる。
+    const id = uuid();
     sql.push(
       `INSERT OR IGNORE INTO session_applications (
   id, created_at, apply_visit_id, response_id, type_code, name, email,
-  concern, preferred_slots, question, source, status
-) VALUES (${q(uuid())}, ${q(createdAt)}, NULL,` +
+  preferred_slots, source, status
+) VALUES (${q(id)}, ${q(createdAt)}, NULL,` +
       // 回答が実在するときだけ紐づける。消えたIDを書くと外部キーで落ちる。
       ` (SELECT id FROM responses WHERE id = ${q(responseId)}), ${q(typeCode)}, ${q(name)}, ${q(email)},` +
-      ` ${q(row[FORM.concern])}, ${q(JSON.stringify(slots))}, ${q(row[FORM.question])},` +
-      ` 'google-form-import', '未対応');`
+      ` ${q(JSON.stringify(slots))}, 'google-form-import', '未対応');`
     );
+    const answers = [
+      ['q_concern', 1, 'いま、人間関係で気になっていること', row[FORM.concern]],
+      ['q_message', 2, 'ご質問・伝えておきたいこと', row[FORM.question]],
+    ];
+    for (const [qid, position, label, value] of answers) {
+      if (!String(value ?? '').trim()) continue;
+      sql.push(
+        `INSERT OR IGNORE INTO question_answers (application_id, question_id, position, label, answer)` +
+        ` SELECT id, ${q(qid)}, ${position}, ${q(label)}, ${q(String(value).trim())} FROM session_applications WHERE id = ${q(id)};`
+      );
+    }
     report.imported++;
     if (responseId) report.linked++; else report.unlinked++;
   }

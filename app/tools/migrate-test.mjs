@@ -8,10 +8,16 @@
  *   ・引用符の中の改行・カンマ・シングルクォートを壊さずSQLに載せる
  *   ・「診断ID」がある申込だけが回答に紐づく（7.1）
  */
+import { DatabaseSync } from 'node:sqlite';
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   parseCsv, toUtc, num, splitIssues, q, typeCodeOf,
   buildResponses, buildReferrers, buildCorpLeads, buildApplications,
 } from './migrate-sheets.mjs';
+
+const MIGRATIONS = join(dirname(fileURLToPath(import.meta.url)), '..', 'migrations');
 
 let pass = 0;
 const fails = [];
@@ -151,6 +157,24 @@ const eq = (label, a, b) =>
 
   const skipped = buildApplications([{ 'タイムスタンプ': '2026/08/10 09:30:00', 'お名前': '', 'メールアドレス': '' }]);
   eq('氏名もメールも無い行は取り込まない', skipped.report.imported, 0);
+
+  // 書いてもらった内容は question_answers に入れる（migrations/0008。旧列は 0009 で消した）。
+  // **書き出した SQL を、最新のスキーマにそのまま流して確かめる。**
+  check('旧列（concern / question）には書かない', !/\b(concern|question)\s*,/.test(sql.find((x) => x.includes('INTO session_applications'))));
+  const db = new DatabaseSync(':memory:');
+  for (const f of readdirSync(MIGRATIONS).filter((x) => x.endsWith('.sql')).sort()) db.exec(readFileSync(join(MIGRATIONS, f), 'utf8'));
+  db.exec('pragma foreign_keys = on');
+  db.exec(`insert into responses (id, created_at, question_set_version, type_code, type_name, axis_h, axis_c, axis_w)
+             values ('resp-1','2026-08-01T00:00:00.000Z','legacy','OBL','突撃隊長','O','B','L')`);
+  for (const stmt of sql) db.exec(stmt);
+  const rowsIn = db.prepare(`select sa.name, sa.response_id, qa.question_id, qa.answer
+                               from session_applications sa left join question_answers qa on qa.application_id = sa.id
+                              order by sa.created_at, qa.position`).all();
+  eq('最新のスキーマに流せる（申込2件・回答は書いてある1件だけ）',
+    rowsIn.map((r) => `${r.name}:${r.question_id}=${r.answer}`), ['山田太郎:q_concern=任せ方', '佐藤花子:null=null']);
+  eq('診断IDで回答に紐づく', rowsIn[0].response_id, 'resp-1');
+  check('外部キーの不整合が無い', db.prepare('pragma foreign_key_check').all().length === 0);
+  db.close();
 }
 
 if (fails.length) {
