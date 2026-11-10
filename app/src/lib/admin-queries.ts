@@ -9,6 +9,7 @@
  * 許可リストに載っているものしか通さない。
  */
 import { jstDayEnd, jstDayStart } from './admin-format.ts';
+import { groupAnswers, type QuestionAnswer } from './questions.ts';
 
 /** 回答の対応状況（旧スプレッドシートの手入力列の置き換え。F1-1）。 */
 export const RESPONSE_STATUSES = ['未対応', '対応中', '対応済', '見送り'] as const;
@@ -227,10 +228,9 @@ export type ApplicationRow = {
   type_code: string | null;
   name: string;
   email: string;
-  concern: string | null;
+  // concern / question / custom_answers は 2026-11-10 から書かない（question_answers へ移した。
+  // migrations/0008）。列は 0009 で消すまで残るが、読まないように型から外してある。
   preferred_slots: string | null;
-  question: string | null;
-  custom_answers: string | null;
   entry_id: string;
   source: string;
   status: string;
@@ -238,8 +238,11 @@ export type ApplicationRow = {
   admin_note: string | null;
 };
 
+/** 申込と、その申込で書いてもらった内容（設問への回答。migrations/0008）。 */
+export type ApplicationWithAnswers = ApplicationRow & { answers: QuestionAnswer[] };
+
 export async function loadRelated(db: D1Database, responseId: string) {
-  const [survey, visits, applications] = await Promise.all([
+  const [survey, visits, applications, answers] = await Promise.all([
     db.prepare(`select * from feedback_surveys where response_id = ?`).bind(responseId).first<Record<string, string | null>>(),
     db.prepare(`select id, visited_at, cta,
                        (select count(*) from session_applications sa
@@ -248,11 +251,18 @@ export async function loadRelated(db: D1Database, responseId: string) {
       .bind(responseId).all<{ id: string; visited_at: string; cta: string; application_count: number }>(),
     db.prepare(`select * from session_applications where response_id = ? and deleted_at is null
                  order by created_at desc`).bind(responseId).all<ApplicationRow>(),
+    db.prepare(`select qa.application_id, qa.question_id, qa.position, qa.label, qa.answer
+                  from question_answers qa
+                  join session_applications sa on sa.id = qa.application_id
+                 where sa.response_id = ? and sa.deleted_at is null
+                 order by qa.application_id, qa.position`)
+      .bind(responseId).all<QuestionAnswer & { application_id: string }>(),
   ]);
+  const byApp = groupAnswers(answers.results ?? []);
   return {
     survey: survey ?? null,
     visits: visits.results ?? [],
-    applications: applications.results ?? [],
+    applications: (applications.results ?? []).map((a): ApplicationWithAnswers => ({ ...a, answers: byApp.get(a.id) ?? [] })),
   };
 }
 
@@ -467,7 +477,8 @@ const RESERVED_SLUGS = ['guide', 'direct'];
 export type EntryRow = {
   id: string; slug: string; kind: string; name: string;
   headline: string | null; intro: string | null;
-  session_label: string | null; fields_json: string | null;
+  /** 見出しの帯（migrations/0008）。NULL なら既定の「体験セッション（60分・無料）」。 */
+  eyebrow: string | null;
   system: number; active: number; created_at: string;
   /** entry_seminars 側。kind='seminar' 以外では常に null。 */
   held_on: string | null; venue: string | null; audience_count: number | null;
@@ -475,7 +486,7 @@ export type EntryRow = {
 };
 
 const ENTRY_SELECT = `
-  select e.id, e.slug, e.kind, e.name, e.headline, e.intro, e.session_label, e.fields_json,
+  select e.id, e.slug, e.kind, e.name, e.headline, e.intro, e.eyebrow,
          e.system, e.active, e.created_at,
          s.held_on, s.venue, s.audience_count,
          (select count(*) from session_applications sa
@@ -522,25 +533,6 @@ export function slugError(slug: string): string | null {
 export function heldOnError(heldOn: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(heldOn)) return '開催日は YYYY-MM-DD の形式で入力してください。';
   if (Number.isNaN(Date.parse(`${heldOn}T00:00:00Z`))) return '開催日が実在しない日付です。';
-  return null;
-}
-
-/**
- * 事前入力の追加項目。JSON配列（文字列の並び）だけ通す。
- * 空欄は「追加項目なし」で、NULL として保存する（既定の設問だけになる）。
- */
-export function fieldsJsonError(raw: string): string | null {
-  if (!raw.trim()) return null;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return '追加項目は JSON の配列で書いてください（例：["役職","店舗の人数"]）。';
-  }
-  if (!Array.isArray(parsed) || parsed.some((v) => typeof v !== 'string' || !v.trim())) {
-    return '追加項目は、空でない文字列だけを並べた JSON の配列にしてください。';
-  }
-  if (parsed.length > 10) return '追加項目は10個までにしてください。';
   return null;
 }
 

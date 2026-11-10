@@ -140,10 +140,11 @@ for (const slug of slugs) {
 // 診断を使わないセミナー（副業・転職など）も含めた、主催するセミナー全般の申込ページにするため。
 // ガイド経由（/apply/{typeCode}）は診断の続きなので、名前とロゴを残す。DB を引かずに描いて比べる。
 {
-  const entry = { slug: 'sem-test', headline: null, intro: null, sessionLabel: null, fields: [] };
+  const entry = { slug: 'sem-test', headline: null, intro: null, eyebrow: null };
+  const questions = [{ id: 'q_message', label: 'ご質問・伝えておきたいこと', hint: null, fixed: 1 }];
   const pages = {
-    guide: applyPage({ code: 'OBL', visitId: null, entry: null }),
-    seminar: applyPage({ code: null, visitId: null, entry }),
+    guide: applyPage({ code: 'OBL', visitId: null, entry: null, questions }),
+    seminar: applyPage({ code: null, visitId: null, entry, questions }),
     closed: applyClosedPage(),
   };
   const brand = (html) => markup(html).includes('class="brand"');
@@ -160,6 +161,31 @@ for (const slug of slugs) {
     t(`${k}：診断への誘導が無い`, markup(pages[k]).includes('href="/"'), false);
   }
   t('セミナー経由の申込：フォームはある', pages.seminar.includes('id="applyForm"'), true);
+
+  // ── 見出しの帯と任意の設問（migrations/0008。2026-11-10） ──
+  const side = applyPage({
+    code: null, visitId: null,
+    entry: { ...entry, eyebrow: '体験会（60分）' },
+    questions: [
+      { id: 'q_side_since', label: '副業を始めたいと思ってどのくらい経ちますか？', hint: null, fixed: 0 },
+      { id: 'q_x', label: '<b>注釈あり</b>', hint: 'ひと言で<大丈夫>', fixed: 0 },
+      ...questions,
+    ],
+  });
+  const m = markup(side);
+  t('帯は入口の文言', /<div class="eyebrow">体験会（60分）<\/div>/.test(m), true);
+  t('帯が空なら既定', /<div class="eyebrow">体験セッション（60分・無料）<\/div>/.test(markup(pages.seminar)), true);
+  const order = [...m.matchAll(/data-qid="([^"]+)"/g)].map((x) => x[1]).join(',');
+  t('設問は渡した順に出る', order, 'q_side_since,q_x,q_message');
+  t('設問はすべて複数行', (m.match(/<textarea [^>]*data-qid=/g) ?? []).length, 3);
+  t('設問の入力に name を付けない（お名前などと混ざらない）', /<textarea [^>]*name="[^"]*"[^>]*data-qid=/.test(m), false);
+  t('ラベルに（任意）を付ける', m.includes('副業を始めたいと思ってどのくらい経ちますか？（任意）'), true);
+  t('注釈なしの設問には補足を出さない',
+    /data-qid="q_side_since"[^>]*><\/textarea><\/div>/.test(m), true);
+  t('設問文と注釈はエスケープする', m.includes('&lt;b&gt;注釈あり&lt;/b&gt;（任意）') && m.includes('ひと言で&lt;大丈夫&gt;'), true);
+  t('ラベルと入力が結びつく', m.includes('<label for="ans-q_x">') && m.includes('id="ans-q_x"'), true);
+  t('旧形式の欄（concern / custom / question）は無い', /name="(concern|custom|question)"/.test(m), false);
+  t('見出しが空ならタブの題名は「お申し込み」', /<title>お申し込み<\/title>/.test(pages.seminar), true);
 }
 
 if (fail) {

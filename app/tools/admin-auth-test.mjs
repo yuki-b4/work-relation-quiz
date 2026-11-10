@@ -19,7 +19,7 @@ import {
 } from '../src/lib/admin-format.ts';
 import { csvCell, csvRow, toCsv } from '../src/lib/csv.ts';
 import {
-  makeReferrerCode, normalizeSlug, slugError, heldOnError, fieldsJsonError,
+  makeReferrerCode, normalizeSlug, slugError, heldOnError,
 } from '../src/lib/admin-queries.ts';
 import { viewAnswers, questionSetOf, CURRENT_SET } from '../src/lib/question-archive.ts';
 import {
@@ -251,7 +251,8 @@ const eq = (label, a, b) =>
     {
       id: 'app-1', name: '山田太郎', email: 'taro@example.com',
       typeCode: 'OBL', typeName: '突撃隊長', slots: ['平日の夜（19時以降）'],
-      concern: '任せ方に悩んでいる', linked: true, origin: 'https://natur-indicator.com',
+      answers: [{ label: 'いま、人間関係で気になっていること', answer: '任せ方に悩んでいる' }, { label: '空の設問', answer: null }],
+      linked: true, origin: 'https://natur-indicator.com',
     }
   );
   globalThis.fetch = realFetch;
@@ -267,7 +268,8 @@ const eq = (label, a, b) =>
   check('タイプは出す', text.includes('突撃隊長（OBL）'));
   // 希望の時間帯は移行分にだけ残る。値があるときは出す
   check('移行分の希望の時間帯は出す', text.includes('平日の夜（19時以降）'));
-  check('気になっていることは出す', text.includes('任せ方に悩んでいる'));
+  check('設問への回答は「設問文：回答」で出す', text.includes('いま、人間関係で気になっていること：任せ方に悩んでいる'));
+  check('空欄の設問は出さない', !text.includes('空の設問'));
   check('詳細への直リンクがある', text.includes('https://natur-indicator.com/admin/sessions/app-1'));
   check('紐づいていれば警告を出さない', !text.includes('紐づいていません'));
 
@@ -276,7 +278,7 @@ const eq = (label, a, b) =>
   globalThis.fetch = async (url, init) => { posted2.push(JSON.parse(init.body)); return new Response('ok'); };
   await notifyApplication({ NOTIFY_WEBHOOK: 'https://x' }, {
     id: 'app-2', name: 'A', email: 'a@b.c', typeCode: 'GKS', typeName: null,
-    slots: [], concern: null, linked: false, origin: 'https://natur-indicator.com',
+    slots: [], answers: [], linked: false, origin: 'https://natur-indicator.com',
   });
   globalThis.fetch = realFetch;
   check('未紐づけは警告を出す', posted2[0].text.includes('回答に紐づいていません'));
@@ -289,7 +291,7 @@ const eq = (label, a, b) =>
   const before = posted.length;
   const none = await notifyApplication({}, {
     id: 'x', name: 'A', email: 'a@b.c', typeCode: null, typeName: null,
-    slots: [], concern: null, linked: true, origin: 'https://x',
+    slots: [], answers: [], linked: true, origin: 'https://x',
   });
   eq('未設定なら送らない', none.sent, false);
   eq('理由が分かる', none.error, 'not_configured');
@@ -451,13 +453,6 @@ if (fails.length) {
   check('空の開催日は弾く', !!heldOnError(''));
   check('実在しない日付は弾く', !!heldOnError('2026-13-01'));
 
-  check('追加項目が空なら通る（既定の設問だけ）', fieldsJsonError('') === null);
-  check('文字列の配列なら通る', fieldsJsonError('["役職","店舗の人数"]') === null);
-  check('壊れたJSONは弾く', !!fieldsJsonError('["役職",'));
-  check('配列でなければ弾く', !!fieldsJsonError('{"a":1}'));
-  check('文字列以外が混じれば弾く', !!fieldsJsonError('["役職",3]'));
-  check('空文字が混じれば弾く', !!fieldsJsonError('["役職",""]'));
-  check('11個以上は弾く', !!fieldsJsonError(JSON.stringify(Array.from({ length: 11 }, (_, i) => `q${i}`))));
 }
 
 console.log(`Admin の試験: ${pass} 件通過`);

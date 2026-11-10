@@ -13,6 +13,8 @@ import { esc } from '../result.ts';
 import { adminPage, type ShellOptions } from './layout.ts';
 import { jst } from '../../lib/admin-format.ts';
 import type { EntryRow } from '../../lib/admin-queries.ts';
+import { MAX_SELECTED, type QuestionChoice } from '../../lib/questions.ts';
+import { DEFAULT_EYEBROW } from '../apply-page.ts';
 
 const COPY_SCRIPT = `
 document.addEventListener('click', function (e) {
@@ -121,7 +123,37 @@ export function entriesListPage(
   return adminPage({ ...shell, nav: 'entries' }, body);
 }
 
-export function entryDetailPage(shell: ShellOptions, e: EntryRow, origin: string, csrf: string): string {
+/**
+ * 任意の設問を選ぶ表（migrations/0008）。チェックした設問が、順番の数字の小さい順に申込ページに並ぶ。
+ * 順番が空欄・同じ数字のときは、この表の並び順で決める（lib/questions.ts の selectedQuestionIds）。
+ * 固定の「ご質問・伝えておきたいこと」は選ばせない（どのページにも最後に出る）。
+ */
+function questionTable(choices: QuestionChoice[]): string {
+  if (!choices.length) return '<p class="muted">選べる設問がありません。</p>';
+  return (
+    '<div class="scroll"><table><thead><tr><th style="width:44px">出す</th><th style="width:72px">順番</th><th>設問</th></tr></thead><tbody>' +
+    choices.map((q) => (
+      '<tr>' +
+        `<td><input type="checkbox" name="q" value="${esc(q.id)}" aria-label="${esc(q.label)}を出す"${q.position !== null ? ' checked' : ''}></td>` +
+        `<td><input type="number" name="pos_${esc(q.id)}" min="1" max="99" style="width:60px" aria-label="${esc(q.label)}の順番"` +
+          ` value="${q.position !== null ? esc(String(q.position)) : ''}"></td>` +
+        `<td>${esc(q.label)}${q.archived ? ' <span class="faint">（アーカイブ済み。外すと選び直せません）</span>' : ''}` +
+          (q.hint ? `<br><span class="faint">注釈：${esc(q.hint)}</span>` : '<br><span class="faint">注釈なし</span>') +
+        '</td>' +
+      '</tr>'
+    )).join('') +
+    '</tbody></table></div>'
+  );
+}
+
+export function entryDetailPage(
+  shell: ShellOptions,
+  e: EntryRow,
+  /** 任意の設問の選択肢（lib/questions.ts の questionChoices）。選ばれていれば position が入る。 */
+  choices: QuestionChoice[],
+  origin: string,
+  csrf: string
+): string {
   const url = `${origin}/apply/s/${e.slug}`;
   const field = (id: string, label: string, hint: string, input: string) =>
     `<div class="f" style="flex-basis:100%"><label for="${id}">${esc(label)}</label>${input}` +
@@ -159,16 +191,21 @@ export function entryDetailPage(shell: ShellOptions, e: EntryRow, origin: string
         '<p class="note">すべて任意です。<b>空のままにすると、ガイド経由と同じ既定の文面が出ます。</b>' +
         'セミナーで話した内容に合わせて変えたいところだけ書いてください。</p>' +
         '<div class="filters">' +
+          // 見出しの帯（2026-11-10。以前は「セッションの長さの表記」だけを変えられた）
+          field('eyebrow', '見出しの帯', `空なら「${esc(DEFAULT_EYEBROW)}」。見出しの上に小さく出ます。` +
+            '<b>長さを書くときは、予約カレンダーの枠と揃えること。</b>',
+            `<input id="eyebrow" name="eyebrow" maxlength="60" value="${esc(e.eyebrow ?? '')}" placeholder="${esc(DEFAULT_EYEBROW)}">`) +
           field('headline', '見出し', '空なら「お申し込み」。',
-            `<input id="headline" name="headline" maxlength="120" value="${esc(e.headline ?? '')}" placeholder="体験セッション（60分・無料）">`) +
-          field('session_label', 'セッションの長さの表記', '空なら「60分」。見出しの帯に出ます。<b>予約カレンダーの枠と揃えること。</b>',
-            `<input id="session_label" name="session_label" maxlength="40" value="${esc(e.session_label ?? '')}" placeholder="60分">`) +
+            `<input id="headline" name="headline" maxlength="120" value="${esc(e.headline ?? '')}" placeholder="お申し込み">`) +
           field('intro', '冒頭の説明', '<b>空なら何も出ません</b>（既定の前置きは廃止しました）。書いたぶんだけ、見出しの下に出ます。改行はそのまま反映されます。',
             `<textarea id="intro" name="intro" maxlength="4000" rows="6">${esc(e.intro ?? '')}</textarea>`) +
-          field('fields_json', '事前入力の追加項目',
-            'JSON の配列で書きます。例：<span class="mono">["役職","店舗の人数"]</span>。空なら既定の設問だけになります。',
-            `<textarea id="fields_json" name="fields_json" maxlength="2000" rows="3">${esc(e.fields_json ?? '')}</textarea>`) +
         '</div>' +
+
+        '<h2 style="margin-top:18px">任意の設問</h2>' +
+        `<p class="note">申込ページに出す設問をチェックで選びます（${MAX_SELECTED}個まで）。` +
+        '順番の数字の小さい順に、お名前・メールアドレスの下に並びます。<b>何も選ばなければ、任意の設問は出ません。</b>' +
+        '「ご質問・伝えておきたいこと（任意）」は、選ばなくてもどのページにも最後に出ます。</p>' +
+        questionTable(choices) +
         '<p style="margin-top:12px"><button class="btn" type="submit">保存する</button></p>' +
       '</form>' +
     '</div>' +

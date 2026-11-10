@@ -11,7 +11,7 @@ import {
 } from '../../lib/admin-format.ts';
 import {
   APPLICATION_STATUSES, PER_PAGE, RESPONSE_STATUSES,
-  type ApplicationRow, type ResponseDetail, type ResponseFilters, type ResponseListRow,
+  type ApplicationWithAnswers, type ResponseDetail, type ResponseFilters, type ResponseListRow,
 } from '../../lib/admin-queries.ts';
 import {
   deadlineLabel, domainLabel, targetLabel,
@@ -19,6 +19,7 @@ import {
 import { AX, RADAR_AXES, RADAR_META } from '../../content/quiz.ts';
 import { TYPES, TYPE_CODES } from '../../content/types.ts';
 import type { QuestionView } from '../../lib/question-archive.ts';
+import { answerItems } from './answers.ts';
 
 /** 絞り込みの値を、そのままリンクに引き継ぐためのクエリ文字列を作る。 */
 export function queryString(f: ResponseFilters, override: Record<string, string | number | undefined> = {}): string {
@@ -223,7 +224,7 @@ function declarationRows(d: {
   );
 }
 
-function applicationBlock(a: ApplicationRow, csrf: string): string {
+function applicationBlock(a: ApplicationWithAnswers, csrf: string): string {
   const slots = jsonArray(a.preferred_slots);
   return (
     '<div class="panel" style="background:#FAFAF8">' +
@@ -234,8 +235,8 @@ function applicationBlock(a: ApplicationRow, csrf: string): string {
         // 希望の時間帯は2026-09-14に聞くのをやめた。**移行分にだけ値が残る**ので、あるときだけ出す
         (slots.length ? `<dt>希望の時間帯</dt><dd>${esc(slots.join('／'))}</dd>` : '') +
         // 宣言はこのページのブロック5に出るので、ここでは繰り返さない（申込フォームでは聞かない）
-        `<dt>気になっていること</dt><dd>${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
-        `<dt>質問</dt><dd>${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
+        // 書いてもらった内容（任意の設問 → 固定の「ご質問」。migrations/0008）
+        answerItems(a.answers) +
         `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
       '</dl>' +
       `<form method="post" action="/admin/sessions/${esc(a.id)}" style="margin-top:10px; display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap">` +
@@ -259,7 +260,7 @@ export function responseDetailPage(
     versionKnown: boolean;
     survey: Record<string, string | null> | null;
     visits: { id: string; visited_at: string; cta: string; application_count: number }[];
-    applications: ApplicationRow[];
+    applications: ApplicationWithAnswers[];
   },
   csrf: string
 ): string {

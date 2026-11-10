@@ -2,7 +2,8 @@
  * 体験セッション申込フォーム。
  *
  * 要件：アプリ化要件定義.md F4-5（入口ごとの申込ページ・認可なし・到達IDで紐づけ）。
- * 文面の正：このファイル（既定）と `entries` の上書き列（入口ごと）。
+ * 文面の正：このファイル（既定）と `entries` の上書き列（入口ごと）。任意の設問は設問マスタ
+ * （`questions`。入口ごとに `entry_questions` で選ぶ。2026-11-10）。
  * 旧 Googleフォーム版の仕様書（体験セッション申込フォーム.md）は内製化の完了に伴い削除した。
  *
  * 入口は2つの形で開かれる。
@@ -21,6 +22,7 @@
  *   ・honeypot ＋ レート制限を必ず入れる
  */
 import type { TypeCode } from '../content/types.ts';
+import { ANSWER_MAX, type FormQuestion } from '../lib/questions.ts';
 import { page, siteHeader } from './layout.ts';
 import { esc } from './result.ts';
 
@@ -62,12 +64,17 @@ export const SLOTS = [
 ] as const;
 
 /**
- * セッションの長さの表記。入口が上書きしていなければこれ。
+ * 見出しの帯。入口が上書きしていなければこれ（`entries.eyebrow`。2026-11-10）。
  *
- * **60分で固定**（2026-09-18）。予約カレンダー側の枠と揃える必要があるので、
+ * **長さは60分で固定**（2026-09-18）。予約カレンダー側の枠と揃える必要があるので、
  * ここを変えるなら Google の予約スケジュールの枠も同時に変えること。
+ * 入口で帯を書き換えるときも、長さを書くなら枠と揃える。
+ *
+ * 以前は長さの表記（`entries.session_label`）だけを入口ごとに変えられ、「体験セッション」と
+ * 「無料」は固定だった。診断を使わないセミナーでは呼び方（体験会など）も費用も回で違うので、
+ * 帯の文言ごと書き換えられるようにした。
  */
-const DEFAULT_SESSION_LABEL = '60分';
+export const DEFAULT_EYEBROW = '体験セッション（60分・無料）';
 
 /**
  * 冒頭の説明の既定。
@@ -83,14 +90,12 @@ function defaultIntro(thanksForGuide: boolean): string {
   return thanksForGuide ? '読み解きガイドを最後まで読んでくださり、ありがとうございます。' : '';
 }
 
-/** 申込ページが使う入口の情報。NULL は「上書きしていない」の意味（migrations/0007）。 */
+/** 申込ページが使う入口の情報。NULL は「上書きしていない」の意味（migrations/0007・0008）。 */
 export type ApplyEntry = {
   slug: string;
   headline: string | null;
   intro: string | null;
-  sessionLabel: string | null;
-  /** 事前入力の追加項目のラベル。順番がそのまま custom[] の並びになる。 */
-  fields: string[];
+  eyebrow: string | null;
 };
 
 export type ApplyOptions = {
@@ -100,6 +105,11 @@ export type ApplyOptions = {
   visitId: string | null;
   /** 入口。null はガイド経由（`/apply/{typeCode}`）。 */
   entry: ApplyEntry | null;
+  /**
+   * 出す設問を出す順に（`lib/questions.ts` の formQuestions）。入口ごとに選んだ設問 → 固定の設問。
+   * ガイド経由は `guide` の入口の設問（人間関係の設問）。
+   */
+  questions: FormQuestion[];
 };
 
 /**
@@ -217,8 +227,10 @@ const SCRIPT = `
       return;
     }
     var fd = new FormData(f);
-    // 追加項目は**並び順のまま**送る。ラベルはサーバが入口から引き直すので送らない。
-    var custom = fd.getAll('custom');
+    // 設問への回答は、設問のIDをキーにして送る。設問文はサーバがマスタから引き直すので送らない。
+    var answers = {};
+    var boxes = f.querySelectorAll('textarea[data-qid]');
+    for (var q = 0; q < boxes.length; q++) answers[boxes[q].getAttribute('data-qid')] = boxes[q].value;
     sending = true;
     btn.disabled = true;
     btn.classList.add('is-loading');
@@ -232,9 +244,7 @@ const SCRIPT = `
         v: fd.get('v') || null,
         name: fd.get('name'),
         email: fd.get('email'),
-        concern: fd.get('concern'),
-        custom: custom,
-        question: fd.get('question'),
+        answers: answers,
         website: fd.get('website')
       })
     }).then(function (r) { return r.json().then(function (d) { return { s: r.status, d: d }; }); })
@@ -257,7 +267,7 @@ const SCRIPT = `
 
 function field(id: string, label: string, hint: string, input: string): string {
   return (
-    `<div class="field"><label for="${id}">${esc(label)}</label>${input}` +
+    `<div class="field"><label for="${esc(id)}">${esc(label)}</label>${input}` +
     (hint ? `<p class="qhint" style="text-align:left; margin-top:6px">${esc(hint)}</p>` : '') +
     '</div>'
   );
@@ -284,7 +294,7 @@ function paragraphs(text: string): string {
 export function applyPage(opts: ApplyOptions): string {
   const { code, visitId, entry } = opts;
   const isGuide = entry === null;
-  const sessionLabel = entry?.sessionLabel || DEFAULT_SESSION_LABEL;
+  const eyebrow = entry?.eyebrow || DEFAULT_EYEBROW;
   const headline = entry?.headline || 'お申し込み';
   const intro = entry?.intro || defaultIntro(isGuide);
 
@@ -293,10 +303,13 @@ export function applyPage(opts: ApplyOptions): string {
   // 分からない人の申込は Admin の手動紐づけ（F2-4）で補う。
   const typeField = code ? `<input type="hidden" name="typeCode" value="${esc(code)}">` : '';
 
-  const customFields = (entry?.fields ?? [])
-    .map((label, i) =>
-      field(`custom${i}`, `${label}（任意）`, '',
-        `<input id="custom${i}" name="custom" type="text" maxlength="200">`)
+  // 設問はすべて任意で、すべて複数行（2026-11-10）。注釈は設問ごとに持つ（questions.hint）。
+  // **場面・相手・期限はここでは聞かない**（2026-09-12）。宣言はフォーク（A-1）の1か所で取り、
+  // 宣言が無い人には体験セッションの場で聞く（集客戦略マップ.md §4.2 の1段目）。
+  const questionFields = opts.questions
+    .map((q) =>
+      field(`ans-${q.id}`, `${q.label}（任意）`, q.hint ?? '',
+        `<textarea id="ans-${esc(q.id)}" data-qid="${esc(q.id)}" maxlength="${ANSWER_MAX}"></textarea>`)
     )
     .join('');
 
@@ -305,7 +318,7 @@ export function applyPage(opts: ApplyOptions): string {
       // セミナー経由はヘッダーごと出さない（冒頭のコメント）。ロゴは `/` へのリンクでもあるので、
       // 残すと診断への出口にもなる。
       (isGuide ? siteHeader() + '<section class="screen active">' : `<section class="screen active" style="${BARE_TOP}">`) +
-        `<div class="eyebrow">体験セッション（${esc(sessionLabel)}・無料）</div>` +
+        `<div class="eyebrow">${esc(eyebrow)}</div>` +
         `<h1 class="hero" style="font-size:clamp(21px,4.6vw,28px)">${esc(headline)}</h1>` +
         // **タイプ名は出さない**（2026-09-18）。この画面のタイプは、URL か、
         // セミナー入口では結果セッションCookieから引いている。Cookieから当てた名前を
@@ -331,17 +344,9 @@ export function applyPage(opts: ApplyOptions): string {
             '<input id="name" name="name" type="text" required maxlength="100" autocomplete="name">') +
           field('email', 'メールアドレス（必須）', '日程のご連絡に使います。',
             '<input id="email" name="email" type="email" required maxlength="200" autocomplete="email">') +
-          // **場面・相手・期限はここでは聞かない**（2026-09-12）。宣言はフォーク（A-1）の1か所で取り、
-          // 宣言が無い人には体験セッションの場で聞く（集客戦略マップ.md §4.2 の1段目）。
-          // 同じことを2回聞かないぶん、フォームの摩擦も増やさない。
-          field('concern', 'いま、人間関係で気になっていること（任意）',
-            'ひと言でも大丈夫です。書いていただけると、当日の読み解きが早く、深くなります。',
-            '<textarea id="concern" name="concern" maxlength="4000"></textarea>') +
-
-          customFields +
-
-          field('question', 'ご質問・伝えておきたいこと（任意）', '',
-            '<textarea id="question" name="question" maxlength="4000"></textarea>') +
+          // 任意の設問。入口ごとに選んだ設問 → 固定の設問（ご質問・伝えておきたいこと）の順。
+          // 送るときは name を使わず data-qid で集める（SCRIPT）。お名前・メールと混ざらないように。
+          questionFields +
 
           // 日程は送信より先に、この枠で選んでもらう（2026-10-19）。見出しは他の項目と同じ大きさ。
           // 予約UIは Google の中で完結し、選ばれた日時はこちらで受け取れないので、
@@ -396,7 +401,9 @@ export function applyPage(opts: ApplyOptions): string {
 
   return page(
     {
-      title: isGuide ? '体験セッションのお申し込み | ナチュール診断' : '体験セッションのお申し込み',
+      // セミナー経由は見出しをそのまま使う。帯は入口ごとに書き換えられる（体験会など）ので、
+      // 題名で「体験セッション」と決め打ちしない。
+      title: isGuide ? '体験セッションのお申し込み | ナチュール診断' : headline,
       noindex: true,
       icons: isGuide,
       head: `<style>${STYLE}</style>`,
@@ -418,7 +425,8 @@ export function applyClosedPage(): string {
     { title: '受付を終了しました', noindex: true, icons: false },
     '<div class="app">' +
       `<section class="screen active" style="${BARE_TOP}">` +
-        '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">この体験セッションの受付は終了しました</h1>' +
+        // 呼び方は入口ごとに違う（帯を書き換えられる）ので、「体験セッション」と決め打ちしない（2026-11-10）
+        '<h1 class="hero" style="font-size:clamp(22px,5vw,30px)">お申し込みの受付は終了しました</h1>' +
         '<p class="lead">お申し込みいただける期間が過ぎています。ご案内の行き違いでしたら、申し訳ありません。</p>' +
       '</section>' +
     '</div>'

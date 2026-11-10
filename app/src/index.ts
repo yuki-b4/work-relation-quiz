@@ -31,6 +31,7 @@ import { admin } from './routes/admin.ts';
 import { adminPage } from './views/admin/layout.ts';
 import { apexUrl } from './lib/canonical-host.ts';
 import { errorSignature, notifyApplication, notifyError, shouldNotifyError } from './lib/notify.ts';
+import { answerRows, formQuestions, GUIDE_ENTRY_ID } from './lib/questions.ts';
 import ogpImage from '../assets/ogp.png';
 import faviconIco from '../assets/favicon.ico';
 import faviconSvg from '../assets/favicon.svg';
@@ -189,33 +190,20 @@ app.get('/guide', async (c) => {
  * 既定の入口のID。migrations/0007 が system 行として入れる。
  * Admin からは消せないので、ここで参照先が消えることはない。
  */
-const ENTRY_GUIDE = 'entry_guide';
+const ENTRY_GUIDE = GUIDE_ENTRY_ID;
 const ENTRY_DIRECT = 'entry_direct';
 
 type EntryRecord = {
   id: string; slug: string; headline: string | null; intro: string | null;
-  session_label: string | null; fields_json: string | null; active: number; system: number;
+  eyebrow: string | null; active: number; system: number;
 };
-
-/** 入口の事前入力の追加項目。壊れた JSON は「項目なし」として扱う（画面を落とさない）。 */
-function entryFields(fieldsJson: string | null): string[] {
-  if (!fieldsJson) return [];
-  try {
-    const parsed: unknown = JSON.parse(fieldsJson);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is string => typeof v === 'string' && !!v.trim()).slice(0, 10);
-  } catch {
-    return [];
-  }
-}
 
 function toApplyEntry(e: EntryRecord): ApplyEntry {
   return {
     slug: e.slug,
     headline: e.headline,
     intro: e.intro,
-    sessionLabel: e.session_label,
-    fields: entryFields(e.fields_json),
+    eyebrow: e.eyebrow,
   };
 }
 
@@ -233,7 +221,7 @@ function toApplyEntry(e: EntryRecord): ApplyEntry {
  */
 app.get('/apply/s/:slug', async (c) => {
   const e = await c.env.DB.prepare(
-    `select id, slug, headline, intro, session_label, fields_json, active, system
+    `select id, slug, headline, intro, eyebrow, active, system
        from entries where slug = ?`
   ).bind(c.req.param('slug')).first<EntryRecord>();
   // system 行（guide / direct）は公開URLを持たない。guide は /apply/{typeCode} 側。
@@ -258,7 +246,8 @@ app.get('/apply/s/:slug', async (c) => {
       }
     }
   }
-  return c.html(applyPage({ code, visitId, entry: toApplyEntry(e) }));
+  const questions = await formQuestions(c.env.DB, e.id);
+  return c.html(applyPage({ code, visitId, entry: toApplyEntry(e), questions }));
 });
 
 /**
@@ -295,8 +284,9 @@ app.get('/seminar/:slug/:file', (c) => {
 /**
  * 申込フォーム（ガイド終章から）。タイプ別の共通ページで、認可は無い（F4-5）。
  * ?v= は到達IDで、これ自体は何の権限も与えない（付いていても結果は見えない）。
+ * 設問は `guide` の入口に付いているもの（人間関係の設問。migrations/0008）。
  */
-app.get('/apply/:typeCode', (c) => {
+app.get('/apply/:typeCode', async (c) => {
   const code = c.req.param('typeCode');
   if (!(code in TYPES)) return c.notFound();
   const v = c.req.query('v');
@@ -304,6 +294,7 @@ app.get('/apply/:typeCode', (c) => {
     code: code as TypeCode,
     visitId: /^[0-9a-f]{64}$/.test(v ?? '') ? v! : null,
     entry: null,
+    questions: await formQuestions(c.env.DB, ENTRY_GUIDE),
   }));
 });
 
@@ -622,34 +613,30 @@ app.post('/api/session-applications', async (c) => {
    */
   let entryId = ENTRY_DIRECT;
   let entryName: string | null = null;
-  let fields: string[] = [];
   if (visitCta === 'epilogue-1' || visitCta === 'epilogue-2') {
     entryId = ENTRY_GUIDE;
   } else {
     const slug = str(body.entry, 40);
     if (slug) {
-      const e = await c.env.DB.prepare(`select id, name, fields_json from entries where slug = ?`)
+      const e = await c.env.DB.prepare(`select id, name from entries where slug = ?`)
         .bind(slug)
-        .first<{ id: string; name: string; fields_json: string | null }>();
+        .first<{ id: string; name: string }>();
       if (e) {
         entryId = e.id;
         entryName = e.name;
-        fields = entryFields(e.fields_json);
       }
     }
   }
 
   /**
-   * 入口ごとの追加項目。**ラベルはクライアントから受け取らず、入口から引き直す。**
-   * 並び順だけを信じて対応づけるので、任意のキーを混ぜ込まれることがない。
+   * 設問への回答（migrations/0008）。**設問文はクライアントから受け取らず、マスタから引き直す。**
+   * 受け付けるのは、その入口の申込ページに出した設問のIDだけ。出した設問は空欄でも1行残す。
+   * `direct` は自分のページを持たない（`/apply/{typeCode}` を `?v=` なしで開いた申込）ので、
+   * そのページが出している `guide` の設問で受ける。
+   * キャッシュに残った古い画面は `concern` と `question` を別々に送ってくるので、それも受ける。
    */
-  const answers = Array.isArray(body.custom) ? body.custom : [];
-  const custom: Record<string, string> = {};
-  fields.forEach((label, i) => {
-    const v = typeof answers[i] === 'string' ? (answers[i] as string).trim().slice(0, 200) : '';
-    if (v) custom[label] = v;
-  });
-  const customAnswers = Object.keys(custom).length ? JSON.stringify(custom) : null;
+  const shown = await formQuestions(c.env.DB, entryId === ENTRY_DIRECT ? ENTRY_GUIDE : entryId);
+  const answers = answerRows(shown, body.answers, { concern: body.concern, question: body.question });
 
   /**
    * タイプは、回答が引けたならその回答のものを正とする（クライアントの申告より確か）。
@@ -673,18 +660,23 @@ app.post('/api/session-applications', async (c) => {
     : null;
 
   const applicationId = crypto.randomUUID();
-  const concern = str(body.concern, 4000) || null;
-  await c.env.DB.prepare(
-    `insert into session_applications
-       (id, created_at, entry_id, apply_visit_id, response_id, type_code, name, email,
-        concern, preferred_slots, question, custom_answers, source, status)
-     values (?,?,?,?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
-  )
-    .bind(
-      applicationId, isoNow(), entryId, visitId, responseId, typeCode, name, email,
-      concern, JSON.stringify(slots), str(body.question, 4000) || null, customAnswers
-    )
-    .run();
+  // 申込と回答は1回の batch で入れる（途中で落ちて、回答の無い申込が残らないように）。
+  // 旧列（concern / question / custom_answers）にはもう書かない。0009 で列ごと消す。
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      `insert into session_applications
+         (id, created_at, entry_id, apply_visit_id, response_id, type_code, name, email,
+          preferred_slots, source, status)
+       values (?,?,?,?,?,?,?,?,?, 'in-app', '未対応')`
+    ).bind(
+      applicationId, isoNow(), entryId, visitId, responseId, typeCode, name, email, JSON.stringify(slots)
+    ),
+    ...answers.map((a) =>
+      c.env.DB.prepare(
+        `insert into question_answers (application_id, question_id, position, label, answer) values (?,?,?,?,?)`
+      ).bind(applicationId, a.question_id, a.position, a.label, a.answer)
+    ),
+  ]);
 
   // 申込が来たことを知らせる（D-1）。**待たせない**ので waitUntil に投げる。
   // 通知が失敗しても申込は成立させる（通知のために申込を落とすほうが困る）。
@@ -696,7 +688,9 @@ app.post('/api/session-applications', async (c) => {
       typeCode,
       typeName: typeCode ? (TYPES[typeCode as keyof typeof TYPES]?.name ?? null) : null,
       slots,
-      concern,
+      // 書いてもらった内容のうち、入口ごとに選んだ設問の分（旧「気になっていること」の置き換え）。
+      // 固定の「ご質問」は以前から通知に出していないので、ここでも出さない。
+      answers: answers.filter((_, i) => !shown[i]?.fixed),
       // フォークでの宣言（A-1）。**当日はここの読み上げから始める**（§4.2 の1）。
       // 無ければセッションの場で聞くので、通知では「未宣言」と分かればよい。
       declaration: declarationText(declaration ?? {}),

@@ -72,7 +72,10 @@ t('到達IDつきの申込URLが返る', /^\/apply\/OBL\?v=[0-9a-f]{64}$/.test(a
 await p.goto(`${BASE}${applyUrl}`);
 await p.fill('#name', `紐づき ${marker}`);
 await p.fill('#email', `linked-${marker}@example.com`);
+await p.fill('#ans-q_concern', `任せ方 ${marker}`);
 await p.check('input[name="agree"]');
+// 「日程を選択しました」にチェックが入るまで申込ボタンは押せない（2026-10-19）
+await p.check('#booked');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 
@@ -97,6 +100,7 @@ await p.goto(`${BASE}/apply/OBL`);
 await p.fill('#name', `未紐づけ ${marker}`);
 await p.fill('#email', `orphan-${marker}@example.com`);
 await p.check('input[name="agree"]');
+await p.check('#booked');
 await p.click('#applySubmit');
 await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
 
@@ -166,6 +170,9 @@ t('相手のタイプは段2待ちと分かる', detail.includes('段2で埋ま�
 t('ガイドの終章到達が出る', detail.includes('終章'), true);
 t('申込者の氏名は詳細で全表示', detail.includes(`紐づき ${marker}`), true);
 t('到達したCTAが出る', detail.includes('epilogue-2'), true);
+// 書いてもらった内容（migrations/0008）。設問文は申込した時点の写し
+t('回答詳細の申込に設問への回答が出る', detail.includes(`任せ方 ${marker}`), true);
+t('回答詳細の申込に設問文が出る', detail.includes('いま、人間関係で気になっていること'), true);
 
 // 運用欄の保存（F2-3 ブロック8）
 await p.selectOption('#admin_status', '対応中');
@@ -194,6 +201,9 @@ await p.waitForSelector('h1', { timeout: 8000 });
 const appDetail = await p.textContent('body');
 t('申込詳細に紐づく回答の宣言が出る', appDetail.includes('職場の特定の人との関係'), true);
 t('申込フォームでは宣言を聞いていない', appDetail.includes('未宣言（当日に聞く）'), false);
+t('申込詳細に設問への回答が出る', appDetail.includes(`任せ方 ${marker}`), true);
+// 出した設問は空欄でも1行残す。固定の「ご質問」は書いていないので「—」で出る
+t('空欄の固定の設問も行がある', appDetail.includes('ご質問・伝えておきたいこと'), true);
 
 await p.goto(`${BASE}/admin/sessions?q=${encodeURIComponent(marker)}`);
 await p.click(`tbody tr:has-text("未◯") td:first-child a`);
@@ -241,6 +251,74 @@ t('ダウンロードさせる', (csv.disposition ?? '').includes('attachment'),
 t('UTF-8 BOM が付く（Excelでの文字化け防止）', csv.bom, true);
 t('ヘッダー行が日本語', csv.firstLine.includes('タイプコード'), true);
 t('1列目が回答ID', csv.firstLine.split(',')[0], '回答ID');
+
+// ── 7b. 申込の入口：見出しの帯と任意の設問（F2-8・migrations/0008） ──
+{
+  const slug = `sem-t${marker.slice(-6)}`;
+  await p.goto(`${BASE}/admin/entries`);
+  await p.fill('#name', `副業 ${marker}`);
+  await p.fill('#slug', slug);
+  await p.fill('#held_on', '2026-11-11');
+  await p.click('form[action="/admin/entries"] button[type="submit"]');
+  await p.waitForSelector('.ok', { timeout: 8000 });
+  await p.click(`a:has-text("副業 ${marker}")`);
+  await p.waitForSelector('#eyebrow', { timeout: 8000 });
+  t('新しい入口は設問が何も選ばれていない', await p.$$eval('input[name="q"]:checked', (e) => e.length), 0);
+  t('固定の設問は選択肢に出ない', await p.$$eval('input[name="q"][value="q_message"]', (e) => e.length), 0);
+  t('長さの表記と追加項目の欄は無い', await p.$$eval('#session_label, #fields_json', (e) => e.length), 0);
+
+  // 何も選ばない入口の申込ページ：固定の設問だけ
+  await p.goto(`${BASE}/apply/s/${slug}`);
+  t('選んでいない入口は固定の設問だけ',
+    (await p.$$eval('textarea[data-qid]', (e) => e.map((x) => x.dataset.qid))).join(','), 'q_message');
+  t('帯が空なら既定', (await p.textContent('.eyebrow')).trim(), '体験セッション（60分・無料）');
+
+  // 帯を書き、副業の2問を「悩み → 期間」の順で選ぶ（画面の並びと逆にして、順番の数字が効くかを見る）
+  await p.goBack();
+  await p.fill('#eyebrow', '体験会（60分）');
+  await p.check('input[name="q"][value="q_side_since"]');
+  await p.check('input[name="q"][value="q_side_worry"]');
+  await p.fill('input[name="pos_q_side_since"]', '2');
+  await p.fill('input[name="pos_q_side_worry"]', '1');
+  await p.click('form:has(#eyebrow) button[type="submit"]');
+  await p.waitForSelector('.ok', { timeout: 8000 });
+  t('選んだ設問が残る',
+    (await p.$$eval('input[name="q"]:checked', (e) => e.map((x) => x.value))).join(','), 'q_side_worry,q_side_since');
+  t('順番は1から振り直される', await p.inputValue('input[name="pos_q_side_since"]'), '2');
+  t('帯が残る', await p.inputValue('#eyebrow'), '体験会（60分）');
+
+  await p.goto(`${BASE}/apply/s/${slug}`);
+  t('帯が入口の文言になる', (await p.textContent('.eyebrow')).trim(), '体験会（60分）');
+  t('選んだ順 → 固定の設問',
+    (await p.$$eval('textarea[data-qid]', (e) => e.map((x) => x.dataset.qid))).join(','), 'q_side_worry,q_side_since,q_message');
+  t('人間関係の設問は出ない', (await p.textContent('#applyForm')).includes('人間関係'), false);
+  await p.fill('#name', `副業さん ${marker}`);
+  await p.fill('#email', `side-${marker}@example.com`);
+  await p.fill('#ans-q_side_since', `3年 ${marker}`);
+  await p.check('input[name="agree"]');
+  await p.check('#booked');
+  await p.click('#applySubmit');
+  await p.waitForSelector('#applyDone:not([hidden])', { timeout: 10000 });
+
+  await p.goto(`${BASE}/admin/sessions?entry=${slug}`);
+  await p.click('tbody tr td:first-child a');
+  await p.waitForSelector('h1', { timeout: 8000 });
+  const sideDetail = await p.textContent('.kv');
+  t('申込詳細に設問文と回答が出る', sideDetail.includes(`副業を始めたいと思ってどのくらい経ちますか？3年 ${marker}`), true);
+  t('空欄の設問も見た順に並ぶ',
+    sideDetail.indexOf('副業を始める上で悩んでいること') < sideDetail.indexOf('副業を始めたいと思って') &&
+    sideDetail.indexOf('副業を始めたいと思って') < sideDetail.indexOf('ご質問・伝えておきたいこと'), true);
+
+  // CSV は列の並びを変えない。人間関係とご質問以外は「追加項目」に「設問文：回答」で入る
+  const apps = await p.evaluate(async () => {
+    const r = await fetch('/admin/export/applications.csv', { credentials: 'same-origin' });
+    return new TextDecoder().decode(new Uint8Array(await r.arrayBuffer())).replace(/^\uFEFF/, '');
+  });
+  const head = apps.split('\r\n')[0].split(',');
+  t('申込CSVの列は以前と同じ', head.slice(10, 14).join(','), '気になっていること,希望の時間帯,追加項目,質問');
+  t('申込CSVの追加項目に設問文：回答', apps.includes(`副業を始めたいと思ってどのくらい経ちますか？：3年 ${marker}`), true);
+  t('申込CSVの気になっていることに人間関係の設問の回答', apps.includes(`任せ方 ${marker}`), true);
+}
 
 // ── 8. ログアウト ──
 await p.goto(`${BASE}/admin/responses`);

@@ -27,6 +27,8 @@ const sql = (f) => readFileSync(join(MIGRATIONS, f), 'utf8');
 /** 試す対象と、その前に当たるもの。 */
 const SUBJECT = '0007_entries.sql';
 const BEFORE = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f < SUBJECT).sort();
+/** 後に当たるもの。Admin の問い合わせは最新のスキーマを読むので、その試験の前に当てる。 */
+const AFTER = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f > SUBJECT).sort();
 
 let pass = 0;
 const fails = [];
@@ -196,6 +198,8 @@ function asD1(sqlite) {
 }
 
 {
+  // Admin の問い合わせは最新のスキーマ（0008 の entries.eyebrow など）を読む。0007 の後ろも全部当てる。
+  for (const f of AFTER) db.exec(sql(f));
   const d1 = asD1(db);
 
   // Admin の「セミナーを追加する」と同じ形（entries と entry_seminars を必ず同時に入れる）。
@@ -220,8 +224,9 @@ function asD1(sqlite) {
   check('入口ごとの申込数が出る', bySlug['sem-0928'].application_count === 1 && bySlug['sem-1012'].application_count === 0);
   check('既定の入口の申込数も出る', bySlug.guide.application_count >= 1);
   check('成約数は status で数える', bySlug['sem-0928'].closed_count === 0);
+  // 長さの表記（session_label）は 0008 で見出しの帯（eyebrow）に組み直される
   check('上書き用の文面が読める',
-    bySlug['sem-0928'].session_label === '60分' && bySlug['sem-0928'].fields_json === '["role","team_size"]');
+    bySlug['sem-0928'].headline === '体験セッション（60分・無料）' && bySlug['sem-0928'].eyebrow === '体験セッション（60分・無料）');
 
   // 成約を1件入れたら成約数が動く（申込率・成約率の分子）。
   db.exec(`update session_applications set status = '成約' where id = 'app_sem'`);

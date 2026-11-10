@@ -156,7 +156,11 @@ export type ApplicationEvent = {
    * 値が入るのは移行分だけなので、通知には出さない（日程は予約カレンダーで決まる）。
    */
   slots: string[];
-  concern: string | null;
+  /**
+   * 入口ごとに選んだ設問への回答（migrations/0008。旧「気になっていること」の置き換え）。
+   * 書いてあるものだけを「設問文：回答」で出す。固定の「ご質問」は渡さない（以前から出していない）。
+   */
+  answers: { label: string; answer: string | null }[];
   /**
    * 紐づく回答でのフォークの宣言（施策a 段1・A-1）。場面／相手／期限を1行にしたもの。
    * **申込フォームでは聞かない**ので、無ければ体験セッションの場で聞く（§4.2 の1段目）。
@@ -179,6 +183,10 @@ export type ApplicationEvent = {
  * **日程は通知に出ない。** 予約は申込画面に埋め込んだ Google の予約カレンダーで取るので、
  * こちらでは受け取れない（`apply-page.ts` の `BOOKING_URL`）。突き合わせは氏名・メールで行う。
  */
+function clip(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
 export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Promise<NotifyResult> {
   const body = [
     ...(a.entryName ? [`入口：${a.entryName}`] : []),
@@ -188,7 +196,8 @@ export async function notifyApplication(env: NotifyEnv, a: ApplicationEvent): Pr
     // 移行分にだけ値が残る。新しい申込では出ない（日程は予約カレンダーで決まる）
     ...(a.slots.length ? [`希望の時間帯：${a.slots.join('／')}`] : []),
     `宣言：${a.declaration ?? '未宣言（当日に聞く）'}`,
-    ...(a.concern ? [`気になっていること：${a.concern.slice(0, 120)}${a.concern.length > 120 ? '…' : ''}`] : []),
+    // 長い回答は120字で切る。全文は Admin で読む
+    ...a.answers.filter((x) => x.answer).map((x) => `${x.label}：${clip(x.answer!, 120)}`),
     a.linked ? '' : '⚠ 回答に紐づいていません。Admin で手当てしてください。',
     '',
     `詳細：${a.origin}/admin/sessions/${a.id}`,

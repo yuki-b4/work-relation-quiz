@@ -316,6 +316,9 @@ export function buildApplications(rows, typeByResponseId = new Map()) {
     const typeCode = (responseId && typeByResponseId.get(responseId)) || typeCodeOf(row[FORM.type]);
     const slots = splitIssues(row[FORM.slots]);
 
+    // 旧列（concern / question）に書く。2026-11-10 から画面は question_answers を読む（migrations/0008）。
+    // 0009 で旧列を消す前に流し直す写しで question_answers に移るが、0009 の後はこの insert が落ちる。
+    // 取り込みは済んでいる（2026-09）ので、もう一度使うなら question_answers に書くように直すこと。
     sql.push(
       `INSERT OR IGNORE INTO session_applications (
   id, created_at, apply_visit_id, response_id, type_code, name, email,

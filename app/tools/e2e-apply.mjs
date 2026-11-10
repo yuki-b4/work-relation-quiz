@@ -146,7 +146,7 @@ t('開かないときの逃げ道がある',
 // 見出しは「ご質問・伝えておきたいこと（任意）」と同じ大きさ。計算後のスタイルで比べる
 const heads = await apply.evaluate(() => {
   const pick = (el) => { const c = getComputedStyle(el); return [c.fontSize, c.fontWeight, c.color].join(' '); };
-  return { book: pick(document.getElementById('bookTitle')), question: pick(document.querySelector('label[for="question"]')) };
+  return { book: pick(document.getElementById('bookTitle')), question: pick(document.querySelector('label[for="ans-q_message"]')) };
 });
 t('「日程の選択」の見出しが他の項目と同じ見た目', heads.book, heads.question);
 const bookedBox = await apply.evaluate(() => {
@@ -200,7 +200,7 @@ t('形式が不正なら形式の指摘に変わる',
 
 // ── 送信 ──
 await apply.fill('#email', 'test@example.com');
-await apply.fill('#concern', '任せたいのに抱え込んでしまう');
+await apply.fill('#ans-q_concern', '任せたいのに抱え込んでしまう');
 await apply.check('input[name="agree"]');
 
 await apply.click('#applySubmit');

@@ -20,7 +20,7 @@ import { notifyConfigured, notifyLogin, notifyTest } from '../lib/notify.ts';
 import { saltedHash } from '../lib/hash.ts';
 import { timingSafeEqualStr } from '../lib/password.ts';
 import {
-  APPLICATION_STATUSES, CORP_STATUSES, RESPONSE_STATUSES, fieldsJsonError, filterOptions,
+  APPLICATION_STATUSES, CORP_STATUSES, RESPONSE_STATUSES, filterOptions,
   entryOptions, heldOnError, issueReferrerCode, linkCandidates, listApplications, listCorpLeads,
   listEntries,
   listReferrers, listResponses, listResponsesForCsv, loadAnswers, loadApplication, loadEntry,
@@ -30,6 +30,10 @@ import { csvHeaders, toCsv } from '../lib/csv.ts';
 import { deadlineLabel, domainLabel, targetLabel } from '../lib/declaration.ts';
 import { jsonArray, jstDayEnd, jstDayStart, jstFull } from '../lib/admin-format.ts';
 import { questionSetOf, viewAnswers } from '../lib/question-archive.ts';
+import {
+  answersText, groupAnswers, loadQuestionAnswers, questionChoices, selectedQuestionIds,
+  CONCERN_QUESTION_ID, MESSAGE_QUESTION_ID, type QuestionAnswer,
+} from '../lib/questions.ts';
 import { loginPage, bootstrapPage, lockedMessage } from '../views/admin/login.ts';
 import { responseDetailPage, responsesListPage } from '../views/admin/responses.ts';
 import { sessionDetailPage, sessionsListPage } from '../views/admin/sessions.ts';
@@ -154,28 +158,13 @@ const FLASH: Record<string, string> = {
   linked: '申込を回答に紐づけました。',
   unlinked: '紐づけを外しました。',
   issued: '紹介者コードを発行しました。',
-  entry_added: '入口を追加しました。申込ページの文面は、必要なら表示名から開いて設定してください。',
+  entry_added: '入口を追加しました。任意の設問は何も選ばれていません。申込ページの文面と設問は、表示名から開いて設定してください。',
   opened: '受付を再開しました。',
   closed: '受付を締めました。',
   deleted: '削除しました（伏せました）。',
   restored: '伏せるのを解除しました。',
   purged: '完全に削除しました。',
 };
-
-/**
- * 入口ごとの追加項目を CSV の1セルに畳む。入口によって項目が違うので、列にはできない。
- * 「項目：値」を改行で並べる（toCsv が引用符で包むので、セル内の改行は壊れない）。
- */
-function customText(json: string | null): string {
-  if (!json) return '';
-  try {
-    const parsed: unknown = JSON.parse(json);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return '';
-    return Object.entries(parsed as Record<string, unknown>).map(([k, v]) => `${k}：${String(v)}`).join('\n');
-  } catch {
-    return '';
-  }
-}
 
 function flashOf(key: string): string | undefined {
   return FLASH[key];
@@ -407,12 +396,15 @@ admin.get('/sessions', async (c) => {
 admin.get('/sessions/:id', async (c) => {
   const a = await loadApplication(c.env.DB, c.req.param('id'));
   if (!a) return c.notFound();
-  const candidates = a.response_id ? [] : await linkCandidates(c.env.DB, a);
+  const [candidates, answers] = await Promise.all([
+    a.response_id ? [] : linkCandidates(c.env.DB, a),
+    loadQuestionAnswers(c.env.DB, a.id),
+  ]);
   await audit(c.env.DB, {
     actorId: c.var.userId, action: 'view_pii', targetType: 'session_application', targetId: a.id,
     ipHash: await saltedHash(clientIp(c.req.raw), c.env.IP_HASH_SALT),
   });
-  return c.html(sessionDetailPage(shellOf(c, '申込の詳細'), a, candidates, c.var.csrf));
+  return c.html(sessionDetailPage(shellOf(c, '申込の詳細'), a, answers, candidates, c.var.csrf));
 });
 
 admin.post('/sessions/:id', async (c) => {
@@ -569,13 +561,15 @@ admin.post('/entries', async (c) => {
 admin.get('/entries/:id', async (c) => {
   const e = await loadEntry(c.env.DB, c.req.param('id'));
   if (!e || e.system === 1) return c.notFound();
-  return c.html(entryDetailPage(shellOf(c, e.name), e, originOf(c.req.url), c.var.csrf));
+  const choices = await questionChoices(c.env.DB, e.id);
+  return c.html(entryDetailPage(shellOf(c, e.name), e, choices, originOf(c.req.url), c.var.csrf));
 });
 
 /**
  * 更新。slug は変えさせない（配ったURLが死ぬため。変えたいなら新しい入口を作る）。
- * 文面の4項目は空欄を NULL に落とす。NULL が「既定の文面を使う」の意味なので、
+ * 文面の3項目（帯・見出し・冒頭の説明）は空欄を NULL に落とす。NULL が「既定の文面を使う」の意味なので、
  * 空文字で保存すると見出しが消えた申込ページになる。
+ * 任意の設問は、選び直したぶんを丸ごと入れ替える（migrations/0008。同じ batch で消して入れ直す）。
  */
 admin.post('/entries/:id', async (c) => {
   const check = await readForm(c);
@@ -592,16 +586,25 @@ admin.post('/entries/:id', async (c) => {
   if (heldNg) return c.text(heldNg, 400);
   const audience = audienceOf(str('audience_count', 10));
   if (audience === undefined) return c.text('参加者数は0以上の整数で入力してください。', 400);
-  const fieldsJson = str('fields_json', 2000);
-  const fieldsNg = fieldsJsonError(fieldsJson);
-  if (fieldsNg) return c.text(fieldsNg, 400);
+  // 選べるのは、この入口の選択肢に出していた設問だけ（固定の設問・知らないIDは弾く）
+  const picked = selectedQuestionIds(
+    await questionChoices(c.env.DB, e.id),
+    f.getAll('q').map(String),
+    (id) => str(`pos_${id}`, 4)
+  );
+  if (!picked.ok) return c.text(picked.message, 400);
 
   await c.env.DB.batch([
+    // session_label / fields_json はもう書かない（0009 で列ごと消す）
     c.env.DB.prepare(
-      `update entries set name = ?, headline = ?, intro = ?, session_label = ?, fields_json = ? where id = ?`
+      `update entries set name = ?, eyebrow = ?, headline = ?, intro = ? where id = ?`
     ).bind(
-      name, str('headline', 120) || null, str('intro', 4000) || null,
-      str('session_label', 40) || null, fieldsJson || null, e.id
+      name, str('eyebrow', 60) || null, str('headline', 120) || null, str('intro', 4000) || null, e.id
+    ),
+    c.env.DB.prepare(`delete from entry_questions where entry_id = ?`).bind(e.id),
+    ...picked.ids.map((qid, i) =>
+      c.env.DB.prepare(`insert into entry_questions (entry_id, question_id, position) values (?,?,?)`)
+        .bind(e.id, qid, i + 1)
     ),
     // 付帯行が無い入口（SQLで直接作られた場合）でも落ちないように upsert にする。
     c.env.DB.prepare(
@@ -834,6 +837,22 @@ admin.get('/export/applications.csv', async (c) => {
       order by sa.created_at desc`
   ).bind(p.from, p.from, p.to, p.to).all<Record<string, string | null>>();
 
+  // 書いてもらった内容（migrations/0008）。列の並びは変えない（取り込み先の表計算を壊さない）：
+  // 「気になっていること」＝人間関係の設問、「質問」＝固定の「ご質問」、「追加項目」＝それ以外の設問を「設問文：回答」で。
+  const answerRows = await c.env.DB.prepare(
+    `select qa.application_id, qa.question_id, qa.position, qa.label, qa.answer
+       from question_answers qa
+       join session_applications sa on sa.id = qa.application_id
+      where sa.deleted_at is null
+        and (? is null or sa.created_at >= ?) and (? is null or sa.created_at < ?)
+      order by qa.application_id, qa.position`
+  ).bind(p.from, p.from, p.to, p.to).all<QuestionAnswer & { application_id: string }>();
+  const byApp = groupAnswers(answerRows.results ?? []);
+  const answerOf = (id: string | null | undefined, qid: string) =>
+    (byApp.get(id ?? '') ?? []).find((x) => x.question_id === qid)?.answer ?? '';
+  const othersOf = (id: string | null | undefined) =>
+    answersText((byApp.get(id ?? '') ?? []).filter((x) => x.question_id !== CONCERN_QUESTION_ID && x.question_id !== MESSAGE_QUESTION_ID));
+
   const csv = toCsv(
     ['申込ID', '申込日時(JST)', '入口', '入口コード', '氏名', 'メール', 'タイプ',
      '宣言_場面', '宣言_相手', '宣言_いつまでに', '気になっていること', '希望の時間帯', '追加項目', '質問',
@@ -842,8 +861,8 @@ admin.get('/export/applications.csv', async (c) => {
       a.id, jstFull(a.created_at), a.entry_name, a.entry_slug, a.name, a.email, a.type_code,
       // 宣言は**紐づく回答**（フォーク）から引く。申込フォームでは聞かない
       domainLabel(a.concern_domain), targetLabel(a.concern_domain, a.concern_target),
-      deadlineLabel(a.concern_deadline), a.concern,
-      jsonArray(a.preferred_slots).join('／'), customText(a.custom_answers ?? null), a.question, a.source, a.status,
+      deadlineLabel(a.concern_deadline), answerOf(a.id, CONCERN_QUESTION_ID),
+      jsonArray(a.preferred_slots).join('／'), othersOf(a.id), answerOf(a.id, MESSAGE_QUESTION_ID), a.source, a.status,
       jstFull(a.held_at), a.admin_note, a.response_id, jstFull(a.response_created_at), a.apply_visit_id,
     ])
   );

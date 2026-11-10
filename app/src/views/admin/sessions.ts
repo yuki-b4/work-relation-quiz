@@ -15,24 +15,8 @@ import { adminPage, type ShellOptions } from './layout.ts';
 import { jsonArray, jst, maskEmail, maskName } from '../../lib/admin-format.ts';
 import { deadlineLabel, declarationText, domainLabel, targetLabel } from '../../lib/declaration.ts';
 import { APPLICATION_STATUSES, PER_PAGE, type SessionListRow } from '../../lib/admin-queries.ts';
-
-/**
- * 入口ごとの追加項目（custom_answers）。項目名も値もデータから来るので、必ずエスケープする。
- * 壊れた JSON のときは何も出さない（画面を落とさない）。
- */
-function customRows(json: string | null): string {
-  if (!json) return '';
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(json);
-  } catch {
-    return '';
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return '';
-  return Object.entries(parsed as Record<string, unknown>)
-    .map(([k, v]) => `<dt>${esc(k)}</dt><dd class="wrap-cell">${esc(String(v))}</dd>`)
-    .join('');
-}
+import type { QuestionAnswer } from '../../lib/questions.ts';
+import { answerItems } from './answers.ts';
 
 function option(value: string, label: string, current: string | undefined): string {
   return `<option value="${esc(value)}"${current === value ? ' selected' : ''}>${esc(label)}</option>`;
@@ -128,6 +112,8 @@ export function sessionsListPage(
 export function sessionDetailPage(
   shell: ShellOptions,
   a: SessionListRow,
+  /** 申込フォームで書いてもらった内容（lib/questions.ts の loadQuestionAnswers）。 */
+  answers: QuestionAnswer[],
   candidates: { id: string; created_at: string; type_code: string; type_name: string; visited_at: string | null }[],
   csrf: string
 ): string {
@@ -188,9 +174,8 @@ export function sessionDetailPage(
       `<dt>宣言（場面）</dt><dd>${esc(domainLabel(a.response_concern_domain) ?? '未宣言（当日に聞く）')}</dd>` +
       `<dt>宣言（相手）</dt><dd>${esc(targetLabel(a.response_concern_domain, a.response_concern_target) ?? '—')}</dd>` +
       `<dt>宣言（いつまでに）</dt><dd>${esc(deadlineLabel(a.response_concern_deadline) ?? '—')}</dd>` +
-      `<dt>気になっていること</dt><dd class="wrap-cell">${a.concern ? esc(a.concern) : '<span class="faint">—</span>'}</dd>` +
-      `<dt>質問</dt><dd class="wrap-cell">${a.question ? esc(a.question) : '<span class="faint">—</span>'}</dd>` +
-      customRows(a.custom_answers) +
+      // 書いてもらった内容（任意の設問 → 固定の「ご質問」）。見た順に並ぶ（migrations/0008）
+      answerItems(answers) +
       `<dt>取り込み元</dt><dd>${esc(a.source)}</dd>` +
       `<dt>到達ID</dt><dd class="mono">${a.apply_visit_id ? esc(a.apply_visit_id) : '—'}</dd>` +
     '</dl></div>' +
